@@ -1,0 +1,3 @@
+port: 8085
+repository: repo
+logfile: ../logs/test.log

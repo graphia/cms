@@ -1,0 +1,9 @@
+*.swo
+*.swp
+graphia-cms
+logs/*.log
+node_modules
+public/**/*
+repo
+tags
+tests/tmp/**/*
