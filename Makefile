@@ -16,7 +16,7 @@ run-backend:
 	ls backend/*.go | entr -r go run ${SRC} -log-to-file=true -config ${DEFAULT_CONFIG}
 
 run-frontend:
-	brunch watch --server
+	brunch watch --server frontend
 
 cleanup:
 	rm -rf tests/tmp/**/*
