@@ -184,9 +184,9 @@ func apiListFilesInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(output)
 
 	w.WriteHeader(200)
+	w.Write(output)
 }
 
 // apiCreateFileInDirectory creates a file the specified directory

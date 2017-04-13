@@ -25,7 +25,6 @@
 </template>
 
 <script lang="babel">
-	console.log("Home loaded");
 </script>
 
 <style lang="scss" scoped>
