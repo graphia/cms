@@ -4,7 +4,7 @@
 
 		<ul>
 			<li v-for="document in documents">
-				{{ document.filename }}
+				{{ document.absolutePath }}
 			</li>
 		</ul>
 	</div>
@@ -14,6 +14,7 @@
 	export default {
 		name: "DocumentIndex",
 		created() {
+			// populate $store.state.documents with docs from api
 			return this.$store.dispatch("getDocumentsInDirectory", "documents");
 		},
 

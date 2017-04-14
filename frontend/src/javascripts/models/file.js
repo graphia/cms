@@ -1,11 +1,13 @@
 import store from '../store.js';
+import config from '../config.js';
 
 export default class CMSFile {
 
-	constructor(author, email, filename, title, body) {
+	constructor(author, email, path, filename, title, body) {
 		this.author   = author;
 		this.email    = email;
 		this.filename = filename;
+		this.path     = path;
 		this.title    = title;
 		this.body     = body;
 	}
@@ -18,15 +20,19 @@ export default class CMSFile {
 		// fetch all files in directory
 		console.debug("fetching...");
 
-		fetch(`http://localhost:8080/api/directories/${directory}/files`, {mode: "cors"})
+		fetch(`${config.api}/directories/${directory}/files`, {mode: "cors"})
 			.then((response) => {
 
 				if (response.status !== 200) {
 					console.error('Looks like there was a problem. Status Code: ' + response.status);
 				}
 
-				response.json().then((documents) => {
-					store.state.documents = documents;
+				response.json().then((data) => {
+					// map documents
+					//store.state.documents = documents;
+					store.state.documents = data.map((d) => {
+						return new CMSFile(d.author, d.email, d.filename, d.path, d.title, d.body);
+					});
 				});
 			});
 	}
@@ -42,5 +48,9 @@ export default class CMSFile {
 
 	save() {
 		console.debug("saving...");
+	}
+
+	get absolutePath() {
+		return [this.path, this.filename].join("/");
 	}
 }
