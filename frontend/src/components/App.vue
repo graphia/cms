@@ -3,17 +3,16 @@
 
 		<nav id="primary">
 			<ul>
-				<li class="active">primary 1</li>
-				<li>primary 2</li>
-				<li>primary 3</li>
+				<li class="active">Files</li>
+				<li>Activity</li>
 			</ul>
 		</nav>
 
 		<nav id="secondary">
 			<ul>
-				<li>secondary 1</li>
-				<li>secondary 2</li>
-				<li>secondary 3</li>
+				<li v-for="document in documents">
+					{{ document.filename }}
+				</li>
 			</ul>
 		</nav>
 
@@ -26,5 +25,12 @@
 </template>
 
 <script lang="babel">
-	console.log("App loaded");
+
+	export default {
+		computed: {
+			documents() {
+				return this.$store.state.documents;
+			}
+		}
+	};
 </script>

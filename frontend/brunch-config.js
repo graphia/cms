@@ -22,7 +22,10 @@ exports.paths = {
 };
 
 exports.plugins = {
-	babel: {presets: ['latest', 'stage-3', 'es2015']},
+	babel: {
+		presets: ['latest'],
+		plugins: ['transform-runtime']
+	},
 	sass: {
 		mode: 'native',
 		options: {

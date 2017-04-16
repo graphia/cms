@@ -1,10 +1,11 @@
 <template>
 	<div id="document-index">
 		<h2>Documents</h2>
-
 		<ul>
 			<li v-for="document in documents">
-				{{ document.absolutePath }}
+				<router-link :to="{name: 'document_show', params: {filename: document.filename}}">
+					{{ document.absolutePath }}
+				</router-link>
 			</li>
 		</ul>
 	</div>
@@ -15,12 +16,15 @@
 		name: "DocumentIndex",
 		created() {
 			// populate $store.state.documents with docs from api
-			return this.$store.dispatch("getDocumentsInDirectory", "documents");
+			let directory = this.$route.params.directory;
+
+			console.debug("retrieving all files from", directory);
+
+			this.$store.dispatch("getDocumentsInDirectory", directory);
 		},
 
 		computed: {
 			documents() {
-				console.log("accessing stored docs");
 				return this.$store.state.documents;
 			}
 		}

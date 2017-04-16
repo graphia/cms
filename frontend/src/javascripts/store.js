@@ -7,13 +7,19 @@ import CMSFile from '../javascripts/models/file.js';
 Vue.use(Vuex);
 
 const state = {
-	documents: []
+	documents: [],
+	activeDocument: CMSFile
 };
 const mutations = {};
 const getters = {};
 const actions = {
 	getDocumentsInDirectory(context, directory) {
 		CMSFile.all(directory);
+	},
+	getDocument(context, args) {
+		// returns a compiled doc
+		console.debug("hello");
+		CMSFile.find(args.directory, args.filename);
 	}
 };
 
