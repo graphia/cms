@@ -12,6 +12,7 @@
   "dependencies": {
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-polyfill": "^6.23.0",
+    "bootstrap": "^4.0.0-alpha.6",
     "remarkable": "^1.7.1",
     "simplemde": "^1.11.2"
   },
@@ -25,7 +26,6 @@
     "babel-preset-stage-3": "^6.22.0",
     "brunch": "^2",
     "clean-css-brunch": "^2",
-    "milligram": "^1.3.0",
     "sass-brunch": "^2.10.4",
     "uglify-js-brunch": "^2",
     "vue": "^2.1.10",

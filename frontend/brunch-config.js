@@ -1,6 +1,7 @@
 // See http://brunch.io for documentation.
 exports.files = {
 	javascripts: {
+		exclude: '**/*.min.js',
 		joinTo: {
 			'javascripts/vendor.js': /^(?!src)/,
 			'javascripts/app.js': /^src/
@@ -17,6 +18,7 @@ exports.files = {
 exports.paths = {
 	watched: [
 		'src'
+
 		/*,'node_modules/simplemde/dist'*/
 	]
 };
@@ -30,7 +32,7 @@ exports.plugins = {
 		mode: 'native',
 		options: {
 			includePaths: [
-				'node_modules/milligram/src'
+				'node_modules/bootstrap/scss'
 			],
 			sourceMapEmbed: true,
 		}
@@ -41,3 +43,9 @@ exports.plugins = {
 		out: 'public/stylesheets/components.css'
 	}
 };
+
+exports.npm = {
+	globals: {
+		$: 'jquery'
+	}
+}
