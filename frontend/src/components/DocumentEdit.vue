@@ -1,7 +1,7 @@
 <template>
 	<section>
 
-		<form class="row">
+		<form class="row" @submit="update">
 
 			<!-- Markdown Editor Start -->
 			<div class="col-md-9">
@@ -29,7 +29,7 @@
 
 				<div class="form-group">
 					<label for="commit-message">Commit Message</label>
-					<textarea name="commit-message" class="form-control"/>
+					<textarea name="commit-message" class="form-control" v-model="commit.message"/>
 				</div>
 
 				<div class="form-group">
@@ -48,18 +48,45 @@
 	export default {
 		name: "DocumentEdit",
 		created() {
-			// populate $store.state.documents with docs from api
+			// retrieve the document and add it to vuex's store
+			this.$store.dispatch("editDocument", {directory: this.directory, filename: this.filename});
 
-			let directory = this.$route.params.directory;
-			let filename = this.$route.params.filename;
-
-			console.debug(`retrieving document ${filename} from ${directory}`);
-
-			this.$store.dispatch("editDocument", {directory, filename});
+			// set up a fresh new commit
+			this.$store.dispatch("initializeCommit")
 		},
 		computed: {
+
+			// quick access to things in the store
 			document() {
 				return this.$store.state.activeDocument;
+			},
+			commit() {
+				return this.$store.state.commit;
+			},
+
+			// quick access to route params
+			directory() {
+				return this.$route.params.directory;
+			},
+			filename() {
+				return this.$route.params.filename;
+			}
+		},
+		methods: {
+			update(event) {
+				event.preventDefault();
+				console.debug('Update clicked!');
+
+				this.document.update(this.commit);
+			},
+			redirectToShowDocument() {
+				this.$router.push({
+					name: 'document_show',
+					params:{
+						filename: this.filename,
+						directory: this.directory
+					}
+				});
 			}
 		}
 	}

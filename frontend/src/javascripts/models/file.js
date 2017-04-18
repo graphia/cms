@@ -91,10 +91,41 @@ export default class CMSFile {
 
 	// instance methods
 
-	save(commitMessage) {
+	create(commitMessage) {
 		// create a commit object containing relevant info
 		// and despatch it
-		console.debug("saving...");
+		console.debug("creating...");
+	};
+
+	update(commit) {
+		// create a commit object containing relevant info
+		// and despatch it
+
+		if (!this.changed) {
+			console.warn("Update called but content hasn't changed");
+		}
+
+		var path = `${config.api}/directories/${this.path}/files/${this.filename}`
+
+		try {
+
+			return fetch(path, {mode: "cors", method: "PATCH", body: commit.toJSON(this)})
+
+				.then((response) => {
+
+					if (response.status !== 200) {
+						console.error('Oops, there was a problem', response.status);
+					}
+
+					console.debug(response);
+
+
+				});
+
+		}
+		catch(err) {
+			console.error(`There was a problem retrieving document from ${filename} from ${directory}, ${err}`);
+		}
 	};
 
 	// has the markdown changed since loading?
@@ -102,6 +133,7 @@ export default class CMSFile {
 		return this.markdown !== this.initialMarkdown;
 	}
 
+	// path/filename.md
 	get absolutePath() {
 		return [this.path, this.filename].join("/");
 	};

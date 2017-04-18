@@ -3,16 +3,21 @@ import Vuex from 'vuex';
 import router from './app';
 
 import CMSFile from '../javascripts/models/file.js';
+import CMSCommit from '../javascripts/models/commit.js';
 
 Vue.use(Vuex);
 
 const state = {
 	documents: [],
-	activeDocument: CMSFile
+	activeDocument: new CMSFile,
+	commit: new CMSCommit
 };
 const mutations = {};
 const getters = {};
 const actions = {
+	initializeCommit(context) {
+		CMSCommit.initialize()
+	},
 	getDocumentsInDirectory(context, directory) {
 		CMSFile.all(directory);
 	},
