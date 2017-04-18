@@ -18,8 +18,11 @@ const actions = {
 	},
 	getDocument(context, args) {
 		// returns a compiled doc
-		console.debug("hello");
 		CMSFile.find(args.directory, args.filename);
+	},
+	editDocument(context, args) {
+		// returns a raw doc
+		CMSFile.find(args.directory, args.filename, true);
 	}
 };
 

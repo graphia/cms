@@ -35,4 +35,7 @@
 </template>
 
 <script lang="babel">
+export default {
+	name: "GraphiaCMS"
+}
 </script>

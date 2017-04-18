@@ -17,6 +17,7 @@
 
 <script lang="babel">
 	export default {
+		name: "DocumentShow",
 		created() {
 			// populate $store.state.documents with docs from api
 
