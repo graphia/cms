@@ -1,12 +1,12 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
+
+// Pages
 import App from '../components/App.vue';
 import Home from '../components/Home.vue';
-
 import DocumentIndex from '../components/DocumentIndex.vue';
 import DocumentShow from '../components/DocumentShow.vue';
 import DocumentEdit from '../components/DocumentEdit.vue';
-
 
 import store from './store.js';
 

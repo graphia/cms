@@ -6,11 +6,7 @@
 			<!-- Markdown Editor Start -->
 			<div class="col-md-9">
 				<h1>Editing {{ document.filename }}</h1>
-
-				<div class="form-group">
-					<label for="markdown" class="sr-only">Document Contents</label>
-					<textarea name="markdown" class="form-control" rows="40" v-model="document.markdown"/>
-				</div>
+				<Editor></Editor>
 			</div>
 			<!-- Markdown Editor End -->
 
@@ -50,6 +46,8 @@
 </template>
 
 <script lang="babel">
+	import Editor from "../components/Editor";
+
 	export default {
 		name: "DocumentEdit",
 		created() {
@@ -80,9 +78,12 @@
 		methods: {
 			update(event) {
 				event.preventDefault();
-				console.debug('Update clicked!');
 
-				this.document.update(this.commit);
+				this.document.update(this.commit)
+					.then((response) => {
+						console.debug("Document saved, redirecting to 'document_show'");
+						this.redirectToShowDocument();
+					});
 			},
 			redirectToShowDocument() {
 				this.$router.push({
@@ -93,6 +94,9 @@
 					}
 				});
 			}
+		},
+		components: {
+			Editor
 		}
 	}
 </script>
