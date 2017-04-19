@@ -16,14 +16,7 @@ export default class CMSCommit {
 			message: this.message,
 			path: document.path,
 			filename: document.filename,
-
-			body:
-				Array
-					.from(document.markdown)
-					.map(function(_char, i, _orig) {
-						return "document.markdown".charCodeAt(i)
-					}),
-
+			body: document.markdown,
 
 			// a few extra bits to make it work without auth
 

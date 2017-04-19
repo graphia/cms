@@ -9,7 +9,7 @@ import (
 type RepoWrite struct {
 	Filename string
 	Path     string
-	Body     []byte
+	Body     string
 	Message  string
 	Name     string
 	Email    string

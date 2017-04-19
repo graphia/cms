@@ -22,7 +22,7 @@ func TestUpdateFile(t *testing.T) {
 	}
 
 	rw := RepoWrite{
-		Body:     []byte("# The quick brown fox\n\njumped over the lazy dog"),
+		Body:     "# The quick brown fox\n\njumped over the lazy dog",
 		Filename: "document_2.md",
 		Path:     "documents",
 		Message:  "Update document 2",
@@ -43,7 +43,7 @@ func TestUpdateFile(t *testing.T) {
 
 	// ensure the file exists and has the right content
 	contents, _ := ioutil.ReadFile(filepath.Join(repoPath, rw.Path, rw.Filename))
-	assert.Equal(t, contents, rw.Body)
+	assert.Equal(t, string(contents), rw.Body)
 
 	// ensure the most recent commit has the right name and email
 	lastCommit, _ := repo.LookupCommit(oid)
@@ -63,7 +63,7 @@ func TestUpdateFileWhenNotExists(t *testing.T) {
 	setupSmallTestRepo(repoPath)
 
 	rw := RepoWrite{
-		Body:     []byte("# The quick brown fox\n\njumped over the lazy dog"),
+		Body:     "# The quick brown fox\n\njumped over the lazy dog",
 		Filename: "document_9.md",
 		Path:     "documents",
 		Message:  "Add document 9",

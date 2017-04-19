@@ -14,7 +14,7 @@ import (
 // getFilesInDir returns a list of FileItems for listing
 func getFilesInDir(directory string) (files []FileItem, err error) {
 
-	var pathFound bool = false
+	var pathFound = false
 
 	repo, err := repository(config)
 	if err != nil {
@@ -82,7 +82,7 @@ func createFile(rw RepoWrite) (oid *git.Oid, err error) {
 
 	file, _ := tree.EntryByPath(target)
 	if file != nil {
-		return nil, fmt.Errorf("file already exists:", target)
+		return nil, fmt.Errorf("file already exists %s", target)
 	}
 
 	oid, err = writeFile(repo, rw)
@@ -109,12 +109,12 @@ func updateFile(rw RepoWrite) (oid *git.Oid, err error) {
 
 	file, _ := tree.EntryByPath(target)
 	if file == nil {
-		return nil, fmt.Errorf("file does not exist:", target)
+		return nil, fmt.Errorf("file does not exist %s", target)
 	}
 
 	oid, err = writeFile(repo, rw)
 	if err != nil {
-		return nil, fmt.Errorf("file modification failed:", err.Error())
+		return nil, fmt.Errorf("file modification failed %s", err.Error())
 	}
 
 	return oid, err
@@ -129,7 +129,7 @@ func writeFile(repo *git.Repository, rw RepoWrite) (oid *git.Oid, err error) {
 		return nil, err
 	}
 
-	oid, err = repo.CreateBlobFromBuffer(rw.Body)
+	oid, err = repo.CreateBlobFromBuffer([]byte(rw.Body))
 	if err != nil {
 		return nil, err
 	}
@@ -144,13 +144,13 @@ func writeFile(repo *git.Repository, rw RepoWrite) (oid *git.Oid, err error) {
 	}
 
 	// write the tree, persisting our addition to the git repo
-	treeId, err := index.WriteTree()
+	treeID, err := index.WriteTree()
 	if err != nil {
 		return nil, err
 	}
 
 	// and use the tree's id to find the actual updated tree
-	tree, err := repo.LookupTree(treeId)
+	tree, err := repo.LookupTree(treeID)
 	if err != nil {
 		return nil, err
 	}
@@ -198,7 +198,7 @@ func createDirectory(rw RepoWrite) (oid *git.Oid, err error) {
 	// git can't track empty directories, so, Rails-style, we'll add an
 	// empty file called .keep
 	rw.Filename = ".keep"
-	rw.Body = []byte("")
+	rw.Body = ""
 
 	// And set the commit message sensibly so we don't need to prompt
 	// the user
@@ -230,7 +230,7 @@ func deleteDirectory(rw RepoWrite) (oid *git.Oid, err error) {
 	// ensure that the directory exists before we try to delete it
 	directory, _ := ht.EntryByPath(target)
 	if directory == nil {
-		return nil, fmt.Errorf("directory does not exist:", target)
+		return nil, fmt.Errorf("directory does not exist %s", target)
 	}
 
 	// now go head and remove it
@@ -250,12 +250,12 @@ func deleteDirectory(rw RepoWrite) (oid *git.Oid, err error) {
 	}
 
 	// write the tree, persisting our deletion to the git repo
-	treeId, err := index.WriteTree()
+	treeID, err := index.WriteTree()
 	if err != nil {
 		return nil, err
 	}
 
-	tree, err := repo.LookupTree(treeId)
+	tree, err := repo.LookupTree(treeID)
 	if err != nil {
 		return nil, err
 	}
@@ -307,7 +307,7 @@ func deleteFile(rw RepoWrite) (oid *git.Oid, err error) {
 	// ensure that the file exists before we try to delete it
 	file, _ := ht.EntryByPath(target)
 	if file == nil {
-		return nil, fmt.Errorf("file does not exist:", target)
+		return nil, fmt.Errorf("file does not exist %s", target)
 	}
 
 	// now go head and remove it
@@ -325,12 +325,12 @@ func deleteFile(rw RepoWrite) (oid *git.Oid, err error) {
 	}
 
 	// write the tree, persisting our deletion to the git repo
-	treeId, err := index.WriteTree()
+	treeID, err := index.WriteTree()
 	if err != nil {
 		return nil, err
 	}
 
-	tree, err := repo.LookupTree(treeId)
+	tree, err := repo.LookupTree(treeID)
 	if err != nil {
 		return nil, err
 	}
