@@ -23,6 +23,11 @@
 				</div>
 
 				<div class="form-group">
+					<label for="author">Author</label>
+					<input name="author" class="form-control" v-model="document.author"/>
+				</div>
+
+				<div class="form-group">
 					<label for="tags">Tags</label>
 					<input name="tags" class="form-control"/>
 				</div>

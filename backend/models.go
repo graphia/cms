@@ -7,12 +7,13 @@ import (
 // RepoWrite contains all info we need to perform a git commit
 // TODO rename to FileWrite fw
 type RepoWrite struct {
-	Filename string
-	Path     string
-	Body     string
-	Message  string
-	Name     string
-	Email    string
+	Filename    string
+	Path        string
+	Body        string
+	Message     string
+	Name        string
+	Email       string
+	FrontMatter FrontMatter
 }
 
 // SuccessResponse contains information about a successful
@@ -28,11 +29,15 @@ type FailureResponse struct {
 	Message string `json:"message"`
 }
 
+// FrontMatter contains the document's metadata
 type FrontMatter struct {
 	Title  string
 	Author string
 }
 
+// Directory contains the directory's metadata
+// FIXME eventually it will, currently just the name, need to
+// work out how best to store it
 type Directory struct {
 	Name string
 }

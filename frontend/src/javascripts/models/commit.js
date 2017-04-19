@@ -21,7 +21,13 @@ export default class CMSCommit {
 			// a few extra bits to make it work without auth
 
 			name: "Ralph Wiggum",
-			email: "ralph@springfield.org"
+			email: "ralph@springfield.org",
+
+			// and the frontmatter
+			frontmatter: {
+				title: document.title,
+				author: document.author
+			}
 		});
 	}
 
