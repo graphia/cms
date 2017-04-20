@@ -3,6 +3,13 @@ import config from '../config.js';
 
 export default class CMSFile {
 
+	static initialize(directory) {
+		console.debug("Initialising file");
+		let file = new CMSFile(null, null, directory, null, null, null, null);
+		store.state.activeDocument = file;
+		return file;
+	}
+
 	constructor(author, email, path, filename, title, html, markdown) {
 
 		// TODO this is a bit long and ugly; can it be neatened up?
@@ -15,6 +22,7 @@ export default class CMSFile {
 		this.markdown = markdown;
 
 		// finally save the initial markdown value so we can detect changes
+		// and display a diff if necessary
 		this.initialMarkdown = markdown;
 	};
 
@@ -91,10 +99,27 @@ export default class CMSFile {
 
 	// instance methods
 
-	create(commitMessage) {
+	create(commit) {
 		// create a commit object containing relevant info
 		// and despatch it
-		console.debug("creating...");
+
+		if (!this.changed) {
+			console.warn("Update called but content hasn't changed");
+		}
+
+		var path = `${config.api}/directories/${this.path}/files`
+
+		try {
+			return fetch(path, {mode: "cors", method: "POST", body: commit.toJSON(this)})
+				.then((response) => {
+					if (response.status !== 200) {
+						console.error('Oops, there was a problem', response.status);
+					}
+				});
+		}
+		catch(err) {
+			console.error(`There was a problem creating new document in ${directory}, ${err}`);
+		}
 	};
 
 	update(commit) {
@@ -108,25 +133,37 @@ export default class CMSFile {
 		var path = `${config.api}/directories/${this.path}/files/${this.filename}`
 
 		try {
-
 			return fetch(path, {mode: "cors", method: "PATCH", body: commit.toJSON(this)})
-
 				.then((response) => {
-
 					if (response.status !== 200) {
 						console.error('Oops, there was a problem', response.status);
 					}
-
-					console.debug(response);
-
-
 				});
-
 		}
 		catch(err) {
-			console.error(`There was a problem retrieving document from ${filename} from ${directory}, ${err}`);
+			console.error(`There was a problem updating document ${filename} in ${directory}, ${err}`);
 		}
 	};
+
+	destroy(commit) {
+		console.debug(commit);
+
+		var path = `${config.api}/directories/${this.path}/files/${this.filename}`
+
+		try {
+			return fetch(path, {mode: "cors", method: "DELETE", body: commit.toJSON(this)})
+				.then((response) => {
+					if (response.status !== 200) {
+						console.error('Oops, there was a problem', response.status);
+					}
+				});
+		}
+		catch(err) {
+			console.error(`There was a problem deleting document ${filename} from ${directory}, ${err}`);
+		}
+
+		console.debug("Deleted")
+	}
 
 	// has the markdown changed since loading?
 	get changed() {

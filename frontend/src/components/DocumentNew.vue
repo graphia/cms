@@ -1,11 +1,11 @@
 <template>
 	<section>
 
-		<form class="row" @submit="update">
+		<form class="row" @submit="create">
 
 			<!-- Markdown Editor Start -->
 			<div class="col-md-9">
-				<h1>Editing {{ document.filename }}</h1>
+				<h1>New Document</h1>
 				<Editor></Editor>
 			</div>
 			<!-- Markdown Editor End -->
@@ -14,8 +14,8 @@
 			<div class="col-md-3">
 
 				<div class="form-group">
-					<label for="title">Title</label>
-					<input name="title" class="form-control" v-model="document.title"/>
+					<label for="filename">Filename</label>
+					<input name="filename" class="form-control" v-model="document.filename"/>
 				</div>
 
 				<div class="form-group">
@@ -49,13 +49,16 @@
 	import Editor from "../components/Editor";
 
 	export default {
-		name: "DocumentEdit",
+		name: "DocumentNew",
 		created() {
-			// retrieve the document and add it to vuex's store
-			this.$store.dispatch("editDocument", {directory: this.directory, filename: this.filename});
+
+			console.debug("new doc...");
+
+			// initialize a fresh new document
+			this.$store.dispatch("initializeDocument", this.directory);
 
 			// set up a fresh new commit
-			this.$store.dispatch("initializeCommit")
+			this.$store.dispatch("initializeCommit");
 		},
 		computed: {
 
@@ -70,19 +73,16 @@
 			// quick access to route params
 			directory() {
 				return this.$route.params.directory;
-			},
-			filename() {
-				return this.$route.params.filename;
 			}
 		},
 		methods: {
-			update(event) {
+			create(event) {
 				event.preventDefault();
 
-				this.document.update(this.commit)
+				this.document.create(this.commit)
 					.then((response) => {
 						console.debug("Document saved, redirecting to 'document_show'");
-						this.redirectToShowDocument(this.directory, this.filename);
+						this.redirectToShowDocument(this.document.path, this.document.filename);
 					});
 			},
 			redirectToShowDocument(directory, filename) {

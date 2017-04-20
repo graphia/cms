@@ -1,19 +1,43 @@
 <template>
 	<section class="row">
 
-		<article id="document_show" class="col-md-9">
-			<div v-html="document.html"/>
+		<article id="document-content" class="col-md-8">
+			<div class="content" v-html="document.html"/>
 		</article>
 
-		<div class="col-md-3">
-			<div class="btn-toolbar">
-				<router-link :to="{name: 'document_edit', params: {directory: 'documents', filename: document.filename}}" class="btn btn-success">
-					Edit
-				</router-link>
+		<aside class="col-md-4">
+			<div class="card document-meta">
+				<div class="card-block">
+					<dl>
+
+						<dt>Title</dt>
+						<dd>{{ document.title  }}</dd>
+
+
+						<dt>Description</dt>
+						<dd>This is the document's description</dd>
+					</dl>
+
+					<div class="btn-toolbar" role="toolbar">
+						<router-link class="btn btn-success mr-2" :to="{name: 'document_edit', params: {directory: 'documents', filename: document.filename}}">
+							Edit
+						</router-link>
+
+						<button type="button" @click="destroy" class="btn btn-danger mr-2">
+							Delete
+						</button>
+					</div>
+				</div>
 			</div>
-		</div>
+		</aside>
 	</section>
 </template>
+
+<style scoped lang="scss">
+	aside {
+		margin: 2em 0em;
+	}
+</style>
 
 <script lang="babel">
 	export default {
@@ -21,16 +45,51 @@
 		created() {
 			// populate $store.state.documents with docs from api
 
-			let directory = this.$route.params.directory;
-			let filename = this.$route.params.filename;
+			let directory = this.directory;
+			let filename = this.filename;
 
 			console.debug(`retrieving document ${filename} from ${directory}`);
 
 			this.$store.dispatch("getDocument", {directory, filename});
+
+			// create a commit to be populated/used if delete is clicked
+			this.$store.dispatch("initializeCommit")
+
 		},
 		computed: {
+			directory() {
+				return this.$route.params.directory;
+			},
+			filename() {
+				return this.$route.params.filename;
+			},
 			document() {
 				return this.$store.state.activeDocument;
+			},
+			commit() {
+				return this.$store.state.commit;
+			}
+		},
+		methods: {
+			destroy(event) {
+				event.preventDefault();
+				console.debug("delete clicked!");
+
+				let commit = this.commit;
+				let file = this.document;
+
+				this.document.destroy(this.commit)
+					.then((response) => {
+						console.debug("File deleted, redirecting to document index");
+						this.redirectToDirectoryIndex(this.directory);
+					});
+
+			},
+			redirectToDirectoryIndex(directory) {
+				this.$router.push({
+					name: 'document_index',
+					params:{directory}
+				});
 			}
 		}
 	}

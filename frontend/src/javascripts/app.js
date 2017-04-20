@@ -7,6 +7,8 @@ import Home from '../components/Home.vue';
 import DocumentIndex from '../components/DocumentIndex.vue';
 import DocumentShow from '../components/DocumentShow.vue';
 import DocumentEdit from '../components/DocumentEdit.vue';
+import DocumentNew from '../components/DocumentNew.vue';
+
 
 import store from './store.js';
 
@@ -15,9 +17,9 @@ Vue.use(VueRouter);
 const routes = [
 	{path: '/', component: Home},
 	{path: '/:directory', component: DocumentIndex, name: 'document_index'},
+	{path: '/:directory/new', component: DocumentNew, name: 'document_new'},
 	{path: '/:directory/:filename', component: DocumentShow, name: 'document_show'},
 	{path: '/:directory/:filename/edit', component: DocumentEdit, name: 'document_edit'}
-
 ];
 
 const router = new VueRouter({

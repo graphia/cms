@@ -8,6 +8,10 @@
 				</router-link>
 			</li>
 		</ul>
+
+		<router-link :to="{name: 'document_new', params: {directory: this.$route.params.directory}}" class="btn btn-primary">
+			New
+		</router-link>
 	</div>
 </template>
 
@@ -16,16 +20,17 @@
 		name: "DocumentIndex",
 		created() {
 			// populate $store.state.documents with docs from api
-			let directory = this.$route.params.directory;
 
-			console.debug("retrieving all files from", directory);
+			console.debug("retrieving all files from", this.directory);
 
-			this.$store.dispatch("getDocumentsInDirectory", directory);
+			this.$store.dispatch("getDocumentsInDirectory", this.directory);
 		},
-
 		computed: {
 			documents() {
 				return this.$store.state.documents;
+			},
+			directory() {
+				return this.$route.params.directory;
 			}
 		}
 	}

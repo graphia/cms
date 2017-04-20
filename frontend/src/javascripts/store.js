@@ -15,8 +15,11 @@ const state = {
 const mutations = {};
 const getters = {};
 const actions = {
-	initializeCommit(context) {
-		CMSCommit.initialize()
+	initializeCommit(context, directory) {
+		CMSCommit.initialize(directory)
+	},
+	initializeDocument(context, directory) {
+		CMSFile.initialize(directory);
 	},
 	getDocumentsInDirectory(context, directory) {
 		CMSFile.all(directory);
