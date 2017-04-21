@@ -115,6 +115,7 @@ export default class CMSFile {
 					if (response.status !== 200) {
 						console.error('Oops, there was a problem', response.status);
 					}
+					return response;
 				});
 		}
 		catch(err) {
