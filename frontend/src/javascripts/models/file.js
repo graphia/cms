@@ -36,26 +36,21 @@ export default class CMSFile {
 	 */
 	static async all(directory) {
 
-		try {
-			return fetch(`${config.api}/directories/${directory}/files`, {mode: "cors"})
-				.then((response) => {
+		let path = `${config.api}/directories/${directory}/files`;
 
-					if (response.status !== 200) {
-						console.error('Oops, there was a problem', response.status);
-					}
+		let response = await fetch(path, {mode: "cors"})
 
-					response.json().then((data) => {
-						// map documents
-						store.state.documents = data.map((d) => {
-							return new CMSFile(d.author, d.email, d.path, d.filename, d.title, null);
-						});
-					});
-
-				});
+		if (response.status !== 200) {
+			console.error('Oops, there was a problem', response.status);
 		}
-		catch(err) {
-			console.error(`There was a problem retrieving documents from ${directory}, ${err}`);
-		}
+
+		let json = await response.json()
+
+		// map documents
+		store.state.documents = json.map((file) => {
+			return new CMSFile(file.author, file.email, file.path, file.filename, file.title, null);
+		});
+
 	};
 
 	/*
@@ -77,24 +72,17 @@ export default class CMSFile {
 			path = [path, "edit"].join("/");
 		}
 
-		try {
-			return fetch(path, {mode: "cors"})
-				.then((response) => {
+		let response = await fetch(path, {mode: "cors"})
 
-					if (response.status !== 200) {
-						console.error('Oops, there was a problem', response.status);
-					}
+		if (response.status !== 200) {
+			console.error('Oops, there was a problem', response.status);
+		}
 
-					response.json().then((d) => {
-						store.state.activeDocument = new CMSFile(
-							d.author, d.email, d.path, d.filename, d.title, d.html, d.markdown
-						);
-					});
-				});
-		}
-		catch(err) {
-			console.error(`There was a problem retrieving document from ${filename} from ${directory}, ${err}`);
-		}
+		let file = await response.json()
+		store.state.activeDocument = new CMSFile(
+			file.author, file.email, file.path, file.filename, file.title, file.html, file.markdown
+		);
+
 	};
 
 	// instance methods

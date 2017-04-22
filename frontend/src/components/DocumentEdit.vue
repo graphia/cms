@@ -35,6 +35,10 @@
 
 				<div class="form-group">
 					<input type="submit" value="Update" class="btn btn-success">
+
+					<router-link :to="{name: 'document_show', params: {directory: 'documents', filename: document.filename}}" class="btn btn-text">
+						Cancel
+					</router-link>
 				</div>
 
 			</div>
@@ -50,12 +54,17 @@
 
 	export default {
 		name: "DocumentEdit",
-		created() {
-			// retrieve the document and add it to vuex's store
-			this.$store.dispatch("editDocument", {directory: this.directory, filename: this.filename});
-
+		data() {
+			return {markdownLoaded: false};
+		},
+		async created() {
 			// set up a fresh new commit
-			this.$store.dispatch("initializeCommit")
+			this.$store.dispatch("initializeCommit");
+
+			// retrieve the document and add it to vuex's store
+			await this.$store.dispatch("editDocument", {directory: this.directory, filename: this.filename});
+			this.markdownLoaded = true;
+
 		},
 		computed: {
 

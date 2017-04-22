@@ -17,9 +17,8 @@ exports.files = {
 
 exports.paths = {
 	watched: [
-		'src'
-
-		/*,'node_modules/simplemde/dist'*/
+		'src',
+		'node_modules/simplemde/dist'
 	]
 };
 

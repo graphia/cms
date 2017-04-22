@@ -19,7 +19,6 @@
 				</div>
 
 				<div class="form-group">
-					<!-- TODO when readonly set tabindex to "-1" so it's skipped -->
 
 					<label for="filename">Filename</label>
 
@@ -30,7 +29,13 @@
 							<input name="custom-filename" type="checkbox" v-model="enableCustomFilename" title="Toggle custom filename"/>
 						</span>
 
-						<input :readonly="!enableCustomFilename" name="filename" class="form-control filename" v-model="customFilename"/>
+						<!-- disable tabindex when custom filename is disabled -->
+						<input	:readonly="!enableCustomFilename"
+								:tabindex="!enableCustomFilename ? '-1' : '0'"
+								name="filename"
+								class="form-control filename"
+								v-model="customFilename"
+						/>
 
 						<span class="input-group-addon">
 							.md

@@ -10,7 +10,10 @@ import DocumentEdit from '../components/DocumentEdit.vue';
 import DocumentNew from '../components/DocumentNew.vue';
 
 
+// Vuex Store
 import store from './store.js';
+import SimpleMDE from 'simplemde';
+
 
 Vue.use(VueRouter);
 

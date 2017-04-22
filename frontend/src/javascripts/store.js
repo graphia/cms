@@ -16,21 +16,21 @@ const mutations = {};
 const getters = {};
 const actions = {
 	initializeCommit(context, directory) {
-		CMSCommit.initialize(directory)
+		return CMSCommit.initialize(directory)
 	},
 	initializeDocument(context, directory) {
-		CMSFile.initialize(directory);
+		return CMSFile.initialize(directory);
 	},
 	getDocumentsInDirectory(context, directory) {
-		CMSFile.all(directory);
+		return CMSFile.all(directory);
 	},
 	getDocument(context, args) {
-		// returns a compiled doc
-		CMSFile.find(args.directory, args.filename);
+		// set activeDocument to compiled doc from API
+		return CMSFile.find(args.directory, args.filename);
 	},
 	editDocument(context, args) {
-		// returns a raw doc
-		CMSFile.find(args.directory, args.filename, true);
+		// set activeDocument to raw doc from API
+		return CMSFile.find(args.directory, args.filename, true);
 	}
 };
 

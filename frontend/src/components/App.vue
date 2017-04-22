@@ -15,7 +15,7 @@
 
 					<router-link :to="{name: 'document_index', params: {directory: 'documents'}}" class="nav-link">
 						Documents
-					</router-link>3
+					</router-link>
 
 					<li><a class="nav-link" href="#">History</a></li>
 					<li><a class="nav-link" href="#">Admin</a></li>
