@@ -55,7 +55,7 @@ func setupMiddleware(r *vestigo.Router) (n *negroni.Negroni) {
 
 func setupRouter() (r *vestigo.Router) {
 	r = vestigo.NewRouter()
-	r.Get("/", apiRootHandler)
+	r.Get("/api", apiRootHandler)
 
 	// directory endpoints
 	r.Get("/api/directories", apiListDirectoriesHandler)
@@ -85,6 +85,11 @@ func setupRouter() (r *vestigo.Router) {
 			MaxAge:           3600 * time.Second,
 		})
 	}
+
+	// rather than above rule, do a check to see if the file exists and serve it
+	// if it doesn't, serve index.html :>
+	r.HandleFunc("/cms", cmsGeneralHandler)
+	r.HandleFunc("/cms/*", cmsGeneralHandler)
 
 	return
 }

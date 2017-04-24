@@ -4,9 +4,39 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
 
 	"github.com/husobee/vestigo"
 )
+
+// cmsGeneralHandler takes care of serving the frontend CMS portion
+// of the app. Paths that match '/cms' are routed here; if the file exists
+// on the filesystem it's served. If not, cms/index.html is served instead
+//
+// GET /cms                        -> public/cms/index.html
+// GET /cms/javascripts/app.js     -> public/cms/javascripts/app.js
+// GET /cms/something/nonexistant  -> public/cms/index.html
+func cmsGeneralHandler(w http.ResponseWriter, r *http.Request) {
+	Debug.Println(r.URL.Path)
+
+	// TODO make this path configurable
+	base := "./frontend/public"
+
+	path := filepath.Join(base, r.URL.Path)
+
+	// if we can't find a file (asset) to serve but the path begins
+	// with /cms, serve the CMS's index. It is likely someone navigating
+	// directly to a resource or refreshing a page. If Vue's router
+	// *still* can't match it to a page, it'll show an appropriate error
+	index := filepath.Join(base, "cms", "index.html")
+
+	if _, err := os.Stat(path); err == nil {
+		http.ServeFile(w, r, path)
+	} else {
+		http.ServeFile(w, r, index)
+	}
+}
 
 func apiRootHandler(w http.ResponseWriter, r *http.Request) {}
 
