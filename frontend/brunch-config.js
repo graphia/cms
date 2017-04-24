@@ -3,14 +3,14 @@ exports.files = {
 	javascripts: {
 		exclude: '**/*.min.js',
 		joinTo: {
-			'javascripts/vendor.js': /^(?!src)/,
-			'javascripts/app.js': /^src/
+			'cms/javascripts/vendor.js': /^(?!src)/,
+			'cms/javascripts/app.js': /^src/
 		}
 	},
 	stylesheets: {
 		joinTo: {
-			'stylesheets/vendor.css': /^(?!src)/,
-			'stylesheets/app.css': /^src/
+			'cms/stylesheets/vendor.css': /^(?!src)/,
+			'cms/stylesheets/app.css': /^src/
 		}
 	}
 };
@@ -39,7 +39,7 @@ exports.plugins = {
 	vue: {
 		extractCSS: true,
 		indentedSyntax: true,
-		out: 'public/stylesheets/components.css'
+		out: 'public/cms/stylesheets/components.css'
 	}
 };
 
@@ -47,4 +47,8 @@ exports.npm = {
 	globals: {
 		$: 'jquery'
 	}
-}
+};
+
+exports.server = {
+	indexPath: '/cms/index.html'
+};

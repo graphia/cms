@@ -18,11 +18,11 @@ import SimpleMDE from 'simplemde';
 Vue.use(VueRouter);
 
 const routes = [
-	{path: '/', component: Home},
-	{path: '/:directory', component: DocumentIndex, name: 'document_index'},
-	{path: '/:directory/new', component: DocumentNew, name: 'document_new'},
-	{path: '/:directory/:filename', component: DocumentShow, name: 'document_show'},
-	{path: '/:directory/:filename/edit', component: DocumentEdit, name: 'document_edit'}
+	{path: '/cms/', component: Home},
+	{path: '/cms/:directory', component: DocumentIndex, name: 'document_index'},
+	{path: '/cms/:directory/new', component: DocumentNew, name: 'document_new'},
+	{path: '/cms/:directory/:filename', component: DocumentShow, name: 'document_show'},
+	{path: '/cms/:directory/:filename/edit', component: DocumentEdit, name: 'document_edit'}
 ];
 
 const router = new VueRouter({
