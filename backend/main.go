@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"time"
 
 	"github.com/husobee/vestigo"
 	"github.com/urfave/negroni"
@@ -72,6 +73,18 @@ func setupRouter() (r *vestigo.Router) {
 	// missing operations:
 	// how should file and directory moves/copies be represented?
 	// auth..
+
+	if config.CORSEnabled {
+
+		Warning.Println("CORS:", config.CORSEnabled)
+		Warning.Println("CORS origin:", config.CORSOrigin)
+
+		r.SetGlobalCors(&vestigo.CorsAccessControl{
+			AllowOrigin:      []string{"*", config.CORSOrigin},
+			AllowCredentials: true,
+			MaxAge:           3600 * time.Second,
+		})
+	}
 
 	return
 }

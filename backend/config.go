@@ -8,9 +8,11 @@ import (
 )
 
 type Config struct {
-	Port       string
-	Repository string
-	Logfile    string
+	Port        string
+	Repository  string
+	Logfile     string
+	CORSEnabled bool
+	CORSOrigin  string
 }
 
 func loadConfig(path *string) (Config, error) {

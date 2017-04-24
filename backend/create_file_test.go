@@ -16,12 +16,16 @@ func TestCreateFile(t *testing.T) {
 	setupSmallTestRepo(repoPath)
 
 	rw := RepoWrite{
-		Body:     []byte("# The quick brown fox\n\njumped over the lazy dog"),
+		Body:     "# The quick brown fox\n\njumped over the lazy dog",
 		Filename: "document_9.md",
 		Path:     "documents",
 		Message:  "Add document 9",
 		Name:     "Milhouse van Houten",
 		Email:    "millhouse@springfield.gov",
+		FrontMatter: FrontMatter{
+			Title:  "Document Two",
+			Author: "Robert Underdunk Terwilliger, Jr., Ph.D.",
+		},
 	}
 
 	repo, _ := repository(config)
@@ -33,7 +37,9 @@ func TestCreateFile(t *testing.T) {
 
 	// ensure the file exists and has the right content
 	contents, _ := ioutil.ReadFile(filepath.Join(repoPath, rw.Path, rw.Filename))
-	assert.Equal(t, contents, rw.Body)
+	assert.Contains(t, string(contents), rw.Body)
+	assert.Contains(t, string(contents), rw.FrontMatter.Author)
+	assert.Contains(t, string(contents), rw.FrontMatter.Title)
 
 	// ensure the most recent commit has the right name and email
 	lastCommit, _ := repo.LookupCommit(oid)
@@ -53,7 +59,7 @@ func TestCreateFileWhenExists(t *testing.T) {
 	setupSmallTestRepo(repoPath)
 
 	rw := RepoWrite{
-		Body:     []byte("# The quick brown fox\n\njumped over the lazy dog"),
+		Body:     "# The quick brown fox\n\njumped over the lazy dog",
 		Filename: "document_2.md",
 		Path:     "documents",
 		Message:  "Add document 2",

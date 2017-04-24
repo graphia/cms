@@ -61,7 +61,7 @@ func TestApiCreateDirectory(t *testing.T) {
 
 	// ensure the file exists and has the right content
 	contents, _ := ioutil.ReadFile(filepath.Join(repoPath, rw.Path, ".keep"))
-	assert.Equal(t, contents, []byte{})
+	assert.Equal(t, "", string(contents))
 
 	// ensure the most recent commit has the right name and email
 	oid, _ := git.NewOid(receiver.Oid)
@@ -83,12 +83,16 @@ func TestApiCreateFileInDirectory(t *testing.T) {
 	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files")
 
 	rw := &RepoWrite{
-		Body:     []byte("# The quick brown fox"),
+		Body:     "# The quick brown fox",
 		Email:    "martin.prince@springfield.k12.us",
 		Name:     "Martin Prince",
 		Message:  "Forty whacks with a wet noodle",
 		Path:     "documents",
 		Filename: "document_6.md",
+		FrontMatter: FrontMatter{
+			Title:  "Document Six",
+			Author: "Kent Brockman & Troy McClure",
+		},
 	}
 
 	payload, err := json.Marshal(rw)
@@ -116,7 +120,9 @@ func TestApiCreateFileInDirectory(t *testing.T) {
 
 	// ensure the file exists and has the right content
 	contents, _ := ioutil.ReadFile(filepath.Join(repoPath, rw.Path, rw.Filename))
-	assert.Equal(t, contents, rw.Body)
+	assert.Contains(t, string(contents), rw.Body)
+	assert.Contains(t, string(contents), rw.FrontMatter.Author)
+	assert.Contains(t, string(contents), rw.FrontMatter.Title)
 
 	// ensure the most recent commit has the right name and email
 	oid, _ := git.NewOid(receiver.Oid)
@@ -134,12 +140,16 @@ func TestApiUpdateFileInDirectory(t *testing.T) {
 	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files/document_3.md")
 
 	rw := &RepoWrite{
-		Body:     []byte("# The quick brown fox"),
+		Body:     "# The quick brown fox",
 		Email:    "martin.prince@springfield.k12.us",
 		Name:     "Martin Prince",
 		Message:  "Forty whacks with a wet noodle",
 		Path:     "documents",
 		Filename: "document_3.md",
+		FrontMatter: FrontMatter{
+			Title:  "Document Three",
+			Author: "Timothy Lovejoy",
+		},
 	}
 
 	payload, err := json.Marshal(rw)
@@ -167,7 +177,9 @@ func TestApiUpdateFileInDirectory(t *testing.T) {
 
 	// ensure the file exists and has the right content
 	contents, _ := ioutil.ReadFile(filepath.Join(repoPath, rw.Path, rw.Filename))
-	assert.Equal(t, contents, rw.Body)
+	assert.Contains(t, string(contents), rw.Body)
+	assert.Contains(t, string(contents), rw.FrontMatter.Author)
+	assert.Contains(t, string(contents), rw.FrontMatter.Title)
 
 	// ensure the most recent commit has the right name and email
 	oid, _ := git.NewOid(receiver.Oid)

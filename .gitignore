@@ -2,8 +2,8 @@
 *.swp
 graphia-cms
 logs/*.log
-node_modules
-public/**/*
+frontend/node_modules
+frontend/public/**/*
 repo
 tags
 tests/tmp/**/*

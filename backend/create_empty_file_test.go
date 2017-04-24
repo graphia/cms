@@ -9,47 +9,35 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestUpdateFile(t *testing.T) {
+func TestCreateEmptyFile(t *testing.T) {
 
-	// copy the small repo tmp/repositories/update_file
-	repoPath := "../tests/tmp/repositories/update_file"
+	repoPath := "../tests/tmp/repositories/create_file"
 
-	oid, _ := setupSmallTestRepo(repoPath)
-
-	// initialise a config obj so updateFile looks in the right place
-	config = Config{
-		Repository: filepath.Join(repoPath),
-	}
+	setupSmallTestRepo(repoPath)
 
 	rw := RepoWrite{
-		Body:     "# The quick brown fox\n\njumped over the lazy dog",
-		Filename: "document_2.md",
+		Body:     "# Ensure this is discarded",
+		Filename: "document_9.md",
 		Path:     "documents",
-		Message:  "Update document 2",
+		Message:  "Add document 9",
 		Name:     "Milhouse van Houten",
-		Email:    "milhouse@springfield.gov",
+		Email:    "millhouse@springfield.gov",
 		FrontMatter: FrontMatter{
-			Title:  "Document Two",
-			Author: "Hans Moleman",
+			Title:  "Ensure this is discarded",
+			Author: "Ensure this is discarded",
 		},
 	}
 
-	oid, err := updateFile(rw)
-
-	if err != nil {
-		panic(err)
-	}
 	repo, _ := repository(config)
+	oid, _ := createFile(rw)
 	hc, _ := headCommit(repo)
 
 	// our commit hash should now equal the repo's head
 	assert.Equal(t, oid, hc.Id())
 
-	// ensure the file exists and has the right content
+	// ensure the file exists and **is blank**
 	contents, _ := ioutil.ReadFile(filepath.Join(repoPath, rw.Path, rw.Filename))
-	assert.Contains(t, string(contents), rw.Body)
-	assert.Contains(t, string(contents), rw.FrontMatter.Author)
-	assert.Contains(t, string(contents), rw.FrontMatter.Title)
+	assert.Contains(t, string(contents), "")
 
 	// ensure the most recent commit has the right name and email
 	lastCommit, _ := repo.LookupCommit(oid)
@@ -62,28 +50,32 @@ func TestUpdateFile(t *testing.T) {
 
 }
 
-func TestUpdateFileWhenNotExists(t *testing.T) {
+func TestCreateEmptyFileWhenExists(t *testing.T) {
 
-	repoPath := "../tests/tmp/repositories/update_file"
+	repoPath := "../tests/tmp/repositories/create_file"
 
 	setupSmallTestRepo(repoPath)
 
 	rw := RepoWrite{
-		Body:     "# The quick brown fox\n\njumped over the lazy dog",
-		Filename: "document_9.md",
+		Body:     "# Ensure this is discarded",
+		Filename: "document_2.md",
 		Path:     "documents",
-		Message:  "Add document 9",
+		Message:  "Add document 2",
 		Name:     "Ned Flanders",
 		Email:    "nedward.flanders@leftorium.com",
+		FrontMatter: FrontMatter{
+			Title:  "Ensure this is discarded",
+			Author: "Ensure this is discarded",
+		},
 	}
 
 	repo, _ := repository(config)
 	hcBefore, _ := headCommit(repo)
 
-	_, err := updateFile(rw)
+	_, err := createFile(rw)
 
 	// check error message is correct
-	assert.Contains(t, err.Error(), "file does not exist")
+	assert.Contains(t, err.Error(), "file already exists")
 
 	hcAfter, _ := headCommit(repo)
 

@@ -1,0 +1,38 @@
+{
+  "name": "brunch-app",
+  "description": "Brunch.io application",
+  "private": true,
+  "author": "Brunch",
+  "version": "0.0.1",
+  "repository": "",
+  "scripts": {
+    "start": "brunch watch --server",
+    "build": "brunch build --production"
+  },
+  "dependencies": {
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-polyfill": "^6.23.0",
+    "bootstrap": "^4.0.0-alpha.6",
+    "remarkable": "^1.7.1",
+    "simplemde": "^1.11.2"
+  },
+  "devDependencies": {
+    "auto-reload-brunch": "^2",
+    "babel-brunch": "~6.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-es2016": "^6.24.1",
+    "babel-preset-es2017": "^6.24.1",
+    "babel-preset-latest": "^6",
+    "babel-preset-stage-3": "^6.22.0",
+    "brunch": "^2",
+    "clean-css-brunch": "^2",
+    "sass-brunch": "^2.10.4",
+    "uglify-js-brunch": "^2",
+    "vue": "^2.1.10",
+    "vue-brunch": "^2.0.0",
+    "vue-config": "^1.0.0",
+    "vue-router": "^2.2.1",
+    "vueify": "^9.4.1",
+    "vuex": "^2.1.2"
+  }
+}

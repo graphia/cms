@@ -14,7 +14,6 @@ const (
 		blackfriday.EXTENSION_AUTOLINK |
 		blackfriday.EXTENSION_DEFINITION_LISTS |
 		blackfriday.EXTENSION_FENCED_CODE |
-		blackfriday.EXTENSION_HARD_LINE_BREAK |
 		blackfriday.EXTENSION_HEADER_IDS |
 		blackfriday.EXTENSION_NO_EMPTY_LINE_BEFORE_BLOCK |
 		blackfriday.EXTENSION_NO_INTRA_EMPHASIS |
