@@ -1,12 +1,14 @@
 package main
 
 import (
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	"gopkg.in/yaml.v2"
 )
 
+// Config holds configuration options stored in a yaml file
 type Config struct {
 	Port        string
 	Repository  string

@@ -401,7 +401,7 @@ func apiGetFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 
 	file, err := getConvertedFile(directory, filename)
 	if err != nil {
-		fmt.Errorf("Failed to get file:", err.Error())
+		panic(fmt.Errorf("failed to get file %s", err.Error()))
 	}
 
 	output, err := json.Marshal(file)
@@ -436,7 +436,7 @@ func apiEditFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 
 	file, err := getRawFile(directory, filename)
 	if err != nil {
-		fmt.Errorf("Failed to get file:", err.Error())
+		panic(fmt.Errorf("failed to get file %s", err.Error()))
 	}
 
 	output, err := json.Marshal(file)

@@ -7,10 +7,17 @@ import (
 )
 
 var (
-	Debug   *log.Logger
-	Info    *log.Logger
+	// Debug level logging (defaults to stdout)
+	Debug *log.Logger
+
+	// Info level logging (defaults to stdout)
+	Info *log.Logger
+
+	// Warning level logging (defaults to stdout)
 	Warning *log.Logger
-	Error   *log.Logger
+
+	// Error level logging (defaults to stderr)
+	Error *log.Logger
 )
 
 func setupLogging(file bool) {

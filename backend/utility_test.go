@@ -161,13 +161,13 @@ func setupSmallTestRepo(dest string) (oid *git.Oid, err error) {
 		panic(err)
 	}
 
-	treeId, err := idx.WriteTree()
+	treeID, err := idx.WriteTree()
 	if err != nil {
 		panic(err)
 	}
 
 	message := "Quick, honk at that broad!\n"
-	tree, err := repo.LookupTree(treeId)
+	tree, err := repo.LookupTree(treeID)
 	if err != nil {
 		panic(err)
 	}
