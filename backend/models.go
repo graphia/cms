@@ -16,6 +16,11 @@ type RepoWrite struct {
 	FrontMatter FrontMatter
 }
 
+// Response is a general response containing arbitrary data
+type Response struct {
+	Data string `json:"data"`
+}
+
 // SuccessResponse contains information about a successful
 // update to the repository
 type SuccessResponse struct {
@@ -62,4 +67,23 @@ type File struct {
 	Markdown         *string `json:"markdown"`
 	Author           string  `json:"author"`
 	Title            string  `json:"title"`
+}
+
+// UserCredentials is the subset of User required for auth
+type UserCredentials struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+// User holds all information specific to a user
+type User struct {
+	ID       int    `json:"id"`
+	Name     string `json:"name"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+// Token holds a JSON Web Token
+type Token struct {
+	Token string `json:"token"`
 }

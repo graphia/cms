@@ -6,9 +6,70 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
+	"time"
 
+	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/husobee/vestigo"
 )
+
+// Authentication functionality 🔑
+
+func authLoginHandler(w http.ResponseWriter, r *http.Request) {
+	// start session, generate a JWT if the credentials are ok
+
+	var user UserCredentials
+
+	err := json.NewDecoder(r.Body).Decode(&user)
+
+	if err != nil {
+		w.WriteHeader(http.StatusForbidden)
+		fmt.Fprint(w, "Error in request")
+		return
+	}
+
+	if strings.ToLower(user.Username) != "someone" {
+		if user.Password != "p@ssword" {
+			w.WriteHeader(http.StatusForbidden)
+			fmt.Println("Error logging in")
+			fmt.Fprint(w, "Invalid credentials")
+			return
+		}
+	}
+
+	token := jwt.New(jwt.SigningMethodRS256)
+	claims := make(jwt.MapClaims)
+	claims["exp"] = time.Now().Add(time.Hour * time.Duration(1)).Unix()
+	claims["iat"] = time.Now().Unix()
+	token.Claims = claims
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintln(w, "Error extracting the key")
+		panic(err)
+	}
+
+	tokenString, err := token.SignedString(signKey)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintln(w, "Error while signing the token")
+		panic(err)
+	}
+
+	response := Token{tokenString}
+	JSONResponse(response, w)
+
+}
+
+func authLogoutHandler(w http.ResponseWriter, r *http.Request) {
+	// end session
+}
+
+func protectedHandler(w http.ResponseWriter, r *http.Request) {
+	response := Response{"Gained access to protected resource"}
+	JSONResponse(response, w)
+}
 
 // cmsGeneralHandler takes care of serving the frontend CMS portion
 // of the app. Paths that match '/cms' are routed here; if the file exists
