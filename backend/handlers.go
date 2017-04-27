@@ -32,7 +32,12 @@ func authLoginHandler(w http.ResponseWriter, r *http.Request) {
 		if user.Password != "p@ssword" {
 			w.WriteHeader(http.StatusForbidden)
 			fmt.Println("Error logging in")
-			fmt.Fprint(w, "Invalid credentials")
+			response := FailureResponse{Message: "Invalid credentials"}
+			json, err := json.Marshal(response)
+			if err != nil {
+				panic(err)
+			}
+			w.Write(json)
 			return
 		}
 	}

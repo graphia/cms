@@ -22,7 +22,12 @@ func ValidateTokenMiddleware(w http.ResponseWriter, r *http.Request, next http.H
 			next(w, r)
 		} else {
 			w.WriteHeader(http.StatusUnauthorized)
-			fmt.Fprint(w, "Token is not valid")
+			response := FailureResponse{Message: "Invalid credentials"}
+			json, err := json.Marshal(response)
+			if err != nil {
+				panic(err)
+			}
+			w.Write(json)
 		}
 	} else {
 		w.WriteHeader(http.StatusUnauthorized)

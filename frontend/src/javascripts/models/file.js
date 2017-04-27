@@ -1,5 +1,6 @@
 import store from '../store.js';
 import config from '../config.js';
+import { authHeader } from '../headers.js';
 
 export default class CMSFile {
 
@@ -38,7 +39,8 @@ export default class CMSFile {
 
 		let path = `${config.api}/directories/${directory}/files`;
 
-		let response = await fetch(path, {mode: "cors"})
+		console.log(authHeader());
+		let response = await fetch(path, {mode: "cors", headers: authHeader()});
 
 		if (response.status !== 200) {
 			console.error('Oops, there was a problem', response.status);
@@ -72,7 +74,7 @@ export default class CMSFile {
 			path = [path, "edit"].join("/");
 		}
 
-		let response = await fetch(path, {mode: "cors"})
+		let response = await fetch(path, {mode: "cors", headers: authHeader()})
 
 		if (response.status !== 200) {
 			console.error('Oops, there was a problem', response.status);
@@ -98,7 +100,7 @@ export default class CMSFile {
 		var path = `${config.api}/directories/${this.path}/files`
 
 		try {
-			return fetch(path, {mode: "cors", method: "POST", body: commit.toJSON(this)})
+			return fetch(path, {mode: "cors", method: "POST", headers: authHeader(), body: commit.toJSON(this)})
 				.then((response) => {
 					if (response.status !== 200) {
 						console.error('Oops, there was a problem', response.status);
@@ -122,7 +124,7 @@ export default class CMSFile {
 		var path = `${config.api}/directories/${this.path}/files/${this.filename}`
 
 		try {
-			return fetch(path, {mode: "cors", method: "PATCH", body: commit.toJSON(this)})
+			return fetch(path, {mode: "cors", method: "PATCH", headers: authHeader(), body: commit.toJSON(this)})
 				.then((response) => {
 					if (response.status !== 200) {
 						console.error('Oops, there was a problem', response.status);
@@ -140,7 +142,7 @@ export default class CMSFile {
 		var path = `${config.api}/directories/${this.path}/files/${this.filename}`
 
 		try {
-			return fetch(path, {mode: "cors", method: "DELETE", body: commit.toJSON(this)})
+			return fetch(path, {mode: "cors", method: "DELETE", headers: authHeader(), body: commit.toJSON(this)})
 				.then((response) => {
 					if (response.status !== 200) {
 						console.error('Oops, there was a problem', response.status);

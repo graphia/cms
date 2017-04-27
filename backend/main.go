@@ -109,6 +109,20 @@ func unprotectedRouter() (r *vestigo.Router) {
 	r.HandleFunc("/cms", cmsGeneralHandler)
 	r.HandleFunc("/cms/*", cmsGeneralHandler)
 
+	// TODO duplicated below, tidy up
+	if config.CORSEnabled {
+
+		Warning.Println("CORS:", config.CORSEnabled)
+		Warning.Println("CORS origin:", config.CORSOrigin)
+
+		r.SetGlobalCors(&vestigo.CorsAccessControl{
+			AllowOrigin:      []string{"*", config.CORSOrigin},
+			AllowHeaders:     []string{"Authorization"},
+			AllowCredentials: true,
+			MaxAge:           3600 * time.Second,
+		})
+	}
+
 	return r
 }
 
@@ -135,18 +149,6 @@ func protectedRouter() (r *vestigo.Router) {
 	// missing operations:
 	// how should file and directory moves/copies be represented?
 	// auth..
-
-	if config.CORSEnabled {
-
-		Warning.Println("CORS:", config.CORSEnabled)
-		Warning.Println("CORS origin:", config.CORSOrigin)
-
-		r.SetGlobalCors(&vestigo.CorsAccessControl{
-			AllowOrigin:      []string{"*", config.CORSOrigin},
-			AllowCredentials: true,
-			MaxAge:           3600 * time.Second,
-		})
-	}
 
 	return r
 }
