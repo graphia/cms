@@ -67,6 +67,12 @@ func authLoginHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// Renew a JWT
+func pingHandler(w http.ResponseWriter, r *http.Request) {
+	// TODO:
+	// parse supplied token, extract claims, gen a new one with them
+}
+
 func authLogoutHandler(w http.ResponseWriter, r *http.Request) {
 	// end session
 }

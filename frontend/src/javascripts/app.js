@@ -10,18 +10,22 @@ import DocumentShow from '../components/DocumentShow.vue';
 import DocumentEdit from '../components/DocumentEdit.vue';
 import DocumentNew from '../components/DocumentNew.vue';
 
+// Authentication Helpers
+import CMSAuth from './auth.js';
 
 // Vuex Store
 import store from './store.js';
 import SimpleMDE from 'simplemde';
 
-
 Vue.use(VueRouter);
 
 const routes = [
-	// Authentication
-	{path: '/cms/login', component: Login},
+	// Unprotected pages
+	{path: '/cms/login', component: Login, name: 'login'},
+	// {path: '/cms/signup', component: Signup, name: 'signup'},
 
+
+	// Protected pages
 	{path: '/cms/', component: Home},
 	{path: '/cms/:directory', component: DocumentIndex, name: 'document_index'},
 	{path: '/cms/:directory/new', component: DocumentNew, name: 'document_new'},
@@ -34,9 +38,14 @@ const router = new VueRouter({
 	mode: 'history'
 });
 
+// ensure that only logged-in users can continue
+router.beforeEach(CMSAuth.checkLoggedIn);
+
 var app = new Vue({
 	el: "#app",
 	store,
 	router,
 	render: h => h(App)
 });
+
+export default app;

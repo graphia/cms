@@ -41,6 +41,8 @@
 
 				let json = await response.json();
 				localStorage.setItem('token', json.token);
+				localStorage.setItem('token_received', Date.now());
+
 
 				// token saved, redirect to somewhere useful!
 
