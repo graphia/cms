@@ -26,7 +26,7 @@ const routes = [
 
 
 	// Protected pages
-	{path: '/cms/', component: Home},
+	{path: '/cms/', component: Home, name: 'home'},
 	{path: '/cms/:directory', component: DocumentIndex, name: 'document_index'},
 	{path: '/cms/:directory/new', component: DocumentNew, name: 'document_new'},
 	{path: '/cms/:directory/:filename', component: DocumentShow, name: 'document_show'},
