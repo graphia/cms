@@ -18,8 +18,15 @@ exports.files = {
 exports.paths = {
 	watched: [
 		'src',
-		'node_modules/simplemde/dist'
+		'node_modules/simplemde/dist',
+		'node_modules/bootstrap/dist'
 	]
+};
+
+exports.modules = {
+	autoRequire: {
+		'cms/javascripts/app.js': ['src/javascripts/initialize']
+	}
 };
 
 exports.plugins = {
