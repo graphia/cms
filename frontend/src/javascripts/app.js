@@ -41,7 +41,7 @@ const router = new VueRouter({
 export {router};
 
 // ensure that only logged-in users can continue
-router.beforeEach(CMSAuth.checkLoggedIn);
+router.beforeEach(store.state.auth.checkLoggedIn);
 
 var app = new Vue({
 	el: "#app",

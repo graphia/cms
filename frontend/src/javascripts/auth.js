@@ -6,8 +6,8 @@ var jwtDecode = require('jwt-decode');
 export default class CMSAuth {
 
 	constructor() {
+		console.debug("Initialising CMSAuth");
 		this._token = localStorage.getItem("token");
-		console.debug("auth object created");
 	}
 
 	get token() {
@@ -20,11 +20,10 @@ export default class CMSAuth {
 		this._token = value;
 		localStorage.setItem("token", value);
 		localStorage.setItem('token_received', Date.now());
-
 	}
 
 	tokenExpired() {
-		return (this.expiry < Date.now);
+		return (this.tokenExpiry < Date.now);
 	}
 
 	tokenExpiry() {
@@ -54,9 +53,21 @@ export default class CMSAuth {
 
 	}
 
-	isLoggedIn() {
-		this.renew();
-		return !this.tokenExpired()
+	// repetetive and ugly because 'this' isn't available due
+	// to checkLoggedIn being a vue beforeEach hook and 'this' not
+	// being available
+	static isLoggedIn() {
+
+		let token = localStorage.getItem('token');
+		var expired = true;
+
+		if (token) {
+			let exp = jwtDecode(token).exp;
+			expired = (exp < Date.now());
+		}
+
+		return (token && expired);
+
 	}
 
 	async renew() {
