@@ -57,25 +57,7 @@
 				event.preventDefault();
 				console.log("clicked!");
 
-				let response = await fetch(`${this.$config.auth}/login`, {
-					method: "POST",
-					mode: "cors",
-					body: JSON.stringify({
-						username: this.username,
-						password: this.password
-					})
-				});
-
-				if (response.status !== 200) {
-					console.error('Oops, there was a problem', response.status);
-					return
-				}
-
-				let json = await response.json();
-
-				// store the token and the time at which it was written
-				localStorage.setItem('token', json.token);
-				localStorage.setItem('token_received', Date.now());
+				await this.$store.state.auth.login(this.username, this.password);
 
 				// TODO if they'd attempted to navigate to a page
 				// we should store it and send them there.

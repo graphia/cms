@@ -35,7 +35,13 @@
 </template>
 
 <script lang="babel">
-export default {
-	name: "GraphiaCMS"
-}
+	import CMSAuth from '../javascripts/auth.js';
+
+	export default {
+		name: "GraphiaCMS",
+		created() {
+			this.$store.state.auth.renew();
+			console.debug("expiry", this.$store.state.auth.expiry);
+		}
+	}
 </script>

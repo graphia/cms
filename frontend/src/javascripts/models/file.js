@@ -1,6 +1,5 @@
 import store from '../store.js';
 import config from '../config.js';
-import CMSAuth from '../auth.js';
 
 export default class CMSFile {
 
@@ -39,8 +38,8 @@ export default class CMSFile {
 
 		let path = `${config.api}/directories/${directory}/files`;
 
-		console.log(CMSAuth.authHeader());
-		let response = await fetch(path, {mode: "cors", headers: CMSAuth.authHeader()});
+		console.log(store.state.auth.authHeader());
+		let response = await fetch(path, {mode: "cors", headers: store.state.auth.authHeader()});
 
 		if (response.status !== 200) {
 			console.error('Oops, there was a problem', response.status);
@@ -74,7 +73,7 @@ export default class CMSFile {
 			path = [path, "edit"].join("/");
 		}
 
-		let response = await fetch(path, {mode: "cors", headers: CMSAuth.authHeader()})
+		let response = await fetch(path, {mode: "cors", headers: store.state.auth.authHeader()})
 
 		if (response.status !== 200) {
 			console.error('Oops, there was a problem', response.status);
@@ -100,7 +99,7 @@ export default class CMSFile {
 		var path = `${config.api}/directories/${this.path}/files`
 
 		try {
-			return fetch(path, {mode: "cors", method: "POST", headers: CMSAuth.authHeader(), body: commit.toJSON(this)})
+			return fetch(path, {mode: "cors", method: "POST", headers: store.state.auth.authHeader(), body: commit.toJSON(this)})
 				.then((response) => {
 					if (response.status !== 200) {
 						console.error('Oops, there was a problem', response.status);
@@ -124,7 +123,7 @@ export default class CMSFile {
 		var path = `${config.api}/directories/${this.path}/files/${this.filename}`
 
 		try {
-			return fetch(path, {mode: "cors", method: "PATCH", headers: CMSAuth.authHeader(), body: commit.toJSON(this)})
+			return fetch(path, {mode: "cors", method: "PATCH", headers: store.state.auth.authHeader(), body: commit.toJSON(this)})
 				.then((response) => {
 					if (response.status !== 200) {
 						console.error('Oops, there was a problem', response.status);
@@ -142,7 +141,7 @@ export default class CMSFile {
 		var path = `${config.api}/directories/${this.path}/files/${this.filename}`
 
 		try {
-			return fetch(path, {mode: "cors", method: "DELETE", headers: CMSAuth.authHeader(), body: commit.toJSON(this)})
+			return fetch(path, {mode: "cors", method: "DELETE", headers: store.state.auth.authHeader(), body: commit.toJSON(this)})
 				.then((response) => {
 					if (response.status !== 200) {
 						console.error('Oops, there was a problem', response.status);

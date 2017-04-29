@@ -38,6 +38,8 @@ const router = new VueRouter({
 	mode: 'history'
 });
 
+export {router};
+
 // ensure that only logged-in users can continue
 router.beforeEach(CMSAuth.checkLoggedIn);
 
@@ -47,5 +49,3 @@ var app = new Vue({
 	router,
 	render: h => h(App)
 });
-
-export default app;

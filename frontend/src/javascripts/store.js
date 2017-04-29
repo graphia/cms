@@ -5,12 +5,15 @@ import router from './app';
 import CMSFile from '../javascripts/models/file.js';
 import CMSCommit from '../javascripts/models/commit.js';
 
+import CMSAuth from '../javascripts/auth.js';
+
 Vue.use(Vuex);
 
 const state = {
 	documents: [],
 	activeDocument: new CMSFile,
-	commit: new CMSCommit
+	commit: new CMSCommit,
+	auth: new CMSAuth
 };
 const mutations = {};
 const getters = {};
