@@ -7,9 +7,9 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/dgrijalva/jwt-go/request"
 	"github.com/husobee/vestigo"
 )
 
@@ -28,37 +28,32 @@ func authLoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if strings.ToLower(user.Username) != "someone" {
-		if user.Password != "p@ssword" {
-			w.WriteHeader(http.StatusForbidden)
-			fmt.Println("Error logging in")
-			response := FailureResponse{Message: "Invalid credentials"}
-			json, err := json.Marshal(response)
-			if err != nil {
-				panic(err)
-			}
-			w.Write(json)
-			return
+	Debug.Println("user", user)
+
+	if (strings.ToLower(user.Username) != "someone") || (user.Password != "p@ssword") {
+		w.WriteHeader(http.StatusForbidden)
+		fmt.Println("Error logging in")
+		response := FailureResponse{Message: "Invalid credentials"}
+		json, err := json.Marshal(response)
+		if err != nil {
+			panic(err)
 		}
+		w.Write(json)
+		return
 	}
 
-	token := jwt.New(jwt.SigningMethodRS256)
-	claims := make(jwt.MapClaims)
-	claims["exp"] = time.Now().Add(time.Hour * time.Duration(1)).Unix()
-	claims["iat"] = time.Now().Unix()
-	token.Claims = claims
+	token, err := newToken()
+	if err != nil {
+		panic(err)
+	}
+	tokenString, err := newTokenString(token)
+	if err != nil {
+		panic(err)
+	}
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintln(w, "Error extracting the key")
-		panic(err)
-	}
-
-	tokenString, err := token.SignedString(signKey)
-
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintln(w, "Error while signing the token")
 		panic(err)
 	}
 
@@ -67,10 +62,56 @@ func authLoginHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// Renew a JWT
-func pingHandler(w http.ResponseWriter, r *http.Request) {
-	// TODO:
-	// parse supplied token, extract claims, gen a new one with them
+// Renew a new JWT
+func authRenewTokenHandler(w http.ResponseWriter, r *http.Request) {
+
+	token, err := request.ParseFromRequest(
+		r,
+		request.AuthorizationHeaderExtractor,
+		func(token *jwt.Token) (interface{}, error) {
+			return verifyKey, nil
+		},
+	)
+
+	if err == nil {
+		if token.Valid {
+
+			Debug.Println("Token valid, issuing a new one")
+			// TODO print the claims?
+
+			token, err := newToken()
+			if err != nil {
+				panic(err)
+			}
+
+			tokenString, err := newTokenString(token)
+			if err != nil {
+				panic(err)
+			}
+
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				fmt.Fprintln(w, "Error extracting the key")
+				panic(err)
+			}
+
+			response := Token{tokenString}
+			JSONResponse(response, w)
+
+		} else {
+			w.WriteHeader(http.StatusUnauthorized)
+			response := FailureResponse{Message: "Invalid credentials"}
+			json, err := json.Marshal(response)
+			if err != nil {
+				panic(err)
+			}
+			w.Write(json)
+		}
+	} else {
+		w.WriteHeader(http.StatusUnauthorized)
+		fmt.Fprint(w, "Unauthorized access to this resource")
+	}
+
 }
 
 func authLogoutHandler(w http.ResponseWriter, r *http.Request) {

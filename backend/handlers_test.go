@@ -20,7 +20,7 @@ var (
 )
 
 func init() {
-	server = httptest.NewServer(setupRouter())
+	server = httptest.NewServer(protectedRouter())
 }
 
 func TestApiCreateDirectory(t *testing.T) {

@@ -133,6 +133,9 @@ func protectedRouter() (r *vestigo.Router) {
 
 	r.Get("/api", apiRootHandler)
 
+	// auth-related endpoints
+	r.Post("/api/renew", authRenewTokenHandler)
+
 	// directory endpoints
 	r.Get("/api/directories", apiListDirectoriesHandler)
 	r.Post("/api/directories", apiCreateDirectoryHandler)
