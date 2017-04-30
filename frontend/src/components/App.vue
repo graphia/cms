@@ -27,7 +27,9 @@
 
 		<!-- Router View Container Start -->
 		<div class="container-fluid">
-			<router-view/>
+			<transition name="fade">
+				<router-view/>
+			</transition>
 		</div>
 		<!-- Router View Container End -->
 
@@ -45,3 +47,18 @@
 		}
 	}
 </script>
+
+<style lang="scss">
+	.fade-enter-active, .fade-leave-active {
+		transition-property: opacity;
+		transition-duration: 0.15s;
+	}
+
+	.fade-enter-active {
+		transition-delay: 0.15s;
+	}
+
+	.fade-enter, .fade-leave-active {
+		opacity: 0
+	}
+</style>
