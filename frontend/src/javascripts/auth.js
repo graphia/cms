@@ -122,10 +122,14 @@ export default class CMSAuth {
 
 			return headers;
 		} catch(err) {
-			console.debug("No token found, rendering login");
-			router.push({name: 'login'});
-
+			console.warn("No token found, rendering login", err);
+			this.redirectToLogin();
 		}
+	}
+
+	redirectToLogin() {
+		// FIXME display a flash message
+		router.push({name: 'login'});
 	}
 
 };

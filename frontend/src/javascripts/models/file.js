@@ -88,7 +88,7 @@ export default class CMSFile {
 
 	// instance methods
 
-	create(commit) {
+	async create(commit) {
 		// create a commit object containing relevant info
 		// and despatch it
 
@@ -99,20 +99,25 @@ export default class CMSFile {
 		var path = `${config.api}/directories/${this.path}/files`
 
 		try {
-			return fetch(path, {mode: "cors", method: "POST", headers: store.state.auth.authHeader(), body: commit.toJSON(this)})
-				.then((response) => {
-					if (response.status !== 200) {
-						console.error('Oops, there was a problem', response.status);
-					}
-					return response;
-				});
+			let response = await fetch(path, {
+				mode: "cors",
+				method: "POST",
+				headers: store.state.auth.authHeader(),
+				body: commit.toJSON(this)
+			});
+
+			if (response.status !== 200) {
+				console.error('Oops, there was a problem', response.status);
+			}
+
+			return response;
 		}
 		catch(err) {
 			console.error(`There was a problem creating new document in ${directory}, ${err}`);
 		}
 	};
 
-	update(commit) {
+	async update(commit) {
 		// create a commit object containing relevant info
 		// and despatch it
 
@@ -123,12 +128,18 @@ export default class CMSFile {
 		var path = `${config.api}/directories/${this.path}/files/${this.filename}`
 
 		try {
-			return fetch(path, {mode: "cors", method: "PATCH", headers: store.state.auth.authHeader(), body: commit.toJSON(this)})
-				.then((response) => {
-					if (response.status !== 200) {
-						console.error('Oops, there was a problem', response.status);
-					}
-				});
+			let response = await fetch(path, {
+				mode: "cors",
+				method: "PATCH",
+				headers: store.state.auth.authHeader(),
+				body: commit.toJSON(this)
+			});
+
+			if (response.status !== 200) {
+				console.error('Oops, there was a problem', response.status);
+			}
+
+			return response;
 		}
 		catch(err) {
 			console.error(`There was a problem updating document ${filename} in ${directory}, ${err}`);
