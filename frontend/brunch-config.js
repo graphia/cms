@@ -52,7 +52,10 @@ exports.plugins = {
 
 exports.npm = {
 	globals: {
-		$: 'jquery'
+		$: 'jquery',
+		jQuery: 'jquery',
+		Tether: 'tether',
+		Bootstrap: 'bootstrap'
 	}
 };
 
