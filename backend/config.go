@@ -15,6 +15,7 @@ type Config struct {
 	Logfile     string
 	CORSEnabled bool
 	CORSOrigin  string
+	Database    string // file path for BoltDB file
 }
 
 func loadConfig(path *string) (Config, error) {

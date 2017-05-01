@@ -77,10 +77,11 @@ type UserCredentials struct {
 
 // User holds all information specific to a user
 type User struct {
-	ID       int    `json:"id"`
+	ID       int    `json:"id" storm:"id,increment"`
 	Name     string `json:"name"`
-	Username string `json:"username"`
+	Username string `json:"username" storm:"unique"`
 	Password string `json:"password"`
+	Email    string `json:email storm:"unique"`
 }
 
 // Token holds a JSON Web Token

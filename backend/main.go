@@ -7,7 +7,8 @@ import (
 	"io/ioutil"
 	"time"
 
-	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/asdine/storm"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/husobee/vestigo"
 	"github.com/urfave/negroni"
 )
@@ -24,6 +25,7 @@ var (
 	logEnabled     = flag.Bool("log-to-file", false, "enable logging")
 	verifyKey      *rsa.PublicKey
 	signKey        *rsa.PrivateKey
+	db             storm.DB
 )
 
 // init loads config and sets up logging without requiring
@@ -54,6 +56,7 @@ func main() {
 	r = unprotectedRouter()
 	pr = protectedRouter()
 	n = setupMiddleware(r, pr)
+	db = setupDB(config.Database)
 
 	Debug.Println("Router and Middleware set up")
 
@@ -154,4 +157,12 @@ func protectedRouter() (r *vestigo.Router) {
 	// auth..
 
 	return r
+}
+
+func setupDB(path string) storm.DB {
+	stormDB, err := storm.Open(path)
+	if err != nil {
+		panic(fmt.Sprintf("Database cannot be openend %s", err.Error()))
+	}
+	return *stormDB
 }
