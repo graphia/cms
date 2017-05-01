@@ -2,6 +2,8 @@ SRC := $(filter-out backend/%_test.go,$(wildcard backend/*.go))
 ALL := $(wildcard backend/*.go)
 DEFAULT_CONFIG = "config/default.yml"
 TEST_CONFIG = "../config/test.yml"
+PRIVATE_KEY_PATH = "./keys/app.rsa"
+PUBLIC_KEY_PATH = "./keys/app.rsa.pub"
 
 build:
 	go build -o graphia-cms ${ALL}
@@ -20,3 +22,7 @@ run-frontend:
 
 cleanup:
 	rm -rf tests/tmp/**/*
+
+generate-keys:
+	openssl genrsa -out ${PRIVATE_KEY_PATH} 1024
+	openssl rsa -in ${PRIVATE_KEY_PATH} -pubout > ${PUBLIC_KEY_PATH}
