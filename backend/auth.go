@@ -11,6 +11,10 @@ import (
 	"github.com/dgrijalva/jwt-go/request"
 )
 
+const (
+	TokenExpiresAfter = 1
+)
+
 // ValidateTokenMiddleware validates the JWT token
 func ValidateTokenMiddleware(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 
@@ -52,14 +56,21 @@ func JSONResponse(response interface{}, w http.ResponseWriter) {
 	w.Write(json)
 }
 
-func newToken() (jwt.Token, error) {
+func newToken(user User) (jwt.Token, error) {
 
 	token := jwt.New(jwt.SigningMethodRS256)
 	claims := make(jwt.MapClaims)
-	claims["exp"] = time.Now().Add(time.Hour * time.Duration(1)).Unix()
+
+	// JWT claims as per https://tools.ietf.org/html/rfc7519#section-4.1
+
+	// token expires at
+	claims["exp"] = time.Now().Add(time.Hour * time.Duration(TokenExpiresAfter)).Unix()
+
+	// token issued at
 	claims["iat"] = time.Now().Unix()
 
-	// TODO add user-specific claims
+	// username
+	claims["sub"] = user.Username
 
 	token.Claims = claims
 

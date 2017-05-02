@@ -9,23 +9,33 @@ import (
 )
 
 var (
-	mh, ck User
+	mh, ck, ds User
 )
 
 func init() {
 	db = setupDBForTests(config.Database)
 
 	mh = User{
+		//ID:       1,
 		Username: "misshoover",
 		Email:    "e.hoover@springfield.k12.us",
 		Name:     "Elizabeth Hoover",
 		Password: []byte("SuperSecret123"),
 	}
+
 	ck = User{
+		//ID:       2,
 		Username: "cookie.kwan",
 		Email:    "cookie@springfield-realtors.com",
 		Name:     "Cookie Kwan",
 		Password: []byte("P@ssword!"),
+	}
+
+	ds = User{
+		Username: "dolph.starbeam",
+		Email:    "dolph.starbeam@springfield.k12.us",
+		Name:     "Dolph Starbeam",
+		Password: []byte("mightypig"),
 	}
 }
 
@@ -45,6 +55,7 @@ func TestCreateUser(t *testing.T) {
 func TestPasswordIsEncrypted(t *testing.T) {
 
 	initialPassword := mh.Password
+	_ = createUser(mh)
 
 	retrievedUser := User{}
 	_ = db.One("Username", "misshoover", &retrievedUser)
@@ -56,7 +67,7 @@ func TestPasswordIsEncrypted(t *testing.T) {
 	assert.Nil(t, bcrypt.CompareHashAndPassword(retrievedUser.Password, initialPassword))
 }
 
-func TestCreateDuplicateUser(t *testing.T) {
+func TestCreateDuplicateUsers(t *testing.T) {
 
 	var err error
 
@@ -67,33 +78,54 @@ func TestCreateDuplicateUser(t *testing.T) {
 	assert.Contains(t, err.Error(), "already exists")
 
 	// and check that only one misshoover was created
-	criteria := User{Username: "misshoover"}
+	criteria := User{Username: "miss.hoover"}
 	matches, _ := db.Count(&criteria)
 	assert.Equal(t, matches, 1)
 }
 
-func TestFindUser(t *testing.T) {
+func TestGetUserByID(t *testing.T) {
 
 	_ = createUser(ck)
 
-	cookieKwan, _ := getUser("cookie.kwan")
+	cookieKwan, _ := getUserByID(1)
 	assert.NotZero(t, cookieKwan.ID)
 
-	_, err := getUser("not.miss.hoover.ok")
+	_, err := getUserByID(99)
+	assert.Contains(t, err.Error(), "not found")
+
+}
+
+func TestGetUserByUsername(t *testing.T) {
+
+	_ = createUser(ck)
+
+	cookieKwan, _ := getUserByUsername("cookie.kwan")
+	assert.NotZero(t, cookieKwan.ID)
+
+	_, err := getUserByUsername("not.miss.hoover.ok")
 	assert.Contains(t, err.Error(), "not found")
 
 }
 
 func TestAllUsers(t *testing.T) {
+
+	_ = createUser(ds)
+	_ = createUser(ck)
+	_ = createUser(mh)
+
 	users, _ := allUsers()
+
+	assert.Equal(t, 3, len(users))
 
 	var names []string
 
 	for u := range users {
+		//fmt.Println(users[u].Name)
 		names = append(names, users[u].Name)
 	}
-	assert.Equal(t, 2, len(users))
 
 	assert.Contains(t, names, ck.Name)
 	assert.Contains(t, names, mh.Name)
+	assert.Contains(t, names, ds.Name)
+
 }

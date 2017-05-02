@@ -6,11 +6,11 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
 
-	"github.com/dgrijalva/jwt-go"
+	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/dgrijalva/jwt-go/request"
 	"github.com/husobee/vestigo"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // Authentication functionality 🔑
@@ -18,9 +18,9 @@ import (
 func authLoginHandler(w http.ResponseWriter, r *http.Request) {
 	// start session, generate a JWT if the credentials are ok
 
-	var user UserCredentials
+	var uc UserCredentials
 
-	err := json.NewDecoder(r.Body).Decode(&user)
+	err := json.NewDecoder(r.Body).Decode(&uc)
 
 	if err != nil {
 		w.WriteHeader(http.StatusForbidden)
@@ -28,21 +28,38 @@ func authLoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	Debug.Println("user", user)
+	user, err := getUserByUsername(uc.Username)
+	Debug.Println("user is:", user)
+	Debug.Println("error is:", err)
 
-	if (strings.ToLower(user.Username) != "someone") || (user.Password != "p@ssword") {
-		w.WriteHeader(http.StatusForbidden)
-		fmt.Println("Error logging in")
-		response := FailureResponse{Message: "Invalid credentials"}
+	if err != nil {
+		Debug.Println("Handling user not found error")
+		w.WriteHeader(http.StatusUnauthorized)
+		response := FailureResponse{Message: fmt.Sprintf("User not found: %s", uc.Username)}
 		json, err := json.Marshal(response)
 		if err != nil {
+			Debug.Println("Failed", err)
 			panic(err)
 		}
 		w.Write(json)
 		return
 	}
 
-	token, err := newToken()
+	err = bcrypt.CompareHashAndPassword(user.Password, []byte(uc.Password))
+
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		response := FailureResponse{Message: "Invalid credentials"}
+		json, err := json.Marshal(response)
+		if err != nil {
+			Debug.Println("Failed", err)
+			panic(err)
+		}
+		w.Write(json)
+		return
+	}
+
+	token, err := newToken(user)
 	if err != nil {
 		panic(err)
 	}
@@ -79,7 +96,14 @@ func authRenewTokenHandler(w http.ResponseWriter, r *http.Request) {
 			Debug.Println("Token valid, issuing a new one")
 			// TODO print the claims?
 
-			token, err := newToken()
+			claims := token.Claims.(jwt.MapClaims)
+			username := claims["sub"]
+			user, err := getUserByUsername("joey")
+			if err != nil {
+				panic(fmt.Errorf("Cannot find user %s, %s", username, err.Error()))
+			}
+
+			token, err := newToken(user)
 			if err != nil {
 				panic(err)
 			}

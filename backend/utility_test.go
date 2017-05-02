@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/asdine/storm"
+	jwt "github.com/dgrijalva/jwt-go"
 
 	"gopkg.in/libgit2/git2go.v25"
 )
@@ -196,4 +197,26 @@ func setupDBForTests(path string) storm.DB {
 		panic(fmt.Sprintf("Database cannot be openend %s", err.Error()))
 	}
 	return *stormDB
+}
+
+func setupTestKeys() {
+	signBytes, err := ioutil.ReadFile(testPrivKeyPath)
+	if err != nil {
+		panic(err)
+	}
+
+	signKey, err = jwt.ParseRSAPrivateKeyFromPEM(signBytes)
+	if err != nil {
+		panic(err)
+	}
+
+	verifyBytes, err := ioutil.ReadFile(testPubKeyPath)
+	if err != nil {
+		panic(err)
+	}
+
+	verifyKey, err = jwt.ParseRSAPublicKeyFromPEM(verifyBytes)
+	if err != nil {
+		panic(err)
+	}
 }
