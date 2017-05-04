@@ -15,6 +15,17 @@ import (
 
 // Authentication functionality 🔑
 
+// authLoginHandler checks the supplied UserCredentials and, if a user
+// exists and the password matches, returns a JWT
+//
+// POST /auth/login
+//
+// {username: "jimbo.jones", password: "psssstsecret"}
+//
+// If successful, the response:
+//
+// {token: "xxxxx.yyyyy.zzzzz"}
+//
 func authLoginHandler(w http.ResponseWriter, r *http.Request) {
 	// start session, generate a JWT if the credentials are ok
 
@@ -29,8 +40,6 @@ func authLoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user, err := getUserByUsername(uc.Username)
-	Debug.Println("user is:", user)
-	Debug.Println("error is:", err)
 
 	if err != nil {
 		Debug.Println("Handling user not found error")
@@ -79,7 +88,14 @@ func authLoginHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// Renew a new JWT
+// authRenewTokenHandler issues a new token providing a valid one is
+// provided. This is intended to be called periodically by the client so
+// user sessions don't expire while they're still using the site
+//
+// POST /api/renew
+//
+// {token: "xxxxx.yyyyy.zzzzz"}
+//
 func authRenewTokenHandler(w http.ResponseWriter, r *http.Request) {
 
 	token, err := request.ParseFromRequest(
