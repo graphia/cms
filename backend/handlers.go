@@ -154,15 +154,6 @@ func authRenewTokenHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func authLogoutHandler(w http.ResponseWriter, r *http.Request) {
-	// end session
-}
-
-func protectedHandler(w http.ResponseWriter, r *http.Request) {
-	response := Response{"Gained access to protected resource"}
-	JSONResponse(response, w)
-}
-
 // cmsGeneralHandler takes care of serving the frontend CMS portion
 // of the app. Paths that match '/cms' are routed here; if the file exists
 // on the filesystem it's served. If not, cms/index.html is served instead

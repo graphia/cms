@@ -105,7 +105,6 @@ func unprotectedRouter() (r *vestigo.Router) {
 
 	// authentication endpoints
 	r.Post("/auth/login", authLoginHandler)
-	r.Post("/auth/logout", authLogoutHandler)
 
 	// rather than above rule, do a check to see if the file exists and serve it
 	// if it doesn't, serve index.html :>
