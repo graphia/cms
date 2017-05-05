@@ -39,19 +39,26 @@ export default class CMSFile {
 
 		let path = `${config.api}/directories/${directory}/files`;
 
-		console.log(store.state.auth.authHeader());
-		let response = await fetch(path, {mode: "cors", headers: store.state.auth.authHeader()});
+		try {
 
-		 if (!this.checkResponse(response.status)) {
-			 return
-		 }
+			console.log(store.state.auth.authHeader());
+			let response = await fetch(path, {mode: "cors", headers: store.state.auth.authHeader()});
 
-		let json = await response.json()
+			if (!this.checkResponse(response.status)) {
+				return
+			}
 
-		// map documents
-		store.state.documents = json.map((file) => {
-			return new CMSFile(file.author, file.email, file.path, file.filename, file.title, null);
-		});
+			let json = await response.json()
+
+			// map documents
+			store.state.documents = json.map((file) => {
+				return new CMSFile(file.author, file.email, file.path, file.filename, file.title, null);
+			});
+
+		}
+		catch(err) {
+			console.error(`Couldn't retrieve files from directory ${directory}`);
+		}
 
 	};
 

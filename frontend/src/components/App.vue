@@ -42,8 +42,25 @@
 	export default {
 		name: "GraphiaCMS",
 		created() {
-			this.$store.state.auth.renew();
-			console.debug("expiry", this.$store.state.auth.expiry);
+			try {
+
+				if (!this.$store.state.auth.expiry) {
+					throw 'Token missing';
+				}
+
+				if (this.$store.state.auth.expiry < Date.now()) {
+					throw 'Token expired';
+				}
+
+				console.debug("token is present and has not expired, renewing");
+				this.$store.state.auth.renew();
+
+			}
+			catch(err) {
+				// Token rejected for renewal
+				console.warn(err);
+				this.$store.state.auth.redirectToLogin();
+			}
 		}
 	}
 </script>
