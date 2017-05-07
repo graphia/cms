@@ -9,12 +9,6 @@ import (
 )
 
 var (
-	mh, ck, ds User
-)
-
-func init() {
-	db = setupDBForTests(config.Database)
-
 	mh = User{
 		//ID:       1,
 		Username: "misshoover",
@@ -37,6 +31,10 @@ func init() {
 		Name:     "Dolph Starbeam",
 		Password: []byte("mightypig"),
 	}
+)
+
+func init() {
+	db = flushDB(config.Database)
 }
 
 func TestCreateUser(t *testing.T) {

@@ -9,7 +9,7 @@ build:
 	go build -o graphia-cms ${ALL}
 
 test:
-	go test -v ${ALL} -log-to-file=false -config=${TEST_CONFIG}
+	go test -v ${ALL} -log-to-file=true -config=${TEST_CONFIG}
 
 keep-testing:
 	ls backend/*.go | entr -r go test -v ${ALL} -log-to-file=true -config=${TEST_CONFIG}

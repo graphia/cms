@@ -6,13 +6,13 @@ import (
 	"net/http"
 	"time"
 
-	jwt "github.com/dgrijalva/jwt-go"
-
+	"github.com/dgrijalva/jwt-go"
 	"github.com/dgrijalva/jwt-go/request"
 )
 
 const (
-	TokenExpiresAfter = 1
+	// HoursUntilExpiry is number of hours until token expires
+	HoursUntilExpiry = 1
 )
 
 // ValidateTokenMiddleware validates the JWT token
@@ -64,7 +64,7 @@ func newToken(user User) (jwt.Token, error) {
 	// JWT claims as per https://tools.ietf.org/html/rfc7519#section-4.1
 
 	// token expires at
-	claims["exp"] = time.Now().Add(time.Hour * time.Duration(TokenExpiresAfter)).Unix()
+	claims["exp"] = time.Now().Add(time.Hour * time.Duration(HoursUntilExpiry)).Unix()
 
 	// token issued at
 	claims["iat"] = time.Now().Unix()

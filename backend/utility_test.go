@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/asdine/storm"
-	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/dgrijalva/jwt-go"
 
 	"gopkg.in/libgit2/git2go.v25"
 )
@@ -188,7 +188,7 @@ func setupSmallTestRepo(dest string) (oid *git.Oid, err error) {
 	return oid, err
 }
 
-func setupDBForTests(path string) storm.DB {
+func flushDB(path string) storm.DB {
 
 	os.RemoveAll(path)
 

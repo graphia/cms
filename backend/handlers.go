@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/dgrijalva/jwt-go/request"
 	"github.com/husobee/vestigo"
 	"golang.org/x/crypto/bcrypt"
