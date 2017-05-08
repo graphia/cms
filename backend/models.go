@@ -78,8 +78,8 @@ type UserCredentials struct {
 // User holds all information specific to a user
 type User struct {
 	ID       int    `json:"id" storm:"id,increment"`
-	Name     string `json:"name"`
-	Username string `json:"username" storm:"unique"`
+	Name     string `json:"name" validate:"required,min=3,max=64"`
+	Username string `json:"username" storm:"unique" validate:"required,min=3,max=32"`
 
 	// FIXME ordinarily we'd want to omit passwords from
 	// JSON we send to the client, and would do this with
@@ -87,8 +87,8 @@ type User struct {
 	// save in the database so that step should be taken elsewhere,
 	// OR switch to using one of BoltDB's other provided codecs
 	// https://github.com/asdine/storm#provided-codecs
-	Password []byte `json:"password"`
-	Email    string `json:"email" storm:"unique"`
+	Password []byte `json:"password" validate:"required,min=6"`
+	Email    string `json:"email" storm:"unique" validate:"email,required"`
 }
 
 // Token holds a JSON Web Token

@@ -154,6 +154,70 @@ func authRenewTokenHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// authCreateInitialUser allows for the creation of the system's first user and
+// unlike typical user creation, doesn't require the instigator to be logged in
+func authCreateInitialUser(w http.ResponseWriter, r *http.Request) {
+
+	var sr SuccessResponse
+	var fr FailureResponse
+
+	// check that there are no users
+	qty, err := countUsers()
+	if err != nil {
+		// handle error counting users
+		Debug.Println(err)
+	}
+
+	if qty > 0 {
+		// users exist, don't allow a new one to be created
+		Error.Println("Users already exist")
+		fr = FailureResponse{
+			Message: "Users already exist. Cannot create initial user",
+		}
+		output, err := json.Marshal(fr)
+		if err != nil {
+			Error.Println(err.Error())
+		}
+
+		w.WriteHeader(400)
+		w.Write(output)
+		return
+	}
+
+	user := User{}
+	json.NewDecoder(r.Body).Decode(&user)
+
+	err = createUser(user)
+
+	Debug.Println("Error:", err)
+	if err != nil {
+
+		errors := validationErrorsToJSON(err)
+
+		output, err := json.Marshal(errors)
+		if err != nil {
+			panic(err)
+		}
+
+		w.WriteHeader(400)
+		w.Write(output)
+		return
+	}
+
+	sr = SuccessResponse{
+		Message: "User created",
+	}
+
+	output, err := json.Marshal(sr)
+	if err != nil {
+		panic(err)
+	}
+
+	w.WriteHeader(201)
+	w.Write(output)
+
+}
+
 // cmsGeneralHandler takes care of serving the frontend CMS portion
 // of the app. Paths that match '/cms' are routed here; if the file exists
 // on the filesystem it's served. If not, cms/index.html is served instead
@@ -259,7 +323,7 @@ func apiCreateDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	w.WriteHeader(200)
+	w.WriteHeader(201)
 	w.Write(output)
 
 }
@@ -410,6 +474,7 @@ func apiCreateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
+	w.WriteHeader(201)
 	w.Write(output)
 
 	Debug.Println("File created", oid)

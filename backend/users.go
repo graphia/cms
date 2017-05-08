@@ -39,6 +39,13 @@ func getUserByUsername(username string) (user User, err error) {
 func createUser(user User) (err error) {
 	user.Password, err = bcrypt.GenerateFromPassword(user.Password, bcrypt.DefaultCost)
 
+	err = validate.Struct(user)
+	if err != nil {
+		return err
+	}
+
+	Debug.Println("Validation passed, saving")
+
 	err = db.Save(&user)
 	if err != nil {
 		return fmt.Errorf("User not created, %s", err.Error())
@@ -52,4 +59,12 @@ func allUsers() (users []User, err error) {
 		return nil, err
 	}
 	return users, nil
+}
+
+func countUsers() (qty int, err error) {
+	qty, err = db.Count(&User{})
+	if err != nil {
+		return -1, err
+	}
+	return qty, err
 }

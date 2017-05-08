@@ -34,10 +34,12 @@ var (
 )
 
 func init() {
+	Debug.Println("Flushing test database")
 	db = flushDB(config.Database)
 }
 
 func TestCreateUser(t *testing.T) {
+	db.Drop("User")
 
 	_ = createUser(mh)
 
@@ -51,6 +53,7 @@ func TestCreateUser(t *testing.T) {
 }
 
 func TestPasswordIsEncrypted(t *testing.T) {
+	db.Drop("User")
 
 	initialPassword := mh.Password
 	_ = createUser(mh)
@@ -66,6 +69,7 @@ func TestPasswordIsEncrypted(t *testing.T) {
 }
 
 func TestCreateDuplicateUsers(t *testing.T) {
+	db.Drop("User")
 
 	var err error
 
@@ -82,6 +86,7 @@ func TestCreateDuplicateUsers(t *testing.T) {
 }
 
 func TestGetUserByID(t *testing.T) {
+	db.Drop("User")
 
 	_ = createUser(ck)
 
@@ -94,6 +99,7 @@ func TestGetUserByID(t *testing.T) {
 }
 
 func TestGetUserByUsername(t *testing.T) {
+	db.Drop("User")
 
 	_ = createUser(ck)
 
@@ -106,6 +112,7 @@ func TestGetUserByUsername(t *testing.T) {
 }
 
 func TestAllUsers(t *testing.T) {
+	db.Drop("User")
 
 	_ = createUser(ds)
 	_ = createUser(ck)

@@ -11,6 +11,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/husobee/vestigo"
 	"github.com/urfave/negroni"
+	"gopkg.in/go-playground/validator.v9"
 )
 
 const (
@@ -26,6 +27,7 @@ var (
 	verifyKey      *rsa.PublicKey
 	signKey        *rsa.PrivateKey
 	db             storm.DB
+	validate       *validator.Validate
 )
 
 // init loads config and sets up logging without requiring
@@ -41,6 +43,8 @@ func init() {
 			panic(err)
 		}
 	}
+
+	validate = validator.New()
 
 	setupLogging(*logEnabled)
 }
@@ -105,6 +109,7 @@ func unprotectedRouter() (r *vestigo.Router) {
 
 	// authentication endpoints
 	r.Post("/auth/login", authLoginHandler)
+	r.Post("/auth/create_initial_user", authCreateInitialUser)
 
 	// rather than above rule, do a check to see if the file exists and serve it
 	// if it doesn't, serve index.html :>
