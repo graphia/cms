@@ -25,6 +25,8 @@ func validationErrorMessage(e validator.FieldError) string {
 		return "is a required field"
 	case "min":
 
+		// min is available to both string and int attributes, and we probably
+		// want a different message for each
 		switch e.Type().String() {
 		case "int":
 			return fmt.Sprintf("must be at least %s", e.Param())
@@ -34,6 +36,8 @@ func validationErrorMessage(e validator.FieldError) string {
 
 	case "max":
 
+		// min is available to both string and int attributes, and we probably
+		// want a different message for each
 		switch e.Type().String() {
 		case "int":
 			return fmt.Sprintf("must be smaller than %s", e.Param())

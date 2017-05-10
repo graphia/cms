@@ -80,15 +80,17 @@ type User struct {
 	ID       int    `json:"id" storm:"id,increment"`
 	Name     string `json:"name" validate:"required,min=3,max=64"`
 	Username string `json:"username" storm:"unique" validate:"required,min=3,max=32"`
-
-	// FIXME ordinarily we'd want to omit passwords from
-	// JSON we send to the client, and would do this with
-	// `json:"-"`, however we're marshalling the records to
-	// save in the database so that step should be taken elsewhere,
-	// OR switch to using one of BoltDB's other provided codecs
-	// https://github.com/asdine/storm#provided-codecs
 	Password []byte `json:"password" validate:"required,min=6"`
 	Email    string `json:"email" storm:"unique" validate:"email,required"`
+}
+
+// LimitedUser is a 'safe' subset of user data that we can
+// send out via the API. Password is omitted
+type LimitedUser struct {
+	ID       int    `json:"id"`
+	Name     string `json:"name"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
 }
 
 // Token holds a JSON Web Token

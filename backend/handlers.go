@@ -156,6 +156,14 @@ func authRenewTokenHandler(w http.ResponseWriter, r *http.Request) {
 
 // authCreateInitialUser allows for the creation of the system's first user and
 // unlike typical user creation, doesn't require the instigator to be logged in
+//
+// POST /api/create_initial_user
+//
+// {"username": "lhutz", "name": "Lionel Hutz" ...}
+//
+// If successful, the response should be a token:
+//
+// {token: "xxxxx.yyyyy.zzzzz"}
 func authCreateInitialUser(w http.ResponseWriter, r *http.Request) {
 
 	var sr SuccessResponse
@@ -170,9 +178,11 @@ func authCreateInitialUser(w http.ResponseWriter, r *http.Request) {
 
 	if qty > 0 {
 		// users exist, don't allow a new one to be created
-		Error.Println("Users already exist")
+		msg := "Users already exist. Cannot create initial user"
+
+		Error.Println(msg)
 		fr = FailureResponse{
-			Message: "Users already exist. Cannot create initial user",
+			Message: msg,
 		}
 		output, err := json.Marshal(fr)
 		if err != nil {
@@ -656,3 +666,57 @@ func apiEditFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 	w.Write(output)
 }
+
+// user functionality 👩🏽‍💻
+
+// apiListUsers
+func apiListUsers(w http.ResponseWriter, r *http.Request) {
+	users, err := allUsers()
+	if err != nil {
+		Error.Println("Could not get list of users", err.Error())
+	}
+
+	output, err := json.Marshal(users)
+	if err != nil {
+		Error.Println("Could not create JSON", err.Error())
+		Error.Println("Users", users)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+
+	w.WriteHeader(200)
+	w.Write(output)
+
+}
+
+// apiGetUser
+func apiGetUser(w http.ResponseWriter, r *http.Request) {
+
+	username := vestigo.Param(r, "username")
+	Debug.Println("Retrieving user", username)
+
+	user, err := getLimitedUserByUsername(username)
+	if err != nil {
+		Error.Println("Could not get list of users", err.Error())
+	}
+
+	output, err := json.Marshal(user)
+	if err != nil {
+		Error.Println("Could not create JSON", err.Error())
+		Error.Println("User", user)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+
+	w.WriteHeader(200)
+	w.Write(output)
+}
+
+// apiCreateUser
+func apiCreateUser(w http.ResponseWriter, r *http.Request) {}
+
+// apiUpdateUser
+func apiUpdateUser(w http.ResponseWriter, r *http.Request) {}
+
+// apiDeleteUser
+func apiDeleteUser(w http.ResponseWriter, r *http.Request) {}

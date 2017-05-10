@@ -26,6 +26,7 @@ var (
 	}
 
 	ds = User{
+		ID:       3,
 		Username: "dolph.starbeam",
 		Email:    "dolph.starbeam@springfield.k12.us",
 		Name:     "Dolph Starbeam",
@@ -133,4 +134,15 @@ func TestAllUsers(t *testing.T) {
 	assert.Contains(t, names, mh.Name)
 	assert.Contains(t, names, ds.Name)
 
+}
+
+func TestConvertToLimitedUser(t *testing.T) {
+	var lu LimitedUser
+	lu = convertToLimitedUser(ds)
+
+	assert.IsType(t, LimitedUser{}, lu)
+	assert.Equal(t, ds.ID, lu.ID)
+	assert.Equal(t, ds.Username, lu.Username)
+	assert.Equal(t, ds.Name, lu.Name)
+	assert.Equal(t, ds.Email, lu.Email)
 }

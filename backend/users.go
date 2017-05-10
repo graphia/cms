@@ -36,7 +36,25 @@ func getUserByUsername(username string) (user User, err error) {
 	return user, err
 }
 
+func getLimitedUserByUsername(username string) (limitedUser LimitedUser, err error) {
+	var user User
+	err = db.One("Username", username, &user)
+	Debug.Println("Finding user by username", username)
+
+	if user.ID == 0 {
+		Debug.Println("Cannot find user with Username", username)
+
+		return limitedUser, fmt.Errorf("not found: %s", username)
+	}
+
+	Debug.Println("Found user", username)
+	limitedUser = convertToLimitedUser(user)
+
+	return limitedUser, err
+}
+
 func createUser(user User) (err error) {
+
 	user.Password, err = bcrypt.GenerateFromPassword(user.Password, bcrypt.DefaultCost)
 
 	err = validate.Struct(user)
@@ -53,12 +71,20 @@ func createUser(user User) (err error) {
 	return nil
 }
 
-func allUsers() (users []User, err error) {
+func allUsers() (limitedUsers []LimitedUser, err error) {
+
+	var users []User
+
 	err = db.All(&users)
+
+	for _, user := range users {
+		limitedUsers = append(limitedUsers, convertToLimitedUser(user))
+	}
+
 	if err != nil {
 		return nil, err
 	}
-	return users, nil
+	return limitedUsers, nil
 }
 
 func countUsers() (qty int, err error) {
@@ -67,4 +93,13 @@ func countUsers() (qty int, err error) {
 		return -1, err
 	}
 	return qty, err
+}
+
+func convertToLimitedUser(user User) LimitedUser {
+	return LimitedUser{
+		ID:       user.ID,
+		Username: user.Username,
+		Email:    user.Email,
+		Name:     user.Name,
+	}
 }

@@ -116,7 +116,6 @@ func unprotectedRouter() (r *vestigo.Router) {
 	r.HandleFunc("/cms", cmsGeneralHandler)
 	r.HandleFunc("/cms/*", cmsGeneralHandler)
 
-	// TODO duplicated below, tidy up
 	if config.CORSEnabled {
 
 		Warning.Println("CORS:", config.CORSEnabled)
@@ -155,6 +154,12 @@ func protectedRouter() (r *vestigo.Router) {
 	r.Get("/api/directories/:directory/files/:file/edit", apiEditFileInDirectoryHandler)
 	r.Patch("/api/directories/:directory/files/:file", apiUpdateFileInDirectoryHandler)
 	r.Delete("/api/directories/:directory/files/:file", apiDeleteFileFromDirectoryHandler)
+
+	r.Get("/api/users", apiListUsers)
+	r.Post("/api/users", apiCreateUser)
+	r.Get("/api/users/:username", apiGetUser)
+	r.Post("/api/users/:username", apiUpdateUser)
+	r.Delete("/api/users/:username", apiDeleteUser)
 
 	// missing operations:
 	// how should file and directory moves/copies be represented?
