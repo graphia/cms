@@ -713,7 +713,43 @@ func apiGetUser(w http.ResponseWriter, r *http.Request) {
 }
 
 // apiCreateUser
-func apiCreateUser(w http.ResponseWriter, r *http.Request) {}
+func apiCreateUser(w http.ResponseWriter, r *http.Request) {
+	var user User
+	var sr SuccessResponse
+
+	json.NewDecoder(r.Body).Decode(&user)
+
+	err := createUser(user)
+	if err != nil {
+
+		errors := validationErrorsToJSON(err)
+
+		output, err := json.Marshal(errors)
+		if err != nil {
+			panic(err)
+		}
+
+		w.WriteHeader(400)
+		w.Write(output)
+
+		return
+	}
+
+	Debug.Println("User was created successfully")
+
+	sr = SuccessResponse{
+		Message: "User created",
+	}
+
+	output, err := json.Marshal(sr)
+	if err != nil {
+		panic(err)
+	}
+
+	w.WriteHeader(201)
+	w.Write(output)
+
+}
 
 // apiUpdateUser
 func apiUpdateUser(w http.ResponseWriter, r *http.Request) {}
