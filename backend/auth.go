@@ -17,11 +17,42 @@ const (
 
 // ValidateTokenMiddleware validates the JWT token
 func ValidateTokenMiddleware(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+	var usernameFromToken string
 
 	token, err := request.ParseFromRequest(r, request.AuthorizationHeaderExtractor,
 		func(token *jwt.Token) (interface{}, error) {
 			return verifyKey, nil
 		})
+
+	// some checks to make sure the request is from a valid source
+	usernameFromToken = token.Claims.(jwt.MapClaims)["sub"].(string)
+	Debug.Println("Retrieved username from token", usernameFromToken)
+
+	// check that the user still exists, if this fails it's probably been deleted
+	user, err := getUserByUsername(usernameFromToken)
+	if err != nil {
+		response := FailureResponse{Message: "Cannot find user"}
+		json, err := json.Marshal(response)
+		if err != nil {
+			panic(err)
+		}
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write(json)
+		return
+	}
+
+	// check that the token matches the found user's stored token, if it doesn't
+	// it's likely that the user has logged in again and is using the *old* token
+	if user.TokenString != token.Raw {
+		response := FailureResponse{Message: "Token is out of date"}
+		json, err := json.Marshal(response)
+		if err != nil {
+			panic(err)
+		}
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write(json)
+		return
+	}
 
 	if err == nil {
 		if token.Valid {

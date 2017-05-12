@@ -108,7 +108,7 @@ func TestAPICreateUserWithErrors(t *testing.T) {
 		//Username: "misshoover",
 		Email:    "e.hoover@springfield.k12.us",
 		Name:     "Elizabeth Hoover",
-		Password: []byte("SuperSecret123"),
+		Password: "SuperSecret123",
 	}
 
 	payload, _ := json.Marshal(invalid)

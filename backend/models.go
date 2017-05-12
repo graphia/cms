@@ -80,7 +80,7 @@ type User struct {
 	ID          int    `json:"id" storm:"id,increment"`
 	Name        string `json:"name" validate:"required,min=3,max=64"`
 	Username    string `json:"username" storm:"unique" validate:"required,min=3,max=32"`
-	Password    []byte `json:"password" validate:"required,min=6"`
+	Password    string `json:"password" validate:"required,min=6"`
 	Email       string `json:"email" storm:"unique" validate:"email,required"`
 	Active      bool   `json:"active"`
 	TokenString string `json:"token_string" storm:"unique"`

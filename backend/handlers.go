@@ -54,7 +54,7 @@ func authLoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = bcrypt.CompareHashAndPassword(user.Password, []byte(uc.Password))
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(uc.Password))
 
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -200,10 +200,12 @@ func authCreateInitialUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// get details from body and set active
 	user := User{}
 	json.NewDecoder(r.Body).Decode(&user)
 	user.Active = true
 
+	// create the user
 	err = createUser(user)
 
 	Debug.Println("Error:", err)

@@ -14,7 +14,7 @@ var (
 		Username: "misshoover",
 		Email:    "e.hoover@springfield.k12.us",
 		Name:     "Elizabeth Hoover",
-		Password: []byte("SuperSecret123"),
+		Password: "SuperSecret123",
 		Active:   true,
 	}
 
@@ -23,7 +23,7 @@ var (
 		Username: "cookie.kwan",
 		Email:    "cookie@springfield-realtors.com",
 		Name:     "Cookie Kwan",
-		Password: []byte("P@ssword!"),
+		Password: "P@ssword!",
 		Active:   true,
 	}
 
@@ -32,7 +32,7 @@ var (
 		Username: "dolph.starbeam",
 		Email:    "dolph.starbeam@springfield.k12.us",
 		Name:     "Dolph Starbeam",
-		Password: []byte("mightypig"),
+		Password: "mightypig",
 		Active:   false,
 	}
 )
@@ -59,17 +59,22 @@ func TestCreateUser(t *testing.T) {
 func TestPasswordIsEncrypted(t *testing.T) {
 	db.Drop("User")
 
-	initialPassword := mh.Password
+	// initialPassword as a byte slice
+	ipwBytes := []byte(mh.Password)
+
 	_ = createUser(mh)
 
 	retrievedUser := User{}
 	_ = db.One("Username", "misshoover", &retrievedUser)
 
+	// retrieved password as a byteslice
+	rpwBytes := []byte(retrievedUser.Password)
+
 	// ensure that the value written to the db has been modified
-	assert.NotEqual(t, initialPassword, retrievedUser.Password)
+	assert.NotEqual(t, rpwBytes, ipwBytes)
 
 	// ensure comparing our generated hash with the initial password doesn't error (i.e. it matches)
-	assert.Nil(t, bcrypt.CompareHashAndPassword(retrievedUser.Password, initialPassword))
+	assert.Nil(t, bcrypt.CompareHashAndPassword(rpwBytes, ipwBytes))
 }
 
 func TestCreateDuplicateUsers(t *testing.T) {

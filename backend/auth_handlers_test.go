@@ -40,7 +40,7 @@ func TestAuthLoginHandler(t *testing.T) {
 		Username: "misshoover",
 		Email:    "e.hoover@springfield.k12.us",
 		Name:     "Elizabeth Hoover",
-		Password: []byte("SuperSecret123"),
+		Password: "SuperSecret123",
 	}
 
 	_ = createUser(mh)
@@ -97,7 +97,7 @@ func TestAuthInvalidLoginHandler(t *testing.T) {
 		Username: "misshoover",
 		Email:    "e.hoover@springfield.k12.us",
 		Name:     "Elizabeth Hoover",
-		Password: []byte("SuperSecret123"),
+		Password: "SuperSecret123",
 	}
 
 	_ = createUser(mh)
@@ -142,7 +142,7 @@ func TestAuthNonExistantLoginHandler(t *testing.T) {
 		Username: "misshoover",
 		Email:    "e.hoover@springfield.k12.us",
 		Name:     "Elizabeth Hoover",
-		Password: []byte("SuperSecret123"),
+		Password: "SuperSecret123",
 	}
 
 	_ = createUser(mh)
@@ -182,7 +182,7 @@ func TestAuthCreateInitialUser(t *testing.T) {
 		Username: "misshoover",
 		Email:    "e.hoover@springfield.k12.us",
 		Name:     "Elizabeth Hoover",
-		Password: []byte("SuperSecret123"),
+		Password: "SuperSecret123",
 	}
 
 	payload, _ := json.Marshal(mh)
@@ -229,7 +229,7 @@ func TestAuthCreateInitialUserWhenOneExists(t *testing.T) {
 		Username: "misshoover",
 		Email:    "e.hoover@springfield.k12.us",
 		Name:     "Elizabeth Hoover",
-		Password: []byte("SuperSecret123"),
+		Password: "SuperSecret123",
 	}
 
 	// First ensure a user exists
@@ -271,7 +271,7 @@ func TestAuthCreateInitialUserWithErrors(t *testing.T) {
 		//Username: "misshoover",
 		Email:    "e.hoover@springfield.k12.us",
 		Name:     "Elizabeth Hoover",
-		Password: []byte("SuperSecret123"),
+		Password: "SuperSecret123",
 	}
 
 	payload, _ := json.Marshal(mh)

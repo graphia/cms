@@ -55,7 +55,8 @@ func getLimitedUserByUsername(username string) (limitedUser LimitedUser, err err
 
 func createUser(user User) (err error) {
 
-	user.Password, err = bcrypt.GenerateFromPassword(user.Password, bcrypt.DefaultCost)
+	bcryptedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	user.Password = string(bcryptedPassword)
 
 	err = validate.Struct(user)
 	if err != nil {
