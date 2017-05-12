@@ -103,3 +103,30 @@ func convertToLimitedUser(user User) LimitedUser {
 		Name:     user.Name,
 	}
 }
+
+// Actually do a 'hard' delete
+func deleteUser(user User) bool {
+	err := db.DeleteStruct(&user)
+	if err != nil {
+		// handle
+	}
+	return true
+}
+
+// Soft delete, prevent user from signing in and
+// accessing the API
+func deactivateUser(user User) error {
+	err := db.UpdateField(&user, "Active", false)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func reactivateUser(user User) error {
+	err := db.UpdateField(&user, "Active", true)
+	if err != nil {
+		return err
+	}
+	return nil
+}

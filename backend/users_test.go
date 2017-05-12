@@ -15,6 +15,7 @@ var (
 		Email:    "e.hoover@springfield.k12.us",
 		Name:     "Elizabeth Hoover",
 		Password: []byte("SuperSecret123"),
+		Active:   true,
 	}
 
 	ck = User{
@@ -23,6 +24,7 @@ var (
 		Email:    "cookie@springfield-realtors.com",
 		Name:     "Cookie Kwan",
 		Password: []byte("P@ssword!"),
+		Active:   true,
 	}
 
 	ds = User{
@@ -31,6 +33,7 @@ var (
 		Email:    "dolph.starbeam@springfield.k12.us",
 		Name:     "Dolph Starbeam",
 		Password: []byte("mightypig"),
+		Active:   false,
 	}
 )
 
@@ -145,4 +148,62 @@ func TestConvertToLimitedUser(t *testing.T) {
 	assert.Equal(t, ds.Username, lu.Username)
 	assert.Equal(t, ds.Name, lu.Name)
 	assert.Equal(t, ds.Email, lu.Email)
+}
+
+func TestDeleteUser(t *testing.T) {
+
+	var users []LimitedUser
+
+	db.Drop("User")
+
+	// create two users
+	_ = createUser(ck)
+	_ = createUser(ds)
+
+	cookieKwan, _ := getUserByUsername("cookie.kwan")
+
+	// there should be two users
+	users, _ = allUsers()
+	assert.Equal(t, 2, len(users))
+
+	// delete one of them
+	_ = deleteUser(cookieKwan)
+
+	// now there should be one left
+	users, _ = allUsers()
+	assert.Equal(t, 1, len(users))
+}
+
+func TestDeactivateUser(t *testing.T) {
+	var user User
+	var username = "cookie.kwan" // active
+
+	_ = createUser(ck)
+	user, _ = getUserByUsername(username)
+
+	assert.True(t, user.Active)
+
+	_ = deactivateUser(user)
+
+	user, _ = getUserByUsername(username)
+
+	assert.False(t, user.Active)
+
+}
+
+func TestReactivateUser(t *testing.T) {
+	var user User
+	var username = "dolph.starbeam" // inactive
+
+	_ = createUser(ck)
+	user, _ = getUserByUsername(username)
+
+	assert.False(t, user.Active)
+
+	_ = reactivateUser(user)
+
+	user, _ = getUserByUsername(username)
+
+	assert.True(t, user.Active)
+
 }

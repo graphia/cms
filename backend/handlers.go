@@ -196,6 +196,7 @@ func authCreateInitialUser(w http.ResponseWriter, r *http.Request) {
 
 	user := User{}
 	json.NewDecoder(r.Body).Decode(&user)
+	user.Active = true
 
 	err = createUser(user)
 
@@ -718,6 +719,8 @@ func apiCreateUser(w http.ResponseWriter, r *http.Request) {
 	var sr SuccessResponse
 
 	json.NewDecoder(r.Body).Decode(&user)
+
+	user.Active = true
 
 	err := createUser(user)
 	if err != nil {

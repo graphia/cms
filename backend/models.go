@@ -82,6 +82,7 @@ type User struct {
 	Username string `json:"username" storm:"unique" validate:"required,min=3,max=32"`
 	Password []byte `json:"password" validate:"required,min=6"`
 	Email    string `json:"email" storm:"unique" validate:"email,required"`
+	Active   bool   `json:"active"`
 }
 
 // LimitedUser is a 'safe' subset of user data that we can

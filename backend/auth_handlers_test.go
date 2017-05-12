@@ -205,6 +205,7 @@ func TestAuthCreateInitialUser(t *testing.T) {
 	assert.Equal(t, mh.Username, u.Username)
 	assert.Equal(t, mh.Name, u.Name)
 	assert.Equal(t, mh.Email, u.Email)
+	assert.True(t, u.Active)
 
 	// Except the passwors should now be encrypted
 	assert.NotEqual(t, mh.Password, u.Password)
