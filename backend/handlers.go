@@ -77,6 +77,12 @@ func authLoginHandler(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
+	Debug.Println("Setting user token", tokenString)
+	err = setToken(user, tokenString)
+	if err != nil {
+		panic(err)
+	}
+
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintln(w, "Error extracting the key")

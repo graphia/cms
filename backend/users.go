@@ -130,3 +130,11 @@ func reactivateUser(user User) error {
 	}
 	return nil
 }
+
+func setToken(user User, tokenString string) error {
+	err := db.UpdateField(&user, "TokenString", tokenString)
+	if err != nil {
+		return err
+	}
+	return nil
+}

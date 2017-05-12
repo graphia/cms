@@ -30,11 +30,10 @@ func init() {
 // Auth Tests
 
 func TestAuthLoginHandler(t *testing.T) {
-
+	// setup
+	db.Drop("User")
 	setupTestKeys()
-
 	server = httptest.NewServer(unprotectedRouter())
-
 	var target = fmt.Sprintf("%s/%s", server.URL, "auth/login")
 
 	mh := User{
@@ -75,17 +74,23 @@ func TestAuthLoginHandler(t *testing.T) {
 		panic(err)
 	}
 
+	// Ensure token has the right attributes
 	assert.Equal(t, "RS256", ta.Algorithm)
 	assert.Equal(t, "JWT", ta.Type)
+
+	// Make sure that we've set the user's TokenString to equal
+	// the returned Token
+	user, _ := getUserByUsername("misshoover")
+	assert.Equal(t, receiver.Token, user.TokenString)
 
 }
 
 func TestAuthInvalidLoginHandler(t *testing.T) {
 
+	// setup
+	db.Drop("User")
 	setupTestKeys()
-
 	server = httptest.NewServer(unprotectedRouter())
-
 	var target = fmt.Sprintf("%s/%s", server.URL, "auth/login")
 
 	mh := User{
@@ -119,14 +124,18 @@ func TestAuthInvalidLoginHandler(t *testing.T) {
 	assert.NotEmpty(t, receiver)
 	assert.Contains(t, "Invalid credentials", receiver.Message)
 
+	// Make sure that we've not set the user's TokenString
+	user, _ := getUserByUsername("misshoover")
+	assert.Empty(t, user.TokenString)
+
 }
 
 func TestAuthNonExistantLoginHandler(t *testing.T) {
 
+	// setup
+	db.Drop("User")
 	setupTestKeys()
-
 	server = httptest.NewServer(unprotectedRouter())
-
 	var target = fmt.Sprintf("%s/%s", server.URL, "auth/login")
 
 	mh := User{
@@ -164,11 +173,9 @@ func TestAuthNonExistantLoginHandler(t *testing.T) {
 
 func TestAuthCreateInitialUser(t *testing.T) {
 
-	// get rid of users first
+	// setup
 	db.Drop("User")
-
 	server = httptest.NewServer(unprotectedRouter())
-
 	var target = fmt.Sprintf("%s/%s", server.URL, "auth/create_initial_user")
 
 	mh := User{
@@ -213,11 +220,9 @@ func TestAuthCreateInitialUser(t *testing.T) {
 
 func TestAuthCreateInitialUserWhenOneExists(t *testing.T) {
 
-	// get rid of users first
+	// setup
 	db.Drop("User")
-
 	server = httptest.NewServer(unprotectedRouter())
-
 	var target = fmt.Sprintf("%s/%s", server.URL, "auth/create_initial_user")
 
 	mh := User{
