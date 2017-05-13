@@ -10,6 +10,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/stretchr/testify/assert"
+	"github.com/urfave/negroni"
 	"gopkg.in/go-playground/validator.v9"
 )
 
@@ -171,6 +172,8 @@ func TestAuthNonExistantLoginHandler(t *testing.T) {
 
 }
 
+// Initial User Tests
+
 func TestAuthCreateInitialUser(t *testing.T) {
 
 	// setup
@@ -295,4 +298,217 @@ func TestAuthCreateInitialUserWithErrors(t *testing.T) {
 	au, _ := allUsers()
 	assert.Equal(t, 0, len(au))
 
+}
+
+// Auth middleware tests
+
+func setupMiddlewareProtectedTestServer() *httptest.Server {
+	n := negroni.New(
+		negroni.HandlerFunc(ValidateTokenMiddleware),
+		negroni.Wrap(protectedRouter()),
+	)
+
+	server := httptest.NewServer(n)
+	return server
+}
+
+func TestProtectedMiddlewareWithToken(t *testing.T) {
+
+	server := setupMiddlewareProtectedTestServer()
+
+	db.Drop("User")
+	setupTestKeys()
+
+	repoPath := "../tests/tmp/repositories/auth_handlers"
+	setupSmallTestRepo(repoPath)
+
+	_ = createUser(ck)
+	cookieKwan, _ := getUserByUsername("cookie.kwan")
+
+	token, _ := newToken(cookieKwan)
+	tokenString, _ := newTokenString(token)
+	setToken(cookieKwan, tokenString)
+
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files/document_1.md")
+
+	//	Debug.Println(token)
+	client := &http.Client{}
+
+	req, _ := http.NewRequest("GET", target, nil)
+	//resp, _ := http.Get(target)
+	Debug.Println(token.Raw)
+
+	req.Header.Add(
+		"Authorization",
+		fmt.Sprintf("Bearer %s", tokenString),
+	)
+
+	resp, _ := client.Do(req)
+	var file File
+	json.NewDecoder(resp.Body).Decode(&file)
+
+	// ensure the file 'looks' correct
+	assert.Contains(t, file.Filename, "document_1.md")
+	assert.Contains(t, file.Path, "documents")
+}
+
+func TestProtectedMiddlewareNoToken(t *testing.T) {
+
+	db.Drop("User")
+	setupTestKeys()
+
+	repoPath := "../tests/tmp/repositories/auth_handlers"
+	setupSmallTestRepo(repoPath)
+
+	server := setupMiddlewareProtectedTestServer()
+
+	_ = createUser(ck)
+
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files/document_1.md")
+
+	//	Debug.Println(token)
+
+	resp, _ := http.Get(target)
+	var fr FailureResponse
+
+	json.NewDecoder(resp.Body).Decode(&fr)
+
+	assert.Contains(t, fr.Message, "Unauthorized")
+}
+
+func TestProtectedMiddlewareOutdatedToken(t *testing.T) {
+
+	server := setupMiddlewareProtectedTestServer()
+
+	db.Drop("User")
+	setupTestKeys()
+
+	repoPath := "../tests/tmp/repositories/auth_handlers"
+	setupSmallTestRepo(repoPath)
+
+	_ = createUser(ck)
+	cookieKwan, _ := getUserByUsername("cookie.kwan")
+
+	// create the first token and assign it to the user
+	tokenOne, _ := newToken(cookieKwan)
+	tokenOneString, _ := newTokenString(tokenOne)
+	setToken(cookieKwan, tokenOneString)
+
+	// now create a second one which we'll attempt to connect with
+	tokenTwo, _ := newToken(cookieKwan)
+	tokenTwoString, _ := newTokenString(tokenTwo)
+	setToken(cookieKwan, tokenTwoString)
+
+	cookieKwan, _ = getUserByUsername("cookie.kwan")
+
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files/document_1.md")
+
+	//	Debug.Println(token)
+	client := &http.Client{}
+
+	req, _ := http.NewRequest("GET", target, nil)
+
+	req.Header.Add(
+		"Authorization",
+		fmt.Sprintf("Bearer %s", tokenOneString),
+	)
+
+	resp, _ := client.Do(req)
+
+	var fr FailureResponse
+	json.NewDecoder(resp.Body).Decode(&fr)
+	Debug.Println(resp.Body)
+
+	// ensure response claims token is out of date
+
+	assert.Equal(t, resp.StatusCode, 401)
+	assert.Contains(t, fr.Message, "Token is out of date")
+}
+
+func TestProtectedMiddlewareDeletedUser(t *testing.T) {
+
+	server := setupMiddlewareProtectedTestServer()
+
+	db.Drop("User")
+	setupTestKeys()
+
+	repoPath := "../tests/tmp/repositories/auth_handlers"
+	setupSmallTestRepo(repoPath)
+
+	_ = createUser(ck)
+	cookieKwan, _ := getUserByUsername("cookie.kwan")
+
+	// create the first token and assign it to the user
+	token, _ := newToken(cookieKwan)
+	tokenString, _ := newTokenString(token)
+	setToken(cookieKwan, tokenString)
+
+	_ = deleteUser(cookieKwan)
+
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files/document_1.md")
+
+	//	Debug.Println(token)
+	client := &http.Client{}
+
+	req, _ := http.NewRequest("GET", target, nil)
+
+	req.Header.Add(
+		"Authorization",
+		fmt.Sprintf("Bearer %s", tokenString),
+	)
+
+	resp, _ := client.Do(req)
+
+	var fr FailureResponse
+	json.NewDecoder(resp.Body).Decode(&fr)
+	Debug.Println(resp.Body)
+
+	// ensure response claims token is out of date
+
+	assert.Equal(t, resp.StatusCode, 401)
+	assert.Contains(t, fr.Message, "Cannot match user with token")
+}
+
+func TestProtectedMiddlewareDeactivatedUser(t *testing.T) {
+
+	server := setupMiddlewareProtectedTestServer()
+
+	db.Drop("User")
+	setupTestKeys()
+
+	repoPath := "../tests/tmp/repositories/auth_handlers"
+	setupSmallTestRepo(repoPath)
+
+	_ = createUser(ck)
+	cookieKwan, _ := getUserByUsername("cookie.kwan")
+
+	// create the first token and assign it to the user
+	token, _ := newToken(cookieKwan)
+	tokenString, _ := newTokenString(token)
+	setToken(cookieKwan, tokenString)
+
+	_ = deactivateUser(cookieKwan)
+
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files/document_1.md")
+
+	//	Debug.Println(token)
+	client := &http.Client{}
+
+	req, _ := http.NewRequest("GET", target, nil)
+
+	req.Header.Add(
+		"Authorization",
+		fmt.Sprintf("Bearer %s", tokenString),
+	)
+
+	resp, _ := client.Do(req)
+
+	var fr FailureResponse
+	json.NewDecoder(resp.Body).Decode(&fr)
+	Debug.Println(resp.Body)
+
+	// ensure response claims token is out of date
+
+	assert.Equal(t, resp.StatusCode, 401)
+	assert.Contains(t, fr.Message, "User has been deactivated")
 }

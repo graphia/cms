@@ -2,12 +2,12 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/dgrijalva/jwt-go/request"
+	"github.com/rs/xid"
 )
 
 const (
@@ -24,6 +24,17 @@ func ValidateTokenMiddleware(w http.ResponseWriter, r *http.Request, next http.H
 			return verifyKey, nil
 		})
 
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		response := FailureResponse{Message: "Unauthorized access, invalid JWT"}
+		json, err := json.Marshal(response)
+		if err != nil {
+			panic(err)
+		}
+		w.Write(json)
+		return
+	}
+
 	// some checks to make sure the request is from a valid source
 	usernameFromToken = token.Claims.(jwt.MapClaims)["sub"].(string)
 	Debug.Println("Retrieved username from token", usernameFromToken)
@@ -31,7 +42,19 @@ func ValidateTokenMiddleware(w http.ResponseWriter, r *http.Request, next http.H
 	// check that the user still exists, if this fails it's probably been deleted
 	user, err := getUserByUsername(usernameFromToken)
 	if err != nil {
-		response := FailureResponse{Message: "Cannot find user"}
+		response := FailureResponse{Message: "Cannot match user with token"}
+		json, err := json.Marshal(response)
+		if err != nil {
+			panic(err)
+		}
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write(json)
+		return
+	}
+
+	// check that the user is active in the system, if they're not disallow
+	if !user.Active {
+		response := FailureResponse{Message: "User has been deactivated"}
 		json, err := json.Marshal(response)
 		if err != nil {
 			panic(err)
@@ -47,6 +70,8 @@ func ValidateTokenMiddleware(w http.ResponseWriter, r *http.Request, next http.H
 		response := FailureResponse{Message: "Token is out of date"}
 		json, err := json.Marshal(response)
 		if err != nil {
+			Debug.Println("WTFBBQ")
+
 			panic(err)
 		}
 		w.WriteHeader(http.StatusUnauthorized)
@@ -66,9 +91,6 @@ func ValidateTokenMiddleware(w http.ResponseWriter, r *http.Request, next http.H
 			}
 			w.Write(json)
 		}
-	} else {
-		w.WriteHeader(http.StatusUnauthorized)
-		fmt.Fprint(w, "Unauthorized access to this resource")
 	}
 
 }
@@ -102,6 +124,9 @@ func newToken(user User) (jwt.Token, error) {
 
 	// username
 	claims["sub"] = user.Username
+
+	// unique ID for this token
+	claims["jti"] = xid.New()
 
 	token.Claims = claims
 
