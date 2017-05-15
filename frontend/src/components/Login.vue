@@ -44,6 +44,7 @@
 </template>
 
 <script lang="babel">
+	import CMSAuth from '../javascripts/auth.js'
 	export default {
 		name: "Login",
 		data() {
@@ -51,6 +52,9 @@
 				username: "",
 				password: ""
 			};
+		},
+		created() {
+			this.redirectToSetup();
 		},
 		methods: {
 			async login(event) {
@@ -63,6 +67,22 @@
 				// we should store it and send them there.
 				this.$router.push({name: 'home'});
 
+			},
+			async redirectToSetup() {
+
+				// check if there are any users
+				let doSetup = await CMSAuth.doInitialSetup();
+
+				// if there are, abort!
+				if (!doSetup) {
+					console.debug("App is set up, don't load wizard")
+					return;
+				}
+
+				// if there aren't, start the setup wizard
+				this.$router.push({
+					name: 'initial_setup'
+				});
 			}
 		}
 	};

@@ -42,7 +42,7 @@ export default class CMSAuth {
 		if (to.path !== '/cms/login') {
 
 			// if token exists, continue, otherwise redirect to login page
-			CMSAuth.isLoggedIn() ? next() :  next('/cms/login');
+			CMSAuth.isLoggedIn() ? next() : next('/cms/login');
 
 		}
 
@@ -50,6 +50,22 @@ export default class CMSAuth {
 		else {
 			next();
 		}
+
+	}
+
+	static async doInitialSetup() {
+		let response = await fetch(`${config.auth}/create_initial_user`, {});
+
+		if (response.status !== 200) {
+			console.error('Oops, there was a problem', response.status);
+			return false
+		}
+
+		console.log("initial setup!")
+
+		let json = await response.json();
+
+		return json.enabled;
 
 	}
 
@@ -104,6 +120,26 @@ export default class CMSAuth {
 		this.token = json.token;
 
 		return true
+	}
+
+	static async createInitialUser(user) {
+		console.debug("creating initial user");
+
+		let response = await fetch(`${config.auth}/create_initial_user`, {
+			method: "POST",
+			mode: "cors",
+			body: JSON.stringify(user)
+		});
+
+		if (response.status !== 201) {
+			console.error('Oops, there was a problem', response.status);
+			return false
+		}
+
+		let json = await response.json();
+
+		return true
+		//this.redirectToLogin();
 	}
 
 	// pull the token from localStorage and return it inside a

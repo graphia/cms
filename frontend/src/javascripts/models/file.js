@@ -96,11 +96,12 @@ export default class CMSFile {
 
 	// instance methods
 
+	// create a commit object containing relevant info
+	// and despatch it
 	async create(commit) {
-		// create a commit object containing relevant info
-		// and despatch it
 
 		if (!this.changed) {
+			// TODO should probably handle this better..
 			console.warn("Update called but content hasn't changed");
 		}
 

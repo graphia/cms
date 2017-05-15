@@ -4,6 +4,7 @@ import VueRouter from 'vue-router';
 // Pages
 import Login from '../components/Login.vue';
 import App from '../components/App.vue';
+import Setup from '../components/Setup.vue';
 import Home from '../components/Home.vue';
 import DocumentIndex from '../components/DocumentIndex.vue';
 import DocumentShow from '../components/DocumentShow.vue';
@@ -26,6 +27,7 @@ const routes = [
 
 
 	// Protected pages
+	{path: '/cms/setup', component: Setup, name: 'initial_setup'},
 	{path: '/cms/', component: Home, name: 'home'},
 	{path: '/cms/:directory', component: DocumentIndex, name: 'document_index'},
 	{path: '/cms/:directory/new', component: DocumentNew, name: 'document_new'},
