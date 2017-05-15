@@ -512,3 +512,38 @@ func TestProtectedMiddlewareDeactivatedUser(t *testing.T) {
 	assert.Equal(t, resp.StatusCode, 401)
 	assert.Contains(t, fr.Message, "User has been deactivated")
 }
+
+func TestAuthAllowCreateInitialUserNoUsers(t *testing.T) {
+	// clear the db, 0 users exist
+	db.Drop("User")
+
+	server = httptest.NewServer(unprotectedRouter())
+
+	target := fmt.Sprintf("%s/%s", server.URL, "auth/create_initial_user")
+
+	resp, _ := http.Get(target)
+	var is InitialSetup
+
+	json.NewDecoder(resp.Body).Decode(&is)
+
+	// one user exists, initial setup should be allowed
+	assert.Equal(t, is, InitialSetup{Enabled: true})
+}
+
+func TestAuthAllowCreateInitialUserWithUsers(t *testing.T) {
+	// clear the database and create a single new user
+	db.Drop("User")
+	_ = createUser(ck)
+
+	server = httptest.NewServer(unprotectedRouter())
+
+	target := fmt.Sprintf("%s/%s", server.URL, "auth/create_initial_user")
+
+	resp, _ := http.Get(target)
+	var is InitialSetup
+
+	json.NewDecoder(resp.Body).Decode(&is)
+
+	// one user exists, initial setup should not be allowed
+	assert.Equal(t, is, InitialSetup{Enabled: false})
+}

@@ -99,3 +99,8 @@ type LimitedUser struct {
 type Token struct {
 	Token string `json:"token"`
 }
+
+// InitialSetup indicates whether or not to display initial setup screen
+type InitialSetup struct {
+	Enabled bool `json:"enabled"`
+}

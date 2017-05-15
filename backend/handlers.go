@@ -160,10 +160,35 @@ func authRenewTokenHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// authAllowCreateInitialUser will simply return true if there are no users
+// and false if there are some
+//
+// GET /auth/show_initial_setup
+//
+// {"enabled": false}
+func authAllowCreateInitialUser(w http.ResponseWriter, r *http.Request) {
+	var zeroUsers bool
+
+	count, err := countUsers()
+	if err != nil {
+		// fail
+	}
+
+	zeroUsers = (count == 0)
+
+	output, err := json.Marshal(InitialSetup{Enabled: zeroUsers})
+	if err != nil {
+		panic(err)
+	}
+
+	w.WriteHeader(200)
+	w.Write(output)
+}
+
 // authCreateInitialUser allows for the creation of the system's first user and
 // unlike typical user creation, doesn't require the instigator to be logged in
 //
-// POST /api/create_initial_user
+// POST /auth/create_initial_user
 //
 // {"username": "lhutz", "name": "Lionel Hutz" ...}
 //
