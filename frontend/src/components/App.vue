@@ -27,6 +27,7 @@
 
 		<!-- Router View Container Start -->
 		<div class="container-fluid">
+			<Broadcast/>
 			<transition name="fade">
 				<router-view/>
 			</transition>
@@ -38,13 +39,14 @@
 
 <script lang="babel">
 	import CMSAuth from '../javascripts/auth.js';
+	import Broadcast from '../components/Broadcast';
 
 	export default {
 		name: "GraphiaCMS",
 		created() {
 			try {
 
-				if (!this.$store.state.auth.expiry) {
+				if (!this.$store.state.auth.tokenExpiry) {
 					throw 'Token missing';
 				}
 
@@ -61,6 +63,9 @@
 				console.warn(err);
 				this.$store.state.auth.redirectToLogin();
 			}
+		},
+		components: {
+			Broadcast
 		}
 	}
 </script>

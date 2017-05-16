@@ -2,6 +2,7 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 
 // Pages
+import Broadcast from '../components/Broadcast.vue';
 import Login from '../components/Login.vue';
 import App from '../components/App.vue';
 import Setup from '../components/Setup.vue';

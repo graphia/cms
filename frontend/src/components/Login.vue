@@ -65,6 +65,8 @@
 
 				// TODO if they'd attempted to navigate to a page
 				// we should store it and send them there.
+
+				this.$store.state.broadcast.addMessage("info", "Logged in successfullly", 3);
 				this.$router.push({name: 'home'});
 
 			},
@@ -79,6 +81,7 @@
 					return;
 				}
 
+				console.debug("App not setup, load the wizard");
 				// if there aren't, start the setup wizard
 				this.$router.push({
 					name: 'initial_setup'

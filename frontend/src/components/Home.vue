@@ -2,6 +2,8 @@
 	<div>
 		<h2>Hello World</h2>
 
+		<button class="btn btn-primary" @click="addMessage">Hello</button>
+
 		<p>
 			Lorem ipsum dolor sit amet, consectetuer adipiscing elit! Aenean commodo ligula
 			eget dolor. Aenean massa? Cum sociis natoque penatibus et magnis dis parturient
@@ -26,6 +28,16 @@
 </template>
 
 <script lang="babel">
+	export default {
+		name: "Home",
+		methods: {
+			addMessage(event) {
+				event.preventDefault();
+				console.log("clicked");
+				this.$store.state.broadcast.addMessage("info", "omg hi", 20);
+			}
+		}
+	}
 </script>
 
 <style lang="scss" scoped>
