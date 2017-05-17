@@ -1,7 +1,10 @@
 <template>
-	<div class="messages">
-		<div v-for="message in messages" :class="message.classes" role="alert">
-			{{ message.content }}
+	<div class="row messages">
+		<div class="col-md-12 mt-2">
+			<div v-for="message in messages" :class="message.classes" role="alert">
+				<strong>{{ message.alert }}</strong>
+				{{ message.content }}
+			</div>
 		</div>
 	</div>
 </template>

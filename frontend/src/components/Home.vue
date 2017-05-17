@@ -34,7 +34,7 @@
 			addMessage(event) {
 				event.preventDefault();
 				console.log("clicked");
-				this.$store.state.broadcast.addMessage("info", "omg hi", 20);
+				this.$store.state.broadcast.addMessage("info", "hello", "omg hi", 5);
 			}
 		}
 	}

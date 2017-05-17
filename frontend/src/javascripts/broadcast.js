@@ -1,11 +1,13 @@
 class CMSMessage {
 
-	constructor(type, content, timeout) {
-		this.type = type;
-		this.content = content;
-		this.timeout = timeout; // in seconds
-		this.active = true;
+	constructor(type, alert, content, timeout) {
+		this.type = type;		// the alert (Bootstrap) context (success, primary, etc)
+		this.alert = alert;		// the bold prefix for the alert
+		this.content = content; // the alert's main content
+		this.timeout = timeout; // the duration the message will be shown for
+		this.active = true; 	// only 'active' alerts are displayed
 
+		// set auto expiry into motion
 		this.autoExpire();
 	};
 
@@ -46,10 +48,10 @@ export default class CMSBroadcast {
 		});
 	}
 
-	addMessage(type, content, timeout = 10) {
-		console.debug("received broadcast content", type, content)
+	addMessage(type, alert, content, timeout = 10) {
+		console.debug("received broadcast content", type, alert, content)
 
-		let message = new CMSMessage(type, content, timeout);
+		let message = new CMSMessage(type, alert, content, timeout);
 		this.messages.push(message);
 
 	};

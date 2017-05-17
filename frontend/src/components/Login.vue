@@ -66,7 +66,7 @@
 				// TODO if they'd attempted to navigate to a page
 				// we should store it and send them there.
 
-				this.$store.state.broadcast.addMessage("info", "Logged in successfullly", 3);
+				this.$store.state.broadcast.addMessage("success", "Welcome", "You have logged in successfully", 3);
 				this.$router.push({name: 'home'});
 
 			},
