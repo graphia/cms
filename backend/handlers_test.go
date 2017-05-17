@@ -19,11 +19,11 @@ var (
 	server *httptest.Server
 )
 
-func init() {
-	server = httptest.NewServer(setupRouter())
-}
+// API Tests
 
 func TestApiCreateDirectory(t *testing.T) {
+	server = httptest.NewServer(protectedRouter())
+
 	repoPath := "../tests/tmp/repositories/create_directory"
 	setupSmallTestRepo(repoPath)
 
@@ -76,6 +76,7 @@ func TestApiCreateDirectory(t *testing.T) {
 }
 
 func TestApiCreateFileInDirectory(t *testing.T) {
+	server = httptest.NewServer(protectedRouter())
 
 	repoPath := "../tests/tmp/repositories/create_file"
 	setupSmallTestRepo(repoPath)
@@ -133,6 +134,7 @@ func TestApiCreateFileInDirectory(t *testing.T) {
 }
 
 func TestApiUpdateFileInDirectory(t *testing.T) {
+	server = httptest.NewServer(protectedRouter())
 
 	repoPath := "../tests/tmp/repositories/update_file"
 	setupSmallTestRepo(repoPath)
@@ -190,6 +192,7 @@ func TestApiUpdateFileInDirectory(t *testing.T) {
 }
 
 func TestApiDeleteFileFromDirectory(t *testing.T) {
+	server = httptest.NewServer(protectedRouter())
 
 	repoPath := "../tests/tmp/repositories/delete_file"
 	setupSmallTestRepo(repoPath)
@@ -241,6 +244,7 @@ func TestApiDeleteFileFromDirectory(t *testing.T) {
 }
 
 func TestApiDeleteDirectory(t *testing.T) {
+	server = httptest.NewServer(protectedRouter())
 
 	var err error
 
@@ -300,6 +304,7 @@ func TestApiDeleteDirectory(t *testing.T) {
 }
 
 func TestApiDeleteDirectoryNotExists(t *testing.T) {
+	server = httptest.NewServer(protectedRouter())
 
 	var err error
 
@@ -335,6 +340,8 @@ func TestApiDeleteDirectoryNotExists(t *testing.T) {
 }
 
 func TestApiGetFileInDirectory(t *testing.T) {
+	server = httptest.NewServer(protectedRouter())
+
 	repoPath := "../tests/tmp/repositories/create_directory"
 	setupSmallTestRepo(repoPath)
 

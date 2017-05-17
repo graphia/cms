@@ -8,6 +8,9 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/asdine/storm"
+	"github.com/dgrijalva/jwt-go"
+
 	"gopkg.in/libgit2/git2go.v25"
 )
 
@@ -161,13 +164,13 @@ func setupSmallTestRepo(dest string) (oid *git.Oid, err error) {
 		panic(err)
 	}
 
-	treeId, err := idx.WriteTree()
+	treeID, err := idx.WriteTree()
 	if err != nil {
 		panic(err)
 	}
 
 	message := "Quick, honk at that broad!\n"
-	tree, err := repo.LookupTree(treeId)
+	tree, err := repo.LookupTree(treeID)
 	if err != nil {
 		panic(err)
 	}
@@ -183,4 +186,37 @@ func setupSmallTestRepo(dest string) (oid *git.Oid, err error) {
 	}
 
 	return oid, err
+}
+
+func flushDB(path string) storm.DB {
+
+	os.RemoveAll(path)
+
+	stormDB, err := storm.Open(path)
+	if err != nil {
+		panic(fmt.Sprintf("Database cannot be openend %s", err.Error()))
+	}
+	return *stormDB
+}
+
+func setupTestKeys() {
+	signBytes, err := ioutil.ReadFile(testPrivKeyPath)
+	if err != nil {
+		panic(err)
+	}
+
+	signKey, err = jwt.ParseRSAPrivateKeyFromPEM(signBytes)
+	if err != nil {
+		panic(err)
+	}
+
+	verifyBytes, err := ioutil.ReadFile(testPubKeyPath)
+	if err != nil {
+		panic(err)
+	}
+
+	verifyKey, err = jwt.ParseRSAPublicKeyFromPEM(verifyBytes)
+	if err != nil {
+		panic(err)
+	}
 }

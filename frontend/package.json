@@ -28,10 +28,11 @@
     "clean-css-brunch": "^2",
     "sass-brunch": "^2.10.4",
     "uglify-js-brunch": "^2",
-    "vue": "^2.1.10",
-    "vue-brunch": "^2.0.0",
+    "vue": "^2.3.0",
+    "vue-brunch": "^2.0.1",
     "vue-config": "^1.0.0",
-    "vue-router": "^2.2.1",
+    "vue-router": "^2.5.2",
+    "vue-template-compiler": "^2.3.0",
     "vueify": "^9.4.1",
     "vuex": "^2.1.2"
   }

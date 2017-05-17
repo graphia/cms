@@ -5,12 +5,17 @@ import router from './app';
 import CMSFile from '../javascripts/models/file.js';
 import CMSCommit from '../javascripts/models/commit.js';
 
+import CMSAuth from '../javascripts/auth.js';
+import CMSBroadcast from '../javascripts/broadcast.js';
+
 Vue.use(Vuex);
 
 const state = {
 	documents: [],
 	activeDocument: new CMSFile,
-	commit: new CMSCommit
+	commit: new CMSCommit,
+	auth: new CMSAuth,
+	broadcast: new CMSBroadcast
 };
 const mutations = {};
 const getters = {};

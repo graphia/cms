@@ -1,5 +1,6 @@
 import store from '../store.js';
 import config from '../config.js';
+import {router} from '../app.js';
 
 export default class CMSFile {
 
@@ -38,18 +39,26 @@ export default class CMSFile {
 
 		let path = `${config.api}/directories/${directory}/files`;
 
-		let response = await fetch(path, {mode: "cors"})
+		try {
 
-		if (response.status !== 200) {
-			console.error('Oops, there was a problem', response.status);
+			console.log(store.state.auth.authHeader());
+			let response = await fetch(path, {mode: "cors", headers: store.state.auth.authHeader()});
+
+			if (!this.checkResponse(response.status)) {
+				return
+			}
+
+			let json = await response.json()
+
+			// map documents
+			store.state.documents = json.map((file) => {
+				return new CMSFile(file.author, file.email, file.path, file.filename, file.title, null);
+			});
+
 		}
-
-		let json = await response.json()
-
-		// map documents
-		store.state.documents = json.map((file) => {
-			return new CMSFile(file.author, file.email, file.path, file.filename, file.title, null);
-		});
+		catch(err) {
+			console.error(`Couldn't retrieve files from directory ${directory}`);
+		}
 
 	};
 
@@ -72,11 +81,11 @@ export default class CMSFile {
 			path = [path, "edit"].join("/");
 		}
 
-		let response = await fetch(path, {mode: "cors"})
+		let response = await fetch(path, {mode: "cors", headers: store.state.auth.authHeader()})
 
-		if (response.status !== 200) {
-			console.error('Oops, there was a problem', response.status);
-		}
+		 if (!this.checkResponse(response.status)) {
+			 return
+		 }
 
 		let file = await response.json()
 		store.state.activeDocument = new CMSFile(
@@ -87,31 +96,37 @@ export default class CMSFile {
 
 	// instance methods
 
-	create(commit) {
-		// create a commit object containing relevant info
-		// and despatch it
+	// create a commit object containing relevant info
+	// and despatch it
+	async create(commit) {
 
 		if (!this.changed) {
+			// TODO should probably handle this better..
 			console.warn("Update called but content hasn't changed");
 		}
 
 		var path = `${config.api}/directories/${this.path}/files`
 
 		try {
-			return fetch(path, {mode: "cors", method: "POST", body: commit.toJSON(this)})
-				.then((response) => {
-					if (response.status !== 200) {
-						console.error('Oops, there was a problem', response.status);
-					}
-					return response;
-				});
+			let response = await fetch(path, {
+				mode: "cors",
+				method: "POST",
+				headers: store.state.auth.authHeader(),
+				body: commit.toJSON(this)
+			});
+
+			if (!this.checkResponse(response.status)) {
+				return
+			}
+
+			return response;
 		}
 		catch(err) {
 			console.error(`There was a problem creating new document in ${directory}, ${err}`);
 		}
 	};
 
-	update(commit) {
+	async update(commit) {
 		// create a commit object containing relevant info
 		// and despatch it
 
@@ -122,12 +137,18 @@ export default class CMSFile {
 		var path = `${config.api}/directories/${this.path}/files/${this.filename}`
 
 		try {
-			return fetch(path, {mode: "cors", method: "PATCH", body: commit.toJSON(this)})
-				.then((response) => {
-					if (response.status !== 200) {
-						console.error('Oops, there was a problem', response.status);
-					}
-				});
+			let response = await fetch(path, {
+				mode: "cors",
+				method: "PATCH",
+				headers: store.state.auth.authHeader(),
+				body: commit.toJSON(this)
+			});
+
+			if (!this.checkResponse(response.status)) {
+				return
+			}
+
+			return response;
 		}
 		catch(err) {
 			console.error(`There was a problem updating document ${filename} in ${directory}, ${err}`);
@@ -140,10 +161,10 @@ export default class CMSFile {
 		var path = `${config.api}/directories/${this.path}/files/${this.filename}`
 
 		try {
-			return fetch(path, {mode: "cors", method: "DELETE", body: commit.toJSON(this)})
+			return fetch(path, {mode: "cors", method: "DELETE", headers: store.state.auth.authHeader(), body: commit.toJSON(this)})
 				.then((response) => {
-					if (response.status !== 200) {
-						console.error('Oops, there was a problem', response.status);
+					if (!this.checkResponse(response.status)) {
+						return
 					}
 				});
 		}
@@ -162,6 +183,24 @@ export default class CMSFile {
 	// path/filename.md
 	get absolutePath() {
 		return [this.path, this.filename].join("/");
+	};
+
+	static checkResponse(responseCode) {
+		console.debug("checking response", responseCode);
+
+		if (responseCode == 401) {
+			console.warn("Unauthorized request, redirecting to login");
+
+			router.push({name: 'login'});
+			return false;
+			// Unauthorized, redirect
+		}
+		else if (responseCode !== 200) {
+			console.error('Oops, there was a problem', response.status);
+			return false
+		}
+
+		return true
 	};
 
 }

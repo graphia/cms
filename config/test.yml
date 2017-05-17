@@ -3,3 +3,4 @@ repository: repo
 logfile: ../logs/test.log
 corsenabled: false
 corsorigin: null
+database: ../tests/tmp/databases/test.db

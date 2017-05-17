@@ -19,7 +19,7 @@
 					</dl>
 
 					<div class="btn-toolbar" role="toolbar">
-						<router-link class="btn btn-success mr-2" :to="{name: 'document_edit', params: {directory: 'documents', filename: document.filename}}">
+						<router-link class="btn btn-success mr-2" :to="{name: 'document_edit', params: {directory: 'documents', filename: this.filename}}">
 							Edit
 						</router-link>
 

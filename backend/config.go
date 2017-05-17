@@ -1,18 +1,21 @@
 package main
 
 import (
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	"gopkg.in/yaml.v2"
 )
 
+// Config holds configuration options stored in a yaml file
 type Config struct {
 	Port        string
 	Repository  string
 	Logfile     string
 	CORSEnabled bool
 	CORSOrigin  string
+	Database    string // file path for BoltDB file
 }
 
 func loadConfig(path *string) (Config, error) {

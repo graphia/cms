@@ -27,7 +27,10 @@
 
 		<!-- Router View Container Start -->
 		<div class="container-fluid">
-			<router-view/>
+			<Broadcast/>
+			<transition name="fade">
+				<router-view/>
+			</transition>
 		</div>
 		<!-- Router View Container End -->
 
@@ -35,7 +38,49 @@
 </template>
 
 <script lang="babel">
-export default {
-	name: "GraphiaCMS"
-}
+	import CMSAuth from '../javascripts/auth.js';
+	import Broadcast from '../components/Broadcast';
+
+	export default {
+		name: "GraphiaCMS",
+		created() {
+			try {
+
+				if (!this.$store.state.auth.tokenExpiry) {
+					throw 'Token missing';
+				}
+
+				if (this.$store.state.auth.expiry < Date.now()) {
+					throw 'Token expired';
+				}
+
+				console.debug("token is present and has not expired, renewing");
+				this.$store.state.auth.renew();
+
+			}
+			catch(err) {
+				// Token rejected for renewal
+				console.warn(err);
+				this.$store.state.auth.redirectToLogin();
+			}
+		},
+		components: {
+			Broadcast
+		}
+	}
 </script>
+
+<style lang="scss">
+	.fade-enter-active, .fade-leave-active {
+		transition-property: opacity;
+		transition-duration: 0.15s;
+	}
+
+	.fade-enter-active {
+		transition-delay: 0.15s;
+	}
+
+	.fade-enter, .fade-leave-active {
+		opacity: 0
+	}
+</style>
