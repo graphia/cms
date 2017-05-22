@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"time"
 
 	"github.com/asdine/storm"
@@ -116,6 +117,10 @@ func unprotectedRouter() (r *vestigo.Router) {
 	// if it doesn't, serve index.html :>
 	r.HandleFunc("/cms", cmsGeneralHandler)
 	r.HandleFunc("/cms/*", cmsGeneralHandler)
+
+	// serve everything in build by default
+	// TODO make this path configurable
+	r.Handle("/*", http.FileServer(http.Dir("./build")))
 
 	if config.CORSEnabled {
 
