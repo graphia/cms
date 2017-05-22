@@ -4,3 +4,4 @@ logfile: logs/development.log
 corsenabled: true
 corsorigin: localhost:8080
 database: db/development.db
+static: ./dist

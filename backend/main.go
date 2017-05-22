@@ -120,7 +120,7 @@ func unprotectedRouter() (r *vestigo.Router) {
 
 	// serve everything in build by default
 	// TODO make this path configurable
-	r.Handle("/*", http.FileServer(http.Dir("./build")))
+	r.Handle("/*", http.FileServer(http.Dir(config.Static)))
 
 	if config.CORSEnabled {
 
