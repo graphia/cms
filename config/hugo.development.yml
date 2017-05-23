@@ -3,7 +3,6 @@ title: "My New Hugo Site"
 baseURL: "http://localhost:8080"
 buildDrafts: true
 theme: ../../graphia-minimal-theme
-contentDir: ./repo
-outputDir: ./dist
+contentDir: repo
 relativeURLs: true
-publishDir: ./dist
+publishDir: dist

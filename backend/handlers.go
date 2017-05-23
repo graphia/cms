@@ -792,3 +792,19 @@ func apiUpdateUser(w http.ResponseWriter, r *http.Request) {}
 
 // apiDeleteUser
 func apiDeleteUser(w http.ResponseWriter, r *http.Request) {}
+
+func apiPublish(w http.ResponseWriter, r *http.Request) {
+
+	output, err := buildStaticSite()
+
+	if err != nil {
+		Error.Println("Failed to build static site", err.Error())
+		panic(err)
+	}
+
+	Debug.Println("Build success", output)
+
+	w.WriteHeader(201)
+	w.Write([]byte(output))
+
+}

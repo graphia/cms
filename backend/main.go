@@ -167,6 +167,8 @@ func protectedRouter() (r *vestigo.Router) {
 	r.Post("/api/users/:username", apiUpdateUser)
 	r.Delete("/api/users/:username", apiDeleteUser)
 
+	r.Post("/api/publish", apiPublish)
+
 	// missing operations:
 	// how should file and directory moves/copies be represented?
 	// auth..

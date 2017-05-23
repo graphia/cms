@@ -4,3 +4,4 @@ logfile: ../logs/test.log
 corsenabled: false
 corsorigin: null
 database: ../tests/tmp/databases/test.db
+hugo_config_file: config/hugo.yml
