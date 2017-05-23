@@ -9,7 +9,7 @@ PUBLIC_KEY_PATH = "./keys/app.rsa.pub"
 build:
 	rm -rf dist
 	mkdir dist
-	cd frontend && brunch build
+	cd frontend && brunch build --production
 	cp -R frontend/public/cms dist/cms
 	go build -o graphia-cms ${ALL}
 	hugo --config ${HUGO_CONFIG}
