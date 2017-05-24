@@ -798,13 +798,23 @@ func apiPublish(w http.ResponseWriter, r *http.Request) {
 	output, err := buildStaticSite()
 
 	if err != nil {
+		// TODO error response!
 		Error.Println("Failed to build static site", err.Error())
 		panic(err)
 	}
 
 	Debug.Println("Build success", output)
 
-	w.WriteHeader(201)
-	w.Write([]byte(output))
+	sr := SuccessResponse{
+		Message: "Published successfully",
+	}
+
+	repsonse, err := json.Marshal(sr)
+	if err != nil {
+		panic(err)
+	}
+
+	w.WriteHeader(200)
+	w.Write(repsonse)
 
 }

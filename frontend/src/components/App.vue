@@ -7,7 +7,7 @@
 				<span class="navbar-toggler-icon"></span>
 			</button>
 
-			<a class="navbar-brand" href="#">Graphia CMS</a>
+			<a class="navbar-brand" href="/cms">Graphia CMS</a>
 
 			<div id="primary" class="collapse navbar-collapse">
 				<ul class="navbar-nav mr-auto">
