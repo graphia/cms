@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/graphia/particle"
@@ -14,30 +13,35 @@ import (
 // getFilesInDir returns a list of FileItems for listing
 func getFilesInDir(directory string) (files []FileItem, err error) {
 
-	var pathFound = false
-
 	repo, err := repository(config)
 	if err != nil {
-		return
+		return nil, err
 	}
 	defer repo.Free()
 
-	tree, err := headTree(repo)
+	ht, err := headTree(repo)
 	if err != nil {
-		return
+		return nil, err
+	}
+
+	// ensure that the directory exists before we try to delete it
+	entry, _ := ht.EntryByPath(directory)
+	if entry == nil {
+		return nil, fmt.Errorf("directory '%s' not found", directory)
+	}
+
+	if entry.Type != git.ObjectTree {
+		return nil, fmt.Errorf("%s is not a directory", directory)
+	}
+
+	tree, err := repo.LookupTree(entry.Id)
+	if err != nil {
+		return nil, fmt.Errorf("couldn't find tree for entry %s", entry.Id)
 	}
 
 	walkIterator := func(td string, te *git.TreeEntry) int {
 
-		td = strings.TrimRight(td, "/")
-
-		// we've found the directory we're looking for
-		if td == directory {
-			Debug.Println("found directory", directory)
-			pathFound = true
-		}
-
-		if te.Type == git.ObjectBlob && td == directory {
+		if te.Type == git.ObjectBlob {
 
 			fi := FileItem{
 				AbsoluteFilename: fmt.Sprintf("%s%s", td, te.Name),
@@ -57,11 +61,8 @@ func getFilesInDir(directory string) (files []FileItem, err error) {
 
 	err = tree.Walk(walkIterator)
 
-	if !pathFound {
-		return nil, fmt.Errorf("directory '%s' not found", directory)
-	}
-
 	return files, err
+
 }
 
 func createFile(rw RepoWrite) (oid *git.Oid, err error) {
