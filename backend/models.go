@@ -36,11 +36,11 @@ type FailureResponse struct {
 
 // FrontMatter contains the document's metadata
 type FrontMatter struct {
-	Title    string
-	Author   string
-	Synopsis string
-	Version  float32
-	Tags     []string
+	Title    string   `yaml:"title"`
+	Author   string   `yaml:"author"`
+	Synopsis string   `yaml:"synopsis"`
+	Version  string   `yaml:"version"`
+	Tags     []string `yaml:"tags"`
 }
 
 // Directory contains the directory's metadata
@@ -59,8 +59,9 @@ type FileItem struct {
 	Author           string    `json:"author"`
 	Date             time.Time `json:"updated_at"`
 	Synopsis         string    `json:"synopsis"`
-	Version          float32   `json:"version"`
+	Version          string    `json:"version"`
 	Tags             []string  `json:"tags"`
+	Title            string    `json:"title"`
 }
 
 // File represents a Markdown file and can be returned with
@@ -74,7 +75,7 @@ type File struct {
 	Author           string   `json:"author"`
 	Title            string   `json:"title"`
 	Synopsis         string   `json:"synopsis"`
-	Version          float32  `json:"version"`
+	Version          string   `json:"version"`
 	Tags             []string `json:"tags"`
 }
 

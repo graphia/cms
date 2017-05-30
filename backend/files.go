@@ -39,18 +39,32 @@ func getFilesInDir(directory string) (files []FileItem, err error) {
 		return nil, fmt.Errorf("couldn't find tree for entry %s", entry.Id)
 	}
 
-	walkIterator := func(td string, te *git.TreeEntry) int {
+	walkIterator := func(_ string, te *git.TreeEntry) int {
+		var fm FrontMatter
+		var blob *git.Blob
 
 		if te.Type == git.ObjectBlob {
 
-			fi := FileItem{
-				AbsoluteFilename: fmt.Sprintf("%s%s", td, te.Name),
-				Filename:         te.Name,
-				Path:             td,
-				Author:           "Joey Joe",
+			blob, err = repo.LookupBlob(te.Id)
+
+			if err != nil {
+				return -1
 			}
 
-			Debug.Println("found file", fi)
+			_, err := particle.YAMLEncoding.DecodeString(string(blob.Contents()), &fm)
+			if err != nil {
+				return -1
+			}
+
+			fi := FileItem{
+				AbsoluteFilename: fmt.Sprintf("%s/%s", directory, te.Name),
+				Filename:         te.Name,
+				Path:             directory,
+				Author:           fm.Author,
+				Title:            fm.Title,
+				Version:          fm.Version,
+				Tags:             fm.Tags,
+			}
 
 			files = append(files, fi)
 
