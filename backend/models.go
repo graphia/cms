@@ -36,8 +36,11 @@ type FailureResponse struct {
 
 // FrontMatter contains the document's metadata
 type FrontMatter struct {
-	Title  string
-	Author string
+	Title    string
+	Author   string
+	Synopsis string
+	Version  float32
+	Tags     []string
 }
 
 // Directory contains the directory's metadata
@@ -55,18 +58,24 @@ type FileItem struct {
 	Path             string    `json:"path"`
 	Author           string    `json:"author"`
 	Date             time.Time `json:"updated_at"`
+	Synopsis         string    `json:"synopsis"`
+	Version          float32   `json:"version"`
+	Tags             []string  `json:"tags"`
 }
 
 // File represents a Markdown file and can be returned with
 // HTML or Markdown contents (or both if required)
 type File struct {
-	AbsoluteFilename string  `json:"absolute_filename"`
-	Filename         string  `json:"filename"`
-	Path             string  `json:"path"`
-	HTML             *string `json:"html"`
-	Markdown         *string `json:"markdown"`
-	Author           string  `json:"author"`
-	Title            string  `json:"title"`
+	AbsoluteFilename string   `json:"absolute_filename"`
+	Filename         string   `json:"filename"`
+	Path             string   `json:"path"`
+	HTML             *string  `json:"html"`
+	Markdown         *string  `json:"markdown"`
+	Author           string   `json:"author"`
+	Title            string   `json:"title"`
+	Synopsis         string   `json:"synopsis"`
+	Version          float32  `json:"version"`
+	Tags             []string `json:"tags"`
 }
 
 // UserCredentials is the subset of User required for auth

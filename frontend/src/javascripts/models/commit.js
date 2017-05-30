@@ -18,16 +18,20 @@ export default class CMSCommit {
 			filename: document.filename,
 			body: document.markdown,
 
+			// FIXME this shouldn't be supplied now we can identify
+			// the user based on their token
 			// a few extra bits to make it work without auth
-
 			name: "Ralph Wiggum",
 			email: "ralph@springfield.org",
 
 			// and the frontmatter
 			frontmatter: {
 				title: document.title,
-				author: document.author
+				author: document.author,
+				tags: document.tags,
+				synopsis: document.synopsis
 			}
+
 		});
 	}
 

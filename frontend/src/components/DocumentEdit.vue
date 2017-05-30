@@ -13,20 +13,7 @@
 			<!-- Metadata Editor Start -->
 			<div class="col-md-3">
 
-				<div class="form-group">
-					<label for="title">Title</label>
-					<input name="title" class="form-control" v-model="document.title"/>
-				</div>
-
-				<div class="form-group">
-					<label for="author">Author</label>
-					<input name="author" class="form-control" v-model="document.author"/>
-				</div>
-
-				<div class="form-group">
-					<label for="tags">Tags</label>
-					<input name="tags" class="form-control"/>
-				</div>
+				<FrontMatter/>
 
 				<div class="form-group">
 					<label for="commit-message">Commit Message</label>
@@ -51,6 +38,7 @@
 
 <script lang="babel">
 	import Editor from "../components/Editor";
+	import FrontMatter from "../components/FrontMatter";
 
 	export default {
 		name: "DocumentEdit",
@@ -102,7 +90,8 @@
 			}
 		},
 		components: {
-			Editor
+			Editor,
+			FrontMatter
 		}
 	}
 </script>

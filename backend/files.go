@@ -516,8 +516,11 @@ func getFile(directory string, filename string, includeMd, includeHTML bool) (fi
 		Markdown: markdown,
 
 		// front matter derived attributes
-		Title:  fm.Title,
-		Author: fm.Author,
+		Title:    fm.Title,
+		Author:   fm.Author,
+		Synopsis: fm.Synopsis,
+		Version:  fm.Version,
+		Tags:     fm.Tags,
 	}
 
 	return file, err
