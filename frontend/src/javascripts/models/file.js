@@ -54,7 +54,6 @@ export default class CMSFile {
 
 			// map documents
 			store.state.documents = json.map((file) => {
-				console.log("creating file obj", file)
 				return new CMSFile(file.author, file.email, file.path, file.filename, file.title, null, null, file.synopsis, file.tags);
 			});
 

@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"time"
@@ -39,20 +41,39 @@ func getFilesInDir(directory string) (files []FileItem, err error) {
 		return nil, fmt.Errorf("couldn't find tree for entry %s", entry.Id)
 	}
 
+	defer tree.Free()
+
 	walkIterator := func(_ string, te *git.TreeEntry) int {
 		var fm FrontMatter
 		var blob *git.Blob
+		var reader io.Reader
+		var ext string
 
 		if te.Type == git.ObjectBlob {
+
+			// skip unless it's a Markdown file
+
+			ext = filepath.Ext(te.Name)
+
+			if ext != ".md" {
+				Warning.Println("not a markdown file, skipping:", te.Name)
+				return 0
+			}
 
 			blob, err = repo.LookupBlob(te.Id)
 
 			if err != nil {
+				Warning.Println("Failed to find blob", te.Id)
 				return -1
 			}
 
-			_, err := particle.YAMLEncoding.DecodeString(string(blob.Contents()), &fm)
+			reader = bytes.NewReader(blob.Contents())
+
+			_, err := particle.YAMLEncoding.DecodeReader(reader, &fm)
+
 			if err != nil {
+				Warning.Println("Failed to decode file", string(blob.Contents()))
+				Warning.Println("Frontmatter:", fm)
 				return -1
 			}
 
