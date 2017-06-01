@@ -1,0 +1,11 @@
+port: 9095
+repository: ../../tests/tmp/repositories/cucumber
+logfile: ../../logs/cucumber.log
+corsenabled: false
+corsorigin: null
+database: ../../db/cucumber.db
+static: ../../dist
+hugo_config_file: ../../config/hugo.development.yml
+hugo_bin: /usr/local/bin/hugo
+private_key_path: ../../tests/backend/keys/app.test.rsa
+public_key_path: ../../tests/backend/keys/app.test.rsa.pub

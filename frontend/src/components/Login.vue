@@ -23,7 +23,7 @@
 
 						<div class="form-group">
 							<label for="username">Username</label>
-							<input class="form-control" name="username" v-model="username" required/>
+							<input class="form-control" type="text" name="username" v-model="username" required/>
 						</div>
 						<div class="form-group">
 							<label for="password">Password</label>
