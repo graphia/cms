@@ -85,6 +85,7 @@ func getFilesInDir(directory string) (files []FileItem, err error) {
 				Title:            fm.Title,
 				Version:          fm.Version,
 				Tags:             fm.Tags,
+				Synopsis:         fm.Synopsis,
 			}
 
 			files = append(files, fi)

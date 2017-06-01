@@ -64,6 +64,7 @@ func TestGetFilesInDirContents(t *testing.T) {
 	assert.Equal(t, "1.1", file.Version)
 	assert.Equal(t, "Arnold Pye", file.Author)
 	assert.Equal(t, []string{"Traffic News", "KBBL TV"}, file.Tags)
+	assert.Equal(t, "The first appendix is the best appendix", file.Synopsis)
 }
 
 func TestGetFilesInNonExistantDir(t *testing.T) {
