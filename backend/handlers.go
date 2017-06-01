@@ -270,18 +270,13 @@ func authCreateInitialUser(w http.ResponseWriter, r *http.Request) {
 // GET /cms/javascripts/app.js     -> public/cms/javascripts/app.js
 // GET /cms/something/nonexistant  -> public/cms/index.html
 func cmsGeneralHandler(w http.ResponseWriter, r *http.Request) {
-	Debug.Println(r.URL.Path)
-
-	// TODO make this path configurable
-	base := "./frontend/public"
-
-	path := filepath.Join(base, r.URL.Path)
 
 	// if we can't find a file (asset) to serve but the path begins
 	// with /cms, serve the CMS's index. It is likely someone navigating
 	// directly to a resource or refreshing a page. If Vue's router
 	// *still* can't match it to a page, it'll show an appropriate error
-	index := filepath.Join(base, "cms", "index.html")
+	path := filepath.Join(config.Static, r.URL.Path)
+	index := filepath.Join(config.Static, "cms", "index.html")
 
 	if _, err := os.Stat(path); err == nil {
 		http.ServeFile(w, r, path)
