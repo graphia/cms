@@ -54,10 +54,13 @@ func TestGetFilesInDirContents(t *testing.T) {
 
 	file := files[0]
 
+	// file attributes
 	assert.Equal(t, "appendix_1.md", file.Filename)
-	assert.Equal(t, "Appendix 1", file.Title)
 	assert.Equal(t, "appendices", file.Path)
 	assert.Equal(t, "appendices/appendix_1.md", file.AbsoluteFilename)
+
+	// frontmattter metadata
+	assert.Equal(t, "Appendix 1", file.Title)
 	assert.Equal(t, "1.1", file.Version)
 	assert.Equal(t, "Arnold Pye", file.Author)
 	assert.Equal(t, []string{"Traffic News", "KBBL TV"}, file.Tags)
