@@ -4,6 +4,7 @@ graphia-cms
 logs/*.log
 keys/*
 db/*
+dist/*
 frontend/node_modules
 frontend/public/**/*
 repo

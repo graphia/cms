@@ -10,12 +10,15 @@ import (
 
 // Config holds configuration options stored in a yaml file
 type Config struct {
-	Port        string
-	Repository  string
-	Logfile     string
-	CORSEnabled bool
-	CORSOrigin  string
-	Database    string // file path for BoltDB file
+	Port           string
+	Repository     string
+	Logfile        string
+	CORSEnabled    bool
+	CORSOrigin     string
+	Database       string // file path for BoltDB file
+	Static         string
+	HugoConfigFile string `yaml:"hugo_config_file"`
+	HugoBin        string `yaml:"hugo_bin"`
 }
 
 func loadConfig(path *string) (Config, error) {

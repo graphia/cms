@@ -36,8 +36,11 @@ type FailureResponse struct {
 
 // FrontMatter contains the document's metadata
 type FrontMatter struct {
-	Title  string
-	Author string
+	Title    string   `yaml:"title"`
+	Author   string   `yaml:"author"`
+	Synopsis string   `yaml:"synopsis"`
+	Version  string   `yaml:"version"`
+	Tags     []string `yaml:"tags"`
 }
 
 // Directory contains the directory's metadata
@@ -55,18 +58,25 @@ type FileItem struct {
 	Path             string    `json:"path"`
 	Author           string    `json:"author"`
 	Date             time.Time `json:"updated_at"`
+	Synopsis         string    `json:"synopsis"`
+	Version          string    `json:"version"`
+	Tags             []string  `json:"tags"`
+	Title            string    `json:"title"`
 }
 
 // File represents a Markdown file and can be returned with
 // HTML or Markdown contents (or both if required)
 type File struct {
-	AbsoluteFilename string  `json:"absolute_filename"`
-	Filename         string  `json:"filename"`
-	Path             string  `json:"path"`
-	HTML             *string `json:"html"`
-	Markdown         *string `json:"markdown"`
-	Author           string  `json:"author"`
-	Title            string  `json:"title"`
+	AbsoluteFilename string   `json:"absolute_filename"`
+	Filename         string   `json:"filename"`
+	Path             string   `json:"path"`
+	HTML             *string  `json:"html"`
+	Markdown         *string  `json:"markdown"`
+	Author           string   `json:"author"`
+	Title            string   `json:"title"`
+	Synopsis         string   `json:"synopsis"`
+	Version          string   `json:"version"`
+	Tags             []string `json:"tags"`
 }
 
 // UserCredentials is the subset of User required for auth

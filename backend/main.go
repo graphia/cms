@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"time"
 
 	"github.com/asdine/storm"
@@ -117,6 +118,10 @@ func unprotectedRouter() (r *vestigo.Router) {
 	r.HandleFunc("/cms", cmsGeneralHandler)
 	r.HandleFunc("/cms/*", cmsGeneralHandler)
 
+	// serve everything in build by default
+	// TODO make this path configurable
+	r.Handle("/*", http.FileServer(http.Dir(config.Static)))
+
 	if config.CORSEnabled {
 
 		Warning.Println("CORS:", config.CORSEnabled)
@@ -161,6 +166,8 @@ func protectedRouter() (r *vestigo.Router) {
 	r.Get("/api/users/:username", apiGetUser)
 	r.Post("/api/users/:username", apiUpdateUser)
 	r.Delete("/api/users/:username", apiDeleteUser)
+
+	r.Post("/api/publish", apiPublish)
 
 	// missing operations:
 	// how should file and directory moves/copies be represented?

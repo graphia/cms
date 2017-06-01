@@ -1,0 +1,9 @@
+port: 8080
+repository: repo
+logfile: logs/development.log
+corsenabled: true
+corsorigin: localhost:8080
+database: db/development.db
+static: ./dist
+hugo_config_file: config/hugo.development.yml
+hugo_bin: /usr/local/bin/hugo

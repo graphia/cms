@@ -11,7 +11,7 @@ export default class CMSFile {
 		return file;
 	}
 
-	constructor(author, email, path, filename, title, html, markdown) {
+	constructor(author, email, path, filename, title, html, markdown, synopsis, tags) {
 
 		// TODO this is a bit long and ugly; can it be neatened up?
 		this.author   = author;
@@ -21,6 +21,8 @@ export default class CMSFile {
 		this.title    = title;
 		this.html     = html;
 		this.markdown = markdown;
+		this.synopsis = synopsis;
+		this.tags     = tags;
 
 		// finally save the initial markdown value so we can detect changes
 		// and display a diff if necessary
@@ -44,7 +46,7 @@ export default class CMSFile {
 			console.log(store.state.auth.authHeader());
 			let response = await fetch(path, {mode: "cors", headers: store.state.auth.authHeader()});
 
-			if (!this.checkResponse(response.status)) {
+			if (!CMSFile.checkResponse(response.status)) {
 				return
 			}
 
@@ -52,7 +54,7 @@ export default class CMSFile {
 
 			// map documents
 			store.state.documents = json.map((file) => {
-				return new CMSFile(file.author, file.email, file.path, file.filename, file.title, null);
+				return new CMSFile(file.author, file.email, file.path, file.filename, file.title, null, null, file.synopsis, file.tags);
 			});
 
 		}
@@ -83,13 +85,13 @@ export default class CMSFile {
 
 		let response = await fetch(path, {mode: "cors", headers: store.state.auth.authHeader()})
 
-		 if (!this.checkResponse(response.status)) {
+		 if (!CMSFile.checkResponse(response.status)) {
 			 return
 		 }
 
 		let file = await response.json()
 		store.state.activeDocument = new CMSFile(
-			file.author, file.email, file.path, file.filename, file.title, file.html, file.markdown
+			file.author, file.email, file.path, file.filename, file.title, file.html, file.markdown, file.synopsis, file.tags
 		);
 
 	};
@@ -115,14 +117,14 @@ export default class CMSFile {
 				body: commit.toJSON(this)
 			});
 
-			if (!this.checkResponse(response.status)) {
+			if (!CMSFile.checkResponse(response.status)) {
 				return
 			}
 
 			return response;
 		}
 		catch(err) {
-			console.error(`There was a problem creating new document in ${directory}, ${err}`);
+			console.error(`There was a problem creating new document in ${this.path}, ${err}`);
 		}
 	};
 
@@ -144,7 +146,7 @@ export default class CMSFile {
 				body: commit.toJSON(this)
 			});
 
-			if (!this.checkResponse(response.status)) {
+			if (!CMSFile.checkResponse(response.status)) {
 				return
 			}
 
@@ -163,13 +165,13 @@ export default class CMSFile {
 		try {
 			return fetch(path, {mode: "cors", method: "DELETE", headers: store.state.auth.authHeader(), body: commit.toJSON(this)})
 				.then((response) => {
-					if (!this.checkResponse(response.status)) {
+					if (!CMSFile.checkResponse(response.status)) {
 						return
 					}
 				});
 		}
 		catch(err) {
-			console.error(`There was a problem deleting document ${filename} from ${directory}, ${err}`);
+			console.error(`There was a problem deleting document ${this.filename} from ${this.path}, ${err}`);
 		}
 
 		console.debug("Deleted")
@@ -185,6 +187,7 @@ export default class CMSFile {
 		return [this.path, this.filename].join("/");
 	};
 
+	// move this to its own module
 	static checkResponse(responseCode) {
 		console.debug("checking response", responseCode);
 
@@ -195,10 +198,12 @@ export default class CMSFile {
 			return false;
 			// Unauthorized, redirect
 		}
-		else if (responseCode !== 200) {
+		else if (responseCode <= 200 && responseCode >= 300) {
 			console.error('Oops, there was a problem', response.status);
 			return false
 		}
+
+		console.debug("response OK");
 
 		return true
 	};

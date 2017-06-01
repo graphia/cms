@@ -1,10 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/graphia/particle"
@@ -14,39 +15,78 @@ import (
 // getFilesInDir returns a list of FileItems for listing
 func getFilesInDir(directory string) (files []FileItem, err error) {
 
-	var pathFound = false
-
 	repo, err := repository(config)
 	if err != nil {
-		return
+		return nil, err
 	}
 	defer repo.Free()
 
-	tree, err := headTree(repo)
+	ht, err := headTree(repo)
 	if err != nil {
-		return
+		return nil, err
 	}
 
-	walkIterator := func(td string, te *git.TreeEntry) int {
+	// ensure that the directory exists before we try to delete it
+	entry, _ := ht.EntryByPath(directory)
+	if entry == nil {
+		return nil, fmt.Errorf("directory '%s' not found", directory)
+	}
 
-		td = strings.TrimRight(td, "/")
+	if entry.Type != git.ObjectTree {
+		return nil, fmt.Errorf("%s is not a directory", directory)
+	}
 
-		// we've found the directory we're looking for
-		if td == directory {
-			Debug.Println("found directory", directory)
-			pathFound = true
-		}
+	tree, err := repo.LookupTree(entry.Id)
+	if err != nil {
+		return nil, fmt.Errorf("couldn't find tree for entry %s", entry.Id)
+	}
 
-		if te.Type == git.ObjectBlob && td == directory {
+	defer tree.Free()
 
-			fi := FileItem{
-				AbsoluteFilename: fmt.Sprintf("%s%s", td, te.Name),
-				Filename:         te.Name,
-				Path:             td,
-				Author:           "Joey Joe",
+	walkIterator := func(_ string, te *git.TreeEntry) int {
+		var fm FrontMatter
+		var blob *git.Blob
+		var reader io.Reader
+		var ext string
+
+		if te.Type == git.ObjectBlob {
+
+			// skip unless it's a Markdown file
+
+			ext = filepath.Ext(te.Name)
+
+			if ext != ".md" {
+				Warning.Println("not a markdown file, skipping:", te.Name)
+				return 0
 			}
 
-			Debug.Println("found file", fi)
+			blob, err = repo.LookupBlob(te.Id)
+
+			if err != nil {
+				Warning.Println("Failed to find blob", te.Id)
+				return -1
+			}
+
+			reader = bytes.NewReader(blob.Contents())
+
+			_, err := particle.YAMLEncoding.DecodeReader(reader, &fm)
+
+			if err != nil {
+				Warning.Println("Failed to decode file", string(blob.Contents()))
+				Warning.Println("Frontmatter:", fm)
+				return -1
+			}
+
+			fi := FileItem{
+				AbsoluteFilename: fmt.Sprintf("%s/%s", directory, te.Name),
+				Filename:         te.Name,
+				Path:             directory,
+				Author:           fm.Author,
+				Title:            fm.Title,
+				Version:          fm.Version,
+				Tags:             fm.Tags,
+				Synopsis:         fm.Synopsis,
+			}
 
 			files = append(files, fi)
 
@@ -57,11 +97,8 @@ func getFilesInDir(directory string) (files []FileItem, err error) {
 
 	err = tree.Walk(walkIterator)
 
-	if !pathFound {
-		return nil, fmt.Errorf("directory '%s' not found", directory)
-	}
-
 	return files, err
+
 }
 
 func createFile(rw RepoWrite) (oid *git.Oid, err error) {
@@ -515,8 +552,11 @@ func getFile(directory string, filename string, includeMd, includeHTML bool) (fi
 		Markdown: markdown,
 
 		// front matter derived attributes
-		Title:  fm.Title,
-		Author: fm.Author,
+		Title:    fm.Title,
+		Author:   fm.Author,
+		Synopsis: fm.Synopsis,
+		Version:  fm.Version,
+		Tags:     fm.Tags,
 	}
 
 	return file, err

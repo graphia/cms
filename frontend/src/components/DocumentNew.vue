@@ -20,6 +20,7 @@
 
 				<div class="form-group">
 
+					<!-- TODO fix this, now FrontMatter is included Title is duplicated -->
 					<label for="filename">Filename</label>
 
 					<div class="input-group">
@@ -44,15 +45,7 @@
 					</div>
 				</div>
 
-				<div class="form-group">
-					<label for="author">Author</label>
-					<input name="author" class="form-control" v-model="document.author"/>
-				</div>
-
-				<div class="form-group">
-					<label for="tags">Tags</label>
-					<input name="tags" class="form-control"/>
-				</div>
+				<FrontMatter/>
 
 				<div class="form-group">
 					<label for="commit-message">Commit Message</label>
@@ -76,6 +69,7 @@
 
 <script lang="babel">
 	import Editor from "../components/Editor";
+	import FrontMatter from "../components/FrontMatter";
 
 	export default {
 		name: "DocumentNew",
@@ -183,7 +177,8 @@
 				}
 		},
 		components: {
-			Editor
+			Editor,
+			FrontMatter
 		}
 	}
 </script>

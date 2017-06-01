@@ -2,6 +2,7 @@ package main
 
 import (
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -32,12 +33,38 @@ func TestGetFilesInAppendicesDir(t *testing.T) {
 	// using the small test repo, there are two appendices
 	filesExpected := 2
 
+	// ensure a third non-Markdown file exists in the repo but won't be returned
+	_, err := os.Stat(filepath.Join(repoPath, "appendices", "another_file.txt"))
+	assert.False(t, os.IsNotExist(err))
+
 	files, err := getFilesInDir("appendices")
 	if err != nil {
 		t.Error("error", err)
 	}
 	filesCount := len(files)
 	assert.Equal(t, filesExpected, filesCount)
+
+}
+
+func TestGetFilesInDirContents(t *testing.T) {
+	repoPath := "../tests/tmp/repositories/get_file"
+	setupSmallTestRepo(repoPath)
+
+	files, _ := getFilesInDir("appendices")
+
+	file := files[0]
+
+	// file attributes
+	assert.Equal(t, "appendix_1.md", file.Filename)
+	assert.Equal(t, "appendices", file.Path)
+	assert.Equal(t, "appendices/appendix_1.md", file.AbsoluteFilename)
+
+	// frontmattter metadata
+	assert.Equal(t, "Appendix 1", file.Title)
+	assert.Equal(t, "1.1", file.Version)
+	assert.Equal(t, "Arnold Pye", file.Author)
+	assert.Equal(t, []string{"Traffic News", "KBBL TV"}, file.Tags)
+	assert.Equal(t, "The first appendix is the best appendix", file.Synopsis)
 }
 
 func TestGetFilesInNonExistantDir(t *testing.T) {
