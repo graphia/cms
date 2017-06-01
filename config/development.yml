@@ -7,3 +7,5 @@ database: db/development.db
 static: ./dist
 hugo_config_file: config/hugo.development.yml
 hugo_bin: /usr/local/bin/hugo
+private_key_path: keys/app.rsa
+public_key_path: keys/app.rsa.pub
