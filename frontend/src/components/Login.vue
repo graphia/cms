@@ -19,7 +19,7 @@
 				<!-- Login form start -->
 				<div class="card-block">
 
-					<form @submit="login">
+					<form @submit="login" class="login-form">
 
 						<div class="form-group">
 							<label for="username">Username</label>
