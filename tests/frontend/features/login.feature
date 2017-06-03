@@ -4,6 +4,9 @@ Feature: Logging in
 	As an editor
 	I want to log into the CMS
 
+	Background:
+		Given a user account has been created
+
 	Scenario: Login screen contents
 		Given I am on the login screen
 		Then I should see a 'Username' field with type 'text'
@@ -16,9 +19,4 @@ Feature: Logging in
 		And I submit the form
 		Then I should still be on the login screen
 		And there should be a 'red' alert with the message 'Invalid'
-
-	Scenario: Creating an initial user
-		Given there are no users
-		When I navigate to the CMS
-		Then I should see the initial user setup form
 

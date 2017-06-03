@@ -5,6 +5,7 @@ require 'cucumber'
 require 'fileutils'
 require 'git'
 require 'open3'
+require 'net/http'
 require 'pry'
 require 'pry-byebug'
 require 'selenium-webdriver'
@@ -12,6 +13,7 @@ require 'selenium-webdriver'
 REPO_PATH = '../tmp/repositories/cucumber'
 REPO_TEMPLATE_PATH = '../backend/repositories/small'
 PID_PATH = '../tmp/cucumber-browser.pid'
+DB_PATH = '../../db/cucumber.db'
 
 Capybara.register_driver(:headless_chrome) do |app|
   Capybara::Selenium::Driver.new(
@@ -20,7 +22,7 @@ Capybara.register_driver(:headless_chrome) do |app|
     desired_capabilities: Selenium::WebDriver::Remote::Capabilities.chrome(
       chromeOptions: {
         binary: "/Applications/Google\ Chrome\ Canary.app/Contents/MacOS/Google\ Chrome\ Canary",
-        args: %w{--headless --no-sandbox}
+        args: %w{--headless --no-sandbox --disable-gpu}
       }
     )
   )
@@ -33,18 +35,18 @@ Capybara.register_driver(:chrome) do |app|
     desired_capabilities: Selenium::WebDriver::Remote::Capabilities.chrome(
       chromeOptions: {
         binary: "/Applications/Google\ Chrome\ Canary.app/Contents/MacOS/Google\ Chrome\ Canary",
-        args: %w{--no-sandbox}
+        args: %w{--no-sandbox --disable-gpu}
       }
     )
   )
 end
 
 Capybara.register_driver :firefox do |app|
-	Capybara::Selenium::Driver.new(
-		app,
-		browser: :firefox,
-		desired_capabilities: Selenium::WebDriver::Remote::Capabilities.firefox(marionette: false)
-	)
+  Capybara::Selenium::Driver.new(
+    app,
+    browser: :firefox,
+    desired_capabilities: Selenium::WebDriver::Remote::Capabilities.firefox(marionette: false)
+  )
 end
 
 Capybara.configure do |c|
@@ -54,7 +56,10 @@ Capybara.configure do |c|
   c.app_host = "http://localhost:9095"
 end
 
-Before do |scenario|
+Before do
+  if FileTest.exist?(DB_PATH)
+    File.delete(DB_PATH)
+  end
 
   FileUtils.rm_rf(REPO_PATH)
   FileUtils.cp_r(REPO_TEMPLATE_PATH, REPO_PATH)
@@ -68,23 +73,29 @@ Before do |scenario|
   if FileTest.exist?(PID_PATH)
     begin
       @pid = Pathname.new(PID_PATH).read.to_i
-      kill(@pid)
+
+      kill(@pid) if Process.getpgid(@pid) && @pid > 0
     rescue Errno::ESRCH
       # already dead 😵
     end
   end
 
-  @pid = fork do
-    #system("../../graphia-cms -config ../../config/cucumber.yml -log-to-file true")
-    command = "../../graphia-cms -config=../../config/cucumber.yml -log-to-file=true "
+  @pid = Process.spawn(
+    [
+      "../../graphia-cms",
+      "-config ../../config/cucumber.yml",
+      "-log-to-file true"
+    ].join(" ")
+  )
 
-    Open3.popen3(command) do |stdin, stdout, stderr, wait_thr|
+    #command = "../../graphia-cms -config=../../config/cucumber.yml -log-to-file=true "
+
+    #Open3.popen3(command) do |stdin, stdout, stderr, wait_thr|
       # FIXME Negroni's output is still appearing, work out how to suppress it
-    end
-
-  end
+    #end
 
   Pathname.new(PID_PATH).write(@pid)
+  visit('/')
 
 end
 
@@ -93,9 +104,10 @@ After do
 end
 
 def kill(pid)
-  Process.kill 9, pid
-  Process.wait pid
+  Process.kill("HUP", pid)
+  Process.wait
   File.delete(PID_PATH)
+  File.delete(DB_PATH)
   @pid = nil
 end
 

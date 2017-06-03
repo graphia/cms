@@ -175,6 +175,5 @@ func setupDB(path string) storm.DB {
 	if err != nil {
 		panic(fmt.Sprintf("Database cannot be openend %s", err.Error()))
 	}
-	defer stormDB.Close()
 	return *stormDB
 }

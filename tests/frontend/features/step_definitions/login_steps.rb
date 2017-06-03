@@ -1,3 +1,19 @@
+Given %r{^a user account has been created$} do
+  visit('/') # this lets us wait for the web server to start up
+  user = {
+    username: "rod.flanders",
+    name: "Rod Flanders",
+    email: "rod.flanders@springfield-elementary.k12.us",
+    password: "okily-dokily!"
+  }
+  uri = URI('http://127.0.0.1:9095/auth/create_initial_user')
+  req = Net::HTTP::Post.new(uri, "Content-Type" => "application/json")
+  req.body = user.to_json
+  res = Net::HTTP.start(uri.hostname, uri.port) do |http|
+    http.request(req)
+  end
+end
+
 Given %r{I am on the login screen} do
   path = "/cms/login"
   visit(path)

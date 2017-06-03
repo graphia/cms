@@ -171,7 +171,7 @@ func authAllowCreateInitialUser(w http.ResponseWriter, r *http.Request) {
 
 	count, err := countUsers()
 	if err != nil {
-		// fail
+		panic(err)
 	}
 
 	zeroUsers = (count == 0)
