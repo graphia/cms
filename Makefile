@@ -17,6 +17,9 @@ build:
 test:
 	go test -v ${ALL} -log-to-file=true -config=${TEST_CONFIG}
 
+cucumber:
+	cd tests/frontend && cucumber
+
 keep-testing:
 	ls backend/*.go | entr -r go test -v ${ALL} -log-to-file=true -config=${TEST_CONFIG}
 
