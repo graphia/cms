@@ -14,6 +14,14 @@ build:
 	go build -o graphia-cms ${ALL}
 	hugo --config ${HUGO_CONFIG}
 
+# Faster for working with cucumber
+build-dev:
+	rm -rf dist
+	mkdir dist
+	cd frontend && NODE_ENV=production brunch build
+	cp -R frontend/public/cms dist/cms
+	go build -o graphia-cms ${ALL}
+
 test:
 	go test -v ${ALL} -log-to-file=true -config=${TEST_CONFIG}
 
@@ -22,6 +30,9 @@ cucumber:
 
 keep-testing:
 	ls backend/*.go | entr -r go test -v ${ALL} -log-to-file=true -config=${TEST_CONFIG}
+
+keep-building:
+	ls backend/*.go frontend/src/**/*.* | entr -r make build-dev
 
 run-backend:
 	ls backend/*.go | entr -r go run ${SRC} -log-to-file=true -config ${DEVELOPMENT_CONFIG}

@@ -16,6 +16,7 @@ PID_PATH = '../tmp/cucumber-browser.pid'
 DB_PATH = '../../db/cucumber.db'
 
 Capybara.register_driver(:headless_chrome) do |app|
+
   Capybara::Selenium::Driver.new(
     app,
     browser: :chrome,
@@ -50,17 +51,13 @@ Capybara.register_driver :firefox do |app|
 end
 
 Capybara.configure do |c|
-  c.default_driver = :headless_chrome
+  #c.default_driver = :headless_chrome
   #c.default_driver = :firefox
-  #c.default_driver = :chrome
+  c.default_driver = :chrome
   c.app_host = "http://localhost:9095"
 end
 
 Before do
-  if FileTest.exist?(DB_PATH)
-    File.delete(DB_PATH)
-  end
-
   FileUtils.rm_rf(REPO_PATH)
   FileUtils.cp_r(REPO_TEMPLATE_PATH, REPO_PATH)
 
@@ -95,19 +92,21 @@ Before do
     #end
 
   Pathname.new(PID_PATH).write(@pid)
-  visit('/')
+  visit('/') # wait for the server to be running before contining
 
 end
 
 After do
   kill(@pid)
+  if FileTest.exist?(DB_PATH)
+    File.delete(DB_PATH)
+  end
 end
 
 def kill(pid)
   Process.kill("HUP", pid)
   Process.wait
   File.delete(PID_PATH)
-  File.delete(DB_PATH)
   @pid = nil
 end
 

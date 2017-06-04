@@ -63,7 +63,6 @@ export default class CMSAuth {
 
 		if (response.status !== 200) {
 			console.error('Oops, there was a problem', response.status);
-			return false
 		}
 
 		let json = await response.json();
