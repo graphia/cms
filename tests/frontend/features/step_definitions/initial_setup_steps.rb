@@ -80,6 +80,6 @@ end
 
 Then %r{^I should see a message containing '(.*)'$} do |message|
   within(".row.messages") do
-    expect(page).to have_css("div.alert.alert-success", text: message)
+    expect(page).to have_css("div.alert.alert-success", text: /#{message}/)
   end
 end

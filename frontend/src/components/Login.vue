@@ -57,14 +57,13 @@
 		methods: {
 			async login(event) {
 				event.preventDefault();
-				console.log("clicked!");
 
-				let response = await this.$store.state.auth.login(this.username, this.password);
+				let success = await this.$store.state.auth.login(this.username, this.password);
 
 				// TODO if they'd attempted to navigate to a page
 				// we should store it and send them there.
 
-				if (response.status != 200) {
+				if (!success) {
 					this.$store.state.broadcast.addMessage("danger", "Oops", "Invalid credentials", 5);
 					return;
 				}
