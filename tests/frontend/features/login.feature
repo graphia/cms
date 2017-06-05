@@ -18,5 +18,5 @@ Feature: Logging in
 		When I enter invalid credentials
 		And I submit the form
 		Then I should still be on the login screen
-		And there should be a 'red' alert with the message 'Invalid'
+		And there should be an alert with the message 'Invalid credentials'
 

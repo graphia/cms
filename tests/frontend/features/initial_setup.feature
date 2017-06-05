@@ -13,22 +13,23 @@ Feature: First run
 		Given I am on the initial setup page
 		Then I should see a form with the following fields:
 			| Name             | Type     | Required  |
-			| Name             | Text     | yes       |
+			| Full Name        | Text     | yes       |
 			| Username         | Text     | yes       |
+			| Email Address    | Email    | yes       |
 			| Password         | Password | yes       |
 			| Confirm Password | Password | yes       |
-
-		And the submit button should be labelled 'Create initial user'
+		And the submit button should be labelled 'Create'
 
 	Scenario: Entering a username that is too short
 		Given I am on the initial setup page
-		When I enter a '3' letter word into 'Username'
+		When I enter a '2' letter word into 'Username'
 		Then the 'Username' field should be invalid
 
-	Scenario: Entering an valid length username
+	Scenario: HTML5 input length validation
 		Given I am on the initial setup page
-		When I enter a '6' letter word into 'Username'
-		Then the 'Username' field should be valid
+		Then the 'Username' field should allow values from '3' to '32' characters
+		And the 'Full Name' field should allow values from '3' to '64' characters
+		And the 'Password' field should be at least '6' characters long
 
 	Scenario: Non-matching password confirmation
 		Given I am on the initial setup page
@@ -41,3 +42,15 @@ Feature: First run
 		Given I am on the initial setup page
 		When I enter matching passwords in the 'Password' and 'Confirm Password' fields
 		Then no password-related warnings should be visible
+
+	Scenario: Actually creating an initial user
+		Given I am on the initial setup page
+		And I fill in the form with the following data:
+			| Full Name        | Patty Bouvier     |
+			| Username         | p.bouvier         |
+			| Email Address    | patty.b@yahoo.com |
+			| Password         | macguyver101      |
+			| Confirm Password | macguyver101      |
+		When I submit the form
+		Then I should see a message containing 'Administrator created'
+		And the new user should have been saved to the database

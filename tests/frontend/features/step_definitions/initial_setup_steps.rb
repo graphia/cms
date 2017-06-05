@@ -24,7 +24,6 @@ Given %r{^I am on the initial setup page$} do
 end
 
 When %r{^I enter a '(\d+)' letter word into '(.*)'$} do |chars, field|
-
   val = 'a' * chars.to_i
   fill_in(field.downcase, with: val)
   expect(page.find("input[name='#{field.downcase}']").value).to eql(val)
@@ -66,5 +65,21 @@ Then %r{^no password\-related warnings should be visible$} do
   within("form") do
     expect(page).not_to have_css(".confirm-password-group.has-danger")
     expect(page).not_to have_css(".passwords-do-not-match-message")
+  end
+end
+
+Then %r{^the new user should have been saved to the database$} do
+  uri = URI('http://127.0.0.1:9095/auth/create_initial_user')
+  req = Net::HTTP::Get.new(uri, "Content-Type" => "application/json")
+  res = Net::HTTP.start(uri.hostname, uri.port) do |http|
+    http.request(req)
+  end
+  json = JSON.parse(res.body)
+  expect(json['enabled']).to eql(false)
+end
+
+Then %r{^I should see a message containing '(.*)'$} do |message|
+  within(".row.messages") do
+    expect(page).to have_css("div.alert.alert-success", text: message)
   end
 end

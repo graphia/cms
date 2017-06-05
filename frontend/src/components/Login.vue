@@ -5,16 +5,7 @@
 
 			<div class="card mt-4">
 
-				<div class="card-header">
-					<ul class="nav nav-tabs card-header-tabs">
-						<li class="nav-item">
-							<a class="nav-link active" href="#">Login</a>
-						</li>
-						<li class="nav-item">
-							<a class="nav-link" href="#">Sign up</a>
-						</li>
-					</ul>
-				</div>
+				<h3 class="card-header">Log in</h3>
 
 				<!-- Login form start -->
 				<div class="card-block">
@@ -39,9 +30,16 @@
 				<!-- Login form end -->
 
 			</div>
+
 		</div>
 	</div>
 </template>
+
+<style lang="scss">
+	.card-block .form-group:last-child {
+		margin-bottom: 0em;
+	}
+</style>
 
 <script lang="babel">
 	import CMSAuth from '../javascripts/auth.js'
@@ -61,10 +59,15 @@
 				event.preventDefault();
 				console.log("clicked!");
 
-				await this.$store.state.auth.login(this.username, this.password);
+				let response = await this.$store.state.auth.login(this.username, this.password);
 
 				// TODO if they'd attempted to navigate to a page
 				// we should store it and send them there.
+
+				if (response.status != 200) {
+					this.$store.state.broadcast.addMessage("danger", "Oops", "Invalid credentials", 5);
+					return;
+				}
 
 				this.$store.state.broadcast.addMessage("success", "Welcome", "You have logged in successfully", 3);
 				this.$router.push({name: 'home'});

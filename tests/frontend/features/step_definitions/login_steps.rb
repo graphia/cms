@@ -30,5 +30,8 @@ Then %r{^I should still be on the login screen$} do
   expect(page.current_path).to eql(path)
 end
 
-Then %r{^there should be a 'red' alert with the message 'Invalid'$} do
+Then %r{^there should be an alert with the message '(.*)'$} do |message|
+  within(".row.messages") do
+    expect(page).to have_css("div.alert.alert-danger", text: message)
+  end
 end

@@ -12,6 +12,12 @@ When %r{^I enter '(.*)' in the '(.*)' field$} do |value, field|
   fill_in input, with: value
 end
 
+Given %r{^I fill in the form with the following data:$} do |table|
+  table.rows_hash.each do |field, value|
+    step "I enter '#{value}' in the '#{field}' field"
+  end
+end
+
 When %r{^I submit the form$} do
   within("form") do
     find("input[type='submit']").click
@@ -46,5 +52,30 @@ Then %r{^I should see a form with the following fields:$} do |table|
     end
 
 
+  end
+end
+
+Then %r{^the '(.*)' field should allow values from '(\d+)' to '(\d+)' characters$} do |field, min, max|
+  within("form") do
+    name = page.find("label", text: /^#{field}$/)['for']
+    input = page.find("input[name='#{name}']")
+    expect(input['minlength']).to eql(min)
+    expect(input['maxlength']).to eql(max)
+  end
+end
+
+And %r{^the '(.*)' field should be at least '(\d+)' characters long$} do |field, min|
+  within("form") do
+    name = page.find("label", text: /^#{field}$/)['for']
+    input = page.find("input[name='#{name}']")
+    expect(input['minlength']).to eql(min)
+  end
+end
+
+And %r{^the '(.*)' field should be at most '(\d+)' characters long$} do |field, max|
+  within("form") do
+    name = page.find("label", text: /^#{field}$/)['for']
+    input = page.find("input[name='#{name}']")
+    expect(input['maxlength']).to eql(max)
   end
 end
