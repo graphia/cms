@@ -44,9 +44,9 @@
 	export default {
 		name: "GraphiaCMS",
 		created() {
-			try {
 
-				if (!this.$store.state.auth.tokenExpiry) {
+			try {
+				if (!this.$store.state.auth.tokenExpiry()) {
 					throw 'Token missing';
 				}
 

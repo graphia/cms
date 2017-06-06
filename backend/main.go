@@ -15,12 +15,6 @@ import (
 	"gopkg.in/go-playground/validator.v9"
 )
 
-const (
-	// FIXME load these from config
-	privKeyPath = "./keys/app.rsa"
-	pubKeyPath  = "./keys/app.rsa.pub"
-)
-
 var (
 	config         Config
 	configFilePath = flag.String("config", "/etc/graphia.yml", "the config file")
@@ -69,7 +63,7 @@ func main() {
 }
 
 func setupKeys() {
-	signBytes, err := ioutil.ReadFile(privKeyPath)
+	signBytes, err := ioutil.ReadFile(config.PrivateKeyPath)
 	if err != nil {
 		panic(err)
 	}
@@ -79,7 +73,7 @@ func setupKeys() {
 		panic(err)
 	}
 
-	verifyBytes, err := ioutil.ReadFile(pubKeyPath)
+	verifyBytes, err := ioutil.ReadFile(config.PublicKeyPath)
 	if err != nil {
 		panic(err)
 	}

@@ -10,3 +10,4 @@ frontend/public/**/*
 repo
 tags
 tests/tmp/**/*
+tests/frontend/.byebug_history

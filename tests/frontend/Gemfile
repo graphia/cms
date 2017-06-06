@@ -1,0 +1,10 @@
+# frozen_string_literal: true
+source "https://rubygems.org"
+
+gem "cucumber"
+gem "capybara"
+gem "selenium-webdriver"
+gem "pry"
+gem "pry-byebug"
+gem "rspec"
+gem "git"

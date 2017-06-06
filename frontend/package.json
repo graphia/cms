@@ -13,6 +13,7 @@
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-polyfill": "^6.23.0",
     "bootstrap": "^4.0.0-alpha.6",
+    "jwt-decode": "^2.2.0",
     "remarkable": "^1.7.1",
     "simplemde": "^1.11.2"
   },

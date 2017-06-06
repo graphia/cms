@@ -1,10 +1,29 @@
 <template>
 	<div>
-		<h2>Hello World</h2>
 
-		<button class="btn btn-primary" :class="{'disabled': publishing}" @click="publish">
-			{{ publishing ? "Publishing" : "Publish" }}
-		</button>
+		<div class="row">
+			<div class="col-md-6">
+				<div class="card">
+					<div class="card-block">
+						<h4 class="card-title">Recent Updates</h4>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-md-6">
+				<div class="card">
+					<div class="card-block">
+						<h4 class="card-title">Statistics</h4>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<button class="btn btn-primary" :class="{'disabled': publishing}" @click="publish">
+				{{ publishing ? "Publishing" : "Publish" }}
+			</button>
+		</div>
 
 	</div>
 </template>

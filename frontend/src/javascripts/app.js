@@ -23,12 +23,10 @@ Vue.use(VueRouter);
 
 const routes = [
 	// Unprotected pages
+	{path: '/cms/setup', component: Setup, name: 'initial_setup'},
 	{path: '/cms/login', component: Login, name: 'login'},
-	// {path: '/cms/signup', component: Signup, name: 'signup'},
-
 
 	// Protected pages
-	{path: '/cms/setup', component: Setup, name: 'initial_setup'},
 	{path: '/cms/', component: Home, name: 'home'},
 	{path: '/cms/:directory', component: DocumentIndex, name: 'document_index'},
 	{path: '/cms/:directory/new', component: DocumentNew, name: 'document_new'},
