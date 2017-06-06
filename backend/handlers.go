@@ -813,3 +813,21 @@ func apiPublish(w http.ResponseWriter, r *http.Request) {
 	w.Write(repsonse)
 
 }
+
+// Repository metadata 💁
+
+func apiGetCommits(w http.ResponseWriter, r *http.Request) {
+	var commits []Commit
+	var err error
+
+	commits, err = getCommits()
+
+	response, err := json.Marshal(commits)
+
+	if err != nil {
+		panic(err)
+	}
+
+	w.WriteHeader(200)
+	w.Write(response)
+}

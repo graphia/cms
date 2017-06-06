@@ -2,6 +2,8 @@ package main
 
 import (
 	"time"
+
+	"gopkg.in/libgit2/git2go.v25"
 )
 
 // RepoWrite contains all info we need to perform a git commit
@@ -113,4 +115,12 @@ type Token struct {
 // InitialSetup indicates whether or not to display initial setup screen
 type InitialSetup struct {
 	Enabled bool `json:"enabled"`
+}
+
+// Commit holds metadata for a Git Commit
+type Commit struct {
+	Message    string         `json:"message"`
+	ID         string         `json:"id"`
+	ObjectType string         `json:"object_type"`
+	Author     *git.Signature `json:"author"`
 }

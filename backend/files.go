@@ -26,7 +26,7 @@ func getFilesInDir(directory string) (files []FileItem, err error) {
 		return nil, err
 	}
 
-	// ensure that the directory exists before we try to delete it
+	// ensure that the directory exists
 	entry, _ := ht.EntryByPath(directory)
 	if entry == nil {
 		return nil, fmt.Errorf("directory '%s' not found", directory)

@@ -161,6 +161,10 @@ func protectedRouter() (r *vestigo.Router) {
 	r.Post("/api/users/:username", apiUpdateUser)
 	r.Delete("/api/users/:username", apiDeleteUser)
 
+	// repo endpoints
+	r.Get("/api/commits", apiGetCommits)
+
+	// cms endpoints
 	r.Post("/api/publish", apiPublish)
 
 	// missing operations:
