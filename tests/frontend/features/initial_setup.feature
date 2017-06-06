@@ -20,12 +20,7 @@ Feature: First run
 			| Confirm Password | Password | yes       |
 		And the submit button should be labelled 'Create'
 
-	Scenario: Entering a username that is too short
-		Given I am on the initial setup page
-		When I enter a '2' letter word into 'Username'
-		Then the 'Username' field should be invalid
-
-	Scenario: HTML5 input length validation
+	Scenario: HTML5 input length validation attributes
 		Given I am on the initial setup page
 		Then the 'Username' field should allow values from '3' to '32' characters
 		And the 'Full Name' field should allow values from '3' to '64' characters
@@ -43,7 +38,7 @@ Feature: First run
 		When I enter matching passwords in the 'Password' and 'Confirm Password' fields
 		Then no password-related warnings should be visible
 
-	Scenario: Actually creating an initial user
+	Scenario: Creating an administrator
 		Given I am on the initial setup page
 		And I fill in the form with the following data:
 			| Full Name        | Patty Bouvier     |

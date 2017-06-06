@@ -79,3 +79,10 @@ And %r{^the '(.*)' field should be at most '(\d+)' characters long$} do |field, 
     expect(input['maxlength']).to eql(max)
   end
 end
+
+When %r{^I enter a '(\d+)' letter word into '(.*)'$} do |chars, field|
+  val = 'a' * chars.to_i
+  fill_in(field.downcase, with: val)
+  expect(page.find("input[name='#{field.downcase}']").value).to eql(val)
+  page.find('body').click
+end

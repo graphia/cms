@@ -25,8 +25,6 @@ const routes = [
 	// Unprotected pages
 	{path: '/cms/setup', component: Setup, name: 'initial_setup'},
 	{path: '/cms/login', component: Login, name: 'login'},
-	// {path: '/cms/signup', component: Signup, name: 'signup'},
-
 
 	// Protected pages
 	{path: '/cms/', component: Home, name: 'home'},

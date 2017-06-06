@@ -23,13 +23,6 @@ Given %r{^I am on the initial setup page$} do
   }
 end
 
-When %r{^I enter a '(\d+)' letter word into '(.*)'$} do |chars, field|
-  val = 'a' * chars.to_i
-  fill_in(field.downcase, with: val)
-  expect(page.find("input[name='#{field.downcase}']").value).to eql(val)
-  page.find('body').click
-end
-
 Then %r{^the '(.*)' field should be invalid$} do |field|
   selector = %Q{$("form input[name='#{field.downcase}']").get(0).checkValidity() }
   valid = evaluate_script(selector)
