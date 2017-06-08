@@ -3,7 +3,7 @@
 
 		<div class="row">
 			<div class="col-md-6">
-				<div class="card">
+				<div class="card recent-updates">
 					<div class="card-block">
 						<h4 class="card-title">Recent Updates</h4>
 					</div>
@@ -91,6 +91,10 @@
 
 				try {
 					let response = await fetch(path, {mode: "cors", headers: this.$store.state.auth.authHeader()});
+
+					if (response.status != 200) {
+						throw("Could not retrieve recent commit sumamry");
+					}
 
 					let json = await response.json()
 

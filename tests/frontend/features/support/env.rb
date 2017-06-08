@@ -14,6 +14,7 @@ REPO_PATH = '../tmp/repositories/cucumber'
 REPO_TEMPLATE_PATH = '../backend/repositories/small'
 PID_PATH = '../tmp/cucumber-browser.pid'
 DB_PATH = '../../db/cucumber.db'
+SAMPLES_PATH = '../backend/samples'
 
 Capybara.register_driver(:headless_chrome) do |app|
 
