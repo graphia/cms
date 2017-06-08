@@ -820,7 +820,9 @@ func apiGetCommits(w http.ResponseWriter, r *http.Request) {
 	var commits []Commit
 	var err error
 
-	commits, err = getCommits()
+	// TODO manage quantity param
+
+	commits, err = getCommits(20)
 
 	response, err := json.Marshal(commits)
 

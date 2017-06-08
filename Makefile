@@ -38,7 +38,8 @@ run-backend:
 	ls backend/*.go | entr -r go run ${SRC} -log-to-file=true -config ${DEVELOPMENT_CONFIG}
 
 run-frontend:
-	brunch watch --server frontend
+	#brunch watch --server frontend
+	cd frontend && brunch watch --server
 
 cleanup:
 	rm -rf tests/tmp/**/*

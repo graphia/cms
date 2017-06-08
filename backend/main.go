@@ -162,7 +162,7 @@ func protectedRouter() (r *vestigo.Router) {
 	r.Delete("/api/users/:username", apiDeleteUser)
 
 	// repo endpoints
-	r.Get("/api/commits", apiGetCommits)
+	r.Get("/api/recent_commits", apiGetCommits)
 
 	// cms endpoints
 	r.Post("/api/publish", apiPublish)

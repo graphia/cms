@@ -43,7 +43,6 @@ export default class CMSFile {
 
 		try {
 
-			console.log(store.state.auth.authHeader());
 			let response = await fetch(path, {mode: "cors", headers: store.state.auth.authHeader()});
 
 			if (!CMSFile.checkResponse(response.status)) {

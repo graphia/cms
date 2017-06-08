@@ -7,6 +7,17 @@
 					<div class="card-block">
 						<h4 class="card-title">Recent Updates</h4>
 					</div>
+
+					<ol class="list-group list-group-flush">
+						<li class="recent-commit-info list-group-item" v-for="commit in commits">
+							<a :href="`/cms/commit/${commit.id}`">
+								{{ commit.message || "Empty commit message" }}
+							</a>
+							<p class="card-text">
+								<small>{{ commit.author.Name }} committed 2 minutes ago</small>
+							</p>
+						</li>
+					</ol>
 				</div>
 			</div>
 
@@ -31,17 +42,24 @@
 <script lang="babel">
 	import Broadcast from '../components/Broadcast';
 	import CMSPublisher from '../javascripts/publish.js';
+	import config from '../javascripts/config.js';
 
 	export default {
 		name: "Home",
 
+		created() {
+			this.commits = this.getLatestCommits();
+		},
+
 		data() {
 			return {
-				publishing: false
+				publishing: false,
+				commits: []
 			};
 		},
 
 		methods: {
+
 
 			async publish(event) {
 
@@ -66,6 +84,23 @@
 				finally {
 					this.publishing = false;
 				}
+			},
+
+			async getLatestCommits() {
+				let path = `${config.api}/recent_commits`;
+
+				try {
+					let response = await fetch(path, {mode: "cors", headers: this.$store.state.auth.authHeader()});
+
+					let json = await response.json()
+
+					this.commits = json;
+
+
+				} catch(err) {
+					throw(err);
+				}
+
 			}
 		}
 	}

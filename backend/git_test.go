@@ -70,3 +70,77 @@ func TestHeadCommit(t *testing.T) {
 
 	assert.Equal(t, hc.Id(), oid)
 }
+
+func createRandomFile(repo *git.Repository, filename, msg string) error {
+	rw := RepoWrite{
+		Body:     "# The quick brown fox\n\njumped over the lazy dog",
+		Filename: filename,
+		Path:     "documents",
+		Message:  msg,
+		Name:     "Barney Gumble",
+		Email:    "barney.gumble@hotmail.com",
+		FrontMatter: FrontMatter{
+			Title:  "Document Twelve",
+			Author: "Bernard Arnold Gumble",
+		},
+	}
+	_, err := createFile(rw)
+	return err
+}
+
+func TestAllCommits(t *testing.T) {
+	repoPath := "../tests/tmp/repositories/get_commits"
+	_, _ = setupSmallTestRepo(repoPath)
+
+	repo, _ := repository(config)
+
+	msg := "Well well, if it isn't Mr Plow"
+
+	err := createRandomFile(repo, "document_12.md", msg)
+	if err != nil {
+		panic(err)
+	}
+
+	commits, _ := allCommits(repo, 10)
+
+	var messages []string
+
+	for _, commit := range commits {
+		messages = append(messages, commit.Message)
+	}
+
+	// should return both commit messages
+	assert.Equal(t, []string{msg, "Quick, honk at that broad!"}, messages)
+
+}
+
+func TestAllCommitsWithLimitOf3(t *testing.T) {
+	repoPath := "../tests/tmp/repositories/get_commits"
+	_, _ = setupSmallTestRepo(repoPath)
+
+	repo, _ := repository(config)
+
+	for i := 12; i <= 16; i++ {
+		err := createRandomFile(
+			repo,
+			fmt.Sprintf("document_%d.md", i),
+			fmt.Sprintf("Commit Message %d", i),
+		)
+
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	commits, _ := allCommits(repo, 3)
+
+	var messages []string
+
+	for _, commit := range commits {
+		messages = append(messages, commit.Message)
+	}
+
+	// should return both commit messages
+	assert.Equal(t, []string{"Commit Message 16", "Commit Message 15", "Commit Message 14"}, messages)
+
+}
