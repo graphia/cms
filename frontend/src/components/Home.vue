@@ -43,6 +43,7 @@
 	import Broadcast from '../components/Broadcast';
 	import CMSPublisher from '../javascripts/publish.js';
 	import config from '../javascripts/config.js';
+	import checkResponse from '../javascripts/response.js';
 
 	export default {
 		name: "Home",
@@ -92,7 +93,7 @@
 				try {
 					let response = await fetch(path, {mode: "cors", headers: this.$store.state.auth.authHeader()});
 
-					if (response.status != 200) {
+					if (!checkResponse(response.status)) {
 						throw("Could not retrieve recent commit sumamry");
 					}
 

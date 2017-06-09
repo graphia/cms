@@ -1,6 +1,6 @@
 import store from '../store.js';
 import config from '../config.js';
-import {router} from '../app.js';
+import checkResponse from '../response.js';
 
 export default class CMSFile {
 
@@ -45,7 +45,7 @@ export default class CMSFile {
 
 			let response = await fetch(path, {mode: "cors", headers: store.state.auth.authHeader()});
 
-			if (!CMSFile.checkResponse(response.status)) {
+			if (!checkResponse(response.status)) {
 				return
 			}
 
@@ -84,7 +84,7 @@ export default class CMSFile {
 
 		let response = await fetch(path, {mode: "cors", headers: store.state.auth.authHeader()})
 
-		 if (!CMSFile.checkResponse(response.status)) {
+		 if (!checkResponse(response.status)) {
 			 return
 		 }
 
@@ -116,7 +116,7 @@ export default class CMSFile {
 				body: commit.toJSON(this)
 			});
 
-			if (!CMSFile.checkResponse(response.status)) {
+			if (!checkResponse(response.status)) {
 				return
 			}
 
@@ -145,7 +145,7 @@ export default class CMSFile {
 				body: commit.toJSON(this)
 			});
 
-			if (!CMSFile.checkResponse(response.status)) {
+			if (!checkResponse(response.status)) {
 				return
 			}
 
@@ -164,7 +164,7 @@ export default class CMSFile {
 		try {
 			return fetch(path, {mode: "cors", method: "DELETE", headers: store.state.auth.authHeader(), body: commit.toJSON(this)})
 				.then((response) => {
-					if (!CMSFile.checkResponse(response.status)) {
+					if (!checkResponse(response.status)) {
 						return
 					}
 				});
@@ -184,27 +184,6 @@ export default class CMSFile {
 	// path/filename.md
 	get absolutePath() {
 		return [this.path, this.filename].join("/");
-	};
-
-	// move this to its own module
-	static checkResponse(responseCode) {
-		console.debug("checking response", responseCode);
-
-		if (responseCode == 401) {
-			console.warn("Unauthorized request, redirecting to login");
-
-			router.push({name: 'login'});
-			return false;
-			// Unauthorized, redirect
-		}
-		else if (responseCode <= 200 && responseCode >= 300) {
-			console.error('Oops, there was a problem', response.status);
-			return false
-		}
-
-		console.debug("response OK");
-
-		return true
 	};
 
 }
