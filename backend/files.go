@@ -308,6 +308,44 @@ func writeFile(repo *git.Repository, rw RepoWrite) (oid *git.Oid, err error) {
 
 }
 
+func listRootDirectories() (directories []Directory, err error) {
+
+	repo, err := repository(config)
+	if err != nil {
+		return nil, err
+	}
+	defer repo.Free()
+
+	ht, err := headTree(repo)
+	if err != nil {
+		return nil, err
+	}
+
+	defer ht.Free()
+
+	walkIterator := func(_ string, te *git.TreeEntry) int {
+
+		if te.Type == git.ObjectTree {
+
+			Debug.Println("Found Dir", te)
+
+			directories = append(directories, Directory{
+				Name: te.Name,
+			})
+
+			return 1
+
+		}
+
+		return 0
+	}
+
+	err = ht.Walk(walkIterator)
+
+	return directories, err
+
+}
+
 func createDirectory(rw RepoWrite) (oid *git.Oid, err error) {
 
 	// check that the directory does not already exist

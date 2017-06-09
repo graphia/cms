@@ -289,10 +289,38 @@ func apiRootHandler(w http.ResponseWriter, r *http.Request) {}
 
 // Directory level functionality 🗃
 
+// apiListDirectoriesHandler returns an array of directories
+//
+// GET /api/directories/
+//
+// eg. when the documents directory contains Documents 1 and 2:
+//
+// {
+//	  {name: 'documents'},
+//	  {name: 'appendices'}
+// }
+func apiListDirectoriesHandler(w http.ResponseWriter, r *http.Request) {
+
+	var directories []Directory
+	var err error
+
+	directories, err = listRootDirectories()
+
+	output, err := json.Marshal(directories)
+	if err != nil {
+		panic(err)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(output)
+
+	w.WriteHeader(200)
+}
+
 // apiListDirectoriesHandler returns a JSON object representing
 // the Repository's contents.
 //
-// GET /api/directories/
+// GET /api/directory_summary
 //
 // eg. when the documents directory contains Documents 1 and 2:
 //
@@ -303,7 +331,7 @@ func apiRootHandler(w http.ResponseWriter, r *http.Request) {}
 //	 ],
 //	 appendices: [...]
 // }
-func apiListDirectoriesHandler(w http.ResponseWriter, r *http.Request) {
+func apiListDirectorySummaryHandler(w http.ResponseWriter, r *http.Request) {
 
 	fi1 := FileItem{Filename: "abc123"}
 	fi2 := FileItem{Filename: "def234"}

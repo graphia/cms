@@ -21,6 +21,35 @@ var (
 
 // API Tests
 
+func TestApiListDirectoriesHandler(t *testing.T) {
+	server = httptest.NewServer(protectedRouter())
+
+	repoPath := "../tests/tmp/repositories/create_directory"
+	setupSmallTestRepo(repoPath)
+
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories")
+
+	client := &http.Client{}
+
+	req, _ := http.NewRequest("GET", target, nil)
+
+	resp, _ := client.Do(req)
+
+	var receiver []Directory
+
+	json.NewDecoder(resp.Body).Decode(&receiver)
+
+	directoriesExpected := []string{"appendices", "documents"}
+
+	var directoryNames []string
+	for _, directory := range receiver {
+		directoryNames = append(directoryNames, directory.Name)
+	}
+
+	assert.Equal(t, directoryNames, directoriesExpected)
+
+}
+
 func TestApiCreateDirectory(t *testing.T) {
 	server = httptest.NewServer(protectedRouter())
 

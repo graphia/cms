@@ -161,3 +161,26 @@ func TestGetFileNeitherMarkdownOrHTML(t *testing.T) {
 	assert.Nil(t, file.Markdown)
 
 }
+
+func TestListDirectoriesWithSubdirs(t *testing.T) {
+
+	// test with subdirectories to ensure we're only returning root
+	// directories
+	repoPath := "../tests/tmp/repositories/list_directories_subdirs"
+	setupSubdirsTestRepo(repoPath)
+
+	directoriesExpected := []string{"appendices", "documents"}
+
+	directories, err := listRootDirectories()
+	if err != nil {
+		t.Error("error", err)
+	}
+
+	var directoryNames []string
+	for _, directory := range directories {
+		directoryNames = append(directoryNames, directory.Name)
+	}
+
+	assert.Equal(t, 2, len(directoryNames))
+	assert.Equal(t, directoriesExpected, directoryNames)
+}

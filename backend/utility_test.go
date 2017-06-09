@@ -117,9 +117,20 @@ func CopyDir(src string, dst string) (err error) {
 }
 
 func setupSmallTestRepo(dest string) (oid *git.Oid, err error) {
-	// copy the small repo skeleton to specified path
 	src := "../tests/backend/repositories/small"
+	oid, err = setupTestRepo(src, dest)
+	return
+}
 
+func setupSubdirsTestRepo(dest string) (oid *git.Oid, err error) {
+	src := "../tests/backend/repositories/subdirs"
+	oid, err = setupTestRepo(src, dest)
+	return
+}
+
+func setupTestRepo(src, dest string) (oid *git.Oid, err error) {
+
+	// copy the small repo skeleton to specified path
 	err = os.RemoveAll(dest)
 	if err != nil {
 		return nil, err

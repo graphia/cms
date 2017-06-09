@@ -144,6 +144,8 @@ func protectedRouter() (r *vestigo.Router) {
 
 	// directory endpoints
 	r.Get("/api/directories", apiListDirectoriesHandler)
+	r.Get("/api/directories_summary", apiListDirectorySummaryHandler)
+
 	r.Post("/api/directories", apiCreateDirectoryHandler)
 	r.Delete("/api/directories/:directory", apiDeleteDirectoryHandler)
 
