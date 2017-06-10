@@ -346,6 +346,48 @@ func listRootDirectories() (directories []Directory, err error) {
 
 }
 
+func listRootDirectorySummary() (summary map[string][]FileItem, err error) {
+
+	var filesInDir []FileItem
+	summary = make(map[string][]FileItem)
+
+	repo, err := repository(config)
+	if err != nil {
+		return nil, err
+	}
+	defer repo.Free()
+
+	ht, err := headTree(repo)
+	if err != nil {
+		return nil, err
+	}
+
+	defer ht.Free()
+
+	walkIterator := func(_ string, te *git.TreeEntry) int {
+
+		if te.Type == git.ObjectTree {
+
+			filesInDir, err = getFilesInDir(te.Name)
+			if err != nil {
+				Error.Println("Failed to retrieve files when generating summary", te.Name, err)
+				return 0
+			}
+
+			summary[te.Name] = filesInDir
+
+			return 1
+
+		}
+
+		return 0
+	}
+
+	err = ht.Walk(walkIterator)
+
+	return summary, err
+}
+
 func createDirectory(rw RepoWrite) (oid *git.Oid, err error) {
 
 	// check that the directory does not already exist

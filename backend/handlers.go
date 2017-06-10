@@ -312,9 +312,8 @@ func apiListDirectoriesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(output)
-
 	w.WriteHeader(200)
+	w.Write(output)
 }
 
 // apiListDirectoriesHandler returns a JSON object representing
@@ -331,24 +330,24 @@ func apiListDirectoriesHandler(w http.ResponseWriter, r *http.Request) {
 //	 ],
 //	 appendices: [...]
 // }
-func apiListDirectorySummaryHandler(w http.ResponseWriter, r *http.Request) {
+func apiDirectorySummary(w http.ResponseWriter, r *http.Request) {
 
-	fi1 := FileItem{Filename: "abc123"}
-	fi2 := FileItem{Filename: "def234"}
+	var summary map[string][]FileItem
+	var err error
 
-	filesByDirectory := map[string][]FileItem{
-		"documents": []FileItem{fi1, fi2},
-	}
+	summary = make(map[string][]FileItem)
 
-	output, err := json.Marshal(filesByDirectory)
+	summary, err = listRootDirectorySummary()
+
+	output, err := json.Marshal(summary)
 	if err != nil {
 		panic(err)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
 	w.Write(output)
 
-	w.WriteHeader(200)
 }
 
 // apiCreateDirectoryHandler creates an 'empty' directory. It actually

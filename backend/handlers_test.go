@@ -24,7 +24,7 @@ var (
 func TestApiListDirectoriesHandler(t *testing.T) {
 	server = httptest.NewServer(protectedRouter())
 
-	repoPath := "../tests/tmp/repositories/create_directory"
+	repoPath := "../tests/tmp/repositories/list_directories"
 	setupSmallTestRepo(repoPath)
 
 	target := fmt.Sprintf("%s/%s", server.URL, "api/directories")
@@ -47,6 +47,39 @@ func TestApiListDirectoriesHandler(t *testing.T) {
 	}
 
 	assert.Equal(t, directoryNames, directoriesExpected)
+
+}
+
+func TestApiListDirectorySummaryHandler(t *testing.T) {
+
+	server = httptest.NewServer(protectedRouter())
+
+	// setup and send the request
+	repoPath := "../tests/tmp/repositories/list_directory_summary"
+	setupSmallTestRepo(repoPath)
+
+	target := fmt.Sprintf("%s/%s", server.URL, "api/summary")
+
+	client := &http.Client{}
+
+	req, _ := http.NewRequest("GET", target, nil)
+
+	resp, _ := client.Do(req)
+
+	var receiver map[string][]FileItem
+	json.NewDecoder(resp.Body).Decode(&receiver)
+
+	// prepare the expected output
+	documentFiles, _ := getFilesInDir("documents")
+	appendicesFiles, _ := getFilesInDir("appendices")
+
+	expectedSummary := map[string][]FileItem{
+		"documents":  documentFiles,
+		"appendices": appendicesFiles,
+	}
+
+	assert.Equal(t, 2, len(receiver))
+	assert.Equal(t, expectedSummary, receiver)
 
 }
 

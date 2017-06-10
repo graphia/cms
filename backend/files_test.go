@@ -162,7 +162,7 @@ func TestGetFileNeitherMarkdownOrHTML(t *testing.T) {
 
 }
 
-func TestListDirectoriesWithSubdirs(t *testing.T) {
+func TestListRootDirectories(t *testing.T) {
 
 	// test with subdirectories to ensure we're only returning root
 	// directories
@@ -183,4 +183,28 @@ func TestListDirectoriesWithSubdirs(t *testing.T) {
 
 	assert.Equal(t, 2, len(directoryNames))
 	assert.Equal(t, directoriesExpected, directoryNames)
+}
+
+func TestRootDirectorySummary(t *testing.T) {
+
+	// test with subdirectories to ensure we're only returning root
+	// directories
+	repoPath := "../tests/tmp/repositories/directories_summary"
+	setupSubdirsTestRepo(repoPath)
+
+	documentFiles, _ := getFilesInDir("documents")
+	appendicesFiles, _ := getFilesInDir("appendices")
+
+	expectedSummary := map[string][]FileItem{
+		"appendices": appendicesFiles,
+		"documents":  documentFiles,
+	}
+
+	summary, err := listRootDirectorySummary()
+	if err != nil {
+		t.Error("error", err)
+	}
+
+	assert.Equal(t, 2, len(summary))
+	assert.Equal(t, expectedSummary, summary)
 }
