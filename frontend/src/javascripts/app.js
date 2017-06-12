@@ -11,6 +11,7 @@ import DocumentIndex from '../components/DocumentIndex.vue';
 import DocumentShow from '../components/DocumentShow.vue';
 import DocumentEdit from '../components/DocumentEdit.vue';
 import DocumentNew from '../components/DocumentNew.vue';
+import Commit from '../components/Commit.vue';
 
 // Authentication Helpers
 import CMSAuth from './auth.js';
@@ -27,11 +28,15 @@ const routes = [
 	{path: '/cms/login', component: Login, name: 'login'},
 
 	// Protected pages
+
+	{path: '/cms/commits/:hash', component: Commit, name: 'commit'},
+
 	{path: '/cms/', component: Home, name: 'home'},
 	{path: '/cms/:directory', component: DocumentIndex, name: 'document_index'},
 	{path: '/cms/:directory/new', component: DocumentNew, name: 'document_new'},
 	{path: '/cms/:directory/:filename', component: DocumentShow, name: 'document_show'},
 	{path: '/cms/:directory/:filename/edit', component: DocumentEdit, name: 'document_edit'}
+
 ];
 
 const router = new VueRouter({

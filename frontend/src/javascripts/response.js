@@ -1,4 +1,5 @@
 import {router} from './app.js';
+import store from './store.js';
 
 export default function checkResponse(responseCode) {
 	console.debug("checking response", responseCode);
@@ -7,7 +8,7 @@ export default function checkResponse(responseCode) {
 		console.warn("Unauthorized request, redirecting to login");
 
 		// Unauthorized, redirect
-		router.push({name: 'login'});
+		store.state.auth.redirectToLogin();
 		return false;
 
 	}

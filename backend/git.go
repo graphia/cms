@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -108,4 +109,67 @@ func allCommits(repo *git.Repository, qty int) (commits []Commit, err error) {
 	}
 
 	return commits, nil
+}
+
+func diffForCommit(hash string) (numDiffs int, diff string, err error) {
+	repo, err := repository(config)
+
+	commitOid, err := git.NewOid(hash)
+	if err != nil {
+		return numDiffs, diff, err
+	}
+	commit, err := repo.LookupCommit(commitOid)
+	if err != nil {
+		return numDiffs, diff, err
+	}
+
+	commitTree, err := commit.Tree()
+	if err != nil {
+		return numDiffs, diff, err
+	}
+	options, err := git.DefaultDiffOptions()
+	if err != nil {
+		return numDiffs, diff, err
+	}
+	options.IdAbbrev = 40
+
+	var parentTree *git.Tree
+	if commit.ParentCount() > 0 {
+		parentTree, err = commit.Parent(0).Tree()
+		if err != nil {
+			return numDiffs, diff, err
+		}
+	}
+
+	gitDiff, err := repo.DiffTreeToTree(parentTree, commitTree, &options)
+	if err != nil {
+		return numDiffs, diff, err
+	}
+
+	// Show all file patch diffs in a commit.
+	numDeltas, err := gitDiff.NumDeltas()
+	if err != nil {
+		return numDiffs, diff, err
+	}
+
+	var buffer bytes.Buffer
+
+	for d := 0; d < numDeltas; d++ {
+
+		patch, err := gitDiff.Patch(d)
+		if err != nil {
+			return numDiffs, diff, err
+		}
+
+		patchString, err := patch.String()
+		if err != nil {
+			return numDiffs, diff, err
+		}
+
+		buffer.WriteString(fmt.Sprintf("\n%s", patchString))
+		patch.Free()
+	}
+
+	return numDeltas, buffer.String(), nil
+
 }

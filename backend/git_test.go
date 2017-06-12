@@ -144,3 +144,21 @@ func TestAllCommitsWithLimitOf3(t *testing.T) {
 	assert.Equal(t, []string{"Commit Message 16", "Commit Message 15", "Commit Message 14"}, messages)
 
 }
+
+func TestDiffForCommit(t *testing.T) {
+	repoPath := "../tests/tmp/repositories/get_commits"
+	oid, _ := setupSmallTestRepo(repoPath)
+	count, diff, _ := diffForCommit(oid.String())
+
+	// Make sure only the correct five markdown files were added
+	assert.Equal(t, 5, count)
+	assert.Contains(t, diff, "+++ b/documents/document_1.md")
+	assert.Contains(t, diff, "+++ b/documents/document_2.md")
+	assert.Contains(t, diff, "+++ b/documents/document_3.md")
+	assert.Contains(t, diff, "+++ b/appendices/appendix_1.md")
+	assert.Contains(t, diff, "+++ b/appendices/appendix_2.md")
+
+	// Ensure the file contents are included
+	assert.Contains(t, diff, "+Lorem ipsum dolor sit")
+
+}

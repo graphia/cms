@@ -124,3 +124,9 @@ type Commit struct {
 	ObjectType string         `json:"object_type"`
 	Author     *git.Signature `json:"author"`
 }
+
+// Patch holds data about a previous commit, including the full delta
+type Patch struct {
+	NumDeltas int    `json:"num_deltas"`
+	Diff      string `json:"diff"`
+}

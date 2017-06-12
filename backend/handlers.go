@@ -841,7 +841,7 @@ func apiPublish(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// Repository metadata 💁
+// Repository data 💁
 
 func apiGetCommits(w http.ResponseWriter, r *http.Request) {
 	var commits []Commit
@@ -859,4 +859,25 @@ func apiGetCommits(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(200)
 	w.Write(response)
+}
+
+func apiGetCommit(w http.ResponseWriter, r *http.Request) {
+
+	hash := vestigo.Param(r, "hash")
+
+	numDeltas, diff, err := diffForCommit(hash)
+
+	patch := Patch{
+		NumDeltas: numDeltas,
+		Diff:      diff,
+	}
+
+	output, err := json.Marshal(patch)
+	if err != nil {
+		panic(err)
+	}
+
+	w.WriteHeader(200)
+	w.Write(output)
+
 }

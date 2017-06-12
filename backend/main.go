@@ -165,6 +165,7 @@ func protectedRouter() (r *vestigo.Router) {
 
 	// repo endpoints
 	r.Get("/api/recent_commits", apiGetCommits)
+	r.Get("/api/commits/:hash", apiGetCommit)
 
 	// cms endpoints
 	r.Post("/api/publish", apiPublish)

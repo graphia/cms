@@ -10,7 +10,7 @@
 
 					<ol class="list-group list-group-flush">
 						<li class="recent-commit-info list-group-item" v-for="commit in commits">
-							<a :href="`/cms/commit/${commit.id}`">
+							<a :href="`/cms/commits/${commit.id}`">
 								{{ commit.message || "Empty commit message" }}
 							</a>
 							<p class="card-text">
