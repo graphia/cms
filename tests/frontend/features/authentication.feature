@@ -11,6 +11,13 @@ Feature: Authentication
 		When I navigate directly to the homepage
 		Then I should be redirected to the login page
 
+	Scenario: Routing to the correct destination once authenticatd
+		Given I am not logged in
+		And I navigate directly to a protected page
+		When I am prompted for my credentials
+		And I provide them and log in
+		Then I should be authenticated and redirected to my original destination
+
 	Scenario: Directly accessing the API when not logged in
 		Given I am not logged in
 		When I try to manually make an unauthenticated HTTP request to the API

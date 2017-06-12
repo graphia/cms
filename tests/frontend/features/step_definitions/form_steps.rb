@@ -24,6 +24,12 @@ When %r{^I submit the form$} do
   end
 end
 
+When %r{^I submit the form by clicking '(.*)'$} do |label_text|
+  within("form") do
+    page.find("input[type='submit'][value='#{label_text}']").click
+  end
+end
+
 # | Name     | Type     | Required  |
 # | Name     | Text     | yes       |
 # | Password | Password | yes       |

@@ -69,6 +69,14 @@
 				}
 
 				this.$store.state.broadcast.addMessage("success", "Welcome", "You have logged in successfully", 3);
+
+				// if we've stored the original destination (globally), use it and clear it
+				if (window.originalDestination) {
+					this.$router.push(window.originalDestination);
+					delete window.originalDestination;
+					return;
+				};
+
 				this.$router.push({name: 'home'});
 
 			},

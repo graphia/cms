@@ -34,28 +34,6 @@ export default class CMSAuth {
 		return 0;
 	}
 
-
-	// Run before every page is displayed
-	checkLoggedIn(to, from, next) {
-
-		console.debug("checking user is accessing a 'safe' path", to.path)
-
-		// is the destination somewhere other than the login page?
-		if (to.path == '/cms/login' || to.path == '/cms/setup') {
-			// destination is login page, continue
-			console.debug("yes they are, permit it", to.path)
-			next();
-		}
-
-		else {
-			console.debug("no they aren't, make sure they're logged in", to.path)
-
-			// if token exists, continue, otherwise redirect to login page
-			CMSAuth.isLoggedIn() ? next() : next('/cms/login');
-		}
-
-	}
-
 	static async doInitialSetup() {
 		let response = await fetch(`${config.auth}/create_initial_user`, {});
 
