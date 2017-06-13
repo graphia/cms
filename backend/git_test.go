@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -152,13 +153,32 @@ func TestDiffForCommit(t *testing.T) {
 
 	// Make sure only the correct five markdown files were added
 	assert.Equal(t, 5, cs.NumDeltas)
-	assert.Contains(t, cs.Diff, "+++ b/documents/document_1.md")
-	assert.Contains(t, cs.Diff, "+++ b/documents/document_2.md")
-	assert.Contains(t, cs.Diff, "+++ b/documents/document_3.md")
-	assert.Contains(t, cs.Diff, "+++ b/appendices/appendix_1.md")
-	assert.Contains(t, cs.Diff, "+++ b/appendices/appendix_2.md")
+	assert.Equal(t, 0, cs.NumDeleted)
+	assert.Equal(t, 5, cs.NumAdded)
+	assert.Contains(t, cs.FullDiff, "+++ b/documents/document_1.md")
+	assert.Contains(t, cs.FullDiff, "+++ b/documents/document_2.md")
+	assert.Contains(t, cs.FullDiff, "+++ b/documents/document_3.md")
+	assert.Contains(t, cs.FullDiff, "+++ b/appendices/appendix_1.md")
+	assert.Contains(t, cs.FullDiff, "+++ b/appendices/appendix_2.md")
 
 	// Ensure the file contents are included
-	assert.Contains(t, cs.Diff, "+Lorem ipsum dolor sit")
+	assert.Contains(t, cs.FullDiff, "+Lorem ipsum dolor sit")
+
+	var allFilesInRepo = []string{
+		"documents/document_1.md",
+		"documents/document_2.md",
+		"documents/document_3.md",
+		"appendices/appendix_1.md",
+		"appendices/appendix_2.md",
+	}
+
+	for _, path := range allFilesInRepo {
+		// Ensure 'old' files are empty
+		assert.Empty(t, cs.Files[path].Old)
+
+		// Ensure 'new' files contain the correct info
+		contents, _ := ioutil.ReadFile(filepath.Join(repoPath, path))
+		assert.Equal(t, cs.Files[path].New, string(contents))
+	}
 
 }

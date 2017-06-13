@@ -148,33 +148,97 @@ func diffForCommit(hash string) (cs Changeset, err error) {
 
 	// Show all file patch diffs in a commit.
 	numDeltas, err := gitDiff.NumDeltas()
-	if err != nil {
-		return cs, err
-	}
+
+	numDiffs := 0
+	numAdded := 0
+	numDeleted := 0
 
 	var buffer bytes.Buffer
 
-	for d := 0; d < numDeltas; d++ {
+	var files map[string]ChangesetFiles
 
-		patch, err := gitDiff.Patch(d)
+	files = make(map[string]ChangesetFiles)
+	var changesetFiles ChangesetFiles
+
+	err = gitDiff.ForEach(func(file git.DiffDelta, progress float64) (git.DiffForEachHunkCallback, error) {
+
+		patch, err := gitDiff.Patch(numDiffs)
 		if err != nil {
-			return cs, err
+			return nil, err
 		}
 
 		patchString, err := patch.String()
 		if err != nil {
-			return cs, err
+			return nil, err
 		}
 
 		buffer.WriteString(fmt.Sprintf("\n%s", patchString))
 		patch.Free()
+
+		switch file.Status {
+		case git.DeltaAdded:
+			numAdded++
+		case git.DeltaDeleted:
+			numDeleted++
+		}
+
+		var old []byte
+		var new []byte
+
+		old, err = getFileContentsByOid(repo, file.OldFile.Oid)
+		if err != nil {
+			return nil, err
+		}
+		new, err = getFileContentsByOid(repo, file.NewFile.Oid)
+		if err != nil {
+			return nil, err
+		}
+
+		changesetFiles = ChangesetFiles{
+			Old: string(old),
+			New: string(new),
+		}
+
+		files[file.NewFile.Path] = changesetFiles
+
+		numDiffs++
+
+		return func(hunk git.DiffHunk) (git.DiffForEachLineCallback, error) {
+			return func(line git.DiffLine) error {
+				return nil
+			}, nil
+		}, nil
+
+	}, git.DiffDetailLines)
+
+	if err != nil {
+		return cs, err
 	}
 
 	cs = Changeset{
-		NumDeltas: numDeltas,
-		Diff:      buffer.String(),
+		NumDeltas:  numDeltas,
+		NumAdded:   numAdded,
+		NumDeleted: numDeleted,
+		FullDiff:   buffer.String(),
+		Files:      files,
 	}
 
 	return cs, nil
 
+}
+
+func getFileContentsByOid(repo *git.Repository, oid *git.Oid) (contents []byte, err error) {
+
+	// A hash of 40 zeroes means no file is expected, return nil
+	if oid.String() == "0000000000000000000000000000000000000000" {
+		return nil, err
+	}
+
+	blob, err := repo.LookupBlob(oid)
+	if err != nil {
+		return contents, err
+	}
+	contents = blob.Contents()
+
+	return contents, err
 }
