@@ -865,14 +865,9 @@ func apiGetCommit(w http.ResponseWriter, r *http.Request) {
 
 	hash := vestigo.Param(r, "hash")
 
-	numDeltas, diff, err := diffForCommit(hash)
+	cs, err := diffForCommit(hash)
 
-	patch := Patch{
-		NumDeltas: numDeltas,
-		Diff:      diff,
-	}
-
-	output, err := json.Marshal(patch)
+	output, err := json.Marshal(cs)
 	if err != nil {
 		panic(err)
 	}

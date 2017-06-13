@@ -125,8 +125,10 @@ type Commit struct {
 	Author     *git.Signature `json:"author"`
 }
 
-// Patch holds data about a previous commit, including the full delta
-type Patch struct {
-	NumDeltas int    `json:"num_deltas"`
-	Diff      string `json:"diff"`
+// Changeset holds data about a previous commit, including the full delta
+type Changeset struct {
+	NumDeltas int               `json:"num_deltas"`
+	Diff      string            `json:"diff"`
+	Old       map[string]string `json:"old"`
+	New       map[string]string `json:"new"`
 }
