@@ -127,11 +127,11 @@ type Commit struct {
 
 // Changeset holds data about a previous commit, including the full delta
 type Changeset struct {
-	NumDeltas  int    `json:"num_deltas"`
-	NumAdded   int    `json:"num_added"`
-	NumDeleted int    `json:"num_deleted"`
-	FullDiff   string `json:"full_diff"`
-	Files      map[string]ChangesetFiles
+	NumDeltas  int                       `json:"num_deltas"`
+	NumAdded   int                       `json:"num_added"`
+	NumDeleted int                       `json:"num_deleted"`
+	FullDiff   string                    `json:"full_diff"`
+	Files      map[string]ChangesetFiles `json:"files"`
 }
 
 // ChangesetFiles holds a copy of the file before and after the change
