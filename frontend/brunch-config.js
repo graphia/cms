@@ -19,7 +19,8 @@ exports.paths = {
 	watched: [
 		'src',
 		'node_modules/simplemde/dist',
-		'node_modules/bootstrap/dist'
+		'node_modules/bootstrap/dist',
+		'node_modules/text-diff'
 	]
 };
 

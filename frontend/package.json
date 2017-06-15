@@ -28,6 +28,7 @@
     "brunch": "^2",
     "clean-css-brunch": "^2",
     "sass-brunch": "^2.10.4",
+    "text-diff": "^1.0.1",
     "uglify-js-brunch": "^2",
     "vue": "^2.3.0",
     "vue-brunch": "^2.0.1",

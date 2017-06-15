@@ -12,6 +12,7 @@ import DocumentShow from '../components/DocumentShow.vue';
 import DocumentEdit from '../components/DocumentEdit.vue';
 import DocumentNew from '../components/DocumentNew.vue';
 import Commit from '../components/Commit.vue';
+import CommitFile from '../components/Commit/File.vue';
 
 // Authentication Helpers
 import CMSAuth from './auth.js';
