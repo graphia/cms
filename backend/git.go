@@ -221,6 +221,9 @@ func diffForCommit(hash string) (cs Changeset, err error) {
 		NumDeleted: numDeleted,
 		FullDiff:   buffer.String(),
 		Files:      files,
+		Message:    commit.Message(),
+		Author:     commit.Author(),
+		Hash:       commit.Id().String(),
 	}
 
 	return cs, nil

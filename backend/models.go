@@ -132,6 +132,9 @@ type Changeset struct {
 	NumDeleted int                       `json:"num_deleted"`
 	FullDiff   string                    `json:"full_diff"`
 	Files      map[string]ChangesetFiles `json:"files"`
+	Message    string                    `json:"message"`
+	Author     *git.Signature            `json:"author"`
+	Hash       string                    `json:"hash"`
 }
 
 // ChangesetFiles holds a copy of the file before and after the change

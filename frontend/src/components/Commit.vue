@@ -2,8 +2,18 @@
 	<div>
 		<h1>Commit</h1>
 
-		<pre v-html="this.full_diff">
-		</pre>
+		<dl class="row">
+
+			<dt class="col-sm-3">Commit ID</dt>
+			<dd class="col-sm-9">{{ this.commit.hash }}</dd>
+
+			<dt class="col-sm-3">Author</dt>
+			<dd class="col-sm-9"><a :href="`mailto:${this.commit.author.Email}`">{{ this.commit.author.Name }}</a></dd>
+
+			<dt class="col-sm-3">Message</dt>
+			<dd class="col-sm-9">{{ this.commit.message }}</a></dd>
+
+		</dl>
 
 		<ol>
 			<li v-for="(item, key, index) in files">
@@ -26,8 +36,7 @@
 		name: "Commit",
 		data() {
 			return {
-				commit: {},
-				full_diff: null
+				commit: {}
 			}
 		},
 		computed: {
@@ -61,11 +70,6 @@
 				let json = await response.json()
 
 				this.commit = json;
-
-
-			},
-			setupDiff() {
-				console.log("setting up diff");
 
 
 			}
