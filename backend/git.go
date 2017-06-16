@@ -227,6 +227,7 @@ func diffForCommit(hash string) (cs Changeset, err error) {
 		Message:    commit.Message(),
 		Author:     commit.Author(),
 		Hash:       commit.Id().String(),
+		Time:       commit.Committer().When,
 	}
 
 	return cs, nil

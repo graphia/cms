@@ -135,6 +135,7 @@ type Changeset struct {
 	Message    string                    `json:"message"`
 	Author     *git.Signature            `json:"author"`
 	Hash       string                    `json:"hash"`
+	Time       time.Time                 `json:"timestamp"`
 }
 
 // ChangesetFiles holds a copy of the file before and after the change

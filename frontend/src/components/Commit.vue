@@ -13,6 +13,9 @@
 			<dt class="col-sm-3">Message</dt>
 			<dd class="col-sm-9">{{ this.commit.message }}</a></dd>
 
+			<dt class="col-sm-3">Time</dt>
+			<dd class="col-sm-9">{{ this.commitTime }}</a></dd>
+
 		</dl>
 
 		<ol>
@@ -20,7 +23,6 @@
 				<CommitFile :path='key' :files='item'/>
 			</li>
 		</ol>
-
 
 	</div>
 
@@ -56,6 +58,14 @@
 			committerEmailAddress() {
 				try {
 					return this.commit.author.Email;
+				} catch(err) {
+					return "None found";
+				}
+			},
+			commitTime() {
+				try {
+					let d = new Date(Date.parse(this.commit.timestamp));
+					return d.toLocaleString();
 				} catch(err) {
 					return "None found";
 				}
