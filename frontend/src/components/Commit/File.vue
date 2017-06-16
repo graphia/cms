@@ -71,7 +71,6 @@
 			this.oldFilePresent = !!this.oldFile;
 			this.newFilePresent = !!this.newFile;
 
-
 			if (this.oldFilePresent && this.newFilePresent) {
 				console.log("oldFile and newFile present, creating a diff");
 				this.setupDiff(this.oldFile, this.newFile);
@@ -92,24 +91,28 @@
 
 <style lang="scss">
 
+	// updates/modifications
 	$color-updated: #001f3f;
 	$color-updated-bg: lighten($color-updated, 85%);
 
-
+	// deletions
 	$color-deleted: #FF4136;
 	$color-deleted-bg: lighten($color-deleted, 35%);
 	$color-deleted-diff-bg: lighten($color-deleted, 25%);
 
-
+	// creation
 	$color-created: #3D9970;
 	$color-created-bg: lighten($color-created, 50%);
 	$color-created-diff-bg: lighten($color-created, 25%);
 
-
-
 	div.file {
+
 		h2 > code {
 			font-size: 86%;
+		}
+
+		pre {
+			white-space: pre-wrap !important;
 		}
 	}
 

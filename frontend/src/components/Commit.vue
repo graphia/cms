@@ -8,7 +8,7 @@
 			<dd class="col-sm-9">{{ this.commit.hash }}</dd>
 
 			<dt class="col-sm-3">Author</dt>
-			<dd class="col-sm-9"><a :href="`mailto:${this.commit.author.Email}`">{{ this.commit.author.Name }}</a></dd>
+			<dd class="col-sm-9"><a :href="`mailto:${this.committerEmailAddress}`">{{ this.committerName }}</a></dd>
 
 			<dt class="col-sm-3">Message</dt>
 			<dd class="col-sm-9">{{ this.commit.message }}</a></dd>
@@ -45,19 +45,31 @@
 			},
 			files() {
 				return this.commit.files;
+			},
+			committerName() {
+				try {
+					return this.commit.author.Name;
+				} catch(err) {
+					return "None found";
+				}
+			},
+			committerEmailAddress() {
+				try {
+					return this.commit.author.Email;
+				} catch(err) {
+					return "None found";
+				}
 			}
 		},
-		async created() {
+		created() {
 			console.debug("created");
-			await this.retrievePatch(this.hash);
-			this.setupDiff();
+			this.retrievePatch(this.hash);
 		},
 		components: {
 			CommitFile
 		},
 		methods: {
 			async retrievePatch() {
-				console.debug("got here");
 
 				let path = `${config.api}/commits/${this.hash}`;
 
@@ -70,8 +82,6 @@
 				let json = await response.json()
 
 				this.commit = json;
-
-
 			}
 		}
 	};

@@ -122,11 +122,14 @@ func diffForCommit(hash string) (cs Changeset, err error) {
 	if err != nil {
 		return cs, err
 	}
+	defer commit.Free()
 
 	commitTree, err := commit.Tree()
 	if err != nil {
 		return cs, err
 	}
+	defer commitTree.Free()
+
 	options, err := git.DefaultDiffOptions()
 	if err != nil {
 		return cs, err
@@ -163,6 +166,9 @@ func diffForCommit(hash string) (cs Changeset, err error) {
 	err = gitDiff.ForEach(func(file git.DiffDelta, progress float64) (git.DiffForEachHunkCallback, error) {
 
 		patch, err := gitDiff.Patch(numDiffs)
+		// increment counter as we loop through
+		numDiffs++
+
 		if err != nil {
 			return nil, err
 		}
@@ -182,8 +188,7 @@ func diffForCommit(hash string) (cs Changeset, err error) {
 			numDeleted++
 		}
 
-		var old []byte
-		var new []byte
+		var old, new []byte
 
 		old, err = getFileContentsByOid(repo, file.OldFile.Oid)
 		if err != nil {
@@ -200,8 +205,6 @@ func diffForCommit(hash string) (cs Changeset, err error) {
 		}
 
 		files[file.NewFile.Path] = changesetFiles
-
-		numDiffs++
 
 		return func(hunk git.DiffHunk) (git.DiffForEachLineCallback, error) {
 			return func(line git.DiffLine) error {
