@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<div class="commit">
 		<h1>Commit</h1>
 
 		<dl class="row">
@@ -96,3 +96,13 @@
 		}
 	};
 </script>
+
+<style lang="scss">
+	div.commit {
+		max-width: 60em;
+
+		ol {
+			list-style: none;
+		}
+	}
+</style>
