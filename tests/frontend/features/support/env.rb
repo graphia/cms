@@ -53,9 +53,9 @@ Capybara.register_driver :firefox do |app|
 end
 
 Capybara.configure do |c|
-  c.default_driver = :headless_chrome
+  #c.default_driver = :headless_chrome
   #c.default_driver = :firefox
-  #c.default_driver = :chrome
+  c.default_driver = :chrome
   c.app_host = "http://localhost:9095"
 end
 

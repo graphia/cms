@@ -7,6 +7,7 @@
 	>
 
 		<h2 class="card-header">
+			<octicon :icon-name="this.icon">omg</octicon>
 			<code>{{ this.path }}</code>
 		</h2>
 
@@ -15,17 +16,14 @@
 			<!-- file content display, different content shown depending on the git operation -->
 
 			<div v-if="this.fileUpdated">
-				<h3 class="card-subtitle">File updated</h3>
 				<pre v-html="this.diff"/>
 			</div>
 
 			<div v-else-if="this.fileCreated" class="file-created">
-				<h3 class="card-subtitle">File Created</h3>
 				<pre>{{ this.newFile }}</pre>
 			</div>
 
 			<div v-else-if="this.fileDeleted" class="file-deleted">
-				<h3 class="card-subtitle">File Deleted</h3>
 				<pre>{{ this.oldFile }}</pre>
 			</div>
 
@@ -60,6 +58,23 @@
 			},
 			fileDeleted() {
 				return (this.oldFilePresent && !this.newFilePresent);
+			},
+			icon() {
+				let text = null;
+
+				switch (true) {
+					case this.fileUpdated:
+						text = "diff-modified";
+						break;
+					case this.fileCreated:
+						text = "diff-added";
+						break;
+					case this.fileDeleted:
+						text = "diff-removed";
+						break;
+				};
+
+				return text;
 			}
 		},
 
@@ -108,7 +123,8 @@
 	div.file {
 
 		h2 > code {
-			font-size: 86%;
+			font-size: 70%;
+			color: inherit !important;
 		}
 
 		pre {
@@ -122,10 +138,10 @@
 
 			h2 {
 				background-color: $color-updated-bg;
+				color: $color-updated;
 
 				code {
 					background-color: $color-updated-bg;
-					color: $color-updated;
 				}
 			}
 
@@ -150,10 +166,11 @@
 
 			h2 {
 				background-color: $color-created-bg;
+				color: $color-created;
 
 				code {
 					background-color: $color-created-bg;
-					color: $color-created;
+
 				}
 			}
 
@@ -167,10 +184,11 @@
 			h2 {
 
 				background-color: $color-deleted-bg;
+				color: $color-deleted;
 
 				code {
 					background-color: $color-deleted-bg;
-					color: $color-deleted;
+
 				}
 			}
 

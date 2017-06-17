@@ -105,7 +105,11 @@
 
 		ol.files {
 			list-style: none;
-			padding: 0em;
+			padding-left: 0em;
+
+			li {
+				margin-bottom: 1em;
+			}
 		}
 	}
 </style>

@@ -105,3 +105,9 @@ Then %r{^it should contain a colourised diff showing changes made$} do
     expect(page.find("pre del")).to have_content("Romeo and Juliet")
   end
 end
+
+Then %r{^the diff '(.*)' icon should be visible$} do |context|
+  within("div.card.file h2") do
+    expect(page).to have_css("svg.octicon-diff-#{context}")
+  end
+end

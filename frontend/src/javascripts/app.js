@@ -13,6 +13,7 @@ import DocumentEdit from '../components/DocumentEdit.vue';
 import DocumentNew from '../components/DocumentNew.vue';
 import Commit from '../components/Commit.vue';
 import CommitFile from '../components/Commit/File.vue';
+import Octicon from '../components/utilities/Octicon.vue';
 
 // Authentication Helpers
 import CMSAuth from './auth.js';
@@ -21,6 +22,8 @@ import CMSAuth from './auth.js';
 import store from './store.js';
 import SimpleMDE from 'simplemde';
 
+// Vue Octicons
+Vue.component('octicon', Octicon);
 Vue.use(VueRouter);
 
 const routes = [

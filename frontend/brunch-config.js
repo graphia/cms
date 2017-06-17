@@ -20,6 +20,7 @@ exports.paths = {
 		'src',
 		'node_modules/simplemde/dist',
 		'node_modules/bootstrap/dist',
+		'node_modules/octicons',
 		'node_modules/text-diff'
 	]
 };
