@@ -1,29 +1,31 @@
 <template>
-	<div class="commit">
-		<h1>Commit</h1>
+	<div class="row">
+		<div class="col-md-12 commit">
+			<h1>Commit</h1>
 
-		<dl class="row">
+			<dl class="row">
 
-			<dt class="col-sm-3">Commit ID</dt>
-			<dd class="col-sm-9">{{ this.commit.hash }}</dd>
+				<dt class="col-sm-3">Commit ID</dt>
+				<dd class="col-sm-9">{{ this.commit.hash }}</dd>
 
-			<dt class="col-sm-3">Author</dt>
-			<dd class="col-sm-9"><a :href="`mailto:${this.committerEmailAddress}`">{{ this.committerName }}</a></dd>
+				<dt class="col-sm-3">Author</dt>
+				<dd class="col-sm-9"><a :href="`mailto:${this.committerEmailAddress}`">{{ this.committerName }}</a></dd>
 
-			<dt class="col-sm-3">Message</dt>
-			<dd class="col-sm-9">{{ this.commit.message }}</a></dd>
+				<dt class="col-sm-3">Message</dt>
+				<dd class="col-sm-9">{{ this.commit.message }}</a></dd>
 
-			<dt class="col-sm-3">Time</dt>
-			<dd class="col-sm-9">{{ this.commitTime }}</a></dd>
+				<dt class="col-sm-3">Time</dt>
+				<dd class="col-sm-9">{{ this.commitTime }}</a></dd>
 
-		</dl>
+			</dl>
 
-		<ol>
-			<li v-for="(item, key, index) in files">
-				<CommitFile :path='key' :files='item'/>
-			</li>
-		</ol>
+			<ol class="files">
+				<li v-for="(item, key, index) in files">
+					<CommitFile :path='key' :files='item'/>
+				</li>
+			</ol>
 
+		</div>
 	</div>
 
 </template>
@@ -101,8 +103,9 @@
 	div.commit {
 		max-width: 60em;
 
-		ol {
+		ol.files {
 			list-style: none;
+			padding: 0em;
 		}
 	}
 </style>

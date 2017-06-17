@@ -98,12 +98,12 @@
 	// deletions
 	$color-deleted: #FF4136;
 	$color-deleted-bg: lighten($color-deleted, 35%);
-	$color-deleted-diff-bg: lighten($color-deleted, 25%);
+	$color-deleted-diff-bg: lighten($color-deleted, 35%);
 
 	// creation
 	$color-created: #3D9970;
 	$color-created-bg: lighten($color-created, 50%);
-	$color-created-diff-bg: lighten($color-created, 25%);
+	$color-created-diff-bg: lighten($color-created, 50%);
 
 	div.file {
 
