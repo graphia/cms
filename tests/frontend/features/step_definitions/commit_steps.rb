@@ -1,3 +1,18 @@
+def modify_file(path)
+  @modified_document = <<~CONTENTS
+    ---
+    title: Bart's Friend Falls in Love
+    author: Jay Kogen & Wallace Wolodarsky
+    ---
+    # We started out like Kirk and Luann…
+
+    …but it ended in tragedy.
+  CONTENTS
+
+  File.write(path, @modified_document)
+end
+
+
 Given %r{^I have added a new file$} do
   g = Git.open(REPO_PATH)
 
@@ -63,20 +78,9 @@ Given %r{^I have made changes to an existing file$} do
   g.config('user.name', 'Constance Harm')
   g.config('user.email', 'constance.harm@springfield.court.us')
 
-  @modified_document = <<~CONTENTS
-    ---
-    title: Bart's Friend Falls in Love
-    author: Jay Kogen & Wallace Wolodarsky
-    ---
-    # We started out like Kirk and Luann…
-
-    …but it ended in tragedy.
-  CONTENTS
-
-  File.write(File.join(REPO_PATH, "documents", "s03e23.md"), @modified_document)
+  modify_file(File.join(REPO_PATH, "documents", "s03e23.md"))
 
   g.add(all: true)
-
   g.commit("Switched Romeo and Juliet for Kirk and Luann")
 
   # get the hash of the latest commit (the one right above!)
@@ -109,5 +113,29 @@ end
 Then %r{^the diff '(.*)' icon should be visible$} do |context|
   within("div.card.file h2") do
     expect(page).to have_css("svg.octicon-diff-#{context}")
+  end
+end
+
+Given %r{^I have modified one file and removed another in a single commit$} do
+
+  step "I have added a new file"
+  g = Git.open(REPO_PATH)
+
+  # Set some committer info
+  g.config('user.name', 'Lenny Leonard')
+  g.config('user.email', 'lenny.leonard@nuclear.springfield.com')
+
+  modify_file(File.join(REPO_PATH, "documents", "s03e23.md"))
+
+  g.remove(File.join("documents", "document_1.md"))
+
+  g.add(all: true)
+  g.commit("Various changes")
+  @hash = g.log.first.to_s
+end
+
+Then %r{^I should see two file sections, one for each affected file$} do
+  within("ol.files") do
+    expect(page).to have_css("div.card.file", count: 2)
   end
 end
