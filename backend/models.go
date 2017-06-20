@@ -123,6 +123,17 @@ type Commit struct {
 	ID         string         `json:"id"`
 	ObjectType string         `json:"object_type"`
 	Author     *git.Signature `json:"author"`
+	Time       time.Time      `json:"timestamp"`
+}
+
+// HistoricCommit is a commit used as part of a log
+type HistoricCommit struct {
+	EntryID    string         `json:"entry"`
+	Message    string         `json:"message"`
+	ID         string         `json:"id"`
+	ObjectType string         `json:"object_type"`
+	Author     *git.Signature `json:"author"`
+	Time       time.Time      `json:"timestamp"`
 }
 
 // Changeset holds data about a previous commit, including the full delta

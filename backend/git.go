@@ -249,3 +249,70 @@ func getFileContentsByOid(repo *git.Repository, oid *git.Oid) (contents []byte, 
 
 	return contents, err
 }
+
+func getFileHistory(repo *git.Repository, path string, size int) ([]HistoricCommit, error) {
+
+	if len(path) == 0 {
+		return nil, nil
+	}
+	var err error
+
+	revwalk, err := repo.Walk()
+	if err != nil {
+		return nil, err
+	}
+	defer revwalk.Free()
+
+	err = revwalk.PushHead()
+	if err != nil {
+		return nil, err
+	}
+
+	revwalk.Sorting(git.SortTime)
+
+	var entry *git.TreeEntry
+	var fh []HistoricCommit
+
+	err = revwalk.Iterate(func(commit *git.Commit) bool {
+		defer commit.Free()
+
+		tree, err := commit.Tree()
+		if err != nil {
+			Error.Println("Failed to extract tree from commit", tree.Id())
+			return false
+		}
+		defer tree.Free()
+
+		entry, err = tree.EntryByPath(path)
+		if err != nil {
+			Warning.Printf("Cannot find entry '%s' in tree '%s'", path, tree.Id())
+		}
+
+		entry, err = tree.EntryByPath(path)
+
+		var hc HistoricCommit
+
+		if entry != nil {
+
+			hc = HistoricCommit{
+				ID:      commit.Id().String(),
+				EntryID: entry.Id.String(),
+				Message: commit.Message(),
+				Author:  commit.Author(),
+				Time:    commit.Author().When,
+			}
+
+			fh = append(fh, hc)
+
+			if size > 0 && len(fh) >= size {
+				Info.Println("History limit reached, exiting")
+				return false
+			}
+		}
+
+		return true
+	})
+
+	return fh, nil
+
+}

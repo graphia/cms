@@ -5,8 +5,12 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"sort"
 	"testing"
 
+	"time"
+
+	"github.com/graphia/particle"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/libgit2/git2go.v25"
 )
@@ -181,4 +185,234 @@ func TestDiffForCommit(t *testing.T) {
 		assert.Equal(t, cs.Files[path].New, string(contents))
 	}
 
+}
+
+func TestGetFileHistory(t *testing.T) {
+	repoPath := "../tests/tmp/repositories/get_history_test"
+	oid, _ := setupSmallTestRepo(repoPath)
+	repo, _ := repository(config)
+
+	assert.NotNil(t, oid)
+
+	dir := "documents"
+	filename := "history_test.md"
+	path := fmt.Sprintf("%s/%s", dir, filename)
+
+	template := RepoWrite{
+		Filename: filename,
+		Path:     dir,
+		Name:     "Hyman Krustofski",
+		Email:    "hyman@springfieldsynagogue.org",
+		FrontMatter: FrontMatter{
+			Title:  "History Tests",
+			Author: "Helen Lovejoy",
+		},
+	}
+
+	var r1, r2, r3 RepoWrite
+
+	// Revision 1
+	r1 = template
+	r1.Body = "# r1"
+	r1.Message = "r1"
+	oid, _ = createFile(r1)
+	assert.NotNil(t, oid)
+
+	// Revision 2
+	r2 = template
+	r2.Body = "# r2"
+	r2.Message = "r2"
+	oid, _ = updateFile(r2)
+	assert.NotNil(t, oid)
+
+	// Revision 3
+	r3 = template
+	r3.Body = "# r3"
+	r3.Message = "r3"
+	oid, _ = updateFile(r3)
+	assert.NotNil(t, oid)
+
+	var history []HistoricCommit
+
+	history, _ = getFileHistory(repo, path, 3)
+
+	assert.Equal(t, 3, len(history))
+
+	var messages []string
+	for _, commit := range history {
+		messages = append(messages, commit.Message)
+	}
+
+	sort.Strings(messages)
+
+	assert.Equal(
+		t,
+		[]string{
+			"r1",
+			"r2",
+			"r3",
+		},
+		messages,
+	)
+
+	// Check that retrieving a subset of the history also works
+	history, _ = getFileHistory(repo, path, 2)
+	assert.Equal(t, 2, len(history))
+}
+
+func TestGetFileHistorySortsByTime(t *testing.T) {
+	repoPath := "../tests/tmp/repositories/get_history_test"
+	oid, _ := setupSmallTestRepo(repoPath)
+	repo, _ := repository(config)
+
+	template := RepoWrite{
+		Filename: "sort_test.md",
+		Path:     "documents",
+		Name:     "Hyman Krustofski",
+		Email:    "hyman@springfieldsynagogue.org",
+		FrontMatter: FrontMatter{
+			Title:  "History Tests",
+			Author: "Helen Lovejoy",
+		},
+	}
+
+	// Revisions ordered numerically but entered in the wrong order
+	var r1, r2, r3 RepoWrite
+
+	// Revision 2
+	r2 = template
+	r2.Body = "# r2"
+	r2.Message = "r2"
+	oid, _ = writeHistoricFile(repo, r2, time.Date(2016, 1, 1, 14, 0, 0, 0, time.UTC))
+	assert.NotNil(t, oid)
+
+	// Revision 3
+	r3 = template
+	r3.Body = "# r3"
+	r3.Message = "r3"
+	oid, _ = writeHistoricFile(repo, r3, time.Date(2016, 1, 1, 15, 0, 0, 0, time.UTC))
+	assert.NotNil(t, oid)
+
+	// Revision 1
+	r1 = template
+	r1.Body = "# r1"
+	r1.Message = "r1"
+	oid, _ = writeHistoricFile(repo, r1, time.Date(2016, 1, 1, 13, 0, 0, 0, time.UTC))
+	assert.NotNil(t, oid)
+
+	var history []HistoricCommit
+
+	history, _ = getFileHistory(repo, "documents/sort_test.md", 3)
+
+	assert.Equal(t, 3, len(history))
+
+	var messages []string
+	for _, commit := range history {
+		messages = append(messages, commit.Message)
+	}
+
+	assert.Equal(
+		t,
+		[]string{
+			"r3",
+			"r2",
+			"r1",
+		},
+		messages,
+	)
+
+	// Check that retrieving a subset of the history also works
+
+	var subsetMessages []string
+
+	history, _ = getFileHistory(repo, "documents/sort_test.md", 2)
+	assert.Equal(t, 2, len(history))
+
+	for _, commit := range history {
+		subsetMessages = append(subsetMessages, commit.Message)
+	}
+
+	assert.Equal(
+		t,
+		[]string{
+			"r3",
+			"r2",
+		},
+		subsetMessages,
+	)
+
+}
+
+func writeHistoricFile(repo *git.Repository, rw RepoWrite, time time.Time) (oid *git.Oid, err error) {
+
+	index, err := repo.Index()
+	if err != nil {
+		return nil, err
+	}
+	defer index.Free()
+
+	// add frontmatter to the file contents, followed by the document body
+	contents := particle.YAMLEncoding.EncodeToString([]byte(rw.Body), &rw.FrontMatter)
+
+	// and add the combined contents to a blob in the repo
+	oid, err = repo.CreateBlobFromBuffer([]byte(contents))
+	if err != nil {
+		return nil, err
+	}
+
+	// build the git index entry and add it to the index
+	ie := buildIndexEntry(oid, rw)
+
+	err = index.Add(&ie)
+	if err != nil {
+		return nil, err
+	}
+
+	// write the tree, persisting our addition to the git repo
+	treeID, err := index.WriteTree()
+	if err != nil {
+		return nil, err
+	}
+
+	// and use the tree's id to find the actual updated tree
+	tree, err := repo.LookupTree(treeID)
+	if err != nil {
+		return nil, err
+	}
+
+	// find the repository's tip, where we're committing to
+	tip, err := headCommit(repo)
+	if err != nil {
+		return nil, err
+	}
+
+	// git signatures
+	author := historicSign(rw, time)
+	committer := historicSign(rw, time)
+
+	// now commit our updated tree to the tip (parent)
+	oid, err = repo.CreateCommit("HEAD", author, committer, rw.Message, tree, tip)
+	if err != nil {
+		return nil, err
+	}
+
+	// checkout to keep file system in sync with git
+	err = repo.CheckoutHead(
+		&git.CheckoutOpts{Strategy: git.CheckoutSafe | git.CheckoutRecreateMissing | git.CheckoutForce},
+	)
+
+	if err != nil {
+		Error.Println("Could not checkout head:", err.Error())
+	}
+
+	return oid, err
+
+}
+
+func historicSign(rw RepoWrite, time time.Time) *git.Signature {
+	return &git.Signature{
+		Name:  rw.Name,
+		Email: rw.Email,
+		When:  time,
+	}
 }
