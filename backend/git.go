@@ -288,8 +288,6 @@ func getFileHistory(repo *git.Repository, path string, size int) ([]HistoricComm
 			Warning.Printf("Cannot find entry '%s' in tree '%s'", path, tree.Id())
 		}
 
-		entry, err = tree.EntryByPath(path)
-
 		var hc HistoricCommit
 
 		if entry != nil {
