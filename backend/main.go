@@ -157,6 +157,8 @@ func protectedRouter() (r *vestigo.Router) {
 	r.Patch("/api/directories/:directory/files/:file", apiUpdateFileInDirectoryHandler)
 	r.Delete("/api/directories/:directory/files/:file", apiDeleteFileFromDirectoryHandler)
 
+	r.Get("/api/directories/:directory/files/:file/history", apiGetFileHistory)
+
 	r.Get("/api/users", apiListUsers)
 	r.Post("/api/users", apiCreateUser)
 	r.Get("/api/users/:username", apiGetUser)

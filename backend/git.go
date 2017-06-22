@@ -250,7 +250,18 @@ func getFileContentsByOid(repo *git.Repository, oid *git.Oid) (contents []byte, 
 	return contents, err
 }
 
-func getFileHistory(repo *git.Repository, path string, size int) ([]HistoricCommit, error) {
+func getFileHistory(path string, size int) (history []HistoricCommit, err error) {
+	repo, err := repository(config)
+	if err != nil {
+		return history, err
+	}
+
+	history, err = lookupFileHistory(repo, path, size)
+
+	return history, err
+}
+
+func lookupFileHistory(repo *git.Repository, path string, size int) ([]HistoricCommit, error) {
 
 	if len(path) == 0 {
 		return nil, nil

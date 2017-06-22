@@ -13,6 +13,9 @@ import DocumentEdit from '../components/DocumentEdit.vue';
 import DocumentNew from '../components/DocumentNew.vue';
 import Commit from '../components/Commit.vue';
 import CommitFile from '../components/Commit/File.vue';
+import DocumentHistory from '../components/DocumentHistory.vue';
+
+// Utility Components
 import Octicon from '../components/utilities/Octicon.vue';
 
 // Authentication Helpers
@@ -39,7 +42,8 @@ const routes = [
 	{path: '/cms/:directory', component: DocumentIndex, name: 'document_index'},
 	{path: '/cms/:directory/new', component: DocumentNew, name: 'document_new'},
 	{path: '/cms/:directory/:filename', component: DocumentShow, name: 'document_show'},
-	{path: '/cms/:directory/:filename/edit', component: DocumentEdit, name: 'document_edit'}
+	{path: '/cms/:directory/:filename/edit', component: DocumentEdit, name: 'document_edit'},
+	{path: '/cms/:directory/:filename/history', component: DocumentHistory, name: 'document_history'}
 
 ];
 

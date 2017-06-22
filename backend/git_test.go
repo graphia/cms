@@ -187,7 +187,7 @@ func TestDiffForCommit(t *testing.T) {
 
 }
 
-func TestGetFileHistory(t *testing.T) {
+func TestLookupFileHistory(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/get_history_test"
 	oid, _ := setupSmallTestRepo(repoPath)
 	repo, _ := repository(config)
@@ -234,7 +234,7 @@ func TestGetFileHistory(t *testing.T) {
 
 	var history []HistoricCommit
 
-	history, _ = getFileHistory(repo, path, 3)
+	history, _ = lookupFileHistory(repo, path, 3)
 
 	assert.Equal(t, 3, len(history))
 
@@ -256,11 +256,11 @@ func TestGetFileHistory(t *testing.T) {
 	)
 
 	// Check that retrieving a subset of the history also works
-	history, _ = getFileHistory(repo, path, 2)
+	history, _ = lookupFileHistory(repo, path, 2)
 	assert.Equal(t, 2, len(history))
 }
 
-func TestGetFileHistorySortsByTime(t *testing.T) {
+func TestLookupFileHistorySortsByTime(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/get_history_test"
 	oid, _ := setupSmallTestRepo(repoPath)
 	repo, _ := repository(config)
@@ -302,7 +302,7 @@ func TestGetFileHistorySortsByTime(t *testing.T) {
 
 	var history []HistoricCommit
 
-	history, _ = getFileHistory(repo, "documents/sort_test.md", 3)
+	history, _ = lookupFileHistory(repo, "documents/sort_test.md", 3)
 
 	assert.Equal(t, 3, len(history))
 
@@ -325,7 +325,7 @@ func TestGetFileHistorySortsByTime(t *testing.T) {
 
 	var subsetMessages []string
 
-	history, _ = getFileHistory(repo, "documents/sort_test.md", 2)
+	history, _ = lookupFileHistory(repo, "documents/sort_test.md", 2)
 	assert.Equal(t, 2, len(history))
 
 	for _, commit := range history {

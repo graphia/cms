@@ -866,8 +866,32 @@ func apiGetCommit(w http.ResponseWriter, r *http.Request) {
 	hash := vestigo.Param(r, "hash")
 
 	cs, err := diffForCommit(hash)
+	if err != nil {
+		panic(err)
+	}
 
 	output, err := json.Marshal(cs)
+	if err != nil {
+		panic(err)
+	}
+
+	w.WriteHeader(200)
+	w.Write(output)
+
+}
+
+func apiGetFileHistory(w http.ResponseWriter, r *http.Request) {
+	directory := vestigo.Param(r, "directory")
+	filename := vestigo.Param(r, "file")
+
+	path := fmt.Sprintf("%s/%s", directory, filename)
+
+	history, err := getFileHistory(path, 10)
+	if err != nil {
+		panic(err)
+	}
+
+	output, err := json.Marshal(history)
 	if err != nil {
 		panic(err)
 	}
