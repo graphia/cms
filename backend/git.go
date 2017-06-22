@@ -301,7 +301,12 @@ func lookupFileHistory(repo *git.Repository, path string, size int) ([]HistoricC
 
 		var hc HistoricCommit
 
-		if entry != nil {
+		if entry != nil && err == nil {
+
+			// make sure the file (entry) we're looking for is present in this commit
+			if len(fh) > 0 && fh[len(fh)-1].EntryID == entry.Id.String() {
+				fh = fh[:len(fh)-1]
+			}
 
 			hc = HistoricCommit{
 				ID:      commit.Id().String(),

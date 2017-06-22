@@ -343,6 +343,73 @@ func TestLookupFileHistorySortsByTime(t *testing.T) {
 
 }
 
+func TestLookupFileHistoryOnlyReturnsRelevantCommits(t *testing.T) {
+	repoPath := "../tests/tmp/repositories/get_history_test"
+	oid, _ := setupSmallTestRepo(repoPath)
+	repo, _ := repository(config)
+
+	template := RepoWrite{
+		Path:  "documents",
+		Name:  "Hyman Krustofski",
+		Email: "hyman@springfieldsynagogue.org",
+		FrontMatter: FrontMatter{
+			Title:  "History Tests",
+			Author: "Helen Lovejoy",
+		},
+	}
+
+	// Revisions ordered numerically but entered in the wrong order
+	var r1, r2, r3 RepoWrite
+
+	// Revision 1
+	r1 = template
+	r1.Filename = "document_11.md"
+	r1.Body = "# r1"
+	r1.Message = "r1"
+	oid, _ = createFile(r1)
+	assert.NotNil(t, oid)
+
+	// Revision 2 (unrelated)
+	r2 = template
+	r2.Filename = "document_12.md"
+	r2.Body = "# r2"
+	r2.Message = "r2"
+	oid, _ = createFile(r2)
+	assert.NotNil(t, oid)
+
+	// Revision 1
+	r3 = template
+	r3.Filename = "document_11.md"
+	r3.Body = "# r3"
+	r3.Message = "r3"
+	oid, _ = updateFile(r3)
+	assert.NotNil(t, oid)
+
+	var history []HistoricCommit
+
+	history, _ = lookupFileHistory(repo, "documents/document_11.md", 2)
+
+	assert.Equal(t, 2, len(history))
+
+	var messages []string
+	for _, commit := range history {
+		messages = append(messages, commit.Message)
+	}
+
+	// r2 shouldn't be present because it refers to 'documents/document_12.md'
+	assert.Equal(
+		t,
+		[]string{
+			"r3",
+			"r1",
+		},
+		messages,
+	)
+
+}
+
+// Utility functions
+
 func writeHistoricFile(repo *git.Repository, rw RepoWrite, time time.Time) (oid *git.Oid, err error) {
 
 	index, err := repo.Index()
