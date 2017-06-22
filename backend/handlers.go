@@ -896,6 +896,7 @@ func apiGetFileHistory(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	w.Write(output)
 

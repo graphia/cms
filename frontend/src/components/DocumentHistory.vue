@@ -1,12 +1,35 @@
 <template>
-	<div>
-		<h1>History</h1>
+	<div class="row history">
 
-		<ol>
-			<li v-for="item in history">
-				{{ item.message }}
-			</li>
-		</ol>
+
+		<div class="col-sm-12">
+
+			<h1>History</h1>
+
+			<ol class="commit-list">
+				<li class="commit-list-item" v-for="item in history">
+					<div class="card">
+
+						<div class="card-header">
+							{{ item.author.When | format_date }}
+						</div>
+
+						<div class="card-block">
+
+							<p class="card-text">
+								{{ item.message }}
+							</p>
+
+							<a class="card-link" :href="`mailto:${item.author.Email}`">{{ item.author.Name }}</a>
+							<router-link class="card-link" :to="{name: 'commit', params: {hash: item.id}}">View changes</router-link>
+
+						</div>
+					</div>
+
+				</li>
+			</ol>
+
+		</div>
 	</div>
 </template>
 
@@ -52,3 +75,19 @@
 		}
 	};
 </script>
+
+<style lang="scss">
+
+	div.history {
+		max-width: 60em;
+
+		ol.commit-list {
+			list-style: none;
+			padding-left: 0em;
+
+			li {
+				margin-bottom: 1em;
+			}
+		}
+	}
+</style>

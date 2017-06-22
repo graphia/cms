@@ -84,6 +84,11 @@ router.onError((err) => {
 	}
 })
 
+Vue.filter('format_date', (value) => {
+	let d = new Date(Date.parse(value));
+	return d.toLocaleString();
+});
+
 var app = new Vue({
 	el: "#app",
 	store,
