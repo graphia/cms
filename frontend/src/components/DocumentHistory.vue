@@ -21,7 +21,7 @@
 							</p>
 
 							<a class="card-link" :href="`mailto:${item.author.Email}`">{{ item.author.Name }}</a>
-							<router-link class="card-link" :to="{name: 'commit', params: {hash: item.id}}">View changes</router-link>
+							<router-link class="card-link" :to="{name: 'commit', params: {hash: item.id}}">View entire commit</router-link>
 
 						</div>
 					</div>

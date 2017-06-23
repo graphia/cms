@@ -118,7 +118,7 @@
 	// creation
 	$color-created: #3D9970;
 	$color-created-bg: lighten($color-created, 50%);
-	$color-created-diff-bg: lighten($color-created, 50%);
+	$color-created-diff-bg: lighten($color-created, 40%);
 
 	div.file {
 

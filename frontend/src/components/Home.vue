@@ -10,9 +10,9 @@
 
 					<ol class="list-group list-group-flush">
 						<li class="recent-commit-info list-group-item" v-for="commit in commits">
-							<a :href="`/cms/commits/${commit.id}`">
+							<router-link :to="{name: 'commit', params: {hash: commit.id}}">
 								{{ commit.message || "Empty commit message" }}
-							</a>
+							</router-link>
 							<p class="card-text">
 								<small>{{ commit.author.Name }} committed 2 minutes ago</small>
 							</p>
