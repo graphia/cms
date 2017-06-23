@@ -128,6 +128,12 @@ func setupSubdirsTestRepo(dest string) (oid *git.Oid, err error) {
 	return
 }
 
+func setupMultipleFiletypesTestRepo(dest string) (oid *git.Oid, err error) {
+	src := "../tests/backend/repositories/multiple_filetypes"
+	oid, err = setupTestRepo(src, dest)
+	return
+}
+
 func setupTestRepo(src, dest string) (oid *git.Oid, err error) {
 
 	// copy the small repo skeleton to specified path
@@ -162,6 +168,8 @@ func setupTestRepo(src, dest string) (oid *git.Oid, err error) {
 		[]string{
 			filepath.Join("appendices", "*.md"),
 			filepath.Join("documents", "*.md"),
+			filepath.Join("documents", "document_1", "*.*"),
+			filepath.Join("appendices", "appendix_1", "*.*"),
 		},
 		git.IndexAddForce,
 		nil,
@@ -192,9 +200,10 @@ func setupTestRepo(src, dest string) (oid *git.Oid, err error) {
 	}
 
 	// initialise a config obj so createFile looks in the right place
-	config = Config{
-		Repository: filepath.Join(dest),
-	}
+
+	testConfigPath := "../config/test.yml"
+	config, err = loadConfig(&testConfigPath)
+	config.Repository = filepath.Join(dest)
 
 	return oid, err
 }

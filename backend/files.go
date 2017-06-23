@@ -659,3 +659,55 @@ func getRawFile(directory, filename string) (file *File, err error) {
 	}
 	return
 }
+
+func countFiles() (counter map[string]int, err error) {
+	repo, err := repository(config)
+	if err != nil {
+		return counter, err
+	}
+
+	ht, err := headTree(repo)
+	if err != nil {
+		return counter, err
+	}
+
+	defer ht.Free()
+
+	counter = make(map[string]int)
+	fileCategoryLookup := make(map[string]string)
+
+	// initialise a 'catch all' counter called other at 0
+	counter["other"] = 0
+
+	// loop through file categories and build
+	// counter and lookup map
+	for category, filetypes := range config.FileCategories {
+		counter[category] = 0
+
+		for _, filetype := range filetypes {
+			fileCategoryLookup[filetype] = category
+		}
+	}
+
+	walkIterator := func(_ string, te *git.TreeEntry) int {
+
+		var ext, fc string
+
+		if te.Type == git.ObjectBlob {
+			ext = filepath.Ext(te.Name)
+			fc = fileCategoryLookup[ext]
+
+			if fc != "" {
+				counter[fc]++
+			} else {
+				counter["other"]++
+			}
+		}
+
+		return 0
+	}
+
+	err = ht.Walk(walkIterator)
+
+	return counter, err
+}
