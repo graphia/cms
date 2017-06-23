@@ -22,10 +22,23 @@
 			</div>
 
 			<div class="col-md-6">
-				<div class="card">
+				<div class="card statistics">
 					<div class="card-block">
 						<h4 class="card-title">Statistics</h4>
+
+						<dl class="row">
+							<dt class="col-sm-2">Users</dt>
+							<dd class="col-sm-10">4</dd>
+
+							<dt class="col-sm-2">Commits</dt>
+							<dd class="col-sm-10">38</dd>
+
+							<dt class="col-sm-2">Files</dt>
+							<dd class="col-sm-10">12</dd>
+						</dl>
+
 					</div>
+
 				</div>
 			</div>
 		</div>
@@ -112,4 +125,8 @@
 </script>
 
 <style lang="scss" scoped>
+
+	.card.statistics dl {
+		margin-bottom: 0rem;
+	}
 </style>
