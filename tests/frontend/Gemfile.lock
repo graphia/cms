@@ -64,12 +64,10 @@ GEM
       rspec-support (~> 3.6.0)
     rspec-support (3.6.0)
     rubyzip (1.2.1)
-    selenium-webdriver (3.4.0)
+    selenium-webdriver (3.4.3)
       childprocess (~> 0.5)
       rubyzip (~> 1.0)
-      websocket (~> 1.0)
     slop (3.6.0)
-    websocket (1.2.4)
     xpath (2.1.0)
       nokogiri (~> 1.3)
 

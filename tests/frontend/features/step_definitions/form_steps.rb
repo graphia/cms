@@ -20,7 +20,7 @@ end
 
 When %r{^I submit the form$} do
   within("form") do
-    find("input[type='submit']").click
+    find("input[type='submit']").native.send_keys(:enter)
   end
 end
 
