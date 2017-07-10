@@ -210,6 +210,7 @@ func createEmptyFile(rw RepoWrite) (oid *git.Oid, err error) {
 
 }
 
+// FIXME deprecate, superseded by updateFiles
 // TODO how do we know that a commit hasn't been made in
 // between us serving and receiving the update?
 func updateFile(rw RepoWrite) (oid *git.Oid, err error) {
@@ -239,6 +240,24 @@ func updateFile(rw RepoWrite) (oid *git.Oid, err error) {
 
 	return oid, err
 
+}
+
+// Replaces updateFile
+func updateFiles(rw NewRepoWrite) (oid *git.Oid, err error) {
+
+	repo, err := repository(config)
+	if err != nil {
+		return nil, err
+	}
+	defer repo.Free()
+
+	oid, err = writeFiles(repo, rw)
+	if err != nil {
+		Error.Println("Failed to writeFiles", rw, err)
+		panic(err)
+	}
+
+	return oid, err
 }
 
 func writeFile(repo *git.Repository, rw RepoWrite) (oid *git.Oid, err error) {
@@ -302,6 +321,78 @@ func writeFile(repo *git.Repository, rw RepoWrite) (oid *git.Oid, err error) {
 
 	if err != nil {
 		Error.Println("Could not checkout head:", err.Error())
+	}
+
+	return oid, err
+
+}
+
+func writeFiles(repo *git.Repository, rw NewRepoWrite) (oid *git.Oid, err error) {
+
+	index, err := repo.Index()
+	if err != nil {
+		return nil, err
+	}
+	defer index.Free()
+
+	var contents string
+
+	for _, fw := range rw.Files {
+
+		var ie git.IndexEntry
+
+		contents = particle.YAMLEncoding.EncodeToString([]byte(fw.Body), &fw.FrontMatter)
+
+		oid, err = repo.CreateBlobFromBuffer([]byte(contents))
+		if err != nil {
+			return nil, err
+		}
+
+		// build the git index entry and add it to the index
+		ie = newBuildIndexEntry(oid, fw)
+
+		Debug.Println("IndexEntry", ie)
+		err = index.Add(&ie)
+		if err != nil {
+			return nil, err
+		}
+
+	}
+
+	// write the tree, persisting our addition to the git repo
+	treeID, err := index.WriteTree()
+	if err != nil {
+		return nil, err
+	}
+
+	// and use the tree's id to find the actual updated tree
+	tree, err := repo.LookupTree(treeID)
+	if err != nil {
+		return nil, err
+	}
+
+	// find the repository's tip, where we're committing to
+	tip, err := headCommit(repo)
+	if err != nil {
+		return nil, err
+	}
+
+	author := &git.Signature{
+		Name:  rw.Name,
+		Email: rw.Email,
+		When:  time.Now(),
+	}
+
+	committer := &git.Signature{
+		Name:  rw.Name,
+		Email: rw.Email,
+		When:  time.Now(),
+	}
+
+	// now commit our updated tree to the tip (parent)
+	oid, err = repo.CreateCommit("HEAD", author, committer, rw.Message, tree, tip)
+	if err != nil {
+		return nil, err
 	}
 
 	return oid, err
@@ -581,6 +672,21 @@ func buildIndexEntry(oid *git.Oid, rw RepoWrite) git.IndexEntry {
 		Id:   oid,
 		Path: filepath.Join(rw.Path, rw.Filename),
 		Size: uint32(len(rw.Body)),
+
+		Ctime: git.IndexTime{},
+		Gid:   uint32(os.Getgid()),
+		Uid:   uint32(os.Getuid()),
+		Mode:  git.FilemodeBlob,
+		Mtime: git.IndexTime{},
+	}
+}
+
+// Temporary, replace buildIndexEntry
+func newBuildIndexEntry(oid *git.Oid, fw FileWrite) git.IndexEntry {
+	return git.IndexEntry{
+		Id:   oid,
+		Path: filepath.Join(fw.Path, fw.Filename),
+		Size: uint32(len(fw.Body)),
 
 		Ctime: git.IndexTime{},
 		Gid:   uint32(os.Getgid()),

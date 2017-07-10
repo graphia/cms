@@ -18,6 +18,23 @@ type RepoWrite struct {
 	FrontMatter FrontMatter
 }
 
+// NewRepoWrite will replace RepoWrite and allow multiple files
+type NewRepoWrite struct {
+	Message string      `json:"message"`
+	Name    string      `json:"name"`
+	Email   string      `json:"email"`
+	Files   []FileWrite `json:"files"`
+}
+
+// FileWrite will replace RepoWrite's file attributes
+type FileWrite struct {
+	Filename    string      `json:"filename"`
+	Extension   string      `json:"extension"`
+	Path        string      `json:"path"`
+	Body        string      `json:"body"`
+	FrontMatter FrontMatter `json:"frontmatter"`
+}
+
 // Response is a general response containing arbitrary data
 type Response struct {
 	Data string `json:"data"`
