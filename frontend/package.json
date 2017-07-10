@@ -14,8 +14,10 @@
     "babel-polyfill": "^6.23.0",
     "bootstrap": "^4.0.0-alpha.6",
     "jwt-decode": "^2.2.0",
+    "octicons": "^5.0.1",
     "remarkable": "^1.7.1",
-    "simplemde": "^1.11.2"
+    "simplemde": "^1.11.2",
+    "vue-octicons": "^0.1.7"
   },
   "devDependencies": {
     "auto-reload-brunch": "^2",
@@ -28,6 +30,7 @@
     "brunch": "^2",
     "clean-css-brunch": "^2",
     "sass-brunch": "^2.10.4",
+    "text-diff": "^1.0.1",
     "uglify-js-brunch": "^2",
     "vue": "^2.3.0",
     "vue-brunch": "^2.0.1",

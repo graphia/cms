@@ -1,5 +1,6 @@
-import config from '../javascripts/config.js';
-import store from '../javascripts/store.js';
+import config from './config.js';
+import store from './store.js';
+import checkResponse from './response.js';
 
 export default class CMSPublisher {
 
@@ -11,7 +12,8 @@ export default class CMSPublisher {
 			console.warn("already publishing, abort");
 			return;
 		};
-		console.debug("Publishing");
+
+		console.debug("Attempting to publish");
 
 		let response = await fetch(`${config.api}/publish`, {
 			method: "POST",
@@ -19,16 +21,15 @@ export default class CMSPublisher {
 			headers: store.state.auth.authHeader()
 		});
 
-		if (response.status != 200) {
-			console.error("Failed to publish", response)
-			return
+		if (!checkResponse(response.status)) {
+			console.error("Publishing failed", response);
+			return;
 		};
 
 		console.log("Publishing succeeded");
 
 		return;
 
-	}
+	};
 
-
-}
+};

@@ -144,6 +144,8 @@ func protectedRouter() (r *vestigo.Router) {
 
 	// directory endpoints
 	r.Get("/api/directories", apiListDirectoriesHandler)
+	r.Get("/api/summary", apiDirectorySummary)
+
 	r.Post("/api/directories", apiCreateDirectoryHandler)
 	r.Delete("/api/directories/:directory", apiDeleteDirectoryHandler)
 
@@ -155,12 +157,19 @@ func protectedRouter() (r *vestigo.Router) {
 	r.Patch("/api/directories/:directory/files/:file", apiUpdateFileInDirectoryHandler)
 	r.Delete("/api/directories/:directory/files/:file", apiDeleteFileFromDirectoryHandler)
 
+	r.Get("/api/directories/:directory/files/:file/history", apiGetFileHistory)
+
 	r.Get("/api/users", apiListUsers)
 	r.Post("/api/users", apiCreateUser)
 	r.Get("/api/users/:username", apiGetUser)
 	r.Post("/api/users/:username", apiUpdateUser)
 	r.Delete("/api/users/:username", apiDeleteUser)
 
+	// repo endpoints
+	r.Get("/api/recent_commits", apiGetCommits)
+	r.Get("/api/commits/:hash", apiGetCommit)
+
+	// cms endpoints
 	r.Post("/api/publish", apiPublish)
 
 	// missing operations:

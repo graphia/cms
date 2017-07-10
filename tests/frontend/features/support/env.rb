@@ -14,6 +14,8 @@ REPO_PATH = '../tmp/repositories/cucumber'
 REPO_TEMPLATE_PATH = '../backend/repositories/small'
 PID_PATH = '../tmp/cucumber-browser.pid'
 DB_PATH = '../../db/cucumber.db'
+SAMPLES_PATH = '../backend/samples'
+WEB_SERVER_START_ATTEMPTS = 10 # number of 0.1 second delays to wait for server
 
 Capybara.register_driver(:headless_chrome) do |app|
 
@@ -51,9 +53,14 @@ Capybara.register_driver :firefox do |app|
 end
 
 Capybara.configure do |c|
-  #c.default_driver = :headless_chrome
+  if ENV['DRIVER']
+    c.default_driver = ENV['DRIVER'].to_sym
+  else
+    c.default_driver = :headless_chrome
+  end
+
   #c.default_driver = :firefox
-  c.default_driver = :chrome
+  #c.default_driver = :chrome
   c.app_host = "http://localhost:9095"
 end
 
@@ -92,8 +99,24 @@ Before do
     #end
 
   Pathname.new(PID_PATH).write(@pid)
-  visit('/') # wait for the server to be running before contining
 
+  # wait for the server to be running before contining
+  1.upto(WEB_SERVER_START_ATTEMPTS) do |inc|
+    if inc == WEB_SERVER_START_ATTEMPTS
+      fail "Timed out waiting for web server to start"
+    else
+      break if attempt_webserver_call
+      sleep 0.1
+    end
+  end
+
+end
+
+def	attempt_webserver_call
+  Net::HTTP.get('localhost', '/', '9095')
+  true
+rescue Errno::ECONNREFUSED
+  false
 end
 
 After do

@@ -5,3 +5,15 @@ corsenabled: false
 corsorigin: null
 database: ../tests/tmp/databases/test.db
 hugo_config_file: config/hugo.yml
+file_categories:
+  documents:
+    - .md
+  images:
+    - .png
+    - .jpg
+    - .gif
+  structured data:
+    - .xml
+    - .json
+  tabular data:
+    - .csv

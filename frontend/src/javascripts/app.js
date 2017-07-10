@@ -11,6 +11,12 @@ import DocumentIndex from '../components/DocumentIndex.vue';
 import DocumentShow from '../components/DocumentShow.vue';
 import DocumentEdit from '../components/DocumentEdit.vue';
 import DocumentNew from '../components/DocumentNew.vue';
+import Commit from '../components/Commit.vue';
+import CommitFile from '../components/Commit/File.vue';
+import DocumentHistory from '../components/DocumentHistory.vue';
+
+// Utility Components
+import Octicon from '../components/utilities/Octicon.vue';
 
 // Authentication Helpers
 import CMSAuth from './auth.js';
@@ -19,6 +25,8 @@ import CMSAuth from './auth.js';
 import store from './store.js';
 import SimpleMDE from 'simplemde';
 
+// Vue Octicons
+Vue.component('octicon', Octicon);
 Vue.use(VueRouter);
 
 const routes = [
@@ -27,11 +35,16 @@ const routes = [
 	{path: '/cms/login', component: Login, name: 'login'},
 
 	// Protected pages
+
+	{path: '/cms/commits/:hash', component: Commit, name: 'commit'},
+
 	{path: '/cms/', component: Home, name: 'home'},
 	{path: '/cms/:directory', component: DocumentIndex, name: 'document_index'},
 	{path: '/cms/:directory/new', component: DocumentNew, name: 'document_new'},
 	{path: '/cms/:directory/:filename', component: DocumentShow, name: 'document_show'},
-	{path: '/cms/:directory/:filename/edit', component: DocumentEdit, name: 'document_edit'}
+	{path: '/cms/:directory/:filename/edit', component: DocumentEdit, name: 'document_edit'},
+	{path: '/cms/:directory/:filename/history', component: DocumentHistory, name: 'document_history'}
+
 ];
 
 const router = new VueRouter({
@@ -42,7 +55,39 @@ const router = new VueRouter({
 export {router};
 
 // ensure that only logged-in users can continue
-router.beforeEach(store.state.auth.checkLoggedIn);
+router.beforeEach((to, from, next) => {
+
+	console.debug("checking user is accessing a 'safe' path", to.path)
+
+	// is the destination somewhere other than the login page?
+	if (to.path == '/cms/login' || to.path == '/cms/setup') {
+		// destination is login page, continue
+		next();
+	}
+
+	else {
+		console.debug("no they aren't, make sure they're logged in", to.path)
+
+		// save original destination
+		window.originalDestination = to.path;
+
+		// if token exists, continue, otherwise redirect to login page
+		CMSAuth.isLoggedIn() ? next() : next(new Error("NotLoggedIn"));
+	}
+
+});
+
+router.onError((err) => {
+	if (err.message == "NotLoggedIn") {
+		console.debug("Not logged in, redirecting to login");
+		next('/cms/login');
+	}
+})
+
+Vue.filter('format_date', (value) => {
+	let d = new Date(Date.parse(value));
+	return d.toLocaleString();
+});
 
 var app = new Vue({
 	el: "#app",

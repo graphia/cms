@@ -161,3 +161,66 @@ func TestGetFileNeitherMarkdownOrHTML(t *testing.T) {
 	assert.Nil(t, file.Markdown)
 
 }
+
+func TestListRootDirectories(t *testing.T) {
+
+	// test with subdirectories to ensure we're only returning root
+	// directories
+	repoPath := "../tests/tmp/repositories/list_directories_subdirs"
+	setupSubdirsTestRepo(repoPath)
+
+	directoriesExpected := []string{"appendices", "documents"}
+
+	directories, err := listRootDirectories()
+	if err != nil {
+		t.Error("error", err)
+	}
+
+	var directoryNames []string
+	for _, directory := range directories {
+		directoryNames = append(directoryNames, directory.Name)
+	}
+
+	assert.Equal(t, 2, len(directoryNames))
+	assert.Equal(t, directoriesExpected, directoryNames)
+}
+
+func TestRootDirectorySummary(t *testing.T) {
+
+	// test with subdirectories to ensure we're only returning root
+	// directories
+	repoPath := "../tests/tmp/repositories/directories_summary"
+	setupSubdirsTestRepo(repoPath)
+
+	documentFiles, _ := getFilesInDir("documents")
+	appendicesFiles, _ := getFilesInDir("appendices")
+
+	expectedSummary := map[string][]FileItem{
+		"appendices": appendicesFiles,
+		"documents":  documentFiles,
+	}
+
+	summary, err := listRootDirectorySummary()
+	if err != nil {
+		t.Error("error", err)
+	}
+
+	assert.Equal(t, 2, len(summary))
+	assert.Equal(t, expectedSummary, summary)
+}
+
+func TestCountFiles(t *testing.T) {
+	repoPath := "../tests/tmp/repositories/count_files"
+	setupMultipleFiletypesTestRepo(repoPath)
+	cf, _ := countFiles()
+
+	expectedCounts := map[string]int{
+		"images":          3,
+		"documents":       5,
+		"structured data": 2,
+		"tabular data":    1,
+		"other":           1,
+	}
+
+	assert.Equal(t, expectedCounts, cf)
+}

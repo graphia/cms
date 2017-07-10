@@ -12,3 +12,8 @@ Feature: Home page contents
 		Given I am on the homepage
 		Then I should see a summary of recent changes
 		And I should see a statistics section
+
+	Scenario: Recent commits
+		Given there have been some recent commits
+		And I am on the homepage
+		Then the recent changes summary should contain a list of commits

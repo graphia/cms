@@ -289,10 +289,37 @@ func apiRootHandler(w http.ResponseWriter, r *http.Request) {}
 
 // Directory level functionality 🗃
 
+// apiListDirectoriesHandler returns an array of directories
+//
+// GET /api/directories/
+//
+// eg. when the documents directory contains Documents 1 and 2:
+//
+// {
+//	  {name: 'documents'},
+//	  {name: 'appendices'}
+// }
+func apiListDirectoriesHandler(w http.ResponseWriter, r *http.Request) {
+
+	var directories []Directory
+	var err error
+
+	directories, err = listRootDirectories()
+
+	output, err := json.Marshal(directories)
+	if err != nil {
+		panic(err)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	w.Write(output)
+}
+
 // apiListDirectoriesHandler returns a JSON object representing
 // the Repository's contents.
 //
-// GET /api/directories/
+// GET /api/directory_summary
 //
 // eg. when the documents directory contains Documents 1 and 2:
 //
@@ -303,24 +330,24 @@ func apiRootHandler(w http.ResponseWriter, r *http.Request) {}
 //	 ],
 //	 appendices: [...]
 // }
-func apiListDirectoriesHandler(w http.ResponseWriter, r *http.Request) {
+func apiDirectorySummary(w http.ResponseWriter, r *http.Request) {
 
-	fi1 := FileItem{Filename: "abc123"}
-	fi2 := FileItem{Filename: "def234"}
+	var summary map[string][]FileItem
+	var err error
 
-	filesByDirectory := map[string][]FileItem{
-		"documents": []FileItem{fi1, fi2},
-	}
+	summary = make(map[string][]FileItem)
 
-	output, err := json.Marshal(filesByDirectory)
+	summary, err = listRootDirectorySummary()
+
+	output, err := json.Marshal(summary)
 	if err != nil {
 		panic(err)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
 	w.Write(output)
 
-	w.WriteHeader(200)
 }
 
 // apiCreateDirectoryHandler creates an 'empty' directory. It actually
@@ -811,5 +838,66 @@ func apiPublish(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(200)
 	w.Write(repsonse)
+
+}
+
+// Repository data 💁
+
+func apiGetCommits(w http.ResponseWriter, r *http.Request) {
+	var commits []Commit
+	var err error
+
+	// TODO manage quantity param
+
+	commits, err = getCommits(20)
+
+	response, err := json.Marshal(commits)
+
+	if err != nil {
+		panic(err)
+	}
+
+	w.WriteHeader(200)
+	w.Write(response)
+}
+
+func apiGetCommit(w http.ResponseWriter, r *http.Request) {
+
+	hash := vestigo.Param(r, "hash")
+
+	cs, err := diffForCommit(hash)
+	if err != nil {
+		panic(err)
+	}
+
+	output, err := json.Marshal(cs)
+	if err != nil {
+		panic(err)
+	}
+
+	w.WriteHeader(200)
+	w.Write(output)
+
+}
+
+func apiGetFileHistory(w http.ResponseWriter, r *http.Request) {
+	directory := vestigo.Param(r, "directory")
+	filename := vestigo.Param(r, "file")
+
+	path := fmt.Sprintf("%s/%s", directory, filename)
+
+	history, err := getFileHistory(path, 10)
+	if err != nil {
+		panic(err)
+	}
+
+	output, err := json.Marshal(history)
+	if err != nil {
+		panic(err)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	w.Write(output)
 
 }

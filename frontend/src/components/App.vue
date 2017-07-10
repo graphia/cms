@@ -7,7 +7,7 @@
 				<span class="navbar-toggler-icon"></span>
 			</button>
 
-			<a class="navbar-brand" href="/cms">Graphia CMS</a>
+			<router-link class="navbar-brand" :to="{name: 'home'}">Graphia CMS</router-link>
 
 			<div id="primary" class="collapse navbar-collapse">
 				<ul class="navbar-nav mr-auto">

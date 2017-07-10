@@ -2,6 +2,8 @@ package main
 
 import (
 	"time"
+
+	"gopkg.in/libgit2/git2go.v25"
 )
 
 // RepoWrite contains all info we need to perform a git commit
@@ -113,4 +115,42 @@ type Token struct {
 // InitialSetup indicates whether or not to display initial setup screen
 type InitialSetup struct {
 	Enabled bool `json:"enabled"`
+}
+
+// Commit holds metadata for a Git Commit
+type Commit struct {
+	Message    string         `json:"message"`
+	ID         string         `json:"id"`
+	ObjectType string         `json:"object_type"`
+	Author     *git.Signature `json:"author"`
+	Time       time.Time      `json:"timestamp"`
+}
+
+// HistoricCommit is a commit used as part of a log
+type HistoricCommit struct {
+	EntryID    string         `json:"entry"`
+	Message    string         `json:"message"`
+	ID         string         `json:"id"`
+	ObjectType string         `json:"object_type"`
+	Author     *git.Signature `json:"author"`
+	Time       time.Time      `json:"timestamp"`
+}
+
+// Changeset holds data about a previous commit, including the full delta
+type Changeset struct {
+	NumDeltas  int                       `json:"num_deltas"`
+	NumAdded   int                       `json:"num_added"`
+	NumDeleted int                       `json:"num_deleted"`
+	FullDiff   string                    `json:"full_diff"`
+	Files      map[string]ChangesetFiles `json:"files"`
+	Message    string                    `json:"message"`
+	Author     *git.Signature            `json:"author"`
+	Hash       string                    `json:"hash"`
+	Time       time.Time                 `json:"timestamp"`
+}
+
+// ChangesetFiles holds a copy of the file before and after the change
+type ChangesetFiles struct {
+	Old string `json:"old,omitempty"`
+	New string `json:"new,omitempty"`
 }

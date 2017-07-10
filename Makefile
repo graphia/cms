@@ -25,7 +25,7 @@ build-dev:
 test:
 	go test -v ${ALL} -log-to-file=true -config=${TEST_CONFIG}
 
-cucumber:
+cucumber: build-dev
 	cd tests/frontend && cucumber
 
 keep-testing:
@@ -38,7 +38,8 @@ run-backend:
 	ls backend/*.go | entr -r go run ${SRC} -log-to-file=true -config ${DEVELOPMENT_CONFIG}
 
 run-frontend:
-	brunch watch --server frontend
+	#brunch watch --server frontend
+	cd frontend && brunch watch --server --env development
 
 cleanup:
 	rm -rf tests/tmp/**/*

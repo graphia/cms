@@ -26,7 +26,7 @@ func getFilesInDir(directory string) (files []FileItem, err error) {
 		return nil, err
 	}
 
-	// ensure that the directory exists before we try to delete it
+	// ensure that the directory exists
 	entry, _ := ht.EntryByPath(directory)
 	if entry == nil {
 		return nil, fmt.Errorf("directory '%s' not found", directory)
@@ -308,6 +308,86 @@ func writeFile(repo *git.Repository, rw RepoWrite) (oid *git.Oid, err error) {
 
 }
 
+func listRootDirectories() (directories []Directory, err error) {
+
+	repo, err := repository(config)
+	if err != nil {
+		return nil, err
+	}
+	defer repo.Free()
+
+	ht, err := headTree(repo)
+	if err != nil {
+		return nil, err
+	}
+
+	defer ht.Free()
+
+	walkIterator := func(_ string, te *git.TreeEntry) int {
+
+		if te.Type == git.ObjectTree {
+
+			Debug.Println("Found Dir", te)
+
+			directories = append(directories, Directory{
+				Name: te.Name,
+			})
+
+			return 1
+
+		}
+
+		return 0
+	}
+
+	err = ht.Walk(walkIterator)
+
+	return directories, err
+
+}
+
+func listRootDirectorySummary() (summary map[string][]FileItem, err error) {
+
+	var filesInDir []FileItem
+	summary = make(map[string][]FileItem)
+
+	repo, err := repository(config)
+	if err != nil {
+		return nil, err
+	}
+	defer repo.Free()
+
+	ht, err := headTree(repo)
+	if err != nil {
+		return nil, err
+	}
+
+	defer ht.Free()
+
+	walkIterator := func(_ string, te *git.TreeEntry) int {
+
+		if te.Type == git.ObjectTree {
+
+			filesInDir, err = getFilesInDir(te.Name)
+			if err != nil {
+				Error.Println("Failed to retrieve files when generating summary", te.Name, err)
+				return 0
+			}
+
+			summary[te.Name] = filesInDir
+
+			return 1
+
+		}
+
+		return 0
+	}
+
+	err = ht.Walk(walkIterator)
+
+	return summary, err
+}
+
 func createDirectory(rw RepoWrite) (oid *git.Oid, err error) {
 
 	// check that the directory does not already exist
@@ -578,4 +658,56 @@ func getRawFile(directory, filename string) (file *File, err error) {
 		return nil, err
 	}
 	return
+}
+
+func countFiles() (counter map[string]int, err error) {
+	repo, err := repository(config)
+	if err != nil {
+		return counter, err
+	}
+
+	ht, err := headTree(repo)
+	if err != nil {
+		return counter, err
+	}
+
+	defer ht.Free()
+
+	counter = make(map[string]int)
+	fileCategoryLookup := make(map[string]string)
+
+	// initialise a 'catch all' counter called other at 0
+	counter["other"] = 0
+
+	// loop through file categories and build
+	// counter and lookup map
+	for category, filetypes := range config.FileCategories {
+		counter[category] = 0
+
+		for _, filetype := range filetypes {
+			fileCategoryLookup[filetype] = category
+		}
+	}
+
+	walkIterator := func(_ string, te *git.TreeEntry) int {
+
+		var ext, fc string
+
+		if te.Type == git.ObjectBlob {
+			ext = filepath.Ext(te.Name)
+			fc = fileCategoryLookup[ext]
+
+			if fc != "" {
+				counter[fc]++
+			} else {
+				counter["other"]++
+			}
+		}
+
+		return 0
+	}
+
+	err = ht.Walk(walkIterator)
+
+	return counter, err
 }
