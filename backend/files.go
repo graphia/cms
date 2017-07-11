@@ -127,6 +127,19 @@ func createFile(rw RepoWrite) (oid *git.Oid, err error) {
 
 }
 
+func createFiles(rw NewRepoWrite) (oid *git.Oid, err error) {
+
+	repo, err := repository(config)
+	if err != nil {
+		return nil, err
+	}
+	defer repo.Free()
+
+	oid, err = writeFiles(repo, rw)
+
+	return oid, err
+}
+
 func createEmptyFile(rw RepoWrite) (oid *git.Oid, err error) {
 
 	repo, err := repository(config)
@@ -252,10 +265,6 @@ func updateFiles(rw NewRepoWrite) (oid *git.Oid, err error) {
 	defer repo.Free()
 
 	oid, err = writeFiles(repo, rw)
-	if err != nil {
-		Error.Println("Failed to writeFiles", rw, err)
-		panic(err)
-	}
 
 	return oid, err
 }
@@ -351,7 +360,6 @@ func writeFiles(repo *git.Repository, rw NewRepoWrite) (oid *git.Oid, err error)
 		// build the git index entry and add it to the index
 		ie = newBuildIndexEntry(oid, fw)
 
-		Debug.Println("IndexEntry", ie)
 		err = index.Add(&ie)
 		if err != nil {
 			return nil, err
@@ -394,6 +402,11 @@ func writeFiles(repo *git.Repository, rw NewRepoWrite) (oid *git.Oid, err error)
 	if err != nil {
 		return nil, err
 	}
+
+	// checkout to keep file system in sync with git
+	err = repo.CheckoutHead(
+		&git.CheckoutOpts{Strategy: git.CheckoutSafe | git.CheckoutRecreateMissing | git.CheckoutForce},
+	)
 
 	return oid, err
 

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -75,15 +76,25 @@ func TestUpdateFiles(t *testing.T) {
 	}
 
 	fw1 := FileWrite{
-		Filename:  "document_1.md",
+		Filename:  "document_14.md",
 		Path:      "documents",
 		Extension: "md",
+		Body:      "Cows don't look like cows on film. You gotta use horses.",
+		FrontMatter: FrontMatter{
+			Author: "Lindsay Naegle",
+			Title:  "I'm an alcoholic",
+		},
 	}
 
 	fw2 := FileWrite{
-		Filename:  "document_2.md",
+		Filename:  "document_15.md",
 		Path:      "documents",
 		Extension: "md",
+		Body:      "You don't win friends with salad.",
+		FrontMatter: FrontMatter{
+			Author: "Lindsay Naegle",
+			Title:  "Children are the future, today belongs to me!",
+		},
 	}
 
 	rw := NewRepoWrite{
@@ -108,22 +119,19 @@ func TestUpdateFiles(t *testing.T) {
 
 	file1Contents, _ := ioutil.ReadFile(filepath.Join(repoPath, fw1.Path, fw1.Filename))
 	assert.Contains(t, string(file1Contents), fw1.Body)
-	assert.Contains(t, string(file1Contents), fw1.FrontMatter.Author)
-	assert.Contains(t, string(file1Contents), fw1.FrontMatter.Title)
+	assert.Contains(t, string(file1Contents), fmt.Sprintf("author: %s", fw1.FrontMatter.Author))
+	assert.Contains(t, string(file1Contents), fmt.Sprintf("title: %s", fw1.FrontMatter.Title))
 
 	file2Contents, _ := ioutil.ReadFile(filepath.Join(repoPath, fw2.Path, fw2.Filename))
 	assert.Contains(t, string(file2Contents), fw2.Body)
-	assert.Contains(t, string(file2Contents), fw2.FrontMatter.Author)
-	assert.Contains(t, string(file2Contents), fw2.FrontMatter.Title)
+	assert.Contains(t, string(file2Contents), fmt.Sprintf("author: %s", fw2.FrontMatter.Author))
+	assert.Contains(t, string(file2Contents), fmt.Sprintf("title: %s", fw2.FrontMatter.Title))
 
 	// ensure the most recent commit has the right name and email
 	lastCommit, _ := repo.LookupCommit(oid)
 	assert.Equal(t, lastCommit.Committer().Name, rw.Name)
 	assert.Equal(t, lastCommit.Committer().Email, rw.Email)
 	assert.Equal(t, lastCommit.Message(), rw.Message)
-
-	// finally clean up by removing the tmp repo
-	_ = os.RemoveAll(repoPath)
 
 }
 
