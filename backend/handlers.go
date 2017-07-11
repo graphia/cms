@@ -507,16 +507,13 @@ func apiListFilesInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 // containing an error message
 func apiCreateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 
-	var rw RepoWrite
+	var rw NewRepoWrite
 	var fr FailureResponse
 	var sr SuccessResponse
 
-	directory := vestigo.Param(r, "directory")
-
-	rw = RepoWrite{Path: directory}
 	json.NewDecoder(r.Body).Decode(&rw)
 
-	oid, err := createFile(rw)
+	oid, err := createFiles(rw)
 	if err != nil {
 		fr = FailureResponse{
 			Message: err.Error(),
@@ -531,7 +528,7 @@ func apiCreateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sr = SuccessResponse{
-		Message: "File created",
+		Message: "File(s) created",
 		Oid:     oid.String(),
 	}
 
@@ -543,7 +540,7 @@ func apiCreateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(201)
 	w.Write(output)
 
-	Debug.Println("File created", oid)
+	Debug.Println("File(s) created", oid)
 
 }
 
