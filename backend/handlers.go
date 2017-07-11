@@ -511,6 +511,7 @@ func apiCreateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 	var fr FailureResponse
 	var sr SuccessResponse
 
+	// FIXME should check that params match at least once file in rw.Files
 	json.NewDecoder(r.Body).Decode(&rw)
 
 	oid, err := createFiles(rw)
@@ -557,17 +558,14 @@ func apiCreateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 // returns a SuccessResponse containing the git commit hash or a
 // FailureResponse containing an error message
 func apiUpdateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
-	var rw RepoWrite
+	var rw NewRepoWrite
 	var fr FailureResponse
 	var sr SuccessResponse
 
-	directory := vestigo.Param(r, "directory")
-	filename := vestigo.Param(r, "file")
-
-	rw = RepoWrite{Path: directory, Filename: filename}
+	// FIXME should check that params match at least once file in rw.Files
 	json.NewDecoder(r.Body).Decode(&rw)
 
-	oid, err := updateFile(rw)
+	oid, err := updateFiles(rw)
 	if err != nil {
 		Error.Println("Failed to update file", err.Error())
 		fr = FailureResponse{
