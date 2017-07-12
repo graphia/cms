@@ -672,6 +672,95 @@ func deleteFile(rw RepoWrite) (oid *git.Oid, err error) {
 
 }
 
+func deleteFiles(rw NewRepoWrite) (oid *git.Oid, err error) {
+
+	repo, err := repository(config)
+	if err != nil {
+		return nil, err
+	}
+	defer repo.Free()
+
+	ht, err := headTree(repo)
+	if err != nil {
+		return nil, err
+	}
+
+	// first grab the repo's index
+	index, err := repo.Index()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, fw := range rw.Files {
+
+		target := filepath.Join(fw.Path, fw.Filename)
+
+		// ensure that the file exists before we try to delete it
+		file, _ := ht.EntryByPath(target)
+		if file == nil {
+			return nil, fmt.Errorf("file does not exist %s", target)
+		}
+
+		// and remove the target by path
+		err = index.RemoveByPath(target)
+		if err != nil {
+			return nil, err
+		}
+
+	}
+
+	// write the tree, persisting our deletion to the git repo
+	treeID, err := index.WriteTree()
+	if err != nil {
+		return nil, err
+	}
+
+	tree, err := repo.LookupTree(treeID)
+	if err != nil {
+		return nil, err
+	}
+
+	// find the repository's tip, where we're committing to
+	tip, err := headCommit(repo)
+	if err != nil {
+		return nil, err
+	}
+
+	// git signatures
+	//author := sign(rw)
+	//committer := sign(rw)
+
+	author := &git.Signature{
+		Name:  rw.Name,
+		Email: rw.Email,
+		When:  time.Now(),
+	}
+
+	committer := &git.Signature{
+		Name:  rw.Name,
+		Email: rw.Email,
+		When:  time.Now(),
+	}
+
+	// now commit our updated tree to the tip (parent)
+	oid, err = repo.CreateCommit("HEAD", author, committer, rw.Message, tree, tip)
+	if err != nil {
+		return nil, err
+	}
+
+	// checkout to keep file system in sync with git
+	err = repo.CheckoutHead(
+		&git.CheckoutOpts{Strategy: git.CheckoutSafe | git.CheckoutRecreateMissing | git.CheckoutForce},
+	)
+
+	if err != nil {
+		Error.Println("Could not checkout head:", err.Error())
+	}
+
+	return oid, err
+
+}
+
 func sign(rw RepoWrite) *git.Signature {
 	return &git.Signature{
 		Name:  rw.Name,
