@@ -676,19 +676,19 @@ func deleteFiles(rw NewRepoWrite) (oid *git.Oid, err error) {
 
 	repo, err := repository(config)
 	if err != nil {
-		return nil, err
+		return oid, err
 	}
 	defer repo.Free()
 
 	ht, err := headTree(repo)
 	if err != nil {
-		return nil, err
+		return oid, err
 	}
 
 	// first grab the repo's index
 	index, err := repo.Index()
 	if err != nil {
-		return nil, err
+		return oid, err
 	}
 
 	for _, fw := range rw.Files {
@@ -696,7 +696,12 @@ func deleteFiles(rw NewRepoWrite) (oid *git.Oid, err error) {
 		target := filepath.Join(fw.Path, fw.Filename)
 
 		// ensure that the file exists before we try to delete it
-		file, _ := ht.EntryByPath(target)
+		file, err := ht.EntryByPath(target)
+
+		if err != nil {
+			return oid, err
+		}
+
 		if file == nil {
 			return nil, fmt.Errorf("file does not exist %s", target)
 		}
@@ -704,7 +709,7 @@ func deleteFiles(rw NewRepoWrite) (oid *git.Oid, err error) {
 		// and remove the target by path
 		err = index.RemoveByPath(target)
 		if err != nil {
-			return nil, err
+			return oid, err
 		}
 
 	}
@@ -712,18 +717,18 @@ func deleteFiles(rw NewRepoWrite) (oid *git.Oid, err error) {
 	// write the tree, persisting our deletion to the git repo
 	treeID, err := index.WriteTree()
 	if err != nil {
-		return nil, err
+		return oid, err
 	}
 
 	tree, err := repo.LookupTree(treeID)
 	if err != nil {
-		return nil, err
+		return oid, err
 	}
 
 	// find the repository's tip, where we're committing to
 	tip, err := headCommit(repo)
 	if err != nil {
-		return nil, err
+		return oid, err
 	}
 
 	// git signatures
@@ -745,7 +750,7 @@ func deleteFiles(rw NewRepoWrite) (oid *git.Oid, err error) {
 	// now commit our updated tree to the tip (parent)
 	oid, err = repo.CreateCommit("HEAD", author, committer, rw.Message, tree, tip)
 	if err != nil {
-		return nil, err
+		return oid, err
 	}
 
 	// checkout to keep file system in sync with git

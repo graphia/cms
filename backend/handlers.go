@@ -607,17 +607,16 @@ func apiUpdateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 // returns a SuccessResponse containing the git commit hash or a
 // FailureResponse containing an error message
 func apiDeleteFileFromDirectoryHandler(w http.ResponseWriter, r *http.Request) {
-	var rw RepoWrite
+	var rw NewRepoWrite
 	var fr FailureResponse
 	var sr SuccessResponse
 
-	directory := vestigo.Param(r, "directory")
-	filename := vestigo.Param(r, "file")
-
-	rw = RepoWrite{Path: directory, Filename: filename}
+	//directory := vestigo.Param(r, "directory")
+	//filename := vestigo.Param(r, "file")
+	// FIXME check that path matches at least one file?
 	json.NewDecoder(r.Body).Decode(&rw)
 
-	oid, err := deleteFile(rw)
+	oid, err := deleteFiles(rw)
 
 	if err != nil {
 		Error.Println("Failed to delete file", err.Error())

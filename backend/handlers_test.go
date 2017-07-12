@@ -271,12 +271,21 @@ func TestApiDeleteFileFromDirectory(t *testing.T) {
 
 	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files/document_2.md")
 
-	rw := &RepoWrite{
-		Email:    "clancy.wiggum@springfield.police.gov",
-		Name:     "Clarence Wiggum",
-		Message:  "Suspect is hatless. Repeat, hatless.",
+	fw1 := FileWrite{
+		Filename: "document_1.md",
+		Path:     "documents",
+	}
+
+	fw2 := FileWrite{
 		Filename: "document_2.md",
 		Path:     "documents",
+	}
+
+	rw := &NewRepoWrite{
+		Email:   "clancy.wiggum@springfield.police.gov",
+		Name:    "Clarence Wiggum",
+		Message: "Suspect is hatless. Repeat, hatless.",
+		Files:   []FileWrite{fw1, fw2},
 	}
 
 	payload, err := json.Marshal(rw)
@@ -308,9 +317,10 @@ func TestApiDeleteFileFromDirectory(t *testing.T) {
 	assert.Equal(t, lastCommit.Committer().Name, rw.Name)
 	assert.Equal(t, lastCommit.Committer().Email, rw.Email)
 
-	// TODO ensure file isn't present on the filesystem
+	// TODO ensure files aren't present on the filesystem
 	// ensure the file exists and has the right content
-	_, err = os.Stat(filepath.Join(repoPath, rw.Path, rw.Filename))
+	_, err = os.Stat(filepath.Join(repoPath, fw1.Path, fw1.Filename))
+	_, err = os.Stat(filepath.Join(repoPath, fw2.Path, fw2.Filename))
 	assert.True(t, os.IsNotExist(err))
 
 }
