@@ -361,14 +361,14 @@ func apiDirectorySummary(w http.ResponseWriter, r *http.Request) {
 //	 "message": "Added new directory called Bobbins"
 // }
 func apiCreateDirectoryHandler(w http.ResponseWriter, r *http.Request) {
-	var rw NewRepoWrite
+	var nc NewCommit
 	var sr SuccessResponse
 
-	json.NewDecoder(r.Body).Decode(&rw)
+	json.NewDecoder(r.Body).Decode(&nc)
 
 	//directory = vestigo.Param(r, "directory")
 
-	oid, err := createDirectories(rw)
+	oid, err := createDirectories(nc)
 
 	if err != nil {
 		fr := FailureResponse{Message: err.Error()}
@@ -414,21 +414,21 @@ func apiRenameDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 // returns a SuccessResponse containing the git commit hash or a FailureResponse
 // containing an error message
 func apiDeleteDirectoryHandler(w http.ResponseWriter, r *http.Request) {
-	var rw NewRepoWrite
+	var nc NewCommit
 	var fr FailureResponse
 	var sr SuccessResponse
 	var directory string
 
 	// set up the RepoWrite with git params, an appropraiate message and then
 	// specify the directory based on the path
-	rw = NewRepoWrite{}
+	nc = NewCommit{}
 
 	directory = vestigo.Param(r, "directory")
 
-	json.NewDecoder(r.Body).Decode(&rw)
-	rw.Message = fmt.Sprintf("Deleted %s directory", directory)
+	json.NewDecoder(r.Body).Decode(&nc)
+	nc.Message = fmt.Sprintf("Deleted %s directory", directory)
 
-	oid, err := deleteDirectory(directory, rw)
+	oid, err := deleteDirectory(directory, nc)
 
 	if err != nil {
 
@@ -511,14 +511,14 @@ func apiListFilesInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 // containing an error message
 func apiCreateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 
-	var rw NewRepoWrite
+	var nc NewCommit
 	var fr FailureResponse
 	var sr SuccessResponse
 
-	// FIXME should check that params match at least once file in rw.Files
-	json.NewDecoder(r.Body).Decode(&rw)
+	// FIXME should check that params match at least once file in nc.Files
+	json.NewDecoder(r.Body).Decode(&nc)
 
-	oid, err := createFiles(rw)
+	oid, err := createFiles(nc)
 	if err != nil {
 		fr = FailureResponse{
 			Message: err.Error(),
@@ -562,14 +562,14 @@ func apiCreateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 // returns a SuccessResponse containing the git commit hash or a
 // FailureResponse containing an error message
 func apiUpdateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
-	var rw NewRepoWrite
+	var nc NewCommit
 	var fr FailureResponse
 	var sr SuccessResponse
 
-	// FIXME should check that params match at least once file in rw.Files
-	json.NewDecoder(r.Body).Decode(&rw)
+	// FIXME should check that params match at least once file in nc.Files
+	json.NewDecoder(r.Body).Decode(&nc)
 
-	oid, err := updateFiles(rw)
+	oid, err := updateFiles(nc)
 	if err != nil {
 		Error.Println("Failed to update file", err.Error())
 		fr = FailureResponse{
@@ -611,26 +611,26 @@ func apiUpdateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 // returns a SuccessResponse containing the git commit hash or a
 // FailureResponse containing an error message
 func apiDeleteFileFromDirectoryHandler(w http.ResponseWriter, r *http.Request) {
-	var rw NewRepoWrite
+	var nc NewCommit
 	var fr FailureResponse
 	var sr SuccessResponse
 
 	//directory := vestigo.Param(r, "directory")
 	//filename := vestigo.Param(r, "file")
 	// FIXME check that path matches at least one file?
-	json.NewDecoder(r.Body).Decode(&rw)
+	json.NewDecoder(r.Body).Decode(&nc)
 
-	// TODO check that rw.Files isn't empty
+	// TODO check that nc.Files isn't empty
 
-	Debug.Println("rw", rw)
+	Debug.Println("nc", nc)
 
-	if len(rw.Files) == 0 {
+	if len(nc.Files) == 0 {
 		response := FailureResponse{Message: "No files specified for deletion"}
 		JSONBadRequestResponse(response, w)
 		return
 	}
 
-	oid, err := deleteFiles(rw)
+	oid, err := deleteFiles(nc)
 
 	if err != nil {
 

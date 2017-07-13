@@ -6,17 +6,17 @@ import (
 	"gopkg.in/libgit2/git2go.v25"
 )
 
-// NewRepoWrite will replace RepoWrite and allow multiple files
+// NewCommit will replace RepoWrite and allow multiple files
 // TODO rename to NewCommit
-type NewRepoWrite struct {
-	Message string      `json:"message"`
-	Name    string      `json:"name"`
-	Email   string      `json:"email"`
-	Files   []FileWrite `json:"files"`
+type NewCommit struct {
+	Message string          `json:"message"`
+	Name    string          `json:"name"`
+	Email   string          `json:"email"`
+	Files   []NewCommitFile `json:"files"`
 }
 
-// FileWrite will replace RepoWrite's file attributes
-type FileWrite struct {
+// NewCommitFile will replace RepoWrite's file attributes
+type NewCommitFile struct {
 	Filename    string      `json:"filename"`
 	Extension   string      `json:"extension"`
 	Path        string      `json:"path"`

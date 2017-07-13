@@ -15,7 +15,7 @@ func TestCreateFiles(t *testing.T) {
 
 	setupSmallTestRepo(repoPath)
 
-	fw1 := FileWrite{
+	ncf1 := NewCommitFile{
 		Filename:  "document_14.md",
 		Path:      "documents",
 		Extension: "md",
@@ -26,7 +26,7 @@ func TestCreateFiles(t *testing.T) {
 		},
 	}
 
-	fw2 := FileWrite{
+	ncf2 := NewCommitFile{
 		Filename:  "document_15.md",
 		Path:      "documents",
 		Extension: "md",
@@ -37,14 +37,14 @@ func TestCreateFiles(t *testing.T) {
 		},
 	}
 
-	rw := NewRepoWrite{
+	nc := NewCommit{
 		Message: "Update document 2",
 		Name:    "Milhouse van Houten",
 		Email:   "milhouse@springfield.gov",
-		Files:   []FileWrite{fw1, fw2},
+		Files:   []NewCommitFile{ncf1, ncf2},
 	}
 
-	oid, err := createFiles(rw)
+	oid, err := createFiles(nc)
 
 	if err != nil {
 		panic(err)
@@ -57,21 +57,21 @@ func TestCreateFiles(t *testing.T) {
 
 	// ensure both files exists and have the right content
 
-	file1Contents, _ := ioutil.ReadFile(filepath.Join(repoPath, fw1.Path, fw1.Filename))
-	assert.Contains(t, string(file1Contents), fw1.Body)
-	assert.Contains(t, string(file1Contents), fmt.Sprintf("author: %s", fw1.FrontMatter.Author))
-	assert.Contains(t, string(file1Contents), fmt.Sprintf("title: %s", fw1.FrontMatter.Title))
+	file1Contents, _ := ioutil.ReadFile(filepath.Join(repoPath, ncf1.Path, ncf1.Filename))
+	assert.Contains(t, string(file1Contents), ncf1.Body)
+	assert.Contains(t, string(file1Contents), fmt.Sprintf("author: %s", ncf1.FrontMatter.Author))
+	assert.Contains(t, string(file1Contents), fmt.Sprintf("title: %s", ncf1.FrontMatter.Title))
 
-	file2Contents, _ := ioutil.ReadFile(filepath.Join(repoPath, fw2.Path, fw2.Filename))
-	assert.Contains(t, string(file2Contents), fw2.Body)
-	assert.Contains(t, string(file2Contents), fmt.Sprintf("author: %s", fw2.FrontMatter.Author))
-	assert.Contains(t, string(file2Contents), fmt.Sprintf("title: %s", fw2.FrontMatter.Title))
+	file2Contents, _ := ioutil.ReadFile(filepath.Join(repoPath, ncf2.Path, ncf2.Filename))
+	assert.Contains(t, string(file2Contents), ncf2.Body)
+	assert.Contains(t, string(file2Contents), fmt.Sprintf("author: %s", ncf2.FrontMatter.Author))
+	assert.Contains(t, string(file2Contents), fmt.Sprintf("title: %s", ncf2.FrontMatter.Title))
 
 	// ensure the most recent commit has the right name and email
 	lastCommit, _ := repo.LookupCommit(oid)
-	assert.Equal(t, lastCommit.Committer().Name, rw.Name)
-	assert.Equal(t, lastCommit.Committer().Email, rw.Email)
-	assert.Equal(t, lastCommit.Message(), rw.Message)
+	assert.Equal(t, lastCommit.Committer().Name, nc.Name)
+	assert.Equal(t, lastCommit.Committer().Email, nc.Email)
+	assert.Equal(t, lastCommit.Message(), nc.Message)
 
 }
 
@@ -81,12 +81,12 @@ func TestCreateFileWhenExists(t *testing.T) {
 	setupSmallTestRepo(repoPath)
 	repo, _ := repository(config)
 
-	rw := NewRepoWrite{
+	nc := NewCommit{
 		Message: "Add document 2",
 		Name:    "Ned Flanders",
 		Email:   "nedward.flanders@leftorium.com",
-		Files: []FileWrite{
-			FileWrite{
+		Files: []NewCommitFile{
+			NewCommitFile{
 				Body:     "# The quick brown fox\n\njumped over the lazy dog",
 				Filename: "document_2.md",
 				Path:     "documents",
@@ -96,7 +96,7 @@ func TestCreateFileWhenExists(t *testing.T) {
 
 	hcBefore, _ := headCommit(repo)
 
-	_, err := createFiles(rw)
+	_, err := createFiles(nc)
 
 	// check error message is correct
 	assert.Contains(t, err.Error(), "file already exists")

@@ -91,16 +91,16 @@ func TestApiCreateDirectory(t *testing.T) {
 
 	target := fmt.Sprintf("%s/%s", server.URL, "api/directories")
 
-	fw := FileWrite{Path: "bobbins"}
+	ncf := NewCommitFile{Path: "bobbins"}
 
-	rw := &NewRepoWrite{
+	nc := &NewCommit{
 		Email:   "martin.prince@springfield.k12.us",
 		Name:    "Martin Prince",
 		Message: "Forty whacks with a wet noodle",
-		Files:   []FileWrite{fw},
+		Files:   []NewCommitFile{ncf},
 	}
 
-	payload, err := json.Marshal(rw)
+	payload, err := json.Marshal(nc)
 	if err != nil {
 		panic(err)
 	}
@@ -124,17 +124,17 @@ func TestApiCreateDirectory(t *testing.T) {
 	assert.Equal(t, receiver.Oid, hc.Id().String())
 
 	// ensure the file exists and has the right content
-	contents, _ := ioutil.ReadFile(filepath.Join(repoPath, fw.Path, ".keep"))
+	contents, _ := ioutil.ReadFile(filepath.Join(repoPath, ncf.Path, ".keep"))
 	assert.Equal(t, "", string(contents))
 
 	// ensure the most recent commit has the right name and email
 	oid, _ := git.NewOid(receiver.Oid)
 	lastCommit, _ := repo.LookupCommit(oid)
-	assert.Equal(t, lastCommit.Committer().Name, rw.Name)
-	assert.Equal(t, lastCommit.Committer().Email, rw.Email)
+	assert.Equal(t, lastCommit.Committer().Name, nc.Name)
+	assert.Equal(t, lastCommit.Committer().Email, nc.Email)
 
 	// ensure that the commit message has been set correctly
-	msg := fmt.Sprintf("Added directories: %s", fw.Path)
+	msg := fmt.Sprintf("Added directories: %s", ncf.Path)
 	assert.Equal(t, lastCommit.Message(), msg)
 
 }
@@ -147,7 +147,7 @@ func TestApiCreateFileInDirectory(t *testing.T) {
 
 	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files")
 
-	fw := FileWrite{
+	ncf := NewCommitFile{
 		Path:      "documents",
 		Filename:  "document_6.md",
 		Extension: "md",
@@ -158,14 +158,14 @@ func TestApiCreateFileInDirectory(t *testing.T) {
 		},
 	}
 
-	rw := &NewRepoWrite{
+	nc := &NewCommit{
 		Email:   "martin.prince@springfield.k12.us",
 		Name:    "Martin Prince",
 		Message: "Forty whacks with a wet noodle",
-		Files:   []FileWrite{fw},
+		Files:   []NewCommitFile{ncf},
 	}
 
-	payload, err := json.Marshal(rw)
+	payload, err := json.Marshal(nc)
 	if err != nil {
 		panic(err)
 	}
@@ -189,16 +189,16 @@ func TestApiCreateFileInDirectory(t *testing.T) {
 	assert.Equal(t, receiver.Oid, hc.Id().String())
 
 	// ensure the file exists and has the right content
-	contents, _ := ioutil.ReadFile(filepath.Join(repoPath, fw.Path, fw.Filename))
-	assert.Contains(t, string(contents), fw.Body)
-	assert.Contains(t, string(contents), fw.FrontMatter.Author)
-	assert.Contains(t, string(contents), fw.FrontMatter.Title)
+	contents, _ := ioutil.ReadFile(filepath.Join(repoPath, ncf.Path, ncf.Filename))
+	assert.Contains(t, string(contents), ncf.Body)
+	assert.Contains(t, string(contents), ncf.FrontMatter.Author)
+	assert.Contains(t, string(contents), ncf.FrontMatter.Title)
 
 	// ensure the most recent commit has the right name and email
 	oid, _ := git.NewOid(receiver.Oid)
 	lastCommit, _ := repo.LookupCommit(oid)
-	assert.Equal(t, lastCommit.Committer().Name, rw.Name)
-	assert.Equal(t, lastCommit.Committer().Email, rw.Email)
+	assert.Equal(t, lastCommit.Committer().Name, nc.Name)
+	assert.Equal(t, lastCommit.Committer().Email, nc.Email)
 
 }
 
@@ -210,7 +210,7 @@ func TestApiUpdateFileInDirectory(t *testing.T) {
 
 	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files/document_3.md")
 
-	fw := FileWrite{
+	ncf := NewCommitFile{
 		Path:      "documents",
 		Filename:  "document_3.md",
 		Extension: "md",
@@ -221,14 +221,14 @@ func TestApiUpdateFileInDirectory(t *testing.T) {
 		},
 	}
 
-	rw := &NewRepoWrite{
+	nc := &NewCommit{
 		Email:   "martin.prince@springfield.k12.us",
 		Name:    "Martin Prince",
 		Message: "Forty whacks with a wet noodle",
-		Files:   []FileWrite{fw},
+		Files:   []NewCommitFile{ncf},
 	}
 
-	payload, err := json.Marshal(rw)
+	payload, err := json.Marshal(nc)
 	if err != nil {
 		panic(err)
 	}
@@ -252,16 +252,16 @@ func TestApiUpdateFileInDirectory(t *testing.T) {
 	assert.Equal(t, receiver.Oid, hc.Id().String())
 
 	// ensure the file exists and has the right content
-	contents, _ := ioutil.ReadFile(filepath.Join(repoPath, fw.Path, fw.Filename))
-	assert.Contains(t, string(contents), fw.Body)
-	assert.Contains(t, string(contents), fw.FrontMatter.Author)
-	assert.Contains(t, string(contents), fw.FrontMatter.Title)
+	contents, _ := ioutil.ReadFile(filepath.Join(repoPath, ncf.Path, ncf.Filename))
+	assert.Contains(t, string(contents), ncf.Body)
+	assert.Contains(t, string(contents), ncf.FrontMatter.Author)
+	assert.Contains(t, string(contents), ncf.FrontMatter.Title)
 
 	// ensure the most recent commit has the right name and email
 	oid, _ := git.NewOid(receiver.Oid)
 	lastCommit, _ := repo.LookupCommit(oid)
-	assert.Equal(t, lastCommit.Committer().Name, rw.Name)
-	assert.Equal(t, lastCommit.Committer().Email, rw.Email)
+	assert.Equal(t, lastCommit.Committer().Name, nc.Name)
+	assert.Equal(t, lastCommit.Committer().Email, nc.Email)
 
 }
 
@@ -273,24 +273,24 @@ func TestApiDeleteFileFromDirectory(t *testing.T) {
 
 	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files/document_2.md")
 
-	fw1 := FileWrite{
+	ncf1 := NewCommitFile{
 		Filename: "document_1.md",
 		Path:     "documents",
 	}
 
-	fw2 := FileWrite{
+	ncf2 := NewCommitFile{
 		Filename: "document_2.md",
 		Path:     "documents",
 	}
 
-	rw := &NewRepoWrite{
+	nc := &NewCommit{
 		Email:   "clancy.wiggum@springfield.police.gov",
 		Name:    "Clarence Wiggum",
 		Message: "Suspect is hatless. Repeat, hatless.",
-		Files:   []FileWrite{fw1, fw2},
+		Files:   []NewCommitFile{ncf1, ncf2},
 	}
 
-	payload, err := json.Marshal(rw)
+	payload, err := json.Marshal(nc)
 	if err != nil {
 		panic(err)
 	}
@@ -313,16 +313,16 @@ func TestApiDeleteFileFromDirectory(t *testing.T) {
 	// ensure returned commit hash is hte same as the repo's head
 	assert.Equal(t, receiver.Oid, hc.Id().String())
 
-	// ensure the most recent rw has the right name and email
+	// ensure the most recent nc has the right name and email
 	oid, _ := git.NewOid(receiver.Oid)
 	lastCommit, _ := repo.LookupCommit(oid)
-	assert.Equal(t, lastCommit.Committer().Name, rw.Name)
-	assert.Equal(t, lastCommit.Committer().Email, rw.Email)
+	assert.Equal(t, lastCommit.Committer().Name, nc.Name)
+	assert.Equal(t, lastCommit.Committer().Email, nc.Email)
 
 	// TODO ensure files aren't present on the filesystem
 	// ensure the file exists and has the right content
-	_, err = os.Stat(filepath.Join(repoPath, fw1.Path, fw1.Filename))
-	_, err = os.Stat(filepath.Join(repoPath, fw2.Path, fw2.Filename))
+	_, err = os.Stat(filepath.Join(repoPath, ncf1.Path, ncf1.Filename))
+	_, err = os.Stat(filepath.Join(repoPath, ncf2.Path, ncf2.Filename))
 	assert.True(t, os.IsNotExist(err))
 
 }
@@ -339,7 +339,7 @@ func TestApiDeleteDirectory(t *testing.T) {
 
 	target := fmt.Sprintf("%s/%s/%s", server.URL, "api/directories", directory)
 
-	rw := &NewRepoWrite{
+	nc := &NewCommit{
 		Email: "julius.hibbert@springfield-hospital.com",
 		Name:  "Julius Hibbert",
 	}
@@ -350,7 +350,7 @@ func TestApiDeleteDirectory(t *testing.T) {
 	_, err = os.Stat(filepath.Join(repoPath, directory, "appendix_2.md"))
 	assert.False(t, os.IsNotExist(err))
 
-	payload, err := json.Marshal(rw)
+	payload, err := json.Marshal(nc)
 	if err != nil {
 		panic(err)
 	}
@@ -373,11 +373,11 @@ func TestApiDeleteDirectory(t *testing.T) {
 	// ensure returned commit hash is hte same as the repo's head
 	assert.Equal(t, receiver.Oid, hc.Id().String())
 
-	// ensure the most recent rw has the right name and email
+	// ensure the most recent nc has the right name and email
 	oid, _ := git.NewOid(receiver.Oid)
 	lastCommit, _ := repo.LookupCommit(oid)
-	assert.Equal(t, lastCommit.Committer().Name, rw.Name)
-	assert.Equal(t, lastCommit.Committer().Email, rw.Email)
+	assert.Equal(t, lastCommit.Committer().Name, nc.Name)
+	assert.Equal(t, lastCommit.Committer().Email, nc.Email)
 
 	// ensure the file exists and has the right content
 	_, err = os.Stat(filepath.Join(repoPath, directory, "appendix_1.md"))
@@ -397,12 +397,12 @@ func TestApiDeleteDirectoryNotExists(t *testing.T) {
 
 	target := fmt.Sprintf("%s/%s/%s", server.URL, "api/directories", "favourites")
 
-	rw := &NewRepoWrite{
+	nc := &NewCommit{
 		Email: "julius.hibbert@springfield-hospital.com",
 		Name:  "Julius Hibbert",
 	}
 
-	payload, err := json.Marshal(rw)
+	payload, err := json.Marshal(nc)
 	if err != nil {
 		panic(err)
 	}

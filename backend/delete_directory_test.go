@@ -14,7 +14,7 @@ func TestDeleteDir(t *testing.T) {
 
 	setupSmallTestRepo(repoPath)
 
-	rw := NewRepoWrite{
+	nc := NewCommit{
 		//Path:  "appendices",
 		Name:  "Moe Szyslak",
 		Email: "moe@moes.com",
@@ -24,7 +24,7 @@ func TestDeleteDir(t *testing.T) {
 
 	repo, _ := repository(config)
 
-	oid, err := deleteDirectory(directory, rw)
+	oid, err := deleteDirectory(directory, nc)
 	if err != nil {
 		panic(err)
 	}
@@ -40,9 +40,9 @@ func TestDeleteDir(t *testing.T) {
 
 	// ensure the most recent commit has the right name and email
 	lastCommit, _ := repo.LookupCommit(oid)
-	assert.Equal(t, lastCommit.Committer().Name, rw.Name)
-	assert.Equal(t, lastCommit.Committer().Email, rw.Email)
-	assert.Equal(t, lastCommit.Message(), rw.Message)
+	assert.Equal(t, lastCommit.Committer().Name, nc.Name)
+	assert.Equal(t, lastCommit.Committer().Email, nc.Email)
+	assert.Equal(t, lastCommit.Message(), nc.Message)
 
 }
 
@@ -52,12 +52,12 @@ func TestDeleteDirNotExists(t *testing.T) {
 
 	setupSmallTestRepo(repoPath)
 
-	rw := NewRepoWrite{
+	nc := NewCommit{
 		Name:  "Barney Gumble",
 		Email: "barney@plow-king.com",
 	}
 
-	_, err := deleteDirectory("menu", rw)
+	_, err := deleteDirectory("menu", nc)
 
 	assert.Contains(t, err.Error(), "directory does not exist")
 

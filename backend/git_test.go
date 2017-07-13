@@ -77,12 +77,12 @@ func TestHeadCommit(t *testing.T) {
 }
 
 func createRandomFile(repo *git.Repository, filename, msg string) error {
-	rw := NewRepoWrite{
+	nc := NewCommit{
 		Message: msg,
 		Name:    "Barney Gumble",
 		Email:   "barney.gumble@hotmail.com",
-		Files: []FileWrite{
-			FileWrite{
+		Files: []NewCommitFile{
+			NewCommitFile{
 				Body:     "# The quick brown fox\n\njumped over the lazy dog",
 				Filename: filename,
 				Path:     "documents",
@@ -93,7 +93,7 @@ func createRandomFile(repo *git.Repository, filename, msg string) error {
 			},
 		},
 	}
-	_, err := createFiles(rw)
+	_, err := createFiles(nc)
 	return err
 }
 
@@ -202,12 +202,12 @@ func TestLookupFileHistory(t *testing.T) {
 	filename := "history_test.md"
 	path := fmt.Sprintf("%s/%s", dir, filename)
 
-	template := NewRepoWrite{
+	template := NewCommit{
 
 		Name:  "Hyman Krustofski",
 		Email: "hyman@springfieldsynagogue.org",
-		Files: []FileWrite{
-			FileWrite{
+		Files: []NewCommitFile{
+			NewCommitFile{
 				Filename: filename,
 				Path:     dir,
 				FrontMatter: FrontMatter{
@@ -218,7 +218,7 @@ func TestLookupFileHistory(t *testing.T) {
 		},
 	}
 
-	var r1, r2, r3 NewRepoWrite
+	var r1, r2, r3 NewCommit
 
 	// Revision 1
 	r1 = template
@@ -274,12 +274,12 @@ func TestLookupFileHistorySortsByTime(t *testing.T) {
 	oid, _ := setupSmallTestRepo(repoPath)
 	repo, _ := repository(config)
 
-	template := NewRepoWrite{
+	template := NewCommit{
 
 		Name:  "Hyman Krustofski",
 		Email: "hyman@springfieldsynagogue.org",
-		Files: []FileWrite{
-			FileWrite{
+		Files: []NewCommitFile{
+			NewCommitFile{
 				Filename: "sort_test.md",
 				Path:     "documents",
 				FrontMatter: FrontMatter{
@@ -291,7 +291,7 @@ func TestLookupFileHistorySortsByTime(t *testing.T) {
 	}
 
 	// Revisions ordered numerically but entered in the wrong order
-	var r1, r2, r3 NewRepoWrite
+	var r1, r2, r3 NewCommit
 
 	// Revision 2
 	r2 = template
@@ -362,12 +362,12 @@ func TestLookupFileHistoryOnlyReturnsRelevantCommits(t *testing.T) {
 	oid, _ := setupSmallTestRepo(repoPath)
 	repo, _ := repository(config)
 
-	template := NewRepoWrite{
+	template := NewCommit{
 
 		Name:  "Hyman Krustofski",
 		Email: "hyman@springfieldsynagogue.org",
-		Files: []FileWrite{
-			FileWrite{
+		Files: []NewCommitFile{
+			NewCommitFile{
 				Path: "documents",
 				FrontMatter: FrontMatter{
 					Title:  "History Tests",
@@ -378,7 +378,7 @@ func TestLookupFileHistoryOnlyReturnsRelevantCommits(t *testing.T) {
 	}
 
 	// Revisions ordered numerically but entered in the wrong order
-	var r1, r2, r3 NewRepoWrite
+	var r1, r2, r3 NewCommit
 
 	// Revision 1
 	r1 = template
@@ -429,7 +429,7 @@ func TestLookupFileHistoryOnlyReturnsRelevantCommits(t *testing.T) {
 
 // Utility functions
 
-func writeHistoricFiles(repo *git.Repository, rw NewRepoWrite, time time.Time) (oid *git.Oid, err error) {
+func writeHistoricFiles(repo *git.Repository, nc NewCommit, time time.Time) (oid *git.Oid, err error) {
 
 	index, err := repo.Index()
 	if err != nil {
@@ -439,11 +439,11 @@ func writeHistoricFiles(repo *git.Repository, rw NewRepoWrite, time time.Time) (
 
 	var contents string
 
-	for _, fw := range rw.Files {
+	for _, ncf := range nc.Files {
 
 		var ie git.IndexEntry
 
-		contents = particle.YAMLEncoding.EncodeToString([]byte(fw.Body), &fw.FrontMatter)
+		contents = particle.YAMLEncoding.EncodeToString([]byte(ncf.Body), &ncf.FrontMatter)
 
 		oid, err = repo.CreateBlobFromBuffer([]byte(contents))
 		if err != nil {
@@ -451,7 +451,7 @@ func writeHistoricFiles(repo *git.Repository, rw NewRepoWrite, time time.Time) (
 		}
 
 		// build the git index entry and add it to the index
-		ie = buildIndexEntry(oid, fw)
+		ie = buildIndexEntry(oid, ncf)
 
 		err = index.Add(&ie)
 		if err != nil {
@@ -479,11 +479,11 @@ func writeHistoricFiles(repo *git.Repository, rw NewRepoWrite, time time.Time) (
 	}
 
 	// git signatures
-	author := historicSign(rw, time)
-	committer := historicSign(rw, time)
+	author := historicSign(nc, time)
+	committer := historicSign(nc, time)
 
 	// now commit our updated tree to the tip (parent)
-	oid, err = repo.CreateCommit("HEAD", author, committer, rw.Message, tree, tip)
+	oid, err = repo.CreateCommit("HEAD", author, committer, nc.Message, tree, tip)
 	if err != nil {
 		return nil, err
 	}
@@ -497,10 +497,10 @@ func writeHistoricFiles(repo *git.Repository, rw NewRepoWrite, time time.Time) (
 
 }
 
-func historicSign(rw NewRepoWrite, time time.Time) *git.Signature {
+func historicSign(nc NewCommit, time time.Time) *git.Signature {
 	return &git.Signature{
-		Name:  rw.Name,
-		Email: rw.Email,
+		Name:  nc.Name,
+		Email: nc.Email,
 		When:  time,
 	}
 }

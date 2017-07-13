@@ -14,26 +14,26 @@ func TestDeleteFiles(t *testing.T) {
 
 	setupSmallTestRepo(repoPath)
 
-	fw1 := FileWrite{
+	ncf1 := NewCommitFile{
 		Filename: "document_1.md",
 		Path:     "documents",
 	}
 
-	fw2 := FileWrite{
+	ncf2 := NewCommitFile{
 		Filename: "document_2.md",
 		Path:     "documents",
 	}
 
-	rw := NewRepoWrite{
+	nc := NewCommit{
 		Message: "Delete documents 1 and 2",
 		Name:    "Milhouse van Houten",
 		Email:   "milhouse@springfield.gov",
-		Files:   []FileWrite{fw1, fw2},
+		Files:   []NewCommitFile{ncf1, ncf2},
 	}
 
 	repo, _ := repository(config)
 
-	oid, err := deleteFiles(rw)
+	oid, err := deleteFiles(nc)
 	if err != nil {
 		panic(err)
 	}
@@ -44,16 +44,16 @@ func TestDeleteFiles(t *testing.T) {
 	assert.Equal(t, oid, hc.Id())
 
 	// ensure the file isn't present on the filesystem
-	_, err = os.Stat(filepath.Join(repoPath, fw1.Path, fw1.Filename))
-	_, err = os.Stat(filepath.Join(repoPath, fw2.Path, fw2.Filename))
+	_, err = os.Stat(filepath.Join(repoPath, ncf1.Path, ncf1.Filename))
+	_, err = os.Stat(filepath.Join(repoPath, ncf2.Path, ncf2.Filename))
 
 	assert.True(t, os.IsNotExist(err))
 
 	// ensure the most recent commit has the right name and email
 	lastCommit, _ := repo.LookupCommit(oid)
-	assert.Equal(t, lastCommit.Committer().Name, rw.Name)
-	assert.Equal(t, lastCommit.Committer().Email, rw.Email)
-	assert.Equal(t, lastCommit.Message(), rw.Message)
+	assert.Equal(t, lastCommit.Committer().Name, nc.Name)
+	assert.Equal(t, lastCommit.Committer().Email, nc.Email)
+	assert.Equal(t, lastCommit.Message(), nc.Message)
 
 }
 
@@ -63,19 +63,19 @@ func TestDeleteFileNotExists(t *testing.T) {
 
 	setupSmallTestRepo(repoPath)
 
-	fw := FileWrite{
+	ncf := NewCommitFile{
 		Filename: "document_5.md",
 		Path:     "documents",
 	}
 
-	rw := NewRepoWrite{
+	nc := NewCommit{
 		Message: "Delete document 5",
 		Name:    "Milhouse van Houten",
 		Email:   "milhouse@springfield.gov",
-		Files:   []FileWrite{fw},
+		Files:   []NewCommitFile{ncf},
 	}
 
-	_, err := deleteFiles(rw)
+	_, err := deleteFiles(nc)
 
 	assert.Contains(t, err.Error(), "file does not exist")
 
