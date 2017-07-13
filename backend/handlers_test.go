@@ -91,11 +91,13 @@ func TestApiCreateDirectory(t *testing.T) {
 
 	target := fmt.Sprintf("%s/%s", server.URL, "api/directories")
 
-	rw := &RepoWrite{
+	fw := FileWrite{Path: "bobbins"}
+
+	rw := &NewRepoWrite{
 		Email:   "martin.prince@springfield.k12.us",
 		Name:    "Martin Prince",
 		Message: "Forty whacks with a wet noodle",
-		Path:    "bobbins",
+		Files:   []FileWrite{fw},
 	}
 
 	payload, err := json.Marshal(rw)
@@ -122,7 +124,7 @@ func TestApiCreateDirectory(t *testing.T) {
 	assert.Equal(t, receiver.Oid, hc.Id().String())
 
 	// ensure the file exists and has the right content
-	contents, _ := ioutil.ReadFile(filepath.Join(repoPath, rw.Path, ".keep"))
+	contents, _ := ioutil.ReadFile(filepath.Join(repoPath, fw.Path, ".keep"))
 	assert.Equal(t, "", string(contents))
 
 	// ensure the most recent commit has the right name and email
@@ -132,7 +134,7 @@ func TestApiCreateDirectory(t *testing.T) {
 	assert.Equal(t, lastCommit.Committer().Email, rw.Email)
 
 	// ensure that the commit message has been set correctly
-	msg := fmt.Sprintf("Added %s directory", rw.Path)
+	msg := fmt.Sprintf("Added directories: %s", fw.Path)
 	assert.Equal(t, lastCommit.Message(), msg)
 
 }
@@ -337,7 +339,7 @@ func TestApiDeleteDirectory(t *testing.T) {
 
 	target := fmt.Sprintf("%s/%s/%s", server.URL, "api/directories", directory)
 
-	rw := &RepoWrite{
+	rw := &NewRepoWrite{
 		Email: "julius.hibbert@springfield-hospital.com",
 		Name:  "Julius Hibbert",
 	}
@@ -395,7 +397,7 @@ func TestApiDeleteDirectoryNotExists(t *testing.T) {
 
 	target := fmt.Sprintf("%s/%s/%s", server.URL, "api/directories", "favourites")
 
-	rw := &RepoWrite{
+	rw := &NewRepoWrite{
 		Email: "julius.hibbert@springfield-hospital.com",
 		Name:  "Julius Hibbert",
 	}

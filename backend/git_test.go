@@ -77,19 +77,23 @@ func TestHeadCommit(t *testing.T) {
 }
 
 func createRandomFile(repo *git.Repository, filename, msg string) error {
-	rw := RepoWrite{
-		Body:     "# The quick brown fox\n\njumped over the lazy dog",
-		Filename: filename,
-		Path:     "documents",
-		Message:  msg,
-		Name:     "Barney Gumble",
-		Email:    "barney.gumble@hotmail.com",
-		FrontMatter: FrontMatter{
-			Title:  "Document Twelve",
-			Author: "Bernard Arnold Gumble",
+	rw := NewRepoWrite{
+		Message: msg,
+		Name:    "Barney Gumble",
+		Email:   "barney.gumble@hotmail.com",
+		Files: []FileWrite{
+			FileWrite{
+				Body:     "# The quick brown fox\n\njumped over the lazy dog",
+				Filename: filename,
+				Path:     "documents",
+				FrontMatter: FrontMatter{
+					Title:  "Document Twelve",
+					Author: "Bernard Arnold Gumble",
+				},
+			},
 		},
 	}
-	_, err := createFile(rw)
+	_, err := createFiles(rw)
 	return err
 }
 
@@ -198,38 +202,43 @@ func TestLookupFileHistory(t *testing.T) {
 	filename := "history_test.md"
 	path := fmt.Sprintf("%s/%s", dir, filename)
 
-	template := RepoWrite{
-		Filename: filename,
-		Path:     dir,
-		Name:     "Hyman Krustofski",
-		Email:    "hyman@springfieldsynagogue.org",
-		FrontMatter: FrontMatter{
-			Title:  "History Tests",
-			Author: "Helen Lovejoy",
+	template := NewRepoWrite{
+
+		Name:  "Hyman Krustofski",
+		Email: "hyman@springfieldsynagogue.org",
+		Files: []FileWrite{
+			FileWrite{
+				Filename: filename,
+				Path:     dir,
+				FrontMatter: FrontMatter{
+					Title:  "History Tests",
+					Author: "Helen Lovejoy",
+				},
+			},
 		},
 	}
 
-	var r1, r2, r3 RepoWrite
+	var r1, r2, r3 NewRepoWrite
 
 	// Revision 1
 	r1 = template
-	r1.Body = "# r1"
+	r1.Files[0].Body = "# r1"
 	r1.Message = "r1"
-	oid, _ = createFile(r1)
+	oid, _ = createFiles(r1)
 	assert.NotNil(t, oid)
 
 	// Revision 2
 	r2 = template
-	r2.Body = "# r2"
+	r2.Files[0].Body = "# r2"
 	r2.Message = "r2"
-	oid, _ = updateFile(r2)
+	oid, _ = updateFiles(r2)
 	assert.NotNil(t, oid)
 
 	// Revision 3
 	r3 = template
-	r3.Body = "# r3"
+	r3.Files[0].Body = "# r3"
 	r3.Message = "r3"
-	oid, _ = updateFile(r3)
+	oid, _ = updateFiles(r3)
 	assert.NotNil(t, oid)
 
 	var history []HistoricCommit
@@ -265,39 +274,44 @@ func TestLookupFileHistorySortsByTime(t *testing.T) {
 	oid, _ := setupSmallTestRepo(repoPath)
 	repo, _ := repository(config)
 
-	template := RepoWrite{
-		Filename: "sort_test.md",
-		Path:     "documents",
-		Name:     "Hyman Krustofski",
-		Email:    "hyman@springfieldsynagogue.org",
-		FrontMatter: FrontMatter{
-			Title:  "History Tests",
-			Author: "Helen Lovejoy",
+	template := NewRepoWrite{
+
+		Name:  "Hyman Krustofski",
+		Email: "hyman@springfieldsynagogue.org",
+		Files: []FileWrite{
+			FileWrite{
+				Filename: "sort_test.md",
+				Path:     "documents",
+				FrontMatter: FrontMatter{
+					Title:  "History Tests",
+					Author: "Helen Lovejoy",
+				},
+			},
 		},
 	}
 
 	// Revisions ordered numerically but entered in the wrong order
-	var r1, r2, r3 RepoWrite
+	var r1, r2, r3 NewRepoWrite
 
 	// Revision 2
 	r2 = template
-	r2.Body = "# r2"
+	r2.Files[0].Body = "# r2"
 	r2.Message = "r2"
-	oid, _ = writeHistoricFile(repo, r2, time.Date(2016, 1, 1, 14, 0, 0, 0, time.UTC))
+	oid, _ = writeHistoricFiles(repo, r2, time.Date(2016, 1, 1, 14, 0, 0, 0, time.UTC))
 	assert.NotNil(t, oid)
 
 	// Revision 3
 	r3 = template
-	r3.Body = "# r3"
+	r3.Files[0].Body = "# r3"
 	r3.Message = "r3"
-	oid, _ = writeHistoricFile(repo, r3, time.Date(2016, 1, 1, 15, 0, 0, 0, time.UTC))
+	oid, _ = writeHistoricFiles(repo, r3, time.Date(2016, 1, 1, 15, 0, 0, 0, time.UTC))
 	assert.NotNil(t, oid)
 
 	// Revision 1
 	r1 = template
-	r1.Body = "# r1"
+	r1.Files[0].Body = "# r1"
 	r1.Message = "r1"
-	oid, _ = writeHistoricFile(repo, r1, time.Date(2016, 1, 1, 13, 0, 0, 0, time.UTC))
+	oid, _ = writeHistoricFiles(repo, r1, time.Date(2016, 1, 1, 13, 0, 0, 0, time.UTC))
 	assert.NotNil(t, oid)
 
 	var history []HistoricCommit
@@ -348,41 +362,46 @@ func TestLookupFileHistoryOnlyReturnsRelevantCommits(t *testing.T) {
 	oid, _ := setupSmallTestRepo(repoPath)
 	repo, _ := repository(config)
 
-	template := RepoWrite{
-		Path:  "documents",
+	template := NewRepoWrite{
+
 		Name:  "Hyman Krustofski",
 		Email: "hyman@springfieldsynagogue.org",
-		FrontMatter: FrontMatter{
-			Title:  "History Tests",
-			Author: "Helen Lovejoy",
+		Files: []FileWrite{
+			FileWrite{
+				Path: "documents",
+				FrontMatter: FrontMatter{
+					Title:  "History Tests",
+					Author: "Helen Lovejoy",
+				},
+			},
 		},
 	}
 
 	// Revisions ordered numerically but entered in the wrong order
-	var r1, r2, r3 RepoWrite
+	var r1, r2, r3 NewRepoWrite
 
 	// Revision 1
 	r1 = template
-	r1.Filename = "document_11.md"
-	r1.Body = "# r1"
+	r1.Files[0].Filename = "document_11.md"
+	r1.Files[0].Body = "# r1"
 	r1.Message = "r1"
-	oid, _ = createFile(r1)
+	oid, _ = createFiles(r1)
 	assert.NotNil(t, oid)
 
 	// Revision 2 (unrelated)
 	r2 = template
-	r2.Filename = "document_12.md"
-	r2.Body = "# r2"
+	r2.Files[0].Filename = "document_12.md"
+	r2.Files[0].Body = "# r2"
 	r2.Message = "r2"
-	oid, _ = createFile(r2)
+	oid, _ = createFiles(r2)
 	assert.NotNil(t, oid)
 
 	// Revision 1
 	r3 = template
-	r3.Filename = "document_11.md"
-	r3.Body = "# r3"
+	r3.Files[0].Filename = "document_11.md"
+	r3.Files[0].Body = "# r3"
 	r3.Message = "r3"
-	oid, _ = updateFile(r3)
+	oid, _ = updateFiles(r3)
 	assert.NotNil(t, oid)
 
 	var history []HistoricCommit
@@ -410,7 +429,7 @@ func TestLookupFileHistoryOnlyReturnsRelevantCommits(t *testing.T) {
 
 // Utility functions
 
-func writeHistoricFile(repo *git.Repository, rw RepoWrite, time time.Time) (oid *git.Oid, err error) {
+func writeHistoricFiles(repo *git.Repository, rw NewRepoWrite, time time.Time) (oid *git.Oid, err error) {
 
 	index, err := repo.Index()
 	if err != nil {
@@ -418,21 +437,27 @@ func writeHistoricFile(repo *git.Repository, rw RepoWrite, time time.Time) (oid 
 	}
 	defer index.Free()
 
-	// add frontmatter to the file contents, followed by the document body
-	contents := particle.YAMLEncoding.EncodeToString([]byte(rw.Body), &rw.FrontMatter)
+	var contents string
 
-	// and add the combined contents to a blob in the repo
-	oid, err = repo.CreateBlobFromBuffer([]byte(contents))
-	if err != nil {
-		return nil, err
-	}
+	for _, fw := range rw.Files {
 
-	// build the git index entry and add it to the index
-	ie := buildIndexEntry(oid, rw)
+		var ie git.IndexEntry
 
-	err = index.Add(&ie)
-	if err != nil {
-		return nil, err
+		contents = particle.YAMLEncoding.EncodeToString([]byte(fw.Body), &fw.FrontMatter)
+
+		oid, err = repo.CreateBlobFromBuffer([]byte(contents))
+		if err != nil {
+			return nil, err
+		}
+
+		// build the git index entry and add it to the index
+		ie = buildIndexEntry(oid, fw)
+
+		err = index.Add(&ie)
+		if err != nil {
+			return nil, err
+		}
+
 	}
 
 	// write the tree, persisting our addition to the git repo
@@ -468,15 +493,11 @@ func writeHistoricFile(repo *git.Repository, rw RepoWrite, time time.Time) (oid 
 		&git.CheckoutOpts{Strategy: git.CheckoutSafe | git.CheckoutRecreateMissing | git.CheckoutForce},
 	)
 
-	if err != nil {
-		Error.Println("Could not checkout head:", err.Error())
-	}
-
 	return oid, err
 
 }
 
-func historicSign(rw RepoWrite, time time.Time) *git.Signature {
+func historicSign(rw NewRepoWrite, time time.Time) *git.Signature {
 	return &git.Signature{
 		Name:  rw.Name,
 		Email: rw.Email,

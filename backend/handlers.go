@@ -361,13 +361,14 @@ func apiDirectorySummary(w http.ResponseWriter, r *http.Request) {
 //	 "message": "Added new directory called Bobbins"
 // }
 func apiCreateDirectoryHandler(w http.ResponseWriter, r *http.Request) {
-	var rw RepoWrite
+	var rw NewRepoWrite
 	var sr SuccessResponse
 
-	rw = RepoWrite{}
 	json.NewDecoder(r.Body).Decode(&rw)
 
-	oid, err := createDirectory(rw)
+	//directory = vestigo.Param(r, "directory")
+
+	oid, err := createDirectories(rw)
 
 	if err != nil {
 		fr := FailureResponse{Message: err.Error()}
@@ -413,18 +414,21 @@ func apiRenameDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 // returns a SuccessResponse containing the git commit hash or a FailureResponse
 // containing an error message
 func apiDeleteDirectoryHandler(w http.ResponseWriter, r *http.Request) {
-	var rw RepoWrite
+	var rw NewRepoWrite
 	var fr FailureResponse
 	var sr SuccessResponse
+	var directory string
 
 	// set up the RepoWrite with git params, an appropraiate message and then
 	// specify the directory based on the path
-	rw = RepoWrite{}
-	json.NewDecoder(r.Body).Decode(&rw)
-	rw.Message = fmt.Sprintf("Deleted %s directory", rw.Path)
-	rw.Path = vestigo.Param(r, "directory")
+	rw = NewRepoWrite{}
 
-	oid, err := deleteDirectory(rw)
+	directory = vestigo.Param(r, "directory")
+
+	json.NewDecoder(r.Body).Decode(&rw)
+	rw.Message = fmt.Sprintf("Deleted %s directory", directory)
+
+	oid, err := deleteDirectory(directory, rw)
 
 	if err != nil {
 

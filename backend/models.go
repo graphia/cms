@@ -6,18 +6,6 @@ import (
 	"gopkg.in/libgit2/git2go.v25"
 )
 
-// RepoWrite contains all info we need to perform a git commit
-// TODO rename to FileWrite fw
-type RepoWrite struct {
-	Filename    string
-	Path        string
-	Body        string
-	Message     string
-	Name        string
-	Email       string
-	FrontMatter FrontMatter
-}
-
 // NewRepoWrite will replace RepoWrite and allow multiple files
 // TODO rename to NewCommit
 type NewRepoWrite struct {

@@ -22,20 +22,25 @@ func TestUpdateFile(t *testing.T) {
 		Repository: filepath.Join(repoPath),
 	}
 
-	rw := RepoWrite{
+	fw := FileWrite{
 		Body:     "# The quick brown fox\n\njumped over the lazy dog",
 		Filename: "document_2.md",
 		Path:     "documents",
-		Message:  "Update document 2",
-		Name:     "Milhouse van Houten",
-		Email:    "milhouse@springfield.gov",
 		FrontMatter: FrontMatter{
 			Title:  "Document Two",
 			Author: "Hans Moleman",
 		},
 	}
 
-	oid, err := updateFile(rw)
+	rw := NewRepoWrite{
+
+		Message: "Update document 2",
+		Name:    "Milhouse van Houten",
+		Email:   "milhouse@springfield.gov",
+		Files:   []FileWrite{fw},
+	}
+
+	oid, err := updateFiles(rw)
 
 	if err != nil {
 		panic(err)
@@ -47,10 +52,10 @@ func TestUpdateFile(t *testing.T) {
 	assert.Equal(t, oid, hc.Id())
 
 	// ensure the file exists and has the right content
-	contents, _ := ioutil.ReadFile(filepath.Join(repoPath, rw.Path, rw.Filename))
-	assert.Contains(t, string(contents), rw.Body)
-	assert.Contains(t, string(contents), rw.FrontMatter.Author)
-	assert.Contains(t, string(contents), rw.FrontMatter.Title)
+	contents, _ := ioutil.ReadFile(filepath.Join(repoPath, fw.Path, fw.Filename))
+	assert.Contains(t, string(contents), fw.Body)
+	assert.Contains(t, string(contents), fw.FrontMatter.Author)
+	assert.Contains(t, string(contents), fw.FrontMatter.Title)
 
 	// ensure the most recent commit has the right name and email
 	lastCommit, _ := repo.LookupCommit(oid)
@@ -76,7 +81,7 @@ func TestUpdateFiles(t *testing.T) {
 	}
 
 	fw1 := FileWrite{
-		Filename:  "document_14.md",
+		Filename:  "document_1.md",
 		Path:      "documents",
 		Extension: "md",
 		Body:      "Cows don't look like cows on film. You gotta use horses.",
@@ -87,7 +92,7 @@ func TestUpdateFiles(t *testing.T) {
 	}
 
 	fw2 := FileWrite{
-		Filename:  "document_15.md",
+		Filename:  "document_2.md",
 		Path:      "documents",
 		Extension: "md",
 		Body:      "You don't win friends with salad.",
@@ -98,7 +103,7 @@ func TestUpdateFiles(t *testing.T) {
 	}
 
 	rw := NewRepoWrite{
-		Message: "Update document 2",
+		Message: "Update document 1 and 2",
 		Name:    "Milhouse van Houten",
 		Email:   "milhouse@springfield.gov",
 		Files:   []FileWrite{fw1, fw2},
@@ -141,22 +146,26 @@ func TestUpdateFileWhenNotExists(t *testing.T) {
 
 	setupSmallTestRepo(repoPath)
 
-	rw := RepoWrite{
-		Body:     "# The quick brown fox\n\njumped over the lazy dog",
-		Filename: "document_9.md",
-		Path:     "documents",
-		Message:  "Add document 9",
-		Name:     "Ned Flanders",
-		Email:    "nedward.flanders@leftorium.com",
+	rw := NewRepoWrite{
+		Message: "Add document 9",
+		Name:    "Ned Flanders",
+		Email:   "nedward.flanders@leftorium.com",
+		Files: []FileWrite{
+			FileWrite{
+				Body:     "# The quick brown fox\n\njumped over the lazy dog",
+				Filename: "document_9.md",
+				Path:     "documents",
+			},
+		},
 	}
 
 	repo, _ := repository(config)
 	hcBefore, _ := headCommit(repo)
 
-	_, err := updateFile(rw)
+	_, err := updateFiles(rw)
 
 	// check error message is correct
-	assert.Contains(t, err.Error(), "file does not exist")
+	assert.Contains(t, err.Error(), "file not found: documents/document_9.md")
 
 	hcAfter, _ := headCommit(repo)
 

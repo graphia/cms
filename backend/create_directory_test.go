@@ -17,23 +17,27 @@ func TestCreateDirectory(t *testing.T) {
 	setupSmallTestRepo(repoPath)
 
 	newDir := "recipes"
-	commitMessage := fmt.Sprintf("Added %s directory", newDir)
+	commitMessage := fmt.Sprintf("Added directories: %s", newDir)
 
-	rw := RepoWrite{
-		Path:  newDir,
+	rw := NewRepoWrite{
 		Name:  "Luigi Risotto",
 		Email: "luigi@luigis-restaurant.com",
+		Files: []FileWrite{
+			FileWrite{
+				Path: newDir,
+			},
+		},
 	}
 
 	repo, _ := repository(config)
-	oid, _ := createDirectory(rw)
+	oid, _ := createDirectories(rw)
 	hc, _ := headCommit(repo)
 
 	// our commit hash should now equal the repo's head
 	assert.Equal(t, oid, hc.Id())
 
 	// ensure the file exists and has the right content
-	_, err = os.Stat(filepath.Join(repoPath, rw.Path, ".keep"))
+	_, err = os.Stat(filepath.Join(repoPath, newDir, ".keep"))
 	assert.False(t, os.IsNotExist(err))
 
 	// ensure the most recent commit has the right name and email
@@ -52,15 +56,17 @@ func TestCreateDirectoryWhenExists(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/create_file"
 	setupSmallTestRepo(repoPath)
 
-	rw := RepoWrite{
-		Path:  "appendices",
+	rw := NewRepoWrite{
 		Name:  "Luigi Risotto",
 		Email: "luigi@luigis-restaurant.com",
+		Files: []FileWrite{
+			FileWrite{Path: "appendices"},
+		},
 	}
 	repo, _ := repository(config)
 	hcBefore, _ := headCommit(repo)
 
-	_, err := createDirectory(rw)
+	_, err := createDirectories(rw)
 
 	// check error message is correct
 	assert.Contains(t, err.Error(), "directory already exists")
