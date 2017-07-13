@@ -19,6 +19,7 @@ type RepoWrite struct {
 }
 
 // NewRepoWrite will replace RepoWrite and allow multiple files
+// TODO rename to NewCommit
 type NewRepoWrite struct {
 	Message string      `json:"message"`
 	Name    string      `json:"name"`

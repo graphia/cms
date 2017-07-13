@@ -616,13 +616,24 @@ func apiDeleteFileFromDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 	// FIXME check that path matches at least one file?
 	json.NewDecoder(r.Body).Decode(&rw)
 
+	// TODO check that rw.Files isn't empty
+
+	Debug.Println("rw", rw)
+
+	if len(rw.Files) == 0 {
+		response := FailureResponse{Message: "No files specified for deletion"}
+		JSONBadRequestResponse(response, w)
+		return
+	}
+
 	oid, err := deleteFiles(rw)
 
 	if err != nil {
-		Error.Println("Failed to delete file", err.Error())
+
 		fr = FailureResponse{
 			Message: err.Error(),
 		}
+
 		output, err := json.Marshal(fr)
 		if err != nil {
 			Error.Println(err.Error())
