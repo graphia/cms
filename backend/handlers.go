@@ -355,10 +355,13 @@ func apiDirectorySummary(w http.ResponseWriter, r *http.Request) {
 //
 // POST /api/directories
 // {
-//	 "path": "recipes",
-//	 "name": "Martin Prince",
-//	 "email": "mp@springfield-elementary.gov",
-//	 "message": "Added new directory called Bobbins"
+//	  "name": "Martin Prince",
+//	  "email": "mp@springfield-elementary.gov",
+//	  "message": "Added new directory called Bobbins",
+//	  "directories": [
+//	    {"path": "documents"},
+//	    {"path": "appendices"}
+//	  ]
 // }
 func apiCreateDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 	var nc NewCommit
@@ -407,6 +410,15 @@ func apiRenameDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 //	 "path": "recipes",
 //	 "name": "Martin Prince",
 //	 "email": "mp@springfield-elementary.gov",
+// }
+// DELETE /api/directories
+// {
+//	  "name": "Martin Prince",
+//	  "email": "mp@springfield-elementary.gov",
+//	  "message": "Added new directory called Bobbins",
+//	  "directories": [
+//	    {"path": "documents"}
+//	  ]
 // }
 //
 // returns a SuccessResponse containing the git commit hash or a FailureResponse
@@ -495,14 +507,11 @@ func apiListFilesInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 //
 // POST /api/directories/:directory/files
 // {
-//   "filename": "document_6.md",
-//   "body": "The *quick* brown fox [jumped](appendices/jumping.md) ...",
-//	 "message": "Added document six"
-//   ...
+//	  "message": "Added document six"
+//	  "files": [
+//	    {"filename": "document_six.md", "path": "documents", "extension": "md", body: "blah blah"}
+//	  ]
 // }
-//
-// returns a SuccessResponse containing the git commit hash or a FailureResponse
-// containing an error message
 func apiCreateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 
 	var nc NewCommit
@@ -548,13 +557,11 @@ func apiCreateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 //
 // PATCH /api/directories/:directory/files/:filename
 // {
-//   "body": "The *quick* brown dog [jumped](appendices/jumping.md) ...",
-//	 "message": "Fixed grammar in document six"
-//   ...
+//	  "message": "Added document six"
+//	  "files": [
+//	    {"filename": "document_six.md", "path": "documents", "extension": "md", "body": "what a nice doc"}
+//	  ]
 // }
-//
-// returns a SuccessResponse containing the git commit hash or a
-// FailureResponse containing an error message
 func apiUpdateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 	var nc NewCommit
 	var fr FailureResponse
@@ -599,11 +606,11 @@ func apiUpdateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 //
 // DELETE /api/directories/:directory/files/:filename
 // {
-//   "message": "Deleted document 6 as it's no longer required"
+//	  "message": "Deleted document 6 as it's no longer required",
+//	  "files": [
+//	    {"filename": "document_six.md", "path": "documents"}
+//	  ]
 // }
-//
-// returns a SuccessResponse containing the git commit hash or a
-// FailureResponse containing an error message
 func apiDeleteFileFromDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 	var nc NewCommit
 	var fr FailureResponse
@@ -846,6 +853,20 @@ func apiPublish(w http.ResponseWriter, r *http.Request) {
 
 // Repository data 💁
 
+// GET /api/recent_commits
+//
+// returns the most recent commits made to the repository. Currently hard-coded
+// to 20, but would make sense to accept a param
+//
+// [
+//	  {
+//	    "message": "Changed some stuff",
+//	    "id": "e2da99aa078c",
+//	    "object_type": "blob",
+//	    "author": "Peter Yates"
+//	    "time": "Fri Jul 14 12:34:45 2017 +0100"
+//	  },
+// ]
 func apiGetCommits(w http.ResponseWriter, r *http.Request) {
 	var commits []Commit
 	var err error
@@ -864,6 +885,27 @@ func apiGetCommits(w http.ResponseWriter, r *http.Request) {
 	w.Write(response)
 }
 
+// GET /api/commits/:commit_hash
+//
+// returns a single commit containing relevant info plus the list of files
+// and diff information, plus the file's contents before and after the change
+//
+//	{
+//	  "num_deltas": 2,
+//	  "num_added": 1,
+//	  "num_deleted": 1,
+//	  "full_diff": "raw diff text",
+//	  "files": {
+//	    "documents/document_1.md": {
+//	      "old": "the quick brown fox",
+//	      "new": "the thick brown fox"
+//	    }
+//	  },
+//	  "message": "changed quick to thick",
+//	  "author": "Cletus Spuckler",
+//	  "hash": "e2da99aa078c",
+//	  "timestamp": "Fri Jul 14 12:34:45 2017 +0100"
+//	},
 func apiGetCommit(w http.ResponseWriter, r *http.Request) {
 
 	hash := vestigo.Param(r, "hash")
@@ -883,6 +925,20 @@ func apiGetCommit(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// GET /api/directories/:directory/files/:filename/history
+//
+// returns the basic commit information for every commit that has
+// affected the specified file
+//
+// [
+//	  {
+//	    "message": "Changed some stuff",
+//	    "id": "e2da99aa078c",
+//	    "object_type": "blob",
+//	    "author": "Peter Yates"
+//	    "time": "Fri Jul 14 12:34:45 2017 +0100"
+//	  },
+// ]
 func apiGetFileHistory(w http.ResponseWriter, r *http.Request) {
 	directory := vestigo.Param(r, "directory")
 	filename := vestigo.Param(r, "file")
