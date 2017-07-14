@@ -8,23 +8,24 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestDeleteDir(t *testing.T) {
+func TestDeleteDirectories(t *testing.T) {
 
 	repoPath := "../tests/tmp/repositories/delete_dir"
 
 	setupSmallTestRepo(repoPath)
 
-	nc := NewCommit{
-		//Path:  "appendices",
-		Name:  "Moe Szyslak",
-		Email: "moe@moes.com",
-	}
+	ncd := NewCommitDirectory{Path: "appendices"}
 
-	directory := "appendices"
+	nc := NewCommit{
+		Name:        "Moe Szyslak",
+		Email:       "moe@moes.com",
+		Message:     "Deleted directories",
+		Directories: []NewCommitDirectory{ncd},
+	}
 
 	repo, _ := repository(config)
 
-	oid, err := deleteDirectory(directory, nc)
+	oid, err := deleteDirectories(nc)
 	if err != nil {
 		panic(err)
 	}
@@ -35,7 +36,7 @@ func TestDeleteDir(t *testing.T) {
 	assert.Equal(t, oid, hc.Id())
 
 	// ensure the file isn't present on the filesystem
-	_, err = os.Stat(filepath.Join(repoPath, directory))
+	_, err = os.Stat(filepath.Join(repoPath, ncd.Path))
 	assert.True(t, os.IsNotExist(err))
 
 	// ensure the most recent commit has the right name and email
@@ -46,19 +47,22 @@ func TestDeleteDir(t *testing.T) {
 
 }
 
-func TestDeleteDirNotExists(t *testing.T) {
+func TestDeleteDirectoriesNotExists(t *testing.T) {
 
 	repoPath := "../tests/tmp/repositories/delete_file"
 
 	setupSmallTestRepo(repoPath)
 
+	ncd := NewCommitDirectory{Path: "menu"}
+
 	nc := NewCommit{
-		Name:  "Barney Gumble",
-		Email: "barney@plow-king.com",
+		Name:        "Barney Gumble",
+		Email:       "barney@plow-king.com",
+		Directories: []NewCommitDirectory{ncd},
 	}
 
-	_, err := deleteDirectory("menu", nc)
+	_, err := deleteDirectories(nc)
 
-	assert.Contains(t, err.Error(), "directory does not exist")
+	assert.Equal(t, err.Error(), "directory does not exist: menu")
 
 }

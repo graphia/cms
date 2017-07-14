@@ -91,13 +91,13 @@ func TestApiCreateDirectory(t *testing.T) {
 
 	target := fmt.Sprintf("%s/%s", server.URL, "api/directories")
 
-	ncf := NewCommitFile{Path: "bobbins"}
+	ncd := NewCommitDirectory{Path: "bobbins"}
 
 	nc := &NewCommit{
-		Email:   "martin.prince@springfield.k12.us",
-		Name:    "Martin Prince",
-		Message: "Forty whacks with a wet noodle",
-		Files:   []NewCommitFile{ncf},
+		Email:       "martin.prince@springfield.k12.us",
+		Name:        "Martin Prince",
+		Message:     "Forty whacks with a wet noodle",
+		Directories: []NewCommitDirectory{ncd},
 	}
 
 	payload, err := json.Marshal(nc)
@@ -124,7 +124,7 @@ func TestApiCreateDirectory(t *testing.T) {
 	assert.Equal(t, receiver.Oid, hc.Id().String())
 
 	// ensure the file exists and has the right content
-	contents, _ := ioutil.ReadFile(filepath.Join(repoPath, ncf.Path, ".keep"))
+	contents, _ := ioutil.ReadFile(filepath.Join(repoPath, ncd.Path, ".keep"))
 	assert.Equal(t, "", string(contents))
 
 	// ensure the most recent commit has the right name and email
@@ -134,7 +134,7 @@ func TestApiCreateDirectory(t *testing.T) {
 	assert.Equal(t, lastCommit.Committer().Email, nc.Email)
 
 	// ensure that the commit message has been set correctly
-	msg := fmt.Sprintf("Added directories: %s", ncf.Path)
+	msg := fmt.Sprintf("Added directories: %s", ncd.Path)
 	assert.Equal(t, lastCommit.Message(), msg)
 
 }
@@ -335,19 +335,19 @@ func TestApiDeleteDirectory(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/delete_dir"
 	setupSmallTestRepo(repoPath)
 
-	directory := "appendices"
-
-	target := fmt.Sprintf("%s/%s/%s", server.URL, "api/directories", directory)
-
+	ncd := NewCommitDirectory{Path: "appendices"}
 	nc := &NewCommit{
-		Email: "julius.hibbert@springfield-hospital.com",
-		Name:  "Julius Hibbert",
+		Email:       "julius.hibbert@springfield-hospital.com",
+		Name:        "Julius Hibbert",
+		Directories: []NewCommitDirectory{ncd},
 	}
 
+	target := fmt.Sprintf("%s/%s/%s", server.URL, "api/directories", ncd.Path)
+
 	// before deleting, make sure appendix files are present
-	_, err = os.Stat(filepath.Join(repoPath, directory, "appendix_1.md"))
+	_, err = os.Stat(filepath.Join(repoPath, ncd.Path, "appendix_1.md"))
 	assert.False(t, os.IsNotExist(err))
-	_, err = os.Stat(filepath.Join(repoPath, directory, "appendix_2.md"))
+	_, err = os.Stat(filepath.Join(repoPath, ncd.Path, "appendix_2.md"))
 	assert.False(t, os.IsNotExist(err))
 
 	payload, err := json.Marshal(nc)
@@ -380,9 +380,9 @@ func TestApiDeleteDirectory(t *testing.T) {
 	assert.Equal(t, lastCommit.Committer().Email, nc.Email)
 
 	// ensure the file exists and has the right content
-	_, err = os.Stat(filepath.Join(repoPath, directory, "appendix_1.md"))
+	_, err = os.Stat(filepath.Join(repoPath, ncd.Path, "appendix_1.md"))
 	assert.True(t, os.IsNotExist(err))
-	_, err = os.Stat(filepath.Join(repoPath, directory, "appendix_2.md"))
+	_, err = os.Stat(filepath.Join(repoPath, ncd.Path, "appendix_2.md"))
 	assert.True(t, os.IsNotExist(err))
 
 }
@@ -397,9 +397,11 @@ func TestApiDeleteDirectoryNotExists(t *testing.T) {
 
 	target := fmt.Sprintf("%s/%s/%s", server.URL, "api/directories", "favourites")
 
+	ncd := NewCommitDirectory{Path: "supplements"}
 	nc := &NewCommit{
-		Email: "julius.hibbert@springfield-hospital.com",
-		Name:  "Julius Hibbert",
+		Email:       "julius.hibbert@springfield-hospital.com",
+		Name:        "Julius Hibbert",
+		Directories: []NewCommitDirectory{ncd},
 	}
 
 	payload, err := json.Marshal(nc)

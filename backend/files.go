@@ -326,43 +326,28 @@ func listRootDirectorySummary() (summary map[string][]FileItem, err error) {
 
 func createDirectories(nc NewCommit) (oid *git.Oid, err error) {
 
-	// FIXME tidy this up so we're passing a suitbly specified object
-	// rather than piggybacking on
+	repo, err := repository(config)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(nc.Directories) == 0 {
+		return nil, fmt.Errorf("at least one new directory must be specified")
+	}
 
 	var addedDirs []string
 
 	// git can't track empty directories, so, Rails-style, we'll add an
 	// empty file called .keep for each directory and ensure the body is blank
-	for _, ncf := range nc.Files {
-
-		// check that the directory does not already exist
-		// FIXME this could be improved by performing the check
-		// against the git repository rather than just checking
-		// the filesystem
-
-		target := filepath.Join(ncf.Path, ncf.Filename)
-		absoluteTarget := filepath.Join(config.Repository, target)
-
-		_, err = os.Stat(absoluteTarget)
-		if err == nil {
-			return nil, fmt.Errorf("directory already exists %s", target)
-		}
-
-		if ncf.Path == "" {
-			return nil, fmt.Errorf("path must be specified when creating a directory: %s", ncf)
-		}
-
-		addedDirs = append(addedDirs, ncf.Path)
-
-		ncf.Filename = ".keep"
-		ncf.Body = ""
+	for _, ncd := range nc.Directories {
+		addedDirs = append(addedDirs, ncd.Path)
 	}
 
 	// And set the commit message sensibly so we don't need to prompt
 	// the user
 	nc.Message = fmt.Sprintf("Added directories: %s", strings.Join(addedDirs, ","))
 
-	oid, err = createFiles(nc)
+	oid, err = writeDirectories(repo, nc)
 	if err != nil {
 		return nil, err
 	}
@@ -370,7 +355,84 @@ func createDirectories(nc NewCommit) (oid *git.Oid, err error) {
 	return oid, err
 }
 
-func deleteDirectory(directory string, nc NewCommit) (oid *git.Oid, err error) {
+func writeDirectories(repo *git.Repository, nc NewCommit) (oid *git.Oid, err error) {
+	index, err := repo.Index()
+	if err != nil {
+		return nil, err
+	}
+	defer index.Free()
+
+	var contents string
+
+	for _, ncd := range nc.Directories {
+
+		target := filepath.Join(ncd.Path)
+		absoluteTarget := filepath.Join(config.Repository, target)
+
+		_, err = os.Stat(absoluteTarget)
+		if err == nil {
+			return nil, fmt.Errorf("directory already exists %s", target)
+		}
+
+		if ncd.Path == "" {
+			return nil, fmt.Errorf("path must be specified when creating a directory: %s", ncd)
+		}
+
+		var ie git.IndexEntry
+
+		oid, err = repo.CreateBlobFromBuffer([]byte(contents))
+		if err != nil {
+			return nil, err
+		}
+
+		// build the git index entry and add it to the index
+		ie = buildIndexEntryForNewDirectory(oid, ncd)
+
+		err = index.Add(&ie)
+		if err != nil {
+			return nil, err
+		}
+
+	}
+
+	// write the tree, persisting our addition to the git repo
+	treeID, err := index.WriteTree()
+	if err != nil {
+		return nil, err
+	}
+
+	// and use the tree's id to find the actual updated tree
+	tree, err := repo.LookupTree(treeID)
+	if err != nil {
+		return nil, err
+	}
+
+	// find the repository's tip, where we're committing to
+	tip, err := headCommit(repo)
+	if err != nil {
+		return nil, err
+	}
+
+	// git signatures
+	author := sign(nc)
+	committer := sign(nc)
+
+	// now commit our updated tree to the tip (parent)
+	oid, err = repo.CreateCommit("HEAD", author, committer, nc.Message, tree, tip)
+	if err != nil {
+		return nil, err
+	}
+
+	// checkout to keep file system in sync with git
+	err = repo.CheckoutHead(
+		&git.CheckoutOpts{Strategy: git.CheckoutSafe | git.CheckoutRecreateMissing | git.CheckoutForce},
+	)
+
+	return oid, err
+
+}
+
+func deleteDirectories(nc NewCommit) (oid *git.Oid, err error) {
 
 	repo, err := repository(config)
 	if err != nil {
@@ -378,20 +440,10 @@ func deleteDirectory(directory string, nc NewCommit) (oid *git.Oid, err error) {
 	}
 	defer repo.Free()
 
-	target := directory
-
 	ht, err := headTree(repo)
 	if err != nil {
 		return nil, err
 	}
-
-	// ensure that the directory exists before we try to delete it
-	d, _ := ht.EntryByPath(target)
-	if d == nil {
-		return nil, fmt.Errorf("directory does not exist %s", target)
-	}
-
-	// now go ahead and remove it
 
 	// first grab the repo's index
 	index, err := repo.Index()
@@ -399,12 +451,24 @@ func deleteDirectory(directory string, nc NewCommit) (oid *git.Oid, err error) {
 		return nil, err
 	}
 
-	Debug.Println("Removing directory:", target)
+	for _, ncd := range nc.Directories {
 
-	// and remove the target by path and everything beneath it
-	err = index.RemoveDirectory(target, 0)
-	if err != nil {
-		return nil, err
+		// ensure that the directory exists before we try to delete it
+		d, _ := ht.EntryByPath(ncd.Path)
+		if d == nil {
+			return nil, fmt.Errorf("directory does not exist: %s", ncd.Path)
+		}
+
+		// now go ahead and remove it
+
+		Debug.Println("Removing directory:", ncd.Path)
+
+		// and remove the target by path and everything beneath it
+		err = index.RemoveDirectory(ncd.Path, 0)
+		if err != nil {
+			return nil, err
+		}
+
 	}
 
 	// write the tree, persisting our deletion to the git repo
@@ -427,6 +491,10 @@ func deleteDirectory(directory string, nc NewCommit) (oid *git.Oid, err error) {
 	// git signatures
 	author := sign(nc)
 	committer := sign(nc)
+
+	if nc.Message == "" {
+		nc.Message = "Deleted directories"
+	}
 
 	// now commit our updated tree to the tip (parent)
 	oid, err = repo.CreateCommit("HEAD", author, committer, nc.Message, tree, tip)
@@ -542,6 +610,20 @@ func buildIndexEntry(oid *git.Oid, ncf NewCommitFile) git.IndexEntry {
 		Id:   oid,
 		Path: filepath.Join(ncf.Path, ncf.Filename),
 		Size: uint32(len(ncf.Body)),
+
+		Ctime: git.IndexTime{},
+		Gid:   uint32(os.Getgid()),
+		Uid:   uint32(os.Getuid()),
+		Mode:  git.FilemodeBlob,
+		Mtime: git.IndexTime{},
+	}
+}
+
+func buildIndexEntryForNewDirectory(oid *git.Oid, ncf NewCommitDirectory) git.IndexEntry {
+	return git.IndexEntry{
+		Id:   oid,
+		Path: filepath.Join(ncf.Path, ".keep"),
+		Size: uint32(0),
 
 		Ctime: git.IndexTime{},
 		Gid:   uint32(os.Getgid()),

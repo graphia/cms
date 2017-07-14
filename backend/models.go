@@ -9,10 +9,16 @@ import (
 // NewCommit will replace RepoWrite and allow multiple files
 // TODO rename to NewCommit
 type NewCommit struct {
-	Message string          `json:"message"`
-	Name    string          `json:"name"`
-	Email   string          `json:"email"`
-	Files   []NewCommitFile `json:"files"`
+	Message     string               `json:"message"`
+	Name        string               `json:"name"`
+	Email       string               `json:"email"`
+	Files       []NewCommitFile      `json:"files"`
+	Directories []NewCommitDirectory `json:"directories"`
+}
+
+// NewCommitDirectory holds directory info for creating new dirs
+type NewCommitDirectory struct {
+	Path string `json:"name"`
 }
 
 // NewCommitFile will replace RepoWrite's file attributes

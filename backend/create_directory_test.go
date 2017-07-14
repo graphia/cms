@@ -22,8 +22,8 @@ func TestCreateDirectory(t *testing.T) {
 	nc := NewCommit{
 		Name:  "Luigi Risotto",
 		Email: "luigi@luigis-restaurant.com",
-		Files: []NewCommitFile{
-			NewCommitFile{
+		Directories: []NewCommitDirectory{
+			NewCommitDirectory{
 				Path: newDir,
 			},
 		},
@@ -59,8 +59,8 @@ func TestCreateDirectoryWhenExists(t *testing.T) {
 	nc := NewCommit{
 		Name:  "Luigi Risotto",
 		Email: "luigi@luigis-restaurant.com",
-		Files: []NewCommitFile{
-			NewCommitFile{Path: "appendices"},
+		Directories: []NewCommitDirectory{
+			NewCommitDirectory{Path: "appendices"},
 		},
 	}
 	repo, _ := repository(config)
@@ -70,6 +70,31 @@ func TestCreateDirectoryWhenExists(t *testing.T) {
 
 	// check error message is correct
 	assert.Contains(t, err.Error(), "directory already exists")
+
+	hcAfter, _ := headCommit(repo)
+
+	// nothing should have been committed
+	assert.Equal(t, hcBefore, hcAfter)
+
+}
+
+func TestCreateDirectoryNonSpecified(t *testing.T) {
+
+	repoPath := "../tests/tmp/repositories/create_file"
+	setupSmallTestRepo(repoPath)
+
+	nc := NewCommit{
+		Name:        "Luigi Risotto",
+		Email:       "luigi@luigis-restaurant.com",
+		Directories: []NewCommitDirectory{}, // empty
+	}
+	repo, _ := repository(config)
+	hcBefore, _ := headCommit(repo)
+
+	_, err := createDirectories(nc)
+
+	// check error message is correct
+	assert.Contains(t, err.Error(), "at least one new directory must be specified")
 
 	hcAfter, _ := headCommit(repo)
 

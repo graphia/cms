@@ -396,7 +396,7 @@ func TestLookupFileHistoryOnlyReturnsRelevantCommits(t *testing.T) {
 	oid, _ = createFiles(r2)
 	assert.NotNil(t, oid)
 
-	// Revision 1
+	// Revision 3
 	r3 = template
 	r3.Files[0].Filename = "document_11.md"
 	r3.Files[0].Body = "# r3"

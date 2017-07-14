@@ -45,8 +45,9 @@ func TestDeleteFiles(t *testing.T) {
 
 	// ensure the file isn't present on the filesystem
 	_, err = os.Stat(filepath.Join(repoPath, ncf1.Path, ncf1.Filename))
-	_, err = os.Stat(filepath.Join(repoPath, ncf2.Path, ncf2.Filename))
+	assert.True(t, os.IsNotExist(err))
 
+	_, err = os.Stat(filepath.Join(repoPath, ncf2.Path, ncf2.Filename))
 	assert.True(t, os.IsNotExist(err))
 
 	// ensure the most recent commit has the right name and email

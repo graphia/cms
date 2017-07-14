@@ -366,8 +366,6 @@ func apiCreateDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 
 	json.NewDecoder(r.Body).Decode(&nc)
 
-	//directory = vestigo.Param(r, "directory")
-
 	oid, err := createDirectories(nc)
 
 	if err != nil {
@@ -417,18 +415,14 @@ func apiDeleteDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 	var nc NewCommit
 	var fr FailureResponse
 	var sr SuccessResponse
-	var directory string
 
 	// set up the RepoWrite with git params, an appropraiate message and then
 	// specify the directory based on the path
 	nc = NewCommit{}
 
-	directory = vestigo.Param(r, "directory")
-
 	json.NewDecoder(r.Body).Decode(&nc)
-	nc.Message = fmt.Sprintf("Deleted %s directory", directory)
 
-	oid, err := deleteDirectory(directory, nc)
+	oid, err := deleteDirectories(nc)
 
 	if err != nil {
 
