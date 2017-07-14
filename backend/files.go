@@ -207,38 +207,10 @@ func writeFiles(repo *git.Repository, nc NewCommit) (oid *git.Oid, err error) {
 
 	}
 
-	// write the tree, persisting our addition to the git repo
-	treeID, err := index.WriteTree()
+	oid, err = writeTreeAndCommit(repo, index, nc)
 	if err != nil {
-		return nil, err
+		return oid, err
 	}
-
-	// and use the tree's id to find the actual updated tree
-	tree, err := repo.LookupTree(treeID)
-	if err != nil {
-		return nil, err
-	}
-
-	// find the repository's tip, where we're committing to
-	tip, err := headCommit(repo)
-	if err != nil {
-		return nil, err
-	}
-
-	// git signatures
-	author := sign(nc)
-	committer := sign(nc)
-
-	// now commit our updated tree to the tip (parent)
-	oid, err = repo.CreateCommit("HEAD", author, committer, nc.Message, tree, tip)
-	if err != nil {
-		return nil, err
-	}
-
-	// checkout to keep file system in sync with git
-	err = repo.CheckoutHead(
-		&git.CheckoutOpts{Strategy: git.CheckoutSafe | git.CheckoutRecreateMissing | git.CheckoutForce},
-	)
 
 	return oid, err
 
@@ -395,38 +367,10 @@ func writeDirectories(repo *git.Repository, nc NewCommit) (oid *git.Oid, err err
 
 	}
 
-	// write the tree, persisting our addition to the git repo
-	treeID, err := index.WriteTree()
+	oid, err = writeTreeAndCommit(repo, index, nc)
 	if err != nil {
-		return nil, err
+		return oid, err
 	}
-
-	// and use the tree's id to find the actual updated tree
-	tree, err := repo.LookupTree(treeID)
-	if err != nil {
-		return nil, err
-	}
-
-	// find the repository's tip, where we're committing to
-	tip, err := headCommit(repo)
-	if err != nil {
-		return nil, err
-	}
-
-	// git signatures
-	author := sign(nc)
-	committer := sign(nc)
-
-	// now commit our updated tree to the tip (parent)
-	oid, err = repo.CreateCommit("HEAD", author, committer, nc.Message, tree, tip)
-	if err != nil {
-		return nil, err
-	}
-
-	// checkout to keep file system in sync with git
-	err = repo.CheckoutHead(
-		&git.CheckoutOpts{Strategy: git.CheckoutSafe | git.CheckoutRecreateMissing | git.CheckoutForce},
-	)
 
 	return oid, err
 
@@ -471,44 +415,9 @@ func deleteDirectories(nc NewCommit) (oid *git.Oid, err error) {
 
 	}
 
-	// write the tree, persisting our deletion to the git repo
-	treeID, err := index.WriteTree()
+	oid, err = writeTreeAndCommit(repo, index, nc)
 	if err != nil {
-		return nil, err
-	}
-
-	tree, err := repo.LookupTree(treeID)
-	if err != nil {
-		return nil, err
-	}
-
-	// find the repository's tip, where we're committing to
-	tip, err := headCommit(repo)
-	if err != nil {
-		return nil, err
-	}
-
-	// git signatures
-	author := sign(nc)
-	committer := sign(nc)
-
-	if nc.Message == "" {
-		nc.Message = "Deleted directories"
-	}
-
-	// now commit our updated tree to the tip (parent)
-	oid, err = repo.CreateCommit("HEAD", author, committer, nc.Message, tree, tip)
-	if err != nil {
-		return nil, err
-	}
-
-	// checkout to keep file system in sync with git
-	err = repo.CheckoutHead(
-		&git.CheckoutOpts{Strategy: git.CheckoutSafe | git.CheckoutRecreateMissing | git.CheckoutForce},
-	)
-
-	if err != nil {
-		Error.Println("Could not checkout head:", err.Error())
+		return oid, err
 	}
 
 	return oid, err
@@ -557,40 +466,9 @@ func deleteFiles(nc NewCommit) (oid *git.Oid, err error) {
 
 	}
 
-	// write the tree, persisting our deletion to the git repo
-	treeID, err := index.WriteTree()
+	oid, err = writeTreeAndCommit(repo, index, nc)
 	if err != nil {
 		return oid, err
-	}
-
-	tree, err := repo.LookupTree(treeID)
-	if err != nil {
-		return oid, err
-	}
-
-	// find the repository's tip, where we're committing to
-	tip, err := headCommit(repo)
-	if err != nil {
-		return oid, err
-	}
-
-	// git signatures
-	author := sign(nc)
-	committer := sign(nc)
-
-	// now commit our updated tree to the tip (parent)
-	oid, err = repo.CreateCommit("HEAD", author, committer, nc.Message, tree, tip)
-	if err != nil {
-		return oid, err
-	}
-
-	// checkout to keep file system in sync with git
-	err = repo.CheckoutHead(
-		&git.CheckoutOpts{Strategy: git.CheckoutSafe | git.CheckoutRecreateMissing | git.CheckoutForce},
-	)
-
-	if err != nil {
-		Error.Println("Could not checkout head:", err.Error())
 	}
 
 	return oid, err
@@ -753,4 +631,43 @@ func countFiles() (counter map[string]int, err error) {
 	err = ht.Walk(walkIterator)
 
 	return counter, err
+}
+
+func writeTreeAndCommit(repo *git.Repository, index *git.Index, nc NewCommit) (oid *git.Oid, err error) {
+
+	// write the tree, persisting our addition to the git repo
+	treeID, err := index.WriteTree()
+	if err != nil {
+		return oid, err
+	}
+
+	// and use the tree's id to find the actual updated tree
+	tree, err := repo.LookupTree(treeID)
+	if err != nil {
+		return oid, err
+	}
+
+	// find the repository's tip, where we're committing to
+	tip, err := headCommit(repo)
+	if err != nil {
+		return oid, err
+	}
+
+	// git signatures
+	author := sign(nc)
+	committer := sign(nc)
+
+	// now commit our updated tree to the tip (parent)
+	oid, err = repo.CreateCommit("HEAD", author, committer, nc.Message, tree, tip)
+	if err != nil {
+		return oid, err
+	}
+
+	// checkout to keep file system in sync with git
+	err = repo.CheckoutHead(
+		&git.CheckoutOpts{Strategy: git.CheckoutSafe | git.CheckoutRecreateMissing | git.CheckoutForce},
+	)
+
+	return oid, err
+
 }
