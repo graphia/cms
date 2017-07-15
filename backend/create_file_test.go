@@ -15,6 +15,11 @@ func TestCreateFiles(t *testing.T) {
 
 	setupSmallTestRepo(repoPath)
 
+	user := User{
+		Name:  "Milhouse van Houten",
+		Email: "milhouse@springfield.gov",
+	}
+
 	ncf1 := NewCommitFile{
 		Filename:  "document_14.md",
 		Path:      "documents",
@@ -39,12 +44,10 @@ func TestCreateFiles(t *testing.T) {
 
 	nc := NewCommit{
 		Message: "Update document 2",
-		Name:    "Milhouse van Houten",
-		Email:   "milhouse@springfield.gov",
 		Files:   []NewCommitFile{ncf1, ncf2},
 	}
 
-	oid, err := createFiles(nc)
+	oid, err := createFiles(nc, user)
 
 	if err != nil {
 		panic(err)
@@ -69,8 +72,8 @@ func TestCreateFiles(t *testing.T) {
 
 	// ensure the most recent commit has the right name and email
 	lastCommit, _ := repo.LookupCommit(oid)
-	assert.Equal(t, lastCommit.Committer().Name, nc.Name)
-	assert.Equal(t, lastCommit.Committer().Email, nc.Email)
+	assert.Equal(t, lastCommit.Committer().Name, user.Name)
+	assert.Equal(t, lastCommit.Committer().Email, user.Email)
 	assert.Equal(t, lastCommit.Message(), nc.Message)
 
 }
@@ -81,10 +84,13 @@ func TestCreateFileWhenExists(t *testing.T) {
 	setupSmallTestRepo(repoPath)
 	repo, _ := repository(config)
 
+	user := User{
+		Name:  "Ned Flanders",
+		Email: "nedward.flanders@leftorium.com",
+	}
+
 	nc := NewCommit{
 		Message: "Add document 2",
-		Name:    "Ned Flanders",
-		Email:   "nedward.flanders@leftorium.com",
 		Files: []NewCommitFile{
 			NewCommitFile{
 				Body:     "# The quick brown fox\n\njumped over the lazy dog",
@@ -96,7 +102,7 @@ func TestCreateFileWhenExists(t *testing.T) {
 
 	hcBefore, _ := headCommit(repo)
 
-	_, err := createFiles(nc)
+	_, err := createFiles(nc, user)
 
 	// check error message is correct
 	assert.Contains(t, err.Error(), "file already exists")

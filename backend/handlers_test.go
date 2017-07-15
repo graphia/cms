@@ -84,7 +84,7 @@ func TestApiListDirectorySummaryHandler(t *testing.T) {
 }
 
 func TestApiCreateDirectory(t *testing.T) {
-	server = httptest.NewServer(protectedRouter())
+	server = createTestServerWithContext()
 
 	repoPath := "../tests/tmp/repositories/create_directory"
 	setupSmallTestRepo(repoPath)
@@ -94,8 +94,6 @@ func TestApiCreateDirectory(t *testing.T) {
 	ncd := NewCommitDirectory{Path: "bobbins"}
 
 	nc := &NewCommit{
-		Email:       "martin.prince@springfield.k12.us",
-		Name:        "Martin Prince",
 		Message:     "Forty whacks with a wet noodle",
 		Directories: []NewCommitDirectory{ncd},
 	}
@@ -130,8 +128,9 @@ func TestApiCreateDirectory(t *testing.T) {
 	// ensure the most recent commit has the right name and email
 	oid, _ := git.NewOid(receiver.Oid)
 	lastCommit, _ := repo.LookupCommit(oid)
-	assert.Equal(t, lastCommit.Committer().Name, nc.Name)
-	assert.Equal(t, lastCommit.Committer().Email, nc.Email)
+	user := apiTestUser()
+	assert.Equal(t, lastCommit.Committer().Name, user.Name)
+	assert.Equal(t, lastCommit.Committer().Email, user.Email)
 
 	// ensure that the commit message has been set correctly
 	msg := fmt.Sprintf("Added directories: %s", ncd.Path)
@@ -140,7 +139,7 @@ func TestApiCreateDirectory(t *testing.T) {
 }
 
 func TestApiCreateFileInDirectory(t *testing.T) {
-	server = httptest.NewServer(protectedRouter())
+	server = createTestServerWithContext()
 
 	repoPath := "../tests/tmp/repositories/create_file"
 	setupSmallTestRepo(repoPath)
@@ -159,8 +158,6 @@ func TestApiCreateFileInDirectory(t *testing.T) {
 	}
 
 	nc := &NewCommit{
-		Email:   "martin.prince@springfield.k12.us",
-		Name:    "Martin Prince",
 		Message: "Forty whacks with a wet noodle",
 		Files:   []NewCommitFile{ncf},
 	}
@@ -197,13 +194,15 @@ func TestApiCreateFileInDirectory(t *testing.T) {
 	// ensure the most recent commit has the right name and email
 	oid, _ := git.NewOid(receiver.Oid)
 	lastCommit, _ := repo.LookupCommit(oid)
-	assert.Equal(t, lastCommit.Committer().Name, nc.Name)
-	assert.Equal(t, lastCommit.Committer().Email, nc.Email)
+
+	user := apiTestUser()
+	assert.Equal(t, lastCommit.Committer().Name, user.Name)
+	assert.Equal(t, lastCommit.Committer().Email, user.Email)
 
 }
 
 func TestApiUpdateFileInDirectory(t *testing.T) {
-	server = httptest.NewServer(protectedRouter())
+	server = createTestServerWithContext()
 
 	repoPath := "../tests/tmp/repositories/update_file"
 	setupSmallTestRepo(repoPath)
@@ -222,8 +221,6 @@ func TestApiUpdateFileInDirectory(t *testing.T) {
 	}
 
 	nc := &NewCommit{
-		Email:   "martin.prince@springfield.k12.us",
-		Name:    "Martin Prince",
 		Message: "Forty whacks with a wet noodle",
 		Files:   []NewCommitFile{ncf},
 	}
@@ -260,13 +257,15 @@ func TestApiUpdateFileInDirectory(t *testing.T) {
 	// ensure the most recent commit has the right name and email
 	oid, _ := git.NewOid(receiver.Oid)
 	lastCommit, _ := repo.LookupCommit(oid)
-	assert.Equal(t, lastCommit.Committer().Name, nc.Name)
-	assert.Equal(t, lastCommit.Committer().Email, nc.Email)
+
+	user := apiTestUser()
+	assert.Equal(t, lastCommit.Committer().Name, user.Name)
+	assert.Equal(t, lastCommit.Committer().Email, user.Email)
 
 }
 
 func TestApiDeleteFileFromDirectory(t *testing.T) {
-	server = httptest.NewServer(protectedRouter())
+	server = createTestServerWithContext()
 
 	repoPath := "../tests/tmp/repositories/delete_file"
 	setupSmallTestRepo(repoPath)
@@ -284,8 +283,6 @@ func TestApiDeleteFileFromDirectory(t *testing.T) {
 	}
 
 	nc := &NewCommit{
-		Email:   "clancy.wiggum@springfield.police.gov",
-		Name:    "Clarence Wiggum",
 		Message: "Suspect is hatless. Repeat, hatless.",
 		Files:   []NewCommitFile{ncf1, ncf2},
 	}
@@ -316,8 +313,10 @@ func TestApiDeleteFileFromDirectory(t *testing.T) {
 	// ensure the most recent nc has the right name and email
 	oid, _ := git.NewOid(receiver.Oid)
 	lastCommit, _ := repo.LookupCommit(oid)
-	assert.Equal(t, lastCommit.Committer().Name, nc.Name)
-	assert.Equal(t, lastCommit.Committer().Email, nc.Email)
+
+	user := apiTestUser()
+	assert.Equal(t, lastCommit.Committer().Name, user.Name)
+	assert.Equal(t, lastCommit.Committer().Email, user.Email)
 
 	// TODO ensure files aren't present on the filesystem
 	// ensure the file exists and has the right content
@@ -328,7 +327,7 @@ func TestApiDeleteFileFromDirectory(t *testing.T) {
 }
 
 func TestApiDeleteDirectory(t *testing.T) {
-	server = httptest.NewServer(protectedRouter())
+	server = createTestServerWithContext()
 
 	var err error
 
@@ -337,8 +336,6 @@ func TestApiDeleteDirectory(t *testing.T) {
 
 	ncd := NewCommitDirectory{Path: "appendices"}
 	nc := &NewCommit{
-		Email:       "julius.hibbert@springfield-hospital.com",
-		Name:        "Julius Hibbert",
 		Directories: []NewCommitDirectory{ncd},
 	}
 
@@ -376,8 +373,9 @@ func TestApiDeleteDirectory(t *testing.T) {
 	// ensure the most recent nc has the right name and email
 	oid, _ := git.NewOid(receiver.Oid)
 	lastCommit, _ := repo.LookupCommit(oid)
-	assert.Equal(t, lastCommit.Committer().Name, nc.Name)
-	assert.Equal(t, lastCommit.Committer().Email, nc.Email)
+	user := apiTestUser()
+	assert.Equal(t, lastCommit.Committer().Name, user.Name)
+	assert.Equal(t, lastCommit.Committer().Email, user.Email)
 
 	// ensure the file exists and has the right content
 	_, err = os.Stat(filepath.Join(repoPath, ncd.Path, "appendix_1.md"))
@@ -388,7 +386,7 @@ func TestApiDeleteDirectory(t *testing.T) {
 }
 
 func TestApiDeleteDirectoryNotExists(t *testing.T) {
-	server = httptest.NewServer(protectedRouter())
+	server = createTestServerWithContext()
 
 	var err error
 
@@ -399,8 +397,6 @@ func TestApiDeleteDirectoryNotExists(t *testing.T) {
 
 	ncd := NewCommitDirectory{Path: "supplements"}
 	nc := &NewCommit{
-		Email:       "julius.hibbert@springfield-hospital.com",
-		Name:        "Julius Hibbert",
 		Directories: []NewCommitDirectory{ncd},
 	}
 
@@ -426,7 +422,7 @@ func TestApiDeleteDirectoryNotExists(t *testing.T) {
 }
 
 func TestApiGetFileInDirectory(t *testing.T) {
-	server = httptest.NewServer(protectedRouter())
+	server = createTestServerWithContext()
 
 	repoPath := "../tests/tmp/repositories/create_directory"
 	setupSmallTestRepo(repoPath)
@@ -453,6 +449,9 @@ func TestApiGetFileInDirectory(t *testing.T) {
 }
 
 func TestApiEditFileInDirectory(t *testing.T) {
+
+	server = createTestServerWithContext()
+
 	repoPath := "../tests/tmp/repositories/create_directory"
 	setupSmallTestRepo(repoPath)
 

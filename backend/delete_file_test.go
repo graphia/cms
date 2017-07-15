@@ -14,6 +14,11 @@ func TestDeleteFiles(t *testing.T) {
 
 	setupSmallTestRepo(repoPath)
 
+	user := User{
+		Name:  "Milhouse van Houten",
+		Email: "milhouse@springfield.gov",
+	}
+
 	ncf1 := NewCommitFile{
 		Filename: "document_1.md",
 		Path:     "documents",
@@ -26,14 +31,12 @@ func TestDeleteFiles(t *testing.T) {
 
 	nc := NewCommit{
 		Message: "Delete documents 1 and 2",
-		Name:    "Milhouse van Houten",
-		Email:   "milhouse@springfield.gov",
 		Files:   []NewCommitFile{ncf1, ncf2},
 	}
 
 	repo, _ := repository(config)
 
-	oid, err := deleteFiles(nc)
+	oid, err := deleteFiles(nc, user)
 	if err != nil {
 		panic(err)
 	}
@@ -52,8 +55,8 @@ func TestDeleteFiles(t *testing.T) {
 
 	// ensure the most recent commit has the right name and email
 	lastCommit, _ := repo.LookupCommit(oid)
-	assert.Equal(t, lastCommit.Committer().Name, nc.Name)
-	assert.Equal(t, lastCommit.Committer().Email, nc.Email)
+	assert.Equal(t, lastCommit.Committer().Name, user.Name)
+	assert.Equal(t, lastCommit.Committer().Email, user.Email)
 	assert.Equal(t, lastCommit.Message(), nc.Message)
 
 }
@@ -64,6 +67,11 @@ func TestDeleteFileNotExists(t *testing.T) {
 
 	setupSmallTestRepo(repoPath)
 
+	user := User{
+		Name:  "Milhouse van Houten",
+		Email: "milhouse@springfield.gov",
+	}
+
 	ncf := NewCommitFile{
 		Filename: "document_5.md",
 		Path:     "documents",
@@ -71,12 +79,10 @@ func TestDeleteFileNotExists(t *testing.T) {
 
 	nc := NewCommit{
 		Message: "Delete document 5",
-		Name:    "Milhouse van Houten",
-		Email:   "milhouse@springfield.gov",
 		Files:   []NewCommitFile{ncf},
 	}
 
-	_, err := deleteFiles(nc)
+	_, err := deleteFiles(nc, user)
 
 	assert.Contains(t, err.Error(), "file does not exist")
 

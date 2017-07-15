@@ -14,18 +14,21 @@ func TestDeleteDirectories(t *testing.T) {
 
 	setupSmallTestRepo(repoPath)
 
+	user := User{
+		Name:  "Moe Szyslak",
+		Email: "moe@moes.com",
+	}
+
 	ncd := NewCommitDirectory{Path: "appendices"}
 
 	nc := NewCommit{
-		Name:        "Moe Szyslak",
-		Email:       "moe@moes.com",
 		Message:     "Deleted directories",
 		Directories: []NewCommitDirectory{ncd},
 	}
 
 	repo, _ := repository(config)
 
-	oid, err := deleteDirectories(nc)
+	oid, err := deleteDirectories(nc, user)
 	if err != nil {
 		panic(err)
 	}
@@ -41,8 +44,8 @@ func TestDeleteDirectories(t *testing.T) {
 
 	// ensure the most recent commit has the right name and email
 	lastCommit, _ := repo.LookupCommit(oid)
-	assert.Equal(t, lastCommit.Committer().Name, nc.Name)
-	assert.Equal(t, lastCommit.Committer().Email, nc.Email)
+	assert.Equal(t, lastCommit.Committer().Name, user.Name)
+	assert.Equal(t, lastCommit.Committer().Email, user.Email)
 	assert.Equal(t, lastCommit.Message(), nc.Message)
 
 }
@@ -53,15 +56,19 @@ func TestDeleteDirectoriesNotExists(t *testing.T) {
 
 	setupSmallTestRepo(repoPath)
 
+	user := User{
+		Name:  "Barney Gumble",
+		Email: "barney@plow-king.com",
+	}
+
 	ncd := NewCommitDirectory{Path: "menu"}
 
 	nc := NewCommit{
-		Name:        "Barney Gumble",
-		Email:       "barney@plow-king.com",
+
 		Directories: []NewCommitDirectory{ncd},
 	}
 
-	_, err := deleteDirectories(nc)
+	_, err := deleteDirectories(nc, user)
 
 	assert.Equal(t, err.Error(), "directory does not exist: menu")
 

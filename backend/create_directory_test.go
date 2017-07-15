@@ -19,9 +19,13 @@ func TestCreateDirectory(t *testing.T) {
 	newDir := "recipes"
 	commitMessage := fmt.Sprintf("Added directories: %s", newDir)
 
-	nc := NewCommit{
+	user := User{
 		Name:  "Luigi Risotto",
 		Email: "luigi@luigis-restaurant.com",
+	}
+
+	nc := NewCommit{
+
 		Directories: []NewCommitDirectory{
 			NewCommitDirectory{
 				Path: newDir,
@@ -30,7 +34,7 @@ func TestCreateDirectory(t *testing.T) {
 	}
 
 	repo, _ := repository(config)
-	oid, _ := createDirectories(nc)
+	oid, _ := createDirectories(nc, user)
 	hc, _ := headCommit(repo)
 
 	// our commit hash should now equal the repo's head
@@ -42,8 +46,8 @@ func TestCreateDirectory(t *testing.T) {
 
 	// ensure the most recent commit has the right name and email
 	lastCommit, _ := repo.LookupCommit(oid)
-	assert.Equal(t, lastCommit.Committer().Name, nc.Name)
-	assert.Equal(t, lastCommit.Committer().Email, nc.Email)
+	assert.Equal(t, lastCommit.Committer().Name, user.Name)
+	assert.Equal(t, lastCommit.Committer().Email, user.Email)
 	assert.Equal(t, lastCommit.Message(), commitMessage)
 
 	// finally clean up by removing the tmp repo
@@ -56,9 +60,12 @@ func TestCreateDirectoryWhenExists(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/create_file"
 	setupSmallTestRepo(repoPath)
 
-	nc := NewCommit{
+	user := User{
 		Name:  "Luigi Risotto",
 		Email: "luigi@luigis-restaurant.com",
+	}
+
+	nc := NewCommit{
 		Directories: []NewCommitDirectory{
 			NewCommitDirectory{Path: "appendices"},
 		},
@@ -66,7 +73,7 @@ func TestCreateDirectoryWhenExists(t *testing.T) {
 	repo, _ := repository(config)
 	hcBefore, _ := headCommit(repo)
 
-	_, err := createDirectories(nc)
+	_, err := createDirectories(nc, user)
 
 	// check error message is correct
 	assert.Contains(t, err.Error(), "directory already exists")
@@ -83,15 +90,18 @@ func TestCreateDirectoryNonSpecified(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/create_file"
 	setupSmallTestRepo(repoPath)
 
+	user := User{
+		Name:  "Luigi Risotto",
+		Email: "luigi@luigis-restaurant.com",
+	}
+
 	nc := NewCommit{
-		Name:        "Luigi Risotto",
-		Email:       "luigi@luigis-restaurant.com",
 		Directories: []NewCommitDirectory{}, // empty
 	}
 	repo, _ := repository(config)
 	hcBefore, _ := headCommit(repo)
 
-	_, err := createDirectories(nc)
+	_, err := createDirectories(nc, user)
 
 	// check error message is correct
 	assert.Contains(t, err.Error(), "at least one new directory must be specified")

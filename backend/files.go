@@ -102,7 +102,7 @@ func getFilesInDir(directory string) (files []FileItem, err error) {
 
 }
 
-func createFiles(nc NewCommit) (oid *git.Oid, err error) {
+func createFiles(nc NewCommit, user User) (oid *git.Oid, err error) {
 
 	repo, err := repository(config)
 	if err != nil {
@@ -138,13 +138,13 @@ func createFiles(nc NewCommit) (oid *git.Oid, err error) {
 
 	}
 
-	oid, err = writeFiles(repo, nc)
+	oid, err = writeFiles(repo, nc, user)
 
 	return oid, err
 }
 
 // Replaces updateFile
-func updateFiles(nc NewCommit) (oid *git.Oid, err error) {
+func updateFiles(nc NewCommit, user User) (oid *git.Oid, err error) {
 
 	repo, err := repository(config)
 	if err != nil {
@@ -171,12 +171,12 @@ func updateFiles(nc NewCommit) (oid *git.Oid, err error) {
 
 	}
 
-	oid, err = writeFiles(repo, nc)
+	oid, err = writeFiles(repo, nc, user)
 
 	return oid, err
 }
 
-func writeFiles(repo *git.Repository, nc NewCommit) (oid *git.Oid, err error) {
+func writeFiles(repo *git.Repository, nc NewCommit, user User) (oid *git.Oid, err error) {
 
 	index, err := repo.Index()
 	if err != nil {
@@ -207,7 +207,7 @@ func writeFiles(repo *git.Repository, nc NewCommit) (oid *git.Oid, err error) {
 
 	}
 
-	oid, err = writeTreeAndCommit(repo, index, nc)
+	oid, err = writeTreeAndCommit(repo, index, nc, user)
 	if err != nil {
 		return oid, err
 	}
@@ -296,7 +296,7 @@ func listRootDirectorySummary() (summary map[string][]FileItem, err error) {
 	return summary, err
 }
 
-func createDirectories(nc NewCommit) (oid *git.Oid, err error) {
+func createDirectories(nc NewCommit, user User) (oid *git.Oid, err error) {
 
 	repo, err := repository(config)
 	if err != nil {
@@ -319,7 +319,7 @@ func createDirectories(nc NewCommit) (oid *git.Oid, err error) {
 	// the user
 	nc.Message = fmt.Sprintf("Added directories: %s", strings.Join(addedDirs, ","))
 
-	oid, err = writeDirectories(repo, nc)
+	oid, err = writeDirectories(repo, nc, user)
 	if err != nil {
 		return nil, err
 	}
@@ -327,7 +327,7 @@ func createDirectories(nc NewCommit) (oid *git.Oid, err error) {
 	return oid, err
 }
 
-func writeDirectories(repo *git.Repository, nc NewCommit) (oid *git.Oid, err error) {
+func writeDirectories(repo *git.Repository, nc NewCommit, user User) (oid *git.Oid, err error) {
 	index, err := repo.Index()
 	if err != nil {
 		return nil, err
@@ -367,7 +367,8 @@ func writeDirectories(repo *git.Repository, nc NewCommit) (oid *git.Oid, err err
 
 	}
 
-	oid, err = writeTreeAndCommit(repo, index, nc)
+	oid, err = writeTreeAndCommit(repo, index, nc, user)
+
 	if err != nil {
 		return oid, err
 	}
@@ -376,7 +377,7 @@ func writeDirectories(repo *git.Repository, nc NewCommit) (oid *git.Oid, err err
 
 }
 
-func deleteDirectories(nc NewCommit) (oid *git.Oid, err error) {
+func deleteDirectories(nc NewCommit, user User) (oid *git.Oid, err error) {
 
 	repo, err := repository(config)
 	if err != nil {
@@ -415,7 +416,7 @@ func deleteDirectories(nc NewCommit) (oid *git.Oid, err error) {
 
 	}
 
-	oid, err = writeTreeAndCommit(repo, index, nc)
+	oid, err = writeTreeAndCommit(repo, index, nc, user)
 	if err != nil {
 		return oid, err
 	}
@@ -424,7 +425,7 @@ func deleteDirectories(nc NewCommit) (oid *git.Oid, err error) {
 
 }
 
-func deleteFiles(nc NewCommit) (oid *git.Oid, err error) {
+func deleteFiles(nc NewCommit, user User) (oid *git.Oid, err error) {
 
 	repo, err := repository(config)
 	if err != nil {
@@ -466,7 +467,7 @@ func deleteFiles(nc NewCommit) (oid *git.Oid, err error) {
 
 	}
 
-	oid, err = writeTreeAndCommit(repo, index, nc)
+	oid, err = writeTreeAndCommit(repo, index, nc, user)
 	if err != nil {
 		return oid, err
 	}
@@ -475,10 +476,10 @@ func deleteFiles(nc NewCommit) (oid *git.Oid, err error) {
 
 }
 
-func sign(nc NewCommit) *git.Signature {
+func sign(user User) *git.Signature {
 	return &git.Signature{
-		Name:  nc.Name,
-		Email: nc.Email,
+		Name:  user.Name,
+		Email: user.Email,
 		When:  time.Now(),
 	}
 }
@@ -633,7 +634,7 @@ func countFiles() (counter map[string]int, err error) {
 	return counter, err
 }
 
-func writeTreeAndCommit(repo *git.Repository, index *git.Index, nc NewCommit) (oid *git.Oid, err error) {
+func writeTreeAndCommit(repo *git.Repository, index *git.Index, nc NewCommit, user User) (oid *git.Oid, err error) {
 
 	// write the tree, persisting our addition to the git repo
 	treeID, err := index.WriteTree()
@@ -654,8 +655,8 @@ func writeTreeAndCommit(repo *git.Repository, index *git.Index, nc NewCommit) (o
 	}
 
 	// git signatures
-	author := sign(nc)
-	committer := sign(nc)
+	author := sign(user)
+	committer := sign(user)
 
 	// now commit our updated tree to the tip (parent)
 	oid, err = repo.CreateCommit("HEAD", author, committer, nc.Message, tree, tip)

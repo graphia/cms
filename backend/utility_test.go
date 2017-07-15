@@ -4,12 +4,15 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"time"
 
 	"github.com/asdine/storm"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/urfave/negroni"
 
 	"gopkg.in/libgit2/git2go.v25"
 )
@@ -239,4 +242,33 @@ func setupTestKeys() {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func createTestServerWithContext() (server *httptest.Server) {
+	n := negroni.New()
+
+	r := unprotectedRouter()
+	pr := protectedRouter()
+
+	r.Handle("/api/*", negroni.New(
+		negroni.HandlerFunc(apiTestMiddleware),
+		negroni.Wrap(pr),
+	))
+
+	n.UseHandler(r)
+
+	server = httptest.NewServer(n)
+
+	return server
+
+}
+
+func apiTestUser() (user User) {
+	return User{Name: "Selma Bouvier", Email: "selma.b@aol.com"}
+}
+
+func apiTestMiddleware(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+	user := apiTestUser()
+	ctx := newContextWithCurrentUser(r.Context(), r, user)
+	next(w, r.WithContext(ctx))
 }

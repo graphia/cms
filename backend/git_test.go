@@ -77,10 +77,15 @@ func TestHeadCommit(t *testing.T) {
 }
 
 func createRandomFile(repo *git.Repository, filename, msg string) error {
+
+	user := User{
+		Name:  "Barney Gumble",
+		Email: "barney.gumble@hotmail.com",
+	}
+
 	nc := NewCommit{
 		Message: msg,
-		Name:    "Barney Gumble",
-		Email:   "barney.gumble@hotmail.com",
+
 		Files: []NewCommitFile{
 			NewCommitFile{
 				Body:     "# The quick brown fox\n\njumped over the lazy dog",
@@ -93,7 +98,7 @@ func createRandomFile(repo *git.Repository, filename, msg string) error {
 			},
 		},
 	}
-	_, err := createFiles(nc)
+	_, err := createFiles(nc, user)
 	return err
 }
 
@@ -202,10 +207,12 @@ func TestLookupFileHistory(t *testing.T) {
 	filename := "history_test.md"
 	path := fmt.Sprintf("%s/%s", dir, filename)
 
-	template := NewCommit{
-
+	user := User{
 		Name:  "Hyman Krustofski",
 		Email: "hyman@springfieldsynagogue.org",
+	}
+
+	template := NewCommit{
 		Files: []NewCommitFile{
 			NewCommitFile{
 				Filename: filename,
@@ -224,21 +231,21 @@ func TestLookupFileHistory(t *testing.T) {
 	r1 = template
 	r1.Files[0].Body = "# r1"
 	r1.Message = "r1"
-	oid, _ = createFiles(r1)
+	oid, _ = createFiles(r1, user)
 	assert.NotNil(t, oid)
 
 	// Revision 2
 	r2 = template
 	r2.Files[0].Body = "# r2"
 	r2.Message = "r2"
-	oid, _ = updateFiles(r2)
+	oid, _ = updateFiles(r2, user)
 	assert.NotNil(t, oid)
 
 	// Revision 3
 	r3 = template
 	r3.Files[0].Body = "# r3"
 	r3.Message = "r3"
-	oid, _ = updateFiles(r3)
+	oid, _ = updateFiles(r3, user)
 	assert.NotNil(t, oid)
 
 	var history []HistoricCommit
@@ -274,10 +281,12 @@ func TestLookupFileHistorySortsByTime(t *testing.T) {
 	oid, _ := setupSmallTestRepo(repoPath)
 	repo, _ := repository(config)
 
-	template := NewCommit{
-
+	user := User{
 		Name:  "Hyman Krustofski",
 		Email: "hyman@springfieldsynagogue.org",
+	}
+
+	template := NewCommit{
 		Files: []NewCommitFile{
 			NewCommitFile{
 				Filename: "sort_test.md",
@@ -297,21 +306,21 @@ func TestLookupFileHistorySortsByTime(t *testing.T) {
 	r2 = template
 	r2.Files[0].Body = "# r2"
 	r2.Message = "r2"
-	oid, _ = writeHistoricFiles(repo, r2, time.Date(2016, 1, 1, 14, 0, 0, 0, time.UTC))
+	oid, _ = writeHistoricFiles(repo, r2, user, time.Date(2016, 1, 1, 14, 0, 0, 0, time.UTC))
 	assert.NotNil(t, oid)
 
 	// Revision 3
 	r3 = template
 	r3.Files[0].Body = "# r3"
 	r3.Message = "r3"
-	oid, _ = writeHistoricFiles(repo, r3, time.Date(2016, 1, 1, 15, 0, 0, 0, time.UTC))
+	oid, _ = writeHistoricFiles(repo, r3, user, time.Date(2016, 1, 1, 15, 0, 0, 0, time.UTC))
 	assert.NotNil(t, oid)
 
 	// Revision 1
 	r1 = template
 	r1.Files[0].Body = "# r1"
 	r1.Message = "r1"
-	oid, _ = writeHistoricFiles(repo, r1, time.Date(2016, 1, 1, 13, 0, 0, 0, time.UTC))
+	oid, _ = writeHistoricFiles(repo, r1, user, time.Date(2016, 1, 1, 13, 0, 0, 0, time.UTC))
 	assert.NotNil(t, oid)
 
 	var history []HistoricCommit
@@ -362,10 +371,12 @@ func TestLookupFileHistoryOnlyReturnsRelevantCommits(t *testing.T) {
 	oid, _ := setupSmallTestRepo(repoPath)
 	repo, _ := repository(config)
 
-	template := NewCommit{
-
+	user := User{
 		Name:  "Hyman Krustofski",
 		Email: "hyman@springfieldsynagogue.org",
+	}
+
+	template := NewCommit{
 		Files: []NewCommitFile{
 			NewCommitFile{
 				Path: "documents",
@@ -385,7 +396,7 @@ func TestLookupFileHistoryOnlyReturnsRelevantCommits(t *testing.T) {
 	r1.Files[0].Filename = "document_11.md"
 	r1.Files[0].Body = "# r1"
 	r1.Message = "r1"
-	oid, _ = createFiles(r1)
+	oid, _ = createFiles(r1, user)
 	assert.NotNil(t, oid)
 
 	// Revision 2 (unrelated)
@@ -393,7 +404,7 @@ func TestLookupFileHistoryOnlyReturnsRelevantCommits(t *testing.T) {
 	r2.Files[0].Filename = "document_12.md"
 	r2.Files[0].Body = "# r2"
 	r2.Message = "r2"
-	oid, _ = createFiles(r2)
+	oid, _ = createFiles(r2, user)
 	assert.NotNil(t, oid)
 
 	// Revision 3
@@ -401,7 +412,7 @@ func TestLookupFileHistoryOnlyReturnsRelevantCommits(t *testing.T) {
 	r3.Files[0].Filename = "document_11.md"
 	r3.Files[0].Body = "# r3"
 	r3.Message = "r3"
-	oid, _ = updateFiles(r3)
+	oid, _ = updateFiles(r3, user)
 	assert.NotNil(t, oid)
 
 	var history []HistoricCommit
@@ -429,7 +440,7 @@ func TestLookupFileHistoryOnlyReturnsRelevantCommits(t *testing.T) {
 
 // Utility functions
 
-func writeHistoricFiles(repo *git.Repository, nc NewCommit, time time.Time) (oid *git.Oid, err error) {
+func writeHistoricFiles(repo *git.Repository, nc NewCommit, user User, time time.Time) (oid *git.Oid, err error) {
 
 	index, err := repo.Index()
 	if err != nil {
@@ -479,8 +490,8 @@ func writeHistoricFiles(repo *git.Repository, nc NewCommit, time time.Time) (oid
 	}
 
 	// git signatures
-	author := historicSign(nc, time)
-	committer := historicSign(nc, time)
+	author := historicSign(user, time)
+	committer := historicSign(user, time)
 
 	// now commit our updated tree to the tip (parent)
 	oid, err = repo.CreateCommit("HEAD", author, committer, nc.Message, tree, tip)
@@ -497,10 +508,10 @@ func writeHistoricFiles(repo *git.Repository, nc NewCommit, time time.Time) (oid
 
 }
 
-func historicSign(nc NewCommit, time time.Time) *git.Signature {
+func historicSign(user User, time time.Time) *git.Signature {
 	return &git.Signature{
-		Name:  nc.Name,
-		Email: nc.Email,
+		Name:  user.Name,
+		Email: user.Email,
 		When:  time,
 	}
 }

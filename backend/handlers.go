@@ -369,7 +369,9 @@ func apiCreateDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 
 	json.NewDecoder(r.Body).Decode(&nc)
 
-	oid, err := createDirectories(nc)
+	user := getCurrentUser(r.Context())
+
+	oid, err := createDirectories(nc, user)
 
 	if err != nil {
 		fr := FailureResponse{Message: err.Error()}
@@ -434,7 +436,9 @@ func apiDeleteDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 
 	json.NewDecoder(r.Body).Decode(&nc)
 
-	oid, err := deleteDirectories(nc)
+	user := getCurrentUser(r.Context())
+
+	oid, err := deleteDirectories(nc, user)
 
 	if err != nil {
 
@@ -521,7 +525,9 @@ func apiCreateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 	// FIXME should check that params match at least once file in nc.Files
 	json.NewDecoder(r.Body).Decode(&nc)
 
-	oid, err := createFiles(nc)
+	user := getCurrentUser(r.Context())
+
+	oid, err := createFiles(nc, user)
 	if err != nil {
 		fr = FailureResponse{
 			Message: err.Error(),
@@ -570,7 +576,9 @@ func apiUpdateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 	// FIXME should check that params match at least once file in nc.Files
 	json.NewDecoder(r.Body).Decode(&nc)
 
-	oid, err := updateFiles(nc)
+	user := getCurrentUser(r.Context())
+
+	oid, err := updateFiles(nc, user)
 	if err != nil {
 		Error.Println("Failed to update file", err.Error())
 		fr = FailureResponse{
@@ -631,7 +639,9 @@ func apiDeleteFileFromDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	oid, err := deleteFiles(nc)
+	user := getCurrentUser(r.Context())
+
+	oid, err := deleteFiles(nc, user)
 
 	if err != nil {
 

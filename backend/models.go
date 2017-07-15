@@ -10,8 +10,6 @@ import (
 // TODO rename to NewCommit
 type NewCommit struct {
 	Message     string               `json:"message"`
-	Name        string               `json:"name"`
-	Email       string               `json:"email"`
 	Files       []NewCommitFile      `json:"files"`
 	Directories []NewCommitDirectory `json:"directories"`
 }

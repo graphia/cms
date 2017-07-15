@@ -22,6 +22,11 @@ func TestUpdateFile(t *testing.T) {
 		Repository: filepath.Join(repoPath),
 	}
 
+	user := User{
+		Name:  "Milhouse van Houten",
+		Email: "milhouse@springfield.gov",
+	}
+
 	ncf := NewCommitFile{
 		Body:     "# The quick brown fox\n\njumped over the lazy dog",
 		Filename: "document_2.md",
@@ -33,14 +38,11 @@ func TestUpdateFile(t *testing.T) {
 	}
 
 	nc := NewCommit{
-
 		Message: "Update document 2",
-		Name:    "Milhouse van Houten",
-		Email:   "milhouse@springfield.gov",
 		Files:   []NewCommitFile{ncf},
 	}
 
-	oid, err := updateFiles(nc)
+	oid, err := updateFiles(nc, user)
 
 	if err != nil {
 		panic(err)
@@ -59,8 +61,8 @@ func TestUpdateFile(t *testing.T) {
 
 	// ensure the most recent commit has the right name and email
 	lastCommit, _ := repo.LookupCommit(oid)
-	assert.Equal(t, lastCommit.Committer().Name, nc.Name)
-	assert.Equal(t, lastCommit.Committer().Email, nc.Email)
+	assert.Equal(t, lastCommit.Committer().Name, user.Name)
+	assert.Equal(t, lastCommit.Committer().Email, user.Email)
 	assert.Equal(t, lastCommit.Message(), nc.Message)
 
 	// finally clean up by removing the tmp repo
@@ -78,6 +80,11 @@ func TestUpdateFiles(t *testing.T) {
 	// initialise a config obj so updateFile looks in the right place
 	config = Config{
 		Repository: filepath.Join(repoPath),
+	}
+
+	user := User{
+		Name:  "Milhouse van Houten",
+		Email: "milhouse@springfield.gov",
 	}
 
 	ncf1 := NewCommitFile{
@@ -104,12 +111,10 @@ func TestUpdateFiles(t *testing.T) {
 
 	nc := NewCommit{
 		Message: "Update document 1 and 2",
-		Name:    "Milhouse van Houten",
-		Email:   "milhouse@springfield.gov",
 		Files:   []NewCommitFile{ncf1, ncf2},
 	}
 
-	oid, err := updateFiles(nc)
+	oid, err := updateFiles(nc, user)
 
 	if err != nil {
 		panic(err)
@@ -134,8 +139,8 @@ func TestUpdateFiles(t *testing.T) {
 
 	// ensure the most recent commit has the right name and email
 	lastCommit, _ := repo.LookupCommit(oid)
-	assert.Equal(t, lastCommit.Committer().Name, nc.Name)
-	assert.Equal(t, lastCommit.Committer().Email, nc.Email)
+	assert.Equal(t, lastCommit.Committer().Name, user.Name)
+	assert.Equal(t, lastCommit.Committer().Email, user.Email)
 	assert.Equal(t, lastCommit.Message(), nc.Message)
 
 }
@@ -146,10 +151,14 @@ func TestUpdateFileWhenNotExists(t *testing.T) {
 
 	setupSmallTestRepo(repoPath)
 
+	user := User{
+		Name:  "Ned Flanders",
+		Email: "nedward.flanders@leftorium.com",
+	}
+
 	nc := NewCommit{
 		Message: "Add document 9",
-		Name:    "Ned Flanders",
-		Email:   "nedward.flanders@leftorium.com",
+
 		Files: []NewCommitFile{
 			NewCommitFile{
 				Body:     "# The quick brown fox\n\njumped over the lazy dog",
@@ -162,7 +171,7 @@ func TestUpdateFileWhenNotExists(t *testing.T) {
 	repo, _ := repository(config)
 	hcBefore, _ := headCommit(repo)
 
-	_, err := updateFiles(nc)
+	_, err := updateFiles(nc, user)
 
 	// check error message is correct
 	assert.Contains(t, err.Error(), "file not found: documents/document_9.md")
