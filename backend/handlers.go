@@ -42,15 +42,8 @@ func authLoginHandler(w http.ResponseWriter, r *http.Request) {
 	user, err := getUserByUsername(uc.Username)
 
 	if err != nil {
-		Debug.Println("Handling user not found error")
-		w.WriteHeader(http.StatusUnauthorized)
 		response := FailureResponse{Message: fmt.Sprintf("User not found: %s", uc.Username)}
-		json, err := json.Marshal(response)
-		if err != nil {
-			Debug.Println("Failed", err)
-			panic(err)
-		}
-		w.Write(json)
+		JSONResponse(response, http.StatusBadRequest, w)
 		return
 	}
 
@@ -90,7 +83,7 @@ func authLoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := Token{tokenString}
-	JSONResponse(response, w)
+	JSONResponse(response, http.StatusOK, w)
 
 }
 
@@ -142,7 +135,7 @@ func authRenewTokenHandler(w http.ResponseWriter, r *http.Request) {
 			}
 
 			response := Token{tokenString}
-			JSONResponse(response, w)
+			JSONResponse(response, http.StatusOK, w)
 
 		} else {
 			w.WriteHeader(http.StatusUnauthorized)
@@ -181,7 +174,7 @@ func authAllowCreateInitialUser(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 	w.Write(output)
 }
 
@@ -209,18 +202,15 @@ func authCreateInitialUser(w http.ResponseWriter, r *http.Request) {
 
 	if qty > 0 {
 		// users exist, don't allow a new one to be created
-		msg := "Users already exist. Cannot create initial user"
-
-		Error.Println(msg)
 		fr = FailureResponse{
-			Message: msg,
+			Message: "Users already exist. Cannot create initial user",
 		}
 		output, err := json.Marshal(fr)
 		if err != nil {
 			Error.Println(err.Error())
 		}
 
-		w.WriteHeader(400)
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write(output)
 		return
 	}
@@ -233,7 +223,6 @@ func authCreateInitialUser(w http.ResponseWriter, r *http.Request) {
 	// create the user
 	err = createUser(user)
 
-	Debug.Println("Error:", err)
 	if err != nil {
 
 		errors := validationErrorsToJSON(err)
@@ -243,7 +232,7 @@ func authCreateInitialUser(w http.ResponseWriter, r *http.Request) {
 			panic(err)
 		}
 
-		w.WriteHeader(400)
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write(output)
 		return
 	}
@@ -312,7 +301,7 @@ func apiListDirectoriesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 	w.Write(output)
 }
 
@@ -345,7 +334,7 @@ func apiDirectorySummary(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 	w.Write(output)
 
 }
@@ -366,6 +355,7 @@ func apiDirectorySummary(w http.ResponseWriter, r *http.Request) {
 func apiCreateDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 	var nc NewCommit
 	var sr SuccessResponse
+	var fr FailureResponse
 
 	json.NewDecoder(r.Body).Decode(&nc)
 
@@ -374,13 +364,10 @@ func apiCreateDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 	oid, err := createDirectories(nc, user)
 
 	if err != nil {
-		fr := FailureResponse{Message: err.Error()}
-		output, err := json.Marshal(fr)
-		if err != nil {
-			panic(err)
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Failed to create directory: %s", err.Error()),
 		}
-		w.WriteHeader(400)
-		w.Write(output)
+		JSONResponse(fr, http.StatusBadRequest, w)
 	}
 
 	sr = SuccessResponse{
@@ -393,14 +380,14 @@ func apiCreateDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	w.WriteHeader(201)
+	w.WriteHeader(http.StatusCreated)
 	w.Write(output)
 
 }
 
 func apiRenameDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 	// TODO
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 }
 
 // apiDeleteDirectoryHandler deletes a directory and all of its contents.
@@ -442,21 +429,11 @@ func apiDeleteDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 
-		msg := "Failed to delete directory"
-
-		Error.Println(msg, err.Error())
-
 		fr = FailureResponse{
-			Message: fmt.Sprintf("%s: %s", msg, err.Error()),
+			Message: fmt.Sprintf("Failed to delete directory: %s", err.Error()),
 		}
 
-		output, err := json.Marshal(fr)
-		if err != nil {
-			panic(err)
-		}
-
-		w.WriteHeader(400)
-		w.Write(output)
+		JSONResponse(fr, http.StatusBadRequest, w)
 
 		return
 	}
@@ -471,7 +448,7 @@ func apiDeleteDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 	w.Write(output)
 }
 
@@ -489,21 +466,29 @@ func apiDeleteDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 //   {"filename": "Document 2", ...}
 // ]
 func apiListFilesInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
+	var fr FailureResponse
+
 	directory := vestigo.Param(r, "directory")
 	files, err := getFilesInDir(directory)
 	if err != nil {
-		Error.Println("Could not get list of files in directory", directory, err.Error())
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Could not get list of files in directory %s: %s", directory, err.Error()),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+
 	}
 
 	output, err := json.Marshal(files)
 	if err != nil {
-		Error.Println("Could not create JSON", directory, err.Error())
-		Error.Println("Files", files)
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Could not create JSON: %s", err.Error()),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 	w.Write(output)
 }
 
@@ -529,16 +514,8 @@ func apiCreateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 
 	oid, err := createFiles(nc, user)
 	if err != nil {
-		fr = FailureResponse{
-			Message: err.Error(),
-		}
-		output, err := json.Marshal(fr)
-		if err != nil {
-			panic(err)
-		}
-
-		w.WriteHeader(400)
-		w.Write(output)
+		fr = FailureResponse{Message: fmt.Sprintf("Failed to create files: %s", err.Error())}
+		JSONResponse(fr, http.StatusBadRequest, w)
 	}
 
 	sr = SuccessResponse{
@@ -580,17 +557,10 @@ func apiUpdateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 
 	oid, err := updateFiles(nc, user)
 	if err != nil {
-		Error.Println("Failed to update file", err.Error())
 		fr = FailureResponse{
-			Message: err.Error(),
+			Message: fmt.Sprintf("Failed to update files: %s", err.Error()),
 		}
-		output, err := json.Marshal(fr)
-		if err != nil {
-			Error.Println(err.Error())
-		}
-
-		w.WriteHeader(400)
-		w.Write(output)
+		JSONResponse(fr, http.StatusBadRequest, w)
 	}
 
 	sr = SuccessResponse{
@@ -635,7 +605,7 @@ func apiDeleteFileFromDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 
 	if len(nc.Files) == 0 {
 		response := FailureResponse{Message: "No files specified for deletion"}
-		JSONBadRequestResponse(response, w)
+		JSONResponse(response, http.StatusBadRequest, w)
 		return
 	}
 
@@ -644,18 +614,10 @@ func apiDeleteFileFromDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 	oid, err := deleteFiles(nc, user)
 
 	if err != nil {
-
 		fr = FailureResponse{
 			Message: err.Error(),
 		}
-
-		output, err := json.Marshal(fr)
-		if err != nil {
-			Error.Println(err.Error())
-		}
-
-		w.WriteHeader(400)
-		w.Write(output)
+		JSONResponse(fr, http.StatusBadRequest, w)
 	}
 
 	sr = SuccessResponse{
@@ -691,20 +653,29 @@ func apiDeleteFileFromDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 //	 ...
 // }
 func apiGetFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
+	var fr FailureResponse
+
 	directory := vestigo.Param(r, "directory")
 	filename := vestigo.Param(r, "file")
 
 	file, err := getConvertedFile(directory, filename)
 	if err != nil {
-		panic(fmt.Errorf("failed to get file %s", err.Error()))
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Failed to get converted file: %s", err.Error()),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
 	}
 
 	output, err := json.Marshal(file)
 	if err != nil {
-		Error.Println(err.Error())
+		Error.Println("Failed to convert file to JSON", file)
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Failed to create JSON from file: %s", err.Error()),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
 	}
 
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 	w.Write(output)
 }
 
@@ -739,7 +710,7 @@ func apiEditFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 		Error.Println(err.Error())
 	}
 
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 	w.Write(output)
 }
 
@@ -760,31 +731,37 @@ func apiListUsers(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 	w.Write(output)
 
 }
 
 // apiGetUser
 func apiGetUser(w http.ResponseWriter, r *http.Request) {
+	var fr FailureResponse
 
 	username := vestigo.Param(r, "username")
 	Debug.Println("Retrieving user", username)
 
 	user, err := getLimitedUserByUsername(username)
 	if err != nil {
-		Error.Println("Could not get list of users", err.Error())
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Failed to find restricted user %s: %s", username, err.Error()),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
 	}
 
 	output, err := json.Marshal(user)
 	if err != nil {
-		Error.Println("Could not create JSON", err.Error())
-		Error.Println("User", user)
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Failed to find restricted user %s: %s", username, err.Error()),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 	w.Write(output)
 }
 
@@ -792,6 +769,7 @@ func apiGetUser(w http.ResponseWriter, r *http.Request) {
 func apiCreateUser(w http.ResponseWriter, r *http.Request) {
 	var user User
 	var sr SuccessResponse
+	var fr FailureResponse
 
 	json.NewDecoder(r.Body).Decode(&user)
 
@@ -807,7 +785,7 @@ func apiCreateUser(w http.ResponseWriter, r *http.Request) {
 			panic(err)
 		}
 
-		w.WriteHeader(400)
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write(output)
 
 		return
@@ -821,7 +799,10 @@ func apiCreateUser(w http.ResponseWriter, r *http.Request) {
 
 	output, err := json.Marshal(sr)
 	if err != nil {
-		panic(err)
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Failed to generate JSON %s", err.Error()),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
 	}
 
 	w.WriteHeader(201)
@@ -836,16 +817,18 @@ func apiUpdateUser(w http.ResponseWriter, r *http.Request) {}
 func apiDeleteUser(w http.ResponseWriter, r *http.Request) {}
 
 func apiPublish(w http.ResponseWriter, r *http.Request) {
+	var fr FailureResponse
 
 	output, err := buildStaticSite()
-
 	if err != nil {
-		// TODO error response!
-		Error.Println("Failed to build static site", err.Error())
-		panic(err)
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Failed to publish site: %s", err.Error()),
+			Meta:    string(output),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
 	}
 
-	Debug.Println("Build success", output)
+	Info.Println("Site published!")
 
 	sr := SuccessResponse{
 		Message: "Published successfully",
@@ -853,10 +836,13 @@ func apiPublish(w http.ResponseWriter, r *http.Request) {
 
 	repsonse, err := json.Marshal(sr)
 	if err != nil {
-		panic(err)
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Failed to generate response: %s", err.Error()),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
 	}
 
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 	w.Write(repsonse)
 
 }
@@ -878,20 +864,30 @@ func apiPublish(w http.ResponseWriter, r *http.Request) {
 //	  },
 // ]
 func apiGetCommits(w http.ResponseWriter, r *http.Request) {
+	var fr FailureResponse
 	var commits []Commit
 	var err error
 
 	// TODO manage quantity param
 
 	commits, err = getCommits(20)
+	if err != nil {
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Failed to retrieve recent commits: %s", err.Error()),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+	}
 
 	response, err := json.Marshal(commits)
 
 	if err != nil {
-		panic(err)
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Failed to convert recent commits to JSON: %s", err.Error()),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
 	}
 
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 	w.Write(response)
 }
 
@@ -917,20 +913,28 @@ func apiGetCommits(w http.ResponseWriter, r *http.Request) {
 //	  "timestamp": "Fri Jul 14 12:34:45 2017 +0100"
 //	},
 func apiGetCommit(w http.ResponseWriter, r *http.Request) {
+	var fr FailureResponse
+	var hash string
 
-	hash := vestigo.Param(r, "hash")
+	hash = vestigo.Param(r, "hash")
 
 	cs, err := diffForCommit(hash)
 	if err != nil {
-		panic(err)
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Failed to generate diff for commit %s: %s", hash, err.Error()),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
 	}
 
 	output, err := json.Marshal(cs)
 	if err != nil {
-		panic(err)
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Failed to convert diff to JSON: %s", err.Error()),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
 	}
 
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 	w.Write(output)
 
 }
@@ -966,7 +970,7 @@ func apiGetFileHistory(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 	w.Write(output)
 
 }

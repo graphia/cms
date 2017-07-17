@@ -44,6 +44,7 @@ type SuccessResponse struct {
 // some more information as to why the update failed
 type FailureResponse struct {
 	Message string `json:"message"`
+	Meta    string `json:"meta,omitempty"`
 }
 
 // FrontMatter contains the document's metadata

@@ -35,6 +35,8 @@ func TestApiListDirectoriesHandler(t *testing.T) {
 
 	resp, _ := client.Do(req)
 
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
 	var receiver []Directory
 
 	json.NewDecoder(resp.Body).Decode(&receiver)
@@ -65,6 +67,8 @@ func TestApiListDirectorySummaryHandler(t *testing.T) {
 	req, _ := http.NewRequest("GET", target, nil)
 
 	resp, _ := client.Do(req)
+
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
 	var receiver map[string][]FileItem
 	json.NewDecoder(resp.Body).Decode(&receiver)
@@ -110,6 +114,8 @@ func TestApiCreateDirectory(t *testing.T) {
 	req, _ := http.NewRequest("POST", target, b)
 
 	resp, err := client.Do(req)
+
+	assert.Equal(t, http.StatusCreated, resp.StatusCode)
 
 	var receiver SuccessResponse
 
@@ -175,6 +181,8 @@ func TestApiCreateFileInDirectory(t *testing.T) {
 
 	resp, err := client.Do(req)
 
+	assert.Equal(t, http.StatusCreated, resp.StatusCode)
+
 	var receiver SuccessResponse
 
 	json.NewDecoder(resp.Body).Decode(&receiver)
@@ -238,6 +246,8 @@ func TestApiUpdateFileInDirectory(t *testing.T) {
 
 	resp, err := client.Do(req)
 
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
 	var receiver SuccessResponse
 
 	json.NewDecoder(resp.Body).Decode(&receiver)
@@ -300,6 +310,8 @@ func TestApiDeleteFileFromDirectory(t *testing.T) {
 
 	resp, err := client.Do(req)
 
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
 	var receiver SuccessResponse
 
 	json.NewDecoder(resp.Body).Decode(&receiver)
@@ -360,6 +372,8 @@ func TestApiDeleteDirectory(t *testing.T) {
 
 	resp, err := client.Do(req)
 
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
 	var receiver SuccessResponse
 
 	json.NewDecoder(resp.Body).Decode(&receiver)
@@ -413,6 +427,8 @@ func TestApiDeleteDirectoryNotExists(t *testing.T) {
 
 	resp, err := client.Do(req)
 
+	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+
 	var receiver FailureResponse
 
 	json.NewDecoder(resp.Body).Decode(&receiver)
@@ -433,10 +449,9 @@ func TestApiGetFileInDirectory(t *testing.T) {
 		"api/directories/documents/files/document_3.md",
 	)
 
-	resp, err := http.Get(target)
-	if err != nil {
-		panic(err)
-	}
+	resp, _ := http.Get(target)
+
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
 	var file File
 
@@ -462,6 +477,9 @@ func TestApiEditFileInDirectory(t *testing.T) {
 	)
 
 	resp, err := http.Get(target)
+
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
 	if err != nil {
 		panic(err)
 	}
