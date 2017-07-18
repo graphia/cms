@@ -10,8 +10,7 @@ func JSONResponse(response interface{}, status int, w http.ResponseWriter) {
 
 	json, err := json.Marshal(response)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		panic(err)
 	}
 
 	w.WriteHeader(status)

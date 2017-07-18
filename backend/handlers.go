@@ -413,15 +413,34 @@ func apiRenameDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 // returns a SuccessResponse containing the git commit hash or a FailureResponse
 // containing an error message
 func apiDeleteDirectoryHandler(w http.ResponseWriter, r *http.Request) {
+	var directory string
 	var nc NewCommit
 	var fr FailureResponse
 	var sr SuccessResponse
+
+	directory = vestigo.Param(r, "directory")
 
 	// set up the RepoWrite with git params, an appropraiate message and then
 	// specify the directory based on the path
 	nc = NewCommit{}
 
 	json.NewDecoder(r.Body).Decode(&nc)
+
+	if len(nc.Directories) == 0 {
+		fr = FailureResponse{
+			Message: "No directories specified for deletion",
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	if !pathInDirectories(directory, &nc.Directories) {
+		fr = FailureResponse{
+			Message: "No specified directory matches path",
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
 
 	user := getCurrentUser(r.Context())
 
@@ -546,12 +565,32 @@ func apiCreateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 //	  ]
 // }
 func apiUpdateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
+	var filename, directory string
 	var nc NewCommit
 	var fr FailureResponse
 	var sr SuccessResponse
 
-	// FIXME should check that params match at least once file in nc.Files
+	filename = vestigo.Param(r, "file")
+	directory = vestigo.Param(r, "directory")
+
+	//  FIXME should check that params match at least once file in nc.Files
 	json.NewDecoder(r.Body).Decode(&nc)
+
+	if len(nc.Files) == 0 {
+		fr = FailureResponse{
+			Message: "No files specified for update",
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	if !pathInFiles(directory, filename, &nc.Files) {
+		fr = FailureResponse{
+			Message: "No supplied file matches path",
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
 
 	user := getCurrentUser(r.Context())
 
@@ -561,6 +600,7 @@ func apiUpdateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 			Message: fmt.Sprintf("Failed to update files: %s", err.Error()),
 		}
 		JSONResponse(fr, http.StatusBadRequest, w)
+		return
 	}
 
 	sr = SuccessResponse{
@@ -590,16 +630,31 @@ func apiUpdateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 //	  ]
 // }
 func apiDeleteFileFromDirectoryHandler(w http.ResponseWriter, r *http.Request) {
+	var filename, directory string
 	var nc NewCommit
 	var fr FailureResponse
 	var sr SuccessResponse
 
-	//directory := vestigo.Param(r, "directory")
-	//filename := vestigo.Param(r, "file")
-	// FIXME check that path matches at least one file?
+	filename = vestigo.Param(r, "file")
+	directory = vestigo.Param(r, "directory")
+
 	json.NewDecoder(r.Body).Decode(&nc)
 
-	// TODO check that nc.Files isn't empty
+	if len(nc.Files) == 0 {
+		fr = FailureResponse{
+			Message: "No files specified for deletion",
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	if !pathInFiles(directory, filename, &nc.Files) {
+		fr = FailureResponse{
+			Message: "No supplied file matches path",
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
 
 	Debug.Println("nc", nc)
 

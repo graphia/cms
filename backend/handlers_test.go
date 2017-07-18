@@ -274,6 +274,89 @@ func TestApiUpdateFileInDirectory(t *testing.T) {
 
 }
 
+// Make sure that the file specified in the URL is included in the payload
+func TestApiUpdateOtherFileInDirectory(t *testing.T) {
+	server = createTestServerWithContext()
+
+	repoPath := "../tests/tmp/repositories/update_file"
+	setupSmallTestRepo(repoPath)
+
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files/document_3.md")
+
+	ncf := NewCommitFile{
+		Path:      "documents",
+		Filename:  "document_2.md", // note, target contains document_2.md
+		Extension: "md",
+		Body:      "# The quick brown fox",
+		FrontMatter: FrontMatter{
+			Title:  "Document Three",
+			Author: "Timothy Lovejoy",
+		},
+	}
+
+	nc := &NewCommit{
+		Message: "Forty whacks with a wet noodle",
+		Files:   []NewCommitFile{ncf},
+	}
+
+	payload, err := json.Marshal(nc)
+	if err != nil {
+		panic(err)
+	}
+
+	buff := bytes.NewBuffer(payload)
+
+	client := &http.Client{}
+
+	req, _ := http.NewRequest("PATCH", target, buff)
+
+	resp, err := client.Do(req)
+
+	var receiver FailureResponse
+
+	json.NewDecoder(resp.Body).Decode(&receiver)
+
+	assert.Equal(t, "No supplied file matches path", receiver.Message)
+	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+
+}
+
+// Make sure that at least one file is specified in the payload
+func TestApiUpdateNoFilesInDirectory(t *testing.T) {
+	server = createTestServerWithContext()
+
+	repoPath := "../tests/tmp/repositories/update_file"
+	setupSmallTestRepo(repoPath)
+
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files/document_3.md")
+
+	nc := &NewCommit{
+		Message: "Forty whacks with a wet noodle",
+		Files:   []NewCommitFile{},
+	}
+
+	payload, err := json.Marshal(nc)
+	if err != nil {
+		panic(err)
+	}
+
+	buff := bytes.NewBuffer(payload)
+
+	client := &http.Client{}
+
+	req, _ := http.NewRequest("PATCH", target, buff)
+
+	resp, err := client.Do(req)
+
+	var receiver FailureResponse
+
+	json.NewDecoder(resp.Body).Decode(&receiver)
+
+	assert.Equal(t, "No files specified for update", receiver.Message)
+	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+
+}
+
 func TestApiDeleteFileFromDirectory(t *testing.T) {
 	server = createTestServerWithContext()
 
@@ -338,6 +421,88 @@ func TestApiDeleteFileFromDirectory(t *testing.T) {
 
 }
 
+// Make sure that the file specified in the URL is included in the payload
+func TestApiDeleteOtherFileFromDirectory(t *testing.T) {
+	server = createTestServerWithContext()
+
+	repoPath := "../tests/tmp/repositories/delete_file"
+	setupSmallTestRepo(repoPath)
+
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files/document_3.md")
+
+	ncf1 := NewCommitFile{
+		Filename: "document_1.md",
+		Path:     "documents",
+	}
+
+	ncf2 := NewCommitFile{
+		Filename: "document_2.md",
+		Path:     "documents",
+	}
+
+	nc := &NewCommit{
+		Message: "Suspect is hatless. Repeat, hatless.",
+		Files:   []NewCommitFile{ncf1, ncf2},
+	}
+
+	payload, err := json.Marshal(nc)
+	if err != nil {
+		panic(err)
+	}
+
+	client := &http.Client{}
+
+	buff := bytes.NewBuffer(payload)
+
+	req, _ := http.NewRequest("DELETE", target, buff)
+
+	resp, err := client.Do(req)
+
+	var receiver FailureResponse
+
+	json.NewDecoder(resp.Body).Decode(&receiver)
+
+	assert.Equal(t, "No supplied file matches path", receiver.Message)
+	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+
+}
+
+// Make sure that at least one file is specified in the payload
+func TestApiDeleteNoFilesFromDirectory(t *testing.T) {
+	server = createTestServerWithContext()
+
+	repoPath := "../tests/tmp/repositories/delete_file"
+	setupSmallTestRepo(repoPath)
+
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files/document_3.md")
+
+	nc := &NewCommit{
+		Message: "Suspect is hatless. Repeat, hatless.",
+		Files:   []NewCommitFile{},
+	}
+
+	payload, err := json.Marshal(nc)
+	if err != nil {
+		panic(err)
+	}
+
+	client := &http.Client{}
+
+	buff := bytes.NewBuffer(payload)
+
+	req, _ := http.NewRequest("DELETE", target, buff)
+
+	resp, err := client.Do(req)
+
+	var receiver FailureResponse
+
+	json.NewDecoder(resp.Body).Decode(&receiver)
+
+	assert.Equal(t, "No files specified for deletion", receiver.Message)
+	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+
+}
+
 func TestApiDeleteDirectory(t *testing.T) {
 	server = createTestServerWithContext()
 
@@ -359,10 +524,7 @@ func TestApiDeleteDirectory(t *testing.T) {
 	_, err = os.Stat(filepath.Join(repoPath, ncd.Path, "appendix_2.md"))
 	assert.False(t, os.IsNotExist(err))
 
-	payload, err := json.Marshal(nc)
-	if err != nil {
-		panic(err)
-	}
+	payload, _ := json.Marshal(nc)
 
 	client := &http.Client{}
 
@@ -399,6 +561,7 @@ func TestApiDeleteDirectory(t *testing.T) {
 
 }
 
+// make sure error is returned when trying to delete a non-existant directory
 func TestApiDeleteDirectoryNotExists(t *testing.T) {
 	server = createTestServerWithContext()
 
@@ -409,7 +572,7 @@ func TestApiDeleteDirectoryNotExists(t *testing.T) {
 
 	target := fmt.Sprintf("%s/%s/%s", server.URL, "api/directories", "favourites")
 
-	ncd := NewCommitDirectory{Path: "supplements"}
+	ncd := NewCommitDirectory{Path: "favourites"}
 	nc := &NewCommit{
 		Directories: []NewCommitDirectory{ncd},
 	}
@@ -434,6 +597,46 @@ func TestApiDeleteDirectoryNotExists(t *testing.T) {
 	json.NewDecoder(resp.Body).Decode(&receiver)
 
 	assert.Contains(t, receiver.Message, "Failed to delete directory")
+
+}
+
+// ensure correct error returned dir named in URL path isn't specified
+// in the payload
+func TestApiDeleteAnotherDirectory(t *testing.T) {
+	server = createTestServerWithContext()
+
+	var err error
+
+	repoPath := "../tests/tmp/repositories/delete_dir"
+	setupSmallTestRepo(repoPath)
+
+	target := fmt.Sprintf("%s/%s/%s", server.URL, "api/directories", "appendices")
+
+	ncd := NewCommitDirectory{Path: "documents"}
+	nc := &NewCommit{
+		Directories: []NewCommitDirectory{ncd},
+	}
+
+	payload, err := json.Marshal(nc)
+	if err != nil {
+		panic(err)
+	}
+
+	client := &http.Client{}
+
+	buff := bytes.NewBuffer(payload)
+
+	req, _ := http.NewRequest("DELETE", target, buff)
+
+	resp, err := client.Do(req)
+
+	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+
+	var receiver FailureResponse
+
+	json.NewDecoder(resp.Body).Decode(&receiver)
+
+	assert.Contains(t, receiver.Message, "No specified directory matches path")
 
 }
 
