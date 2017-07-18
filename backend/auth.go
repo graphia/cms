@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"time"
@@ -10,9 +11,12 @@ import (
 	"github.com/rs/xid"
 )
 
+type userKey int
+
 const (
 	// HoursUntilExpiry is number of hours until token expires
-	HoursUntilExpiry = 1
+	HoursUntilExpiry         = 1
+	currentUser      userKey = 0
 )
 
 // ValidateTokenMiddleware validates the JWT token
@@ -70,8 +74,6 @@ func ValidateTokenMiddleware(w http.ResponseWriter, r *http.Request, next http.H
 		response := FailureResponse{Message: "Token is out of date"}
 		json, err := json.Marshal(response)
 		if err != nil {
-			Debug.Println("WTFBBQ")
-
 			panic(err)
 		}
 		w.WriteHeader(http.StatusUnauthorized)
@@ -81,7 +83,8 @@ func ValidateTokenMiddleware(w http.ResponseWriter, r *http.Request, next http.H
 
 	if err == nil {
 		if token.Valid {
-			next(w, r)
+			ctx := newContextWithCurrentUser(r.Context(), r, user)
+			next(w, r.WithContext(ctx))
 		} else {
 			w.WriteHeader(http.StatusUnauthorized)
 			response := FailureResponse{Message: "Invalid credentials"}
@@ -95,18 +98,14 @@ func ValidateTokenMiddleware(w http.ResponseWriter, r *http.Request, next http.H
 
 }
 
-// JSONResponse is a helper function to jsonify and send a response
-func JSONResponse(response interface{}, w http.ResponseWriter) {
+// Add the constant with key currentUser to the context
+func newContextWithCurrentUser(ctx context.Context, req *http.Request, user User) context.Context {
+	return context.WithValue(ctx, currentUser, user)
+}
 
-	json, err := json.Marshal(response)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(json)
+// Retrive the current user from the request's context
+func getCurrentUser(ctx context.Context) User {
+	return ctx.Value(currentUser).(User)
 }
 
 func newToken(user User) (jwt.Token, error) {

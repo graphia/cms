@@ -6,16 +6,26 @@ import (
 	"gopkg.in/libgit2/git2go.v25"
 )
 
-// RepoWrite contains all info we need to perform a git commit
-// TODO rename to FileWrite fw
-type RepoWrite struct {
-	Filename    string
-	Path        string
-	Body        string
-	Message     string
-	Name        string
-	Email       string
-	FrontMatter FrontMatter
+// NewCommit will replace RepoWrite and allow multiple files
+// TODO rename to NewCommit
+type NewCommit struct {
+	Message     string               `json:"message"`
+	Files       []NewCommitFile      `json:"files"`
+	Directories []NewCommitDirectory `json:"directories"`
+}
+
+// NewCommitDirectory holds directory info for creating new dirs
+type NewCommitDirectory struct {
+	Path string `json:"name"`
+}
+
+// NewCommitFile will replace RepoWrite's file attributes
+type NewCommitFile struct {
+	Filename    string      `json:"filename"`
+	Extension   string      `json:"extension"`
+	Path        string      `json:"path"`
+	Body        string      `json:"body"`
+	FrontMatter FrontMatter `json:"frontmatter"`
 }
 
 // Response is a general response containing arbitrary data
@@ -34,6 +44,7 @@ type SuccessResponse struct {
 // some more information as to why the update failed
 type FailureResponse struct {
 	Message string `json:"message"`
+	Meta    string `json:"meta,omitempty"`
 }
 
 // FrontMatter contains the document's metadata

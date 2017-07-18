@@ -42,15 +42,8 @@ func authLoginHandler(w http.ResponseWriter, r *http.Request) {
 	user, err := getUserByUsername(uc.Username)
 
 	if err != nil {
-		Debug.Println("Handling user not found error")
-		w.WriteHeader(http.StatusUnauthorized)
 		response := FailureResponse{Message: fmt.Sprintf("User not found: %s", uc.Username)}
-		json, err := json.Marshal(response)
-		if err != nil {
-			Debug.Println("Failed", err)
-			panic(err)
-		}
-		w.Write(json)
+		JSONResponse(response, http.StatusBadRequest, w)
 		return
 	}
 
@@ -90,7 +83,7 @@ func authLoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := Token{tokenString}
-	JSONResponse(response, w)
+	JSONResponse(response, http.StatusOK, w)
 
 }
 
@@ -142,7 +135,7 @@ func authRenewTokenHandler(w http.ResponseWriter, r *http.Request) {
 			}
 
 			response := Token{tokenString}
-			JSONResponse(response, w)
+			JSONResponse(response, http.StatusOK, w)
 
 		} else {
 			w.WriteHeader(http.StatusUnauthorized)
@@ -181,7 +174,7 @@ func authAllowCreateInitialUser(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 	w.Write(output)
 }
 
@@ -209,18 +202,15 @@ func authCreateInitialUser(w http.ResponseWriter, r *http.Request) {
 
 	if qty > 0 {
 		// users exist, don't allow a new one to be created
-		msg := "Users already exist. Cannot create initial user"
-
-		Error.Println(msg)
 		fr = FailureResponse{
-			Message: msg,
+			Message: "Users already exist. Cannot create initial user",
 		}
 		output, err := json.Marshal(fr)
 		if err != nil {
 			Error.Println(err.Error())
 		}
 
-		w.WriteHeader(400)
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write(output)
 		return
 	}
@@ -233,7 +223,6 @@ func authCreateInitialUser(w http.ResponseWriter, r *http.Request) {
 	// create the user
 	err = createUser(user)
 
-	Debug.Println("Error:", err)
 	if err != nil {
 
 		errors := validationErrorsToJSON(err)
@@ -243,7 +232,7 @@ func authCreateInitialUser(w http.ResponseWriter, r *http.Request) {
 			panic(err)
 		}
 
-		w.WriteHeader(400)
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write(output)
 		return
 	}
@@ -312,7 +301,7 @@ func apiListDirectoriesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 	w.Write(output)
 }
 
@@ -345,7 +334,7 @@ func apiDirectorySummary(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 	w.Write(output)
 
 }
@@ -355,28 +344,30 @@ func apiDirectorySummary(w http.ResponseWriter, r *http.Request) {
 //
 // POST /api/directories
 // {
-//	 "path": "recipes",
-//	 "name": "Martin Prince",
-//	 "email": "mp@springfield-elementary.gov",
-//	 "message": "Added new directory called Bobbins"
+//	  "name": "Martin Prince",
+//	  "email": "mp@springfield-elementary.gov",
+//	  "message": "Added new directory called Bobbins",
+//	  "directories": [
+//	    {"path": "documents"},
+//	    {"path": "appendices"}
+//	  ]
 // }
 func apiCreateDirectoryHandler(w http.ResponseWriter, r *http.Request) {
-	var rw RepoWrite
+	var nc NewCommit
 	var sr SuccessResponse
+	var fr FailureResponse
 
-	rw = RepoWrite{}
-	json.NewDecoder(r.Body).Decode(&rw)
+	json.NewDecoder(r.Body).Decode(&nc)
 
-	oid, err := createDirectory(rw)
+	user := getCurrentUser(r.Context())
+
+	oid, err := createDirectories(nc, user)
 
 	if err != nil {
-		fr := FailureResponse{Message: err.Error()}
-		output, err := json.Marshal(fr)
-		if err != nil {
-			panic(err)
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Failed to create directory: %s", err.Error()),
 		}
-		w.WriteHeader(400)
-		w.Write(output)
+		JSONResponse(fr, http.StatusBadRequest, w)
 	}
 
 	sr = SuccessResponse{
@@ -389,14 +380,14 @@ func apiCreateDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	w.WriteHeader(201)
+	w.WriteHeader(http.StatusCreated)
 	w.Write(output)
 
 }
 
 func apiRenameDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 	// TODO
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 }
 
 // apiDeleteDirectoryHandler deletes a directory and all of its contents.
@@ -409,40 +400,59 @@ func apiRenameDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 //	 "name": "Martin Prince",
 //	 "email": "mp@springfield-elementary.gov",
 // }
+// DELETE /api/directories
+// {
+//	  "name": "Martin Prince",
+//	  "email": "mp@springfield-elementary.gov",
+//	  "message": "Added new directory called Bobbins",
+//	  "directories": [
+//	    {"path": "documents"}
+//	  ]
+// }
 //
 // returns a SuccessResponse containing the git commit hash or a FailureResponse
 // containing an error message
 func apiDeleteDirectoryHandler(w http.ResponseWriter, r *http.Request) {
-	var rw RepoWrite
+	var directory string
+	var nc NewCommit
 	var fr FailureResponse
 	var sr SuccessResponse
 
+	directory = vestigo.Param(r, "directory")
+
 	// set up the RepoWrite with git params, an appropraiate message and then
 	// specify the directory based on the path
-	rw = RepoWrite{}
-	json.NewDecoder(r.Body).Decode(&rw)
-	rw.Message = fmt.Sprintf("Deleted %s directory", rw.Path)
-	rw.Path = vestigo.Param(r, "directory")
+	nc = NewCommit{}
 
-	oid, err := deleteDirectory(rw)
+	json.NewDecoder(r.Body).Decode(&nc)
+
+	if len(nc.Directories) == 0 {
+		fr = FailureResponse{
+			Message: "No directories specified for deletion",
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	if !pathInDirectories(directory, &nc.Directories) {
+		fr = FailureResponse{
+			Message: "No specified directory matches path",
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	user := getCurrentUser(r.Context())
+
+	oid, err := deleteDirectories(nc, user)
 
 	if err != nil {
 
-		msg := "Failed to delete directory"
-
-		Error.Println(msg, err.Error())
-
 		fr = FailureResponse{
-			Message: fmt.Sprintf("%s: %s", msg, err.Error()),
+			Message: fmt.Sprintf("Failed to delete directory: %s", err.Error()),
 		}
 
-		output, err := json.Marshal(fr)
-		if err != nil {
-			panic(err)
-		}
-
-		w.WriteHeader(400)
-		w.Write(output)
+		JSONResponse(fr, http.StatusBadRequest, w)
 
 		return
 	}
@@ -457,7 +467,7 @@ func apiDeleteDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 	w.Write(output)
 }
 
@@ -475,21 +485,29 @@ func apiDeleteDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 //   {"filename": "Document 2", ...}
 // ]
 func apiListFilesInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
+	var fr FailureResponse
+
 	directory := vestigo.Param(r, "directory")
 	files, err := getFilesInDir(directory)
 	if err != nil {
-		Error.Println("Could not get list of files in directory", directory, err.Error())
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Could not get list of files in directory %s: %s", directory, err.Error()),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+
 	}
 
 	output, err := json.Marshal(files)
 	if err != nil {
-		Error.Println("Could not create JSON", directory, err.Error())
-		Error.Println("Files", files)
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Could not create JSON: %s", err.Error()),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 	w.Write(output)
 }
 
@@ -497,41 +515,30 @@ func apiListFilesInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 //
 // POST /api/directories/:directory/files
 // {
-//   "filename": "document_6.md",
-//   "body": "The *quick* brown fox [jumped](appendices/jumping.md) ...",
-//	 "message": "Added document six"
-//   ...
+//	  "message": "Added document six"
+//	  "files": [
+//	    {"filename": "document_six.md", "path": "documents", "extension": "md", body: "blah blah"}
+//	  ]
 // }
-//
-// returns a SuccessResponse containing the git commit hash or a FailureResponse
-// containing an error message
 func apiCreateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 
-	var rw RepoWrite
+	var nc NewCommit
 	var fr FailureResponse
 	var sr SuccessResponse
 
-	directory := vestigo.Param(r, "directory")
+	// FIXME should check that params match at least once file in nc.Files
+	json.NewDecoder(r.Body).Decode(&nc)
 
-	rw = RepoWrite{Path: directory}
-	json.NewDecoder(r.Body).Decode(&rw)
+	user := getCurrentUser(r.Context())
 
-	oid, err := createFile(rw)
+	oid, err := createFiles(nc, user)
 	if err != nil {
-		fr = FailureResponse{
-			Message: err.Error(),
-		}
-		output, err := json.Marshal(fr)
-		if err != nil {
-			panic(err)
-		}
-
-		w.WriteHeader(400)
-		w.Write(output)
+		fr = FailureResponse{Message: fmt.Sprintf("Failed to create files: %s", err.Error())}
+		JSONResponse(fr, http.StatusBadRequest, w)
 	}
 
 	sr = SuccessResponse{
-		Message: "File created",
+		Message: "File(s) created",
 		Oid:     oid.String(),
 	}
 
@@ -543,7 +550,7 @@ func apiCreateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(201)
 	w.Write(output)
 
-	Debug.Println("File created", oid)
+	Debug.Println("File(s) created", oid)
 
 }
 
@@ -552,37 +559,48 @@ func apiCreateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 //
 // PATCH /api/directories/:directory/files/:filename
 // {
-//   "body": "The *quick* brown dog [jumped](appendices/jumping.md) ...",
-//	 "message": "Fixed grammar in document six"
-//   ...
+//	  "message": "Added document six"
+//	  "files": [
+//	    {"filename": "document_six.md", "path": "documents", "extension": "md", "body": "what a nice doc"}
+//	  ]
 // }
-//
-// returns a SuccessResponse containing the git commit hash or a
-// FailureResponse containing an error message
 func apiUpdateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
-	var rw RepoWrite
+	var filename, directory string
+	var nc NewCommit
 	var fr FailureResponse
 	var sr SuccessResponse
 
-	directory := vestigo.Param(r, "directory")
-	filename := vestigo.Param(r, "file")
+	filename = vestigo.Param(r, "file")
+	directory = vestigo.Param(r, "directory")
 
-	rw = RepoWrite{Path: directory, Filename: filename}
-	json.NewDecoder(r.Body).Decode(&rw)
+	//  FIXME should check that params match at least once file in nc.Files
+	json.NewDecoder(r.Body).Decode(&nc)
 
-	oid, err := updateFile(rw)
-	if err != nil {
-		Error.Println("Failed to update file", err.Error())
+	if len(nc.Files) == 0 {
 		fr = FailureResponse{
-			Message: err.Error(),
+			Message: "No files specified for update",
 		}
-		output, err := json.Marshal(fr)
-		if err != nil {
-			Error.Println(err.Error())
-		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
 
-		w.WriteHeader(400)
-		w.Write(output)
+	if !pathInFiles(directory, filename, &nc.Files) {
+		fr = FailureResponse{
+			Message: "No supplied file matches path",
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	user := getCurrentUser(r.Context())
+
+	oid, err := updateFiles(nc, user)
+	if err != nil {
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Failed to update files: %s", err.Error()),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
 	}
 
 	sr = SuccessResponse{
@@ -606,36 +624,55 @@ func apiUpdateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 //
 // DELETE /api/directories/:directory/files/:filename
 // {
-//   "message": "Deleted document 6 as it's no longer required"
+//	  "message": "Deleted document 6 as it's no longer required",
+//	  "files": [
+//	    {"filename": "document_six.md", "path": "documents"}
+//	  ]
 // }
-//
-// returns a SuccessResponse containing the git commit hash or a
-// FailureResponse containing an error message
 func apiDeleteFileFromDirectoryHandler(w http.ResponseWriter, r *http.Request) {
-	var rw RepoWrite
+	var filename, directory string
+	var nc NewCommit
 	var fr FailureResponse
 	var sr SuccessResponse
 
-	directory := vestigo.Param(r, "directory")
-	filename := vestigo.Param(r, "file")
+	filename = vestigo.Param(r, "file")
+	directory = vestigo.Param(r, "directory")
 
-	rw = RepoWrite{Path: directory, Filename: filename}
-	json.NewDecoder(r.Body).Decode(&rw)
+	json.NewDecoder(r.Body).Decode(&nc)
 
-	oid, err := deleteFile(rw)
+	if len(nc.Files) == 0 {
+		fr = FailureResponse{
+			Message: "No files specified for deletion",
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	if !pathInFiles(directory, filename, &nc.Files) {
+		fr = FailureResponse{
+			Message: "No supplied file matches path",
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	Debug.Println("nc", nc)
+
+	if len(nc.Files) == 0 {
+		response := FailureResponse{Message: "No files specified for deletion"}
+		JSONResponse(response, http.StatusBadRequest, w)
+		return
+	}
+
+	user := getCurrentUser(r.Context())
+
+	oid, err := deleteFiles(nc, user)
 
 	if err != nil {
-		Error.Println("Failed to delete file", err.Error())
 		fr = FailureResponse{
 			Message: err.Error(),
 		}
-		output, err := json.Marshal(fr)
-		if err != nil {
-			Error.Println(err.Error())
-		}
-
-		w.WriteHeader(400)
-		w.Write(output)
+		JSONResponse(fr, http.StatusBadRequest, w)
 	}
 
 	sr = SuccessResponse{
@@ -671,20 +708,29 @@ func apiDeleteFileFromDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 //	 ...
 // }
 func apiGetFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
+	var fr FailureResponse
+
 	directory := vestigo.Param(r, "directory")
 	filename := vestigo.Param(r, "file")
 
 	file, err := getConvertedFile(directory, filename)
 	if err != nil {
-		panic(fmt.Errorf("failed to get file %s", err.Error()))
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Failed to get converted file: %s", err.Error()),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
 	}
 
 	output, err := json.Marshal(file)
 	if err != nil {
-		Error.Println(err.Error())
+		Error.Println("Failed to convert file to JSON", file)
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Failed to create JSON from file: %s", err.Error()),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
 	}
 
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 	w.Write(output)
 }
 
@@ -719,7 +765,7 @@ func apiEditFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 		Error.Println(err.Error())
 	}
 
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 	w.Write(output)
 }
 
@@ -740,31 +786,37 @@ func apiListUsers(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 	w.Write(output)
 
 }
 
 // apiGetUser
 func apiGetUser(w http.ResponseWriter, r *http.Request) {
+	var fr FailureResponse
 
 	username := vestigo.Param(r, "username")
 	Debug.Println("Retrieving user", username)
 
 	user, err := getLimitedUserByUsername(username)
 	if err != nil {
-		Error.Println("Could not get list of users", err.Error())
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Failed to find restricted user %s: %s", username, err.Error()),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
 	}
 
 	output, err := json.Marshal(user)
 	if err != nil {
-		Error.Println("Could not create JSON", err.Error())
-		Error.Println("User", user)
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Failed to find restricted user %s: %s", username, err.Error()),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 	w.Write(output)
 }
 
@@ -772,6 +824,7 @@ func apiGetUser(w http.ResponseWriter, r *http.Request) {
 func apiCreateUser(w http.ResponseWriter, r *http.Request) {
 	var user User
 	var sr SuccessResponse
+	var fr FailureResponse
 
 	json.NewDecoder(r.Body).Decode(&user)
 
@@ -787,7 +840,7 @@ func apiCreateUser(w http.ResponseWriter, r *http.Request) {
 			panic(err)
 		}
 
-		w.WriteHeader(400)
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write(output)
 
 		return
@@ -801,7 +854,10 @@ func apiCreateUser(w http.ResponseWriter, r *http.Request) {
 
 	output, err := json.Marshal(sr)
 	if err != nil {
-		panic(err)
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Failed to generate JSON %s", err.Error()),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
 	}
 
 	w.WriteHeader(201)
@@ -816,16 +872,18 @@ func apiUpdateUser(w http.ResponseWriter, r *http.Request) {}
 func apiDeleteUser(w http.ResponseWriter, r *http.Request) {}
 
 func apiPublish(w http.ResponseWriter, r *http.Request) {
+	var fr FailureResponse
 
 	output, err := buildStaticSite()
-
 	if err != nil {
-		// TODO error response!
-		Error.Println("Failed to build static site", err.Error())
-		panic(err)
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Failed to publish site: %s", err.Error()),
+			Meta:    string(output),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
 	}
 
-	Debug.Println("Build success", output)
+	Info.Println("Site published!")
 
 	sr := SuccessResponse{
 		Message: "Published successfully",
@@ -833,53 +891,123 @@ func apiPublish(w http.ResponseWriter, r *http.Request) {
 
 	repsonse, err := json.Marshal(sr)
 	if err != nil {
-		panic(err)
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Failed to generate response: %s", err.Error()),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
 	}
 
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 	w.Write(repsonse)
 
 }
 
 // Repository data 💁
 
+// GET /api/recent_commits
+//
+// returns the most recent commits made to the repository. Currently hard-coded
+// to 20, but would make sense to accept a param
+//
+// [
+//	  {
+//	    "message": "Changed some stuff",
+//	    "id": "e2da99aa078c",
+//	    "object_type": "blob",
+//	    "author": "Peter Yates"
+//	    "time": "Fri Jul 14 12:34:45 2017 +0100"
+//	  },
+// ]
 func apiGetCommits(w http.ResponseWriter, r *http.Request) {
+	var fr FailureResponse
 	var commits []Commit
 	var err error
 
 	// TODO manage quantity param
 
 	commits, err = getCommits(20)
+	if err != nil {
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Failed to retrieve recent commits: %s", err.Error()),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+	}
 
 	response, err := json.Marshal(commits)
 
 	if err != nil {
-		panic(err)
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Failed to convert recent commits to JSON: %s", err.Error()),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
 	}
 
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 	w.Write(response)
 }
 
+// GET /api/commits/:commit_hash
+//
+// returns a single commit containing relevant info plus the list of files
+// and diff information, plus the file's contents before and after the change
+//
+//	{
+//	  "num_deltas": 2,
+//	  "num_added": 1,
+//	  "num_deleted": 1,
+//	  "full_diff": "raw diff text",
+//	  "files": {
+//	    "documents/document_1.md": {
+//	      "old": "the quick brown fox",
+//	      "new": "the thick brown fox"
+//	    }
+//	  },
+//	  "message": "changed quick to thick",
+//	  "author": "Cletus Spuckler",
+//	  "hash": "e2da99aa078c",
+//	  "timestamp": "Fri Jul 14 12:34:45 2017 +0100"
+//	},
 func apiGetCommit(w http.ResponseWriter, r *http.Request) {
+	var fr FailureResponse
+	var hash string
 
-	hash := vestigo.Param(r, "hash")
+	hash = vestigo.Param(r, "hash")
 
 	cs, err := diffForCommit(hash)
 	if err != nil {
-		panic(err)
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Failed to generate diff for commit %s: %s", hash, err.Error()),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
 	}
 
 	output, err := json.Marshal(cs)
 	if err != nil {
-		panic(err)
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Failed to convert diff to JSON: %s", err.Error()),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
 	}
 
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 	w.Write(output)
 
 }
 
+// GET /api/directories/:directory/files/:filename/history
+//
+// returns the basic commit information for every commit that has
+// affected the specified file
+//
+// [
+//	  {
+//	    "message": "Changed some stuff",
+//	    "id": "e2da99aa078c",
+//	    "object_type": "blob",
+//	    "author": "Peter Yates"
+//	    "time": "Fri Jul 14 12:34:45 2017 +0100"
+//	  },
+// ]
 func apiGetFileHistory(w http.ResponseWriter, r *http.Request) {
 	directory := vestigo.Param(r, "directory")
 	filename := vestigo.Param(r, "file")
@@ -897,7 +1025,7 @@ func apiGetFileHistory(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 	w.Write(output)
 
 }

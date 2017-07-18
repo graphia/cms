@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/graphia/particle"
@@ -101,7 +102,7 @@ func getFilesInDir(directory string) (files []FileItem, err error) {
 
 }
 
-func createFile(rw RepoWrite) (oid *git.Oid, err error) {
+func createFiles(nc NewCommit, user User) (oid *git.Oid, err error) {
 
 	repo, err := repository(config)
 	if err != nil {
@@ -109,25 +110,41 @@ func createFile(rw RepoWrite) (oid *git.Oid, err error) {
 	}
 	defer repo.Free()
 
-	tree, err := headTree(repo)
+	ht, err := headTree(repo)
 	if err != nil {
 		return nil, err
 	}
 
-	target := filepath.Join(rw.Path, rw.Filename)
-	Debug.Println("looking for file", target)
+	// check none of the files already exist
+	for _, ncf := range nc.Files {
 
-	file, _ := tree.EntryByPath(target)
-	if file != nil {
-		return nil, fmt.Errorf("file already exists %s", target)
+		// if no filename is specified it's likely that
+		// we are simply creating a directory
+		// TODO fix this
+		if ncf.Filename == "" {
+			continue
+		}
+
+		target := filepath.Join(ncf.Path, ncf.Filename)
+
+		entry, _ := ht.EntryByPath(target)
+		//if err != nil {
+		//return nil, fmt.Errorf("file not found %s", target)
+		//}
+
+		if entry != nil {
+			return nil, fmt.Errorf("file already exists")
+		}
+
 	}
 
-	oid, err = writeFile(repo, rw)
-	return oid, err
+	oid, err = writeFiles(repo, nc, user)
 
+	return oid, err
 }
 
-func createEmptyFile(rw RepoWrite) (oid *git.Oid, err error) {
+// Replaces updateFile
+func updateFiles(nc NewCommit, user User) (oid *git.Oid, err error) {
 
 	repo, err := repository(config)
 	if err != nil {
@@ -135,18 +152,31 @@ func createEmptyFile(rw RepoWrite) (oid *git.Oid, err error) {
 	}
 	defer repo.Free()
 
-	tree, err := headTree(repo)
+	ht, err := headTree(repo)
 	if err != nil {
 		return nil, err
 	}
 
-	target := filepath.Join(rw.Path, rw.Filename)
-	Debug.Println("looking for file", target)
+	// check all of the files already exist
+	// check none of the files already exist
+	for _, ncf := range nc.Files {
 
-	file, _ := tree.EntryByPath(target)
-	if file != nil {
-		return nil, fmt.Errorf("file already exists %s", target)
+		target := filepath.Join(ncf.Path, ncf.Filename)
+
+		_, err := ht.EntryByPath(target)
+
+		if err != nil {
+			return nil, fmt.Errorf("file not found: %s", target)
+		}
+
 	}
+
+	oid, err = writeFiles(repo, nc, user)
+
+	return oid, err
+}
+
+func writeFiles(repo *git.Repository, nc NewCommit, user User) (oid *git.Oid, err error) {
 
 	index, err := repo.Index()
 	if err != nil {
@@ -154,154 +184,32 @@ func createEmptyFile(rw RepoWrite) (oid *git.Oid, err error) {
 	}
 	defer index.Free()
 
-	// add an empty blob to the repo
-	oid, err = repo.CreateBlobFromBuffer([]byte{})
-	if err != nil {
-		return nil, err
+	var contents string
+
+	for _, ncf := range nc.Files {
+
+		var ie git.IndexEntry
+
+		contents = particle.YAMLEncoding.EncodeToString([]byte(ncf.Body), &ncf.FrontMatter)
+
+		oid, err = repo.CreateBlobFromBuffer([]byte(contents))
+		if err != nil {
+			return nil, err
+		}
+
+		// build the git index entry and add it to the index
+		ie = buildIndexEntry(oid, ncf)
+
+		err = index.Add(&ie)
+		if err != nil {
+			return nil, err
+		}
+
 	}
 
-	// build the git index entry and add it to the index
-	ie := buildIndexEntry(oid, rw)
-
-	Debug.Println("IndexEntry", ie)
-	err = index.Add(&ie)
+	oid, err = writeTreeAndCommit(repo, index, nc, user)
 	if err != nil {
-		return nil, err
-	}
-
-	// write the tree, persisting our addition to the git repo
-	treeID, err := index.WriteTree()
-	if err != nil {
-		return nil, err
-	}
-
-	// and use the tree's id to find the actual updated tree
-	tree, err = repo.LookupTree(treeID)
-	if err != nil {
-		return nil, err
-	}
-
-	// find the repository's tip, where we're committing to
-	tip, err := headCommit(repo)
-	if err != nil {
-		return nil, err
-	}
-
-	// git signatures
-	author := sign(rw)
-	committer := sign(rw)
-
-	// now commit our updated tree to the tip (parent)
-	oid, err = repo.CreateCommit("HEAD", author, committer, rw.Message, tree, tip)
-	if err != nil {
-		return nil, err
-	}
-
-	// checkout to keep file system in sync with git
-	err = repo.CheckoutHead(
-		&git.CheckoutOpts{Strategy: git.CheckoutSafe | git.CheckoutRecreateMissing | git.CheckoutForce},
-	)
-
-	if err != nil {
-		Error.Println("Could not checkout head:", err.Error())
-	}
-
-	return oid, err
-
-}
-
-// TODO how do we know that a commit hasn't been made in
-// between us serving and receiving the update?
-func updateFile(rw RepoWrite) (oid *git.Oid, err error) {
-
-	repo, err := repository(config)
-	if err != nil {
-		return nil, err
-	}
-	defer repo.Free()
-
-	tree, err := headTree(repo)
-	if err != nil {
-		return nil, err
-	}
-
-	target := filepath.Join(rw.Path, rw.Filename)
-
-	file, _ := tree.EntryByPath(target)
-	if file == nil {
-		return nil, fmt.Errorf("file does not exist %s", target)
-	}
-
-	oid, err = writeFile(repo, rw)
-	if err != nil {
-		return nil, fmt.Errorf("file modification failed %s", err.Error())
-	}
-
-	return oid, err
-
-}
-
-func writeFile(repo *git.Repository, rw RepoWrite) (oid *git.Oid, err error) {
-
-	index, err := repo.Index()
-	if err != nil {
-		return nil, err
-	}
-	defer index.Free()
-
-	// add frontmatter to the file contents, followed by the document body
-	contents := particle.YAMLEncoding.EncodeToString([]byte(rw.Body), &rw.FrontMatter)
-
-	// and add the combined contents to a blob in the repo
-	oid, err = repo.CreateBlobFromBuffer([]byte(contents))
-	if err != nil {
-		return nil, err
-	}
-
-	// build the git index entry and add it to the index
-	ie := buildIndexEntry(oid, rw)
-
-	Debug.Println("IndexEntry", ie)
-	err = index.Add(&ie)
-	if err != nil {
-		return nil, err
-	}
-
-	// write the tree, persisting our addition to the git repo
-	treeID, err := index.WriteTree()
-	if err != nil {
-		return nil, err
-	}
-
-	// and use the tree's id to find the actual updated tree
-	tree, err := repo.LookupTree(treeID)
-	if err != nil {
-		return nil, err
-	}
-
-	// find the repository's tip, where we're committing to
-	tip, err := headCommit(repo)
-	if err != nil {
-		return nil, err
-	}
-
-	// git signatures
-	author := sign(rw)
-	committer := sign(rw)
-
-	// now commit our updated tree to the tip (parent)
-	oid, err = repo.CreateCommit("HEAD", author, committer, rw.Message, tree, tip)
-	if err != nil {
-		return nil, err
-	}
-
-	// checkout to keep file system in sync with git
-	err = repo.CheckoutHead(
-		&git.CheckoutOpts{Strategy: git.CheckoutSafe | git.CheckoutRecreateMissing | git.CheckoutForce},
-	)
-
-	if err != nil {
-		Error.Println("Could not checkout head:", err.Error())
+		return oid, err
 	}
 
 	return oid, err
@@ -388,27 +296,30 @@ func listRootDirectorySummary() (summary map[string][]FileItem, err error) {
 	return summary, err
 }
 
-func createDirectory(rw RepoWrite) (oid *git.Oid, err error) {
+func createDirectories(nc NewCommit, user User) (oid *git.Oid, err error) {
 
-	// check that the directory does not already exist
-	// FIXME this could be improved by performing the check
-	// against the git repository rather than just checking
-	// the filesystem
-	_, err = os.Stat(filepath.Join(config.Repository, rw.Path))
-	if err == nil {
-		return nil, fmt.Errorf("directory already exists")
+	repo, err := repository(config)
+	if err != nil {
+		return nil, err
 	}
 
+	if len(nc.Directories) == 0 {
+		return nil, fmt.Errorf("at least one new directory must be specified")
+	}
+
+	var addedDirs []string
+
 	// git can't track empty directories, so, Rails-style, we'll add an
-	// empty file called .keep
-	rw.Filename = ".keep"
-	rw.Body = ""
+	// empty file called .keep for each directory and ensure the body is blank
+	for _, ncd := range nc.Directories {
+		addedDirs = append(addedDirs, ncd.Path)
+	}
 
 	// And set the commit message sensibly so we don't need to prompt
 	// the user
-	rw.Message = fmt.Sprintf("Added %s directory", rw.Path)
+	nc.Message = fmt.Sprintf("Added directories: %s", strings.Join(addedDirs, ","))
 
-	oid, err = createEmptyFile(rw)
+	oid, err = writeDirectories(repo, nc, user)
 	if err != nil {
 		return nil, err
 	}
@@ -416,7 +327,57 @@ func createDirectory(rw RepoWrite) (oid *git.Oid, err error) {
 	return oid, err
 }
 
-func deleteDirectory(rw RepoWrite) (oid *git.Oid, err error) {
+func writeDirectories(repo *git.Repository, nc NewCommit, user User) (oid *git.Oid, err error) {
+	index, err := repo.Index()
+	if err != nil {
+		return nil, err
+	}
+	defer index.Free()
+
+	var contents string
+
+	for _, ncd := range nc.Directories {
+
+		target := filepath.Join(ncd.Path)
+		absoluteTarget := filepath.Join(config.Repository, target)
+
+		_, err = os.Stat(absoluteTarget)
+		if err == nil {
+			return nil, fmt.Errorf("directory already exists %s", target)
+		}
+
+		if ncd.Path == "" {
+			return nil, fmt.Errorf("path must be specified when creating a directory: %s", ncd)
+		}
+
+		var ie git.IndexEntry
+
+		oid, err = repo.CreateBlobFromBuffer([]byte(contents))
+		if err != nil {
+			return nil, err
+		}
+
+		// build the git index entry and add it to the index
+		ie = buildIndexEntryForNewDirectory(oid, ncd)
+
+		err = index.Add(&ie)
+		if err != nil {
+			return nil, err
+		}
+
+	}
+
+	oid, err = writeTreeAndCommit(repo, index, nc, user)
+
+	if err != nil {
+		return oid, err
+	}
+
+	return oid, err
+
+}
+
+func deleteDirectories(nc NewCommit, user User) (oid *git.Oid, err error) {
 
 	repo, err := repository(config)
 	if err != nil {
@@ -424,20 +385,10 @@ func deleteDirectory(rw RepoWrite) (oid *git.Oid, err error) {
 	}
 	defer repo.Free()
 
-	target := rw.Path
-
 	ht, err := headTree(repo)
 	if err != nil {
 		return nil, err
 	}
-
-	// ensure that the directory exists before we try to delete it
-	directory, _ := ht.EntryByPath(target)
-	if directory == nil {
-		return nil, fmt.Errorf("directory does not exist %s", target)
-	}
-
-	// now go head and remove it
 
 	// first grab the repo's index
 	index, err := repo.Index()
@@ -445,142 +396,113 @@ func deleteDirectory(rw RepoWrite) (oid *git.Oid, err error) {
 		return nil, err
 	}
 
-	Debug.Println("Removing directory:", target)
+	for _, ncd := range nc.Directories {
 
-	// and remove the target by path and everything beneath it
-	err = index.RemoveDirectory(target, 0)
-	if err != nil {
-		return nil, err
+		// ensure that the directory exists before we try to delete it
+		d, _ := ht.EntryByPath(ncd.Path)
+		if d == nil {
+			return nil, fmt.Errorf("directory does not exist: %s", ncd.Path)
+		}
+
+		// now go ahead and remove it
+
+		Debug.Println("Removing directory:", ncd.Path)
+
+		// and remove the target by path and everything beneath it
+		err = index.RemoveDirectory(ncd.Path, 0)
+		if err != nil {
+			return nil, err
+		}
+
 	}
 
-	// write the tree, persisting our deletion to the git repo
-	treeID, err := index.WriteTree()
+	oid, err = writeTreeAndCommit(repo, index, nc, user)
 	if err != nil {
-		return nil, err
-	}
-
-	tree, err := repo.LookupTree(treeID)
-	if err != nil {
-		return nil, err
-	}
-
-	// find the repository's tip, where we're committing to
-	tip, err := headCommit(repo)
-	if err != nil {
-		return nil, err
-	}
-
-	// git signatures
-	author := sign(rw)
-	committer := sign(rw)
-
-	// now commit our updated tree to the tip (parent)
-	oid, err = repo.CreateCommit("HEAD", author, committer, rw.Message, tree, tip)
-	if err != nil {
-		return nil, err
-	}
-
-	// checkout to keep file system in sync with git
-	err = repo.CheckoutHead(
-		&git.CheckoutOpts{Strategy: git.CheckoutSafe | git.CheckoutRecreateMissing | git.CheckoutForce},
-	)
-
-	if err != nil {
-		Error.Println("Could not checkout head:", err.Error())
+		return oid, err
 	}
 
 	return oid, err
 
 }
 
-func deleteFile(rw RepoWrite) (oid *git.Oid, err error) {
+func deleteFiles(nc NewCommit, user User) (oid *git.Oid, err error) {
 
 	repo, err := repository(config)
 	if err != nil {
-		return nil, err
+		return oid, err
 	}
 	defer repo.Free()
 
-	target := filepath.Join(rw.Path, rw.Filename)
-
 	ht, err := headTree(repo)
 	if err != nil {
-		return nil, err
+		return oid, err
 	}
-
-	// ensure that the file exists before we try to delete it
-	file, _ := ht.EntryByPath(target)
-	if file == nil {
-		return nil, fmt.Errorf("file does not exist %s", target)
-	}
-
-	// now go head and remove it
 
 	// first grab the repo's index
 	index, err := repo.Index()
 	if err != nil {
-		return nil, err
+		return oid, err
 	}
 
-	// and remove the target by path
-	err = index.RemoveByPath(target)
-	if err != nil {
-		return nil, err
+	for _, ncf := range nc.Files {
+
+		target := filepath.Join(ncf.Path, ncf.Filename)
+
+		// ensure that the file exists before we try to delete it
+		file, err := ht.EntryByPath(target)
+
+		if file == nil {
+			return oid, fmt.Errorf("file does not exist %s", target)
+		}
+
+		if err != nil {
+			return oid, err
+		}
+
+		// and remove the target by path
+		err = index.RemoveByPath(target)
+		if err != nil {
+			return oid, err
+		}
+
 	}
 
-	// write the tree, persisting our deletion to the git repo
-	treeID, err := index.WriteTree()
+	oid, err = writeTreeAndCommit(repo, index, nc, user)
 	if err != nil {
-		return nil, err
-	}
-
-	tree, err := repo.LookupTree(treeID)
-	if err != nil {
-		return nil, err
-	}
-
-	// find the repository's tip, where we're committing to
-	tip, err := headCommit(repo)
-	if err != nil {
-		return nil, err
-	}
-
-	// git signatures
-	author := sign(rw)
-	committer := sign(rw)
-
-	// now commit our updated tree to the tip (parent)
-	oid, err = repo.CreateCommit("HEAD", author, committer, rw.Message, tree, tip)
-	if err != nil {
-		return nil, err
-	}
-
-	// checkout to keep file system in sync with git
-	err = repo.CheckoutHead(
-		&git.CheckoutOpts{Strategy: git.CheckoutSafe | git.CheckoutRecreateMissing | git.CheckoutForce},
-	)
-
-	if err != nil {
-		Error.Println("Could not checkout head:", err.Error())
+		return oid, err
 	}
 
 	return oid, err
 
 }
 
-func sign(rw RepoWrite) *git.Signature {
+func sign(user User) *git.Signature {
 	return &git.Signature{
-		Name:  rw.Name,
-		Email: rw.Email,
+		Name:  user.Name,
+		Email: user.Email,
 		When:  time.Now(),
 	}
 }
 
-func buildIndexEntry(oid *git.Oid, rw RepoWrite) git.IndexEntry {
+func buildIndexEntry(oid *git.Oid, ncf NewCommitFile) git.IndexEntry {
 	return git.IndexEntry{
 		Id:   oid,
-		Path: filepath.Join(rw.Path, rw.Filename),
-		Size: uint32(len(rw.Body)),
+		Path: filepath.Join(ncf.Path, ncf.Filename),
+		Size: uint32(len(ncf.Body)),
+
+		Ctime: git.IndexTime{},
+		Gid:   uint32(os.Getgid()),
+		Uid:   uint32(os.Getuid()),
+		Mode:  git.FilemodeBlob,
+		Mtime: git.IndexTime{},
+	}
+}
+
+func buildIndexEntryForNewDirectory(oid *git.Oid, ncf NewCommitDirectory) git.IndexEntry {
+	return git.IndexEntry{
+		Id:   oid,
+		Path: filepath.Join(ncf.Path, ".keep"),
+		Size: uint32(0),
 
 		Ctime: git.IndexTime{},
 		Gid:   uint32(os.Getgid()),
@@ -710,4 +632,67 @@ func countFiles() (counter map[string]int, err error) {
 	err = ht.Walk(walkIterator)
 
 	return counter, err
+}
+
+func writeTreeAndCommit(repo *git.Repository, index *git.Index, nc NewCommit, user User) (oid *git.Oid, err error) {
+
+	// write the tree, persisting our addition to the git repo
+	treeID, err := index.WriteTree()
+	if err != nil {
+		return oid, err
+	}
+
+	// and use the tree's id to find the actual updated tree
+	tree, err := repo.LookupTree(treeID)
+	if err != nil {
+		return oid, err
+	}
+
+	// find the repository's tip, where we're committing to
+	tip, err := headCommit(repo)
+	if err != nil {
+		return oid, err
+	}
+
+	// git signatures
+	author := sign(user)
+	committer := sign(user)
+
+	// now commit our updated tree to the tip (parent)
+	oid, err = repo.CreateCommit("HEAD", author, committer, nc.Message, tree, tip)
+	if err != nil {
+		return oid, err
+	}
+
+	// checkout to keep file system in sync with git
+	err = repo.CheckoutHead(
+		&git.CheckoutOpts{Strategy: git.CheckoutSafe | git.CheckoutRecreateMissing | git.CheckoutForce},
+	)
+
+	return oid, err
+
+}
+
+func pathInFiles(directory, filename string, files *[]NewCommitFile) bool {
+
+	// check that at least one file in files matches the directory and filename
+	for _, file := range *files {
+		if file.Path == directory && file.Filename == filename {
+			return true
+		}
+	}
+
+	return false
+}
+
+func pathInDirectories(directory string, directories *[]NewCommitDirectory) bool {
+
+	// check that at least one directory files matches the path's directory
+	for _, d := range *directories {
+		if d.Path == directory {
+			return true
+		}
+	}
+
+	return false
 }

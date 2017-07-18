@@ -8,23 +8,35 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestDeleteFile(t *testing.T) {
+func TestDeleteFiles(t *testing.T) {
 
 	repoPath := "../tests/tmp/repositories/delete_file"
 
 	setupSmallTestRepo(repoPath)
 
-	rw := RepoWrite{
+	user := User{
+		Name:  "Milhouse van Houten",
+		Email: "milhouse@springfield.gov",
+	}
+
+	ncf1 := NewCommitFile{
+		Filename: "document_1.md",
+		Path:     "documents",
+	}
+
+	ncf2 := NewCommitFile{
 		Filename: "document_2.md",
 		Path:     "documents",
-		Message:  "Delete document 2",
-		Name:     "Milhouse van Houten",
-		Email:    "millhouse@springfield.gov",
+	}
+
+	nc := NewCommit{
+		Message: "Delete documents 1 and 2",
+		Files:   []NewCommitFile{ncf1, ncf2},
 	}
 
 	repo, _ := repository(config)
 
-	oid, err := deleteFile(rw)
+	oid, err := deleteFiles(nc, user)
 	if err != nil {
 		panic(err)
 	}
@@ -35,14 +47,17 @@ func TestDeleteFile(t *testing.T) {
 	assert.Equal(t, oid, hc.Id())
 
 	// ensure the file isn't present on the filesystem
-	_, err = os.Stat(filepath.Join(repoPath, rw.Path, rw.Filename))
+	_, err = os.Stat(filepath.Join(repoPath, ncf1.Path, ncf1.Filename))
+	assert.True(t, os.IsNotExist(err))
+
+	_, err = os.Stat(filepath.Join(repoPath, ncf2.Path, ncf2.Filename))
 	assert.True(t, os.IsNotExist(err))
 
 	// ensure the most recent commit has the right name and email
 	lastCommit, _ := repo.LookupCommit(oid)
-	assert.Equal(t, lastCommit.Committer().Name, rw.Name)
-	assert.Equal(t, lastCommit.Committer().Email, rw.Email)
-	assert.Equal(t, lastCommit.Message(), rw.Message)
+	assert.Equal(t, lastCommit.Committer().Name, user.Name)
+	assert.Equal(t, lastCommit.Committer().Email, user.Email)
+	assert.Equal(t, lastCommit.Message(), nc.Message)
 
 }
 
@@ -52,15 +67,22 @@ func TestDeleteFileNotExists(t *testing.T) {
 
 	setupSmallTestRepo(repoPath)
 
-	rw := RepoWrite{
-		Filename: "document_8.md",
-		Path:     "documents",
-		Message:  "Delete document 8",
-		Name:     "Nelson Muntz",
-		Email:    "muntz@ha-ha.org",
+	user := User{
+		Name:  "Milhouse van Houten",
+		Email: "milhouse@springfield.gov",
 	}
 
-	_, err := deleteFile(rw)
+	ncf := NewCommitFile{
+		Filename: "document_5.md",
+		Path:     "documents",
+	}
+
+	nc := NewCommit{
+		Message: "Delete document 5",
+		Files:   []NewCommitFile{ncf},
+	}
+
+	_, err := deleteFiles(nc, user)
 
 	assert.Contains(t, err.Error(), "file does not exist")
 
