@@ -571,7 +571,7 @@ func getFile(directory string, filename string, includeMd, includeHTML bool) (fi
 	return file, err
 }
 
-func getAttachments(directory string) (files []string, err error) {
+func getAttachments(directory string) (files []Attachment, err error) {
 
 	repo, err := repository(config)
 	if err != nil {
@@ -604,6 +604,7 @@ func getAttachments(directory string) (files []string, err error) {
 	walkIterator := func(_ string, te *git.TreeEntry) int {
 		var blob *git.Blob
 		var ext string
+		var attachment Attachment
 
 		if te.Type == git.ObjectBlob {
 
@@ -624,9 +625,13 @@ func getAttachments(directory string) (files []string, err error) {
 
 			data := blob.Contents()
 
-			encodedString := base64.StdEncoding.EncodeToString(data)
+			attachment = Attachment{
+				Filename:  te.Name,
+				Extension: ext,
+				Data:      base64.StdEncoding.EncodeToString(data),
+			}
 
-			files = append(files, encodedString)
+			files = append(files, attachment)
 
 		}
 

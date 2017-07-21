@@ -93,6 +93,16 @@ type File struct {
 	Tags                 []string `json:"tags"`
 }
 
+// Attachment belongs to a File, usually an image
+type Attachment struct {
+	Path             string `json:"path"`
+	Filename         string `json:"filename"`
+	AbsoluteFilename string `json:"absolute_filename"`
+	Extension        string `json:"extension"`
+	Filetype         string `json:"filetype"`
+	Data             string `json:"data"`
+}
+
 // UserCredentials is the subset of User required for auth
 type UserCredentials struct {
 	Username string `json:"username"`
