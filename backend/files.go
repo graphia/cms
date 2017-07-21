@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"encoding/base64"
+
 	"github.com/graphia/particle"
 	"gopkg.in/libgit2/git2go.v25"
 )
@@ -547,11 +549,16 @@ func getFile(directory string, filename string, includeMd, includeHTML bool) (fi
 		html = &str
 	}
 
+	// the attachments directory is the name of the file
+	// minus the extension
+	attachmentsDir := strings.TrimSuffix(entry.Name, filepath.Ext(entry.Name))
+
 	file = &File{
-		Filename: filename,
-		Path:     directory,
-		HTML:     html,
-		Markdown: markdown,
+		Filename:             filename,
+		Path:                 directory,
+		HTML:                 html,
+		Markdown:             markdown,
+		AttachmentsDirectory: attachmentsDir,
 
 		// front matter derived attributes
 		Title:    fm.Title,
@@ -562,6 +569,74 @@ func getFile(directory string, filename string, includeMd, includeHTML bool) (fi
 	}
 
 	return file, err
+}
+
+func getAttachments(directory string) (files []string, err error) {
+
+	repo, err := repository(config)
+	if err != nil {
+		return nil, err
+	}
+	defer repo.Free()
+
+	ht, err := headTree(repo)
+	if err != nil {
+		return nil, err
+	}
+
+	// ensure that the directory exists
+	entry, _ := ht.EntryByPath(directory)
+	if entry == nil {
+		return nil, fmt.Errorf("directory '%s' not found", directory)
+	}
+
+	if entry.Type != git.ObjectTree {
+		return nil, fmt.Errorf("%s is not a directory", directory)
+	}
+
+	tree, err := repo.LookupTree(entry.Id)
+	if err != nil {
+		return nil, fmt.Errorf("couldn't find tree for entry %s", entry.Id)
+	}
+
+	defer tree.Free()
+
+	walkIterator := func(_ string, te *git.TreeEntry) int {
+		var blob *git.Blob
+		var ext string
+
+		if te.Type == git.ObjectBlob {
+
+			ext = filepath.Ext(te.Name)
+
+			// skip if a Markdown file
+			if ext == ".md" {
+				Debug.Println("markdown file, skipping:", te.Name)
+				return 0
+			}
+
+			blob, err = repo.LookupBlob(te.Id)
+
+			if err != nil {
+				Warning.Println("Failed to find blob", te.Id)
+				return -1
+			}
+
+			data := blob.Contents()
+
+			encodedString := base64.StdEncoding.EncodeToString(data)
+
+			files = append(files, encodedString)
+
+		}
+
+		return 0
+	}
+
+	err = tree.Walk(walkIterator)
+
+	return files, err
+
 }
 
 func getConvertedFile(directory, filename string) (file *File, err error) {

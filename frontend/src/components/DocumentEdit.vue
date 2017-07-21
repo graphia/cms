@@ -33,6 +33,21 @@
 
 		</form>
 
+		<div class="image-gallery row">
+
+			<div class="col col-md-3">
+				<button @click="getAttachments">
+					Get Attachments
+				</button>
+			</div>
+
+			<div v-for="attachment in document.attachments">
+				<img :src="'data:image/jpg;base64,' + attachment"/>
+			</div>
+
+		</div>
+
+
 	</section>
 </template>
 
@@ -87,6 +102,13 @@
 					name: 'document_show',
 					params:{directory, filename}
 				});
+			},
+
+			getAttachments(event) {
+				event.preventDefault();
+				console.log("Clicked!");
+
+				this.document.fetchAttachments();
 			}
 		},
 		components: {

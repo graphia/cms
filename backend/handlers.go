@@ -734,6 +734,39 @@ func apiGetFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(output)
 }
 
+func apiGetFileAttachmentsHandler(w http.ResponseWriter, r *http.Request) {
+	var fr FailureResponse
+
+	directory := vestigo.Param(r, "directory")
+	filename := vestigo.Param(r, "filename")
+
+	path := fmt.Sprintf("%s/%s", directory, filename)
+
+	files, err := getAttachments(path)
+	if err != nil {
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Failed to get converted file: %s", err.Error()),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+	}
+
+	output, err := json.Marshal(files)
+	if err != nil {
+		Error.Println("Failed to convert file to JSON", files)
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Failed to create JSON from file: %s", err.Error()),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(output)
+}
+
+func apiGetFileAttachmentHandler(w http.ResponseWriter, r *http.Request) {
+
+}
+
 // apiEditFileInDirectoryHandler returns a File object representing the
 // specified file to be used on the editor page of the application. A
 // server-renedered preview isn't shown, so we don't generate HTML but
