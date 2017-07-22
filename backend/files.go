@@ -626,9 +626,12 @@ func getAttachments(directory string) (files []Attachment, err error) {
 			data := blob.Contents()
 
 			attachment = Attachment{
-				Filename:  te.Name,
-				Extension: ext,
-				Data:      base64.StdEncoding.EncodeToString(data),
+				Filename:         te.Name,
+				AbsoluteFilename: filepath.Join(directory, te.Name),
+				Extension:        ext,
+				Data:             base64.StdEncoding.EncodeToString(data),
+				Path:             directory,
+				MediaType:        getMediaType(ext),
 			}
 
 			files = append(files, attachment)
@@ -775,4 +778,29 @@ func pathInDirectories(directory string, directories *[]NewCommitDirectory) bool
 	}
 
 	return false
+}
+
+// getMediaType returns the correct media when passed a file extension
+//
+//https://en.wikipedia.org/wiki/Data_URI_scheme#Syntax
+func getMediaType(extension string) string {
+
+	var extensionNoDot string
+
+	if len(config.MediaTypes) == 0 {
+		Error.Println("No media types configured")
+		return "none"
+	}
+
+	extensionNoDot = strings.Replace(extension, ".", "", 1)
+
+	mt := config.MediaTypes[extensionNoDot]
+
+	if mt == "" {
+		fallback := fmt.Sprintf("unknown/%s", extensionNoDot)
+		Warning.Printf("No media type found for '%s', returning '%s'", extension, fallback)
+		return fallback
+	}
+
+	return mt
 }

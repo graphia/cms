@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -223,4 +224,59 @@ func TestCountFiles(t *testing.T) {
 	}
 
 	assert.Equal(t, expectedCounts, cf)
+}
+
+func TestGetMediaType(t *testing.T) {
+	type args struct {
+		extension string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{name: "Joint Photographic Experts Group", args: args{extension: ".jpg"}, want: "image/jpeg"},
+		{name: "Portable Network Graphics", args: args{extension: ".png"}, want: "image/png"},
+		{name: "Graphics Interchange Format", args: args{extension: ".gif"}, want: "image/gif"},
+		{name: "Tagged Image File Format", args: args{extension: ".tiff"}, want: "image/tiff"},
+
+		{name: "Extensible Markup Language", args: args{extension: ".xml"}, want: "text/xml"},
+		{name: "Comma Seperated Values", args: args{extension: ".csv"}, want: "text/csv"},
+		{name: "JavaScript Object Notation", args: args{extension: ".json"}, want: "text/json"},
+
+		// BMP isn't included in test config, should return 'unknown/[ext]'
+		{name: "Bitmap", args: args{extension: ".bmp"}, want: "unknown/bmp"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := getMediaType(tt.args.extension); got != tt.want {
+				t.Errorf("getMediaType() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestGetAttachments(t *testing.T) {
+	repoPath := "../tests/tmp/repositories/count_files"
+	setupMultipleFiletypesTestRepo(repoPath)
+
+	attachments, _ := getAttachments("appendices/appendix_1")
+
+	assert.Equal(t, 4, len(attachments))
+
+	//assert.Contains(t assert.TestingT, s interface{}, contains interface{}, msgAndArgs ...interface{})
+
+	// JSON doc
+	jsonDocContents, _ := ioutil.ReadFile(filepath.Join(repoPath, "appendices", "appendix_1", "data.json"))
+
+	jsonDoc := Attachment{
+		Path:             "appendices/appendix_1",
+		AbsoluteFilename: "appendices/appendix_1/data.json",
+		Extension:        ".json",
+		MediaType:        "text/json",
+		Data:             base64.StdEncoding.EncodeToString(jsonDocContents), // FIXME don't b64encode plain data?
+		Filename:         "data.json",
+	}
+
+	assert.Contains(t, attachments, jsonDoc)
 }

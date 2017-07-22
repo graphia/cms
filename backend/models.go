@@ -99,7 +99,7 @@ type Attachment struct {
 	Filename         string `json:"filename"`
 	AbsoluteFilename string `json:"absolute_filename"`
 	Extension        string `json:"extension"`
-	Filetype         string `json:"filetype"`
+	MediaType        string `json:"filetype"`
 	Data             string `json:"data"`
 }
 

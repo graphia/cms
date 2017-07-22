@@ -22,6 +22,7 @@ type Config struct {
 	PrivateKeyPath string              `yaml:"private_key_path"`
 	PublicKeyPath  string              `yaml:"public_key_path"`
 	FileCategories map[string][]string `yaml:"file_categories"`
+	MediaTypes     map[string]string   `yaml:"media_types"`
 }
 
 func loadConfig(path *string) (Config, error) {

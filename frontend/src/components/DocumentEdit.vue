@@ -42,7 +42,7 @@
 			</div>
 
 			<div v-for="attachment in document.attachments">
-				<img :src="'data:image/jpg;base64,' + attachment.data"/>
+				<img :src="'data:image/jpeg;base64,' + attachment.data"/>
 			</div>
 
 		</div>

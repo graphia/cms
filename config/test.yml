@@ -17,3 +17,16 @@ file_categories:
     - .json
   tabular data:
     - .csv
+media_types:
+
+    # image types
+    gif: image/gif
+    jpeg: image/jpeg
+    jpg: image/jpeg
+    png: image/png
+    tiff: image/tiff
+
+    # structured data types
+    xml: text/xml
+    csv: text/csv
+    json: text/json

@@ -22,3 +22,20 @@ file_categories:
     - .json
   tabular data:
     - .csv
+media_types:
+
+    # image types
+    bmp: image/bmp
+    gif: image/gif
+    jpe: image/jpeg
+    jpeg: image/jpeg
+    jpg: image/jpeg
+    png: image/png
+    pnz: image/png
+    tif: image/tiff
+    tiff: image/tiff
+    webp: image/webp
+
+    # structured data types
+    xml: text/xml
+    csv: text/csv
