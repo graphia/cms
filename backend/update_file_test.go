@@ -88,10 +88,9 @@ func TestUpdateFiles(t *testing.T) {
 	}
 
 	ncf1 := NewCommitFile{
-		Filename:  "document_1.md",
-		Path:      "documents",
-		Extension: "md",
-		Body:      "Cows don't look like cows on film. You gotta use horses.",
+		Filename: "document_1.md",
+		Path:     "documents",
+		Body:     "Cows don't look like cows on film. You gotta use horses.",
 		FrontMatter: FrontMatter{
 			Author: "Lindsay Naegle",
 			Title:  "I'm an alcoholic",
@@ -99,10 +98,9 @@ func TestUpdateFiles(t *testing.T) {
 	}
 
 	ncf2 := NewCommitFile{
-		Filename:  "document_2.md",
-		Path:      "documents",
-		Extension: "md",
-		Body:      "You don't win friends with salad.",
+		Filename: "document_2.md",
+		Path:     "documents",
+		Body:     "You don't win friends with salad.",
 		FrontMatter: FrontMatter{
 			Author: "Lindsay Naegle",
 			Title:  "Children are the future, today belongs to me!",

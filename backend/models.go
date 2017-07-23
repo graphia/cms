@@ -21,11 +21,11 @@ type NewCommitDirectory struct {
 
 // NewCommitFile will replace RepoWrite's file attributes
 type NewCommitFile struct {
-	Filename    string      `json:"filename"`
-	Extension   string      `json:"extension"`
-	Path        string      `json:"path"`
-	Body        string      `json:"body"`
-	FrontMatter FrontMatter `json:"frontmatter"`
+	Filename      string      `json:"filename"`
+	Path          string      `json:"path"`
+	Body          string      `json:"body"`
+	FrontMatter   FrontMatter `json:"frontmatter"`
+	Base64Encoded bool        `json:"base_64_encoded"`
 }
 
 // Response is a general response containing arbitrary data

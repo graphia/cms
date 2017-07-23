@@ -312,3 +312,118 @@ func TestGetAttachments(t *testing.T) {
 	}
 
 }
+
+func TestExtractContents(t *testing.T) {
+	repoPath := "../tests/tmp/repositories/extract_contents"
+	setupMultipleFiletypesTestRepo(repoPath)
+
+	var gifImage, jpegImage, pngImage []byte
+
+	gifImage, _ = ioutil.ReadFile(filepath.Join(repoPath, "documents", "document_1", "image_1.gif"))
+	pngImage, _ = ioutil.ReadFile(filepath.Join(repoPath, "appendices", "appendix_1", "image_1.png"))
+	jpegImage, _ = ioutil.ReadFile(filepath.Join(repoPath, "appendices", "appendix_1", "image_2.jpg"))
+
+	type args struct {
+		ncf NewCommitFile
+	}
+	tests := []struct {
+		name         string
+		args         args
+		wantContents []byte
+		wantErr      bool
+	}{
+
+		{
+			name: "Markdown",
+			args: args{
+				ncf: NewCommitFile{
+					FrontMatter: FrontMatter{
+						Title:    "Pangram",
+						Author:   "Bernice Hibbert",
+						Synopsis: "Use all of the characters",
+						Version:  "1.0",
+						Tags:     nil,
+					},
+					Body:     "the quick *brown* fox jumped over the **lazy** dog",
+					Filename: "pangram.md",
+				},
+			},
+			wantContents: []byte(`---
+title: Pangram
+author: Bernice Hibbert
+synopsis: Use all of the characters
+version: "1.0"
+tags: []
+---
+
+the quick *brown* fox jumped over the **lazy** dog`,
+			),
+			wantErr: false,
+		},
+
+		{
+			name: "JavaScript Object Notation",
+			args: args{
+				ncf: NewCommitFile{
+					Body:     `{"hello": "world"}`,
+					Filename: "hello-world.json",
+				},
+			},
+			wantContents: []byte("{\"hello\": \"world\"}"),
+			wantErr:      false,
+		},
+		{
+			name: "Extensible Markup Language",
+			args: args{
+				ncf: NewCommitFile{
+					Body:     `<?xml version="1.0" encoding="UTF-8"?><hello>world</hello>`,
+					Filename: "hello-world.xml",
+				},
+			},
+			wantContents: []byte("<?xml version=\"1.0\" encoding=\"UTF-8\"?><hello>world</hello>"),
+			wantErr:      false,
+		},
+		{
+			name: "Graphics Interchange Format",
+			args: args{
+				ncf: NewCommitFile{
+					Body:          base64.StdEncoding.EncodeToString(gifImage),
+					Filename:      "hello-world.gif",
+					Base64Encoded: true,
+				},
+			},
+			wantContents: gifImage,
+			wantErr:      false,
+		},
+		{
+			name: "Join Photographic Experts Group",
+			args: args{
+				ncf: NewCommitFile{
+					Body:          base64.StdEncoding.EncodeToString(jpegImage),
+					Filename:      "hello-world.jpeg",
+					Base64Encoded: true,
+				},
+			},
+			wantContents: jpegImage,
+			wantErr:      false,
+		},
+		{
+			name: "Portable Network Graphics",
+			args: args{
+				ncf: NewCommitFile{
+					Body:          base64.StdEncoding.EncodeToString(pngImage),
+					Filename:      "hello-world.png",
+					Base64Encoded: true,
+				},
+			},
+			wantContents: pngImage,
+			wantErr:      false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			contents, _ := extractContents(tt.args.ncf)
+			assert.Equal(t, tt.wantContents, contents)
+		})
+	}
+}

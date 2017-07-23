@@ -153,10 +153,9 @@ func TestApiCreateFileInDirectory(t *testing.T) {
 	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files")
 
 	ncf := NewCommitFile{
-		Path:      "documents",
-		Filename:  "document_6.md",
-		Extension: "md",
-		Body:      "# The quick brown fox",
+		Path:     "documents",
+		Filename: "document_6.md",
+		Body:     "# The quick brown fox",
 		FrontMatter: FrontMatter{
 			Title:  "Document Six",
 			Author: "Kent Brockman & Troy McClure",
@@ -218,10 +217,9 @@ func TestApiUpdateFileInDirectory(t *testing.T) {
 	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files/document_3.md")
 
 	ncf := NewCommitFile{
-		Path:      "documents",
-		Filename:  "document_3.md",
-		Extension: "md",
-		Body:      "# The quick brown fox",
+		Path:     "documents",
+		Filename: "document_3.md",
+		Body:     "# The quick brown fox",
 		FrontMatter: FrontMatter{
 			Title:  "Document Three",
 			Author: "Timothy Lovejoy",
@@ -284,10 +282,9 @@ func TestApiUpdateOtherFileInDirectory(t *testing.T) {
 	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files/document_3.md")
 
 	ncf := NewCommitFile{
-		Path:      "documents",
-		Filename:  "document_2.md", // note, target contains document_2.md
-		Extension: "md",
-		Body:      "# The quick brown fox",
+		Path:     "documents",
+		Filename: "document_2.md", // note, target contains document_2.md
+		Body:     "# The quick brown fox",
 		FrontMatter: FrontMatter{
 			Title:  "Document Three",
 			Author: "Timothy Lovejoy",

@@ -186,15 +186,19 @@ func writeFiles(repo *git.Repository, nc NewCommit, user User) (oid *git.Oid, er
 	}
 	defer index.Free()
 
-	var contents string
+	var contents []byte
 
 	for _, ncf := range nc.Files {
 
 		var ie git.IndexEntry
 
-		contents = particle.YAMLEncoding.EncodeToString([]byte(ncf.Body), &ncf.FrontMatter)
+		// get the file contents in the correct format
+		contents, err = extractContents(ncf)
+		if err != nil {
+			return nil, err
+		}
 
-		oid, err = repo.CreateBlobFromBuffer([]byte(contents))
+		oid, err = repo.CreateBlobFromBuffer(contents)
 		if err != nil {
 			return nil, err
 		}
@@ -803,4 +807,35 @@ func getMediaType(extension string) string {
 	}
 
 	return mt
+}
+
+// extractContents retrieves the contents of the NewCommitFile and prepares
+// them to be written to the repository.
+//
+// * Markdown files are combined with the FrontMatter
+// * Base64 encoded files are decoded to a byte sequence
+// * Plain text files are left untouched, simply converted to a byte slice
+func extractContents(ncf NewCommitFile) (contents []byte, err error) {
+
+	if ncf.Base64Encoded {
+
+		contents, err := base64.StdEncoding.DecodeString(ncf.Body)
+		if err != nil {
+			Error.Println("Failed to decode file:", ncf)
+			return contents, fmt.Errorf("Failed to decode file: %s", ncf.Filename)
+		}
+		return contents, err
+
+	} else if filepath.Ext(ncf.Filename) == ".md" {
+
+		return []byte(
+			particle.YAMLEncoding.EncodeToString(
+				[]byte(ncf.Body), &ncf.FrontMatter,
+			),
+		), err
+
+	} else {
+		return []byte(ncf.Body), err
+	}
+
 }
