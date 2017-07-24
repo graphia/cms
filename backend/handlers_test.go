@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -197,6 +198,70 @@ func TestApiCreateFileInDirectory(t *testing.T) {
 	assert.Contains(t, string(contents), ncf.Body)
 	assert.Contains(t, string(contents), ncf.FrontMatter.Author)
 	assert.Contains(t, string(contents), ncf.FrontMatter.Title)
+
+	// ensure the most recent commit has the right name and email
+	oid, _ := git.NewOid(receiver.Oid)
+	lastCommit, _ := repo.LookupCommit(oid)
+
+	user := apiTestUser()
+	assert.Equal(t, lastCommit.Committer().Name, user.Name)
+	assert.Equal(t, lastCommit.Committer().Email, user.Email)
+
+}
+
+func TestApiCreateImageFileInDirectory(t *testing.T) {
+	server = createTestServerWithContext()
+
+	repoPath := "../tests/tmp/repositories/create_image_file"
+	setupMultipleFiletypesTestRepo(repoPath)
+
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files")
+
+	pngImage, _ := ioutil.ReadFile(filepath.Join(repoPath, "appendices", "appendix_1", "image_1.png"))
+
+	ncf := NewCommitFile{
+		Path:          "documents/document_1",
+		Filename:      "image_4.png",
+		Base64Encoded: true,
+		Body:          base64.StdEncoding.EncodeToString(pngImage),
+	}
+
+	nc := &NewCommit{
+		Message: "Forty whacks with a wet noodle",
+		Files:   []NewCommitFile{ncf},
+	}
+
+	payload, err := json.Marshal(nc)
+	if err != nil {
+		panic(err)
+	}
+
+	b := bytes.NewBuffer(payload)
+
+	client := &http.Client{}
+
+	req, _ := http.NewRequest("POST", target, b)
+
+	resp, err := client.Do(req)
+
+	assert.Equal(t, http.StatusCreated, resp.StatusCode)
+
+	var receiver SuccessResponse
+
+	json.NewDecoder(resp.Body).Decode(&receiver)
+
+	repo, _ := repository(config)
+	hc, _ := headCommit(repo)
+
+	// ensure returned commit hash is hte same as the repo's head
+	assert.Equal(t, receiver.Oid, hc.Id().String())
+
+	// ensure the file exists and has the right content
+	_, err = os.Stat(filepath.Join(repoPath, ncf.Path, ncf.Filename))
+	assert.False(t, os.IsNotExist(err))
+
+	file, _ := ioutil.ReadFile(filepath.Join(repoPath, ncf.Path, ncf.Filename))
+	assert.Equal(t, pngImage, file)
 
 	// ensure the most recent commit has the right name and email
 	oid, _ := git.NewOid(receiver.Oid)
