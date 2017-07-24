@@ -348,6 +348,7 @@ func TestExtractContents(t *testing.T) {
 					Filename: "pangram.md",
 				},
 			},
+			// Multiline string so any leading whitespace remains 😒
 			wantContents: []byte(`---
 title: Pangram
 author: Bernice Hibbert

@@ -475,9 +475,9 @@ func TestApiDeleteFileFromDirectory(t *testing.T) {
 	assert.Equal(t, lastCommit.Committer().Name, user.Name)
 	assert.Equal(t, lastCommit.Committer().Email, user.Email)
 
-	// TODO ensure files aren't present on the filesystem
-	// ensure the file exists and has the right content
+	// ensure the files no longer exist
 	_, err = os.Stat(filepath.Join(repoPath, ncf1.Path, ncf1.Filename))
+	assert.True(t, os.IsNotExist(err))
 	_, err = os.Stat(filepath.Join(repoPath, ncf2.Path, ncf2.Filename))
 	assert.True(t, os.IsNotExist(err))
 
@@ -615,7 +615,7 @@ func TestApiDeleteDirectory(t *testing.T) {
 	assert.Equal(t, lastCommit.Committer().Name, user.Name)
 	assert.Equal(t, lastCommit.Committer().Email, user.Email)
 
-	// ensure the file exists and has the right content
+	// ensure the files no longer exist
 	_, err = os.Stat(filepath.Join(repoPath, ncd.Path, "appendix_1.md"))
 	assert.True(t, os.IsNotExist(err))
 	_, err = os.Stat(filepath.Join(repoPath, ncd.Path, "appendix_2.md"))
