@@ -1,6 +1,7 @@
 import store from '../store.js';
 import config from '../config.js';
 import checkResponse from '../response.js';
+import CMSFileAttachment from './attachment.js';
 
 export default class CMSFile {
 
@@ -220,21 +221,22 @@ export default class CMSFile {
 				headers: store.state.auth.authHeader()
 			});
 
-
 			if (!checkResponse(response.status)) {
 				return
 			};
 
 			let attachments = await response.json()
-
 			this.attachments = attachments;
-
-			return response;
+			return attachments;
 
 		}
 		catch(err) {
 			console.error(`There was a problem retriving attachments`);
 		}
+	};
+
+	addAttachment(file) {
+		store.commit("addAttachment", file);
 	};
 
 	// has the markdown changed since loading?

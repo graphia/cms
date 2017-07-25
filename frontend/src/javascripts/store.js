@@ -17,7 +17,11 @@ const state = {
 	auth: new CMSAuth,
 	broadcast: new CMSBroadcast
 };
-const mutations = {};
+const mutations = {
+	addAttachment(context, file) {
+		return state.activeDocument.attachments.push(file);
+	}
+};
 const getters = {};
 const actions = {
 	initializeCommit(context, directory) {
