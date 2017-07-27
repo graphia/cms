@@ -50,34 +50,72 @@
 			initializeSimpleMDE() {
 				console.log("initializing SimpleMDE");
 
+				let self = this;
+
+				// Because our images might not be on the server yet, we need to
+				// switch the `src` prior to displaying the preview. This function
+				// makes those switches.
+				let previewRender = function(text) {
+
+					let attachments = self.document.attachments;
+
+					let html = $.parseHTML(this.parent.markdown(text));
+
+					$(html)
+						.find('img')
+						.each(function(_, element) {
+
+							if ($(element)
+								.attr('src')
+								.startsWith(self.document.attachments_directory)) {
+
+								let attachment = attachments
+									.find(
+										function(a) {
+											return a.relativePath() === $(element).attr('src')
+										}
+									);
+
+								$(element).attr('src', attachment.dataURI());
+
+							};
+						});
+
+					return html
+						.map((e) => {return e.outerHTML})
+						.filter((n) => {return n})
+						.join("");
+
+				}
+
 				let simpleMDE = new SimpleMDE({
 					element: document.getElementById("editor"),
 					forceSync: true,
 					autoFocus: true,
 					dragDrop: true,
-					allowDropFileTypes: true // ["image/jpeg", "image/jpg", "image/png", "image/gif"]
+					allowDropFileTypes: ["image/jpeg", "image/jpg", "image/png", "image/gif"],
+					previewRender
 				});
 
 				simpleMDE.codemirror.on('change', () => {
 					this.$store.state.activeDocument.markdown = this.simpleMDE.value();
 				});
 
-
 				simpleMDE.codemirror.on('drop', (editor, dropEvent) => {
-					console.log("dropped!");
 
+					dropEvent.stopPropagation();
+					dropEvent.preventDefault();
+
+					// grab some information from the editor so we know where to insert
+					// the image's placeholder later
 					let cursor = editor.getCursor();
 					let doc = editor.getDoc();
 					let line = doc.getLine(cursor.line);
-					let pos = { // create a new object to avoid mutation of the original selection
+					let pos = {
 						line: cursor.line,
-						ch: line.length // set the character position to the end of the line
+						ch: line.length
 					};
 
-
-					console.log(cursor);
-					dropEvent.stopPropagation();
-					dropEvent.preventDefault();
 
 					for (var item in dropEvent.dataTransfer.items) {
 						console.log("item:", item);
@@ -100,9 +138,9 @@
 
 							this.document.addAttachment(attachment);
 
-							let image_placeholder = attachment.markdownImage();
+							let imagePlaceholder = attachment.markdownImage();
 
-							doc.replaceRange(`\n${image_placeholder}\n`, pos);
+							doc.replaceRange(`\n${imagePlaceholder}\n`, pos);
 
 						};
 
