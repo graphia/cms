@@ -1,10 +1,14 @@
+import store from '../store.js';
+
 export default class CMSFileAttachment {
 
 	// Create a CMSFileAttachment object
 	//
 	// @param {file} file A File interface https://developer.mozilla.org/en/docs/Web/API/File
 	// @param {data} data The Base64 encoded contents of the file
-	constructor(file, data) {
+	constructor(file, data, options) {
+
+		this.options = options;
 
 		this.lastModified = file.lastModified;
 		this.lastModifiedDate = file.lastModifiedDate;
@@ -20,6 +24,26 @@ export default class CMSFileAttachment {
 
 	dataURI() {
 		return this.data;
+	}
+
+	// Get rid of the base64, prefix if this attachment
+	// file is encoded, otherwise return the data as is
+	contents() {
+
+		if (this.options.base64Encoded) {
+			return this.data.split("base64,").pop();
+		}
+
+		return this.data;
+	}
+
+	relativePath() {
+		let path = store.state.activeDocument.attachments_directory;
+		return [path, this.name].join('/');
+	}
+
+	markdownImage() {
+		return `![${this.name}](${window.encodeURI(this.relativePath())})`
 	}
 
 };

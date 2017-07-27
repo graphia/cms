@@ -12,9 +12,13 @@
 		<div class="row attachments">
 			<ul>
 				<li v-for="(attachment, index) in document.attachments">
-					<h2>{{ attachment.name }}</h2>
 
-					<img :src="attachment.dataURI()"/>
+					<img
+						class="col-md-3 img-thumbnail"
+						:src="attachment.dataURI()"
+						:data-size="attachment.size"
+						:data-type="attachment.type"
+					/>
 
 				</li>
 
@@ -59,40 +63,48 @@
 				});
 
 
-				simpleMDE.codemirror.setOption('onDragEvent', function(editor, event) {
-					if (event.type === "drop") {
-						event.stopPropagation();
-						event.preventDefault();
-					};
-				});
-
-
-				simpleMDE.codemirror.on('drop', (editor, event) => {
+				simpleMDE.codemirror.on('drop', (editor, dropEvent) => {
 					console.log("dropped!");
 
-					event.stopPropagation();
-					event.preventDefault();
+					let cursor = editor.getCursor();
+					let doc = editor.getDoc();
+					let line = doc.getLine(cursor.line);
+					let pos = { // create a new object to avoid mutation of the original selection
+						line: cursor.line,
+						ch: line.length // set the character position to the end of the line
+					};
 
-					for (var item in event.dataTransfer.items) {
+
+					console.log(cursor);
+					dropEvent.stopPropagation();
+					dropEvent.preventDefault();
+
+					for (var item in dropEvent.dataTransfer.items) {
 						console.log("item:", item);
-					}
+					};
 
 					// surely there's a nicer way of looping with an index in es6? 🤷
-					for (var i = 0; i < event.dataTransfer.files.length; i++) {
+					for (var i = 0; i < dropEvent.dataTransfer.files.length; i++) {
 
-						let file = event.dataTransfer.files[i];
+						let file = dropEvent.dataTransfer.files[i];
 						let reader = new FileReader();
 
-						reader.onloadend = (event) => {
+						reader.onloadend = (onloadendEvent) => {
 
 							// add a CMSFileAtachment to the attachments list
-							return this.document.addAttachment(
-								new CMSFileAttachment(
-									file,
-									event.target.result
-								)
+							let attachment = new CMSFileAttachment(
+								file,
+								onloadendEvent.target.result,
+								{base64Encoded: true}
 							);
-						}
+
+							this.document.addAttachment(attachment);
+
+							let image_placeholder = attachment.markdownImage();
+
+							doc.replaceRange(`\n${image_placeholder}\n`, pos);
+
+						};
 
 						reader.readAsDataURL(file);
 
@@ -111,3 +123,11 @@
 		}
 	}
 </script>
+
+<style lang="scss">
+.attachments > ul > li {
+	img {
+		max-width: 260px;
+	}
+}
+</style>
