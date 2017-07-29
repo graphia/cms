@@ -37,7 +37,7 @@ export default class CMSCommit {
 	_attachments(document) {
 		return document.attachments.map((attachment) => {
 			return {
-				path: document.attachments_directory,
+				path: [document.attachments_directory, "images"].join("/"),
 				filename: attachment.name,
 				base_64_encoded: attachment.options.base64Encoded,
 				body: attachment.contents()

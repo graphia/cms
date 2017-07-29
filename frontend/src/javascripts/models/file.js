@@ -163,7 +163,7 @@ export default class CMSFile {
 			return response;
 		}
 		catch(err) {
-			console.error(`There was a problem updating document ${filename} in ${directory}, ${err}`);
+			console.error(`There was a problem updating document ${this.filename} in ${this.directory}, ${err}`);
 		}
 	};
 

@@ -38,8 +38,7 @@ export default class CMSFileAttachment {
 	}
 
 	relativePath() {
-		let path = store.state.activeDocument.attachments_directory;
-		return [path, this.name].join('/');
+		return ["images", this.name].join('/');
 	}
 
 	markdownImage() {
