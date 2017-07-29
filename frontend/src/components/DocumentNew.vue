@@ -138,7 +138,8 @@
 			 * update the document's filename attribute by adding the markdown extension
 			 */
 			filename() {
-				this.document.filename = `${this.filename}.md`
+				this.document.filename = `${this.filename}.md`;
+				this.document.attachments_directory = [this.document.path, this.filename].join("/");
 			}
 		},
 		methods: {

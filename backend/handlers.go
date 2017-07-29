@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/dgrijalva/jwt-go/request"
@@ -267,7 +268,57 @@ func cmsGeneralHandler(w http.ResponseWriter, r *http.Request) {
 	path := filepath.Join(config.Static, r.URL.Path)
 	index := filepath.Join(config.Static, "cms", "index.html")
 
-	if _, err := os.Stat(path); err == nil {
+	ext := filepath.Ext(r.RequestURI)
+
+	// FIXME should be serving the image file :(
+	if ext == ".jpg" {
+		Debug.Println("yes, it's a JPEG")
+		Debug.Println(r.RequestURI)
+
+		//trimmedURI := strings.TrimPrefix(r.RequestURI, "/cms/documents/dog-document-3.md")
+		//Debug.Println("trimmedURI", trimmedURI)
+
+		//path := filepath.Join(config.Repository, "documents", trimmedURI)
+		//Debug.Println("path", path)
+
+		// rebuild the URI without the markdown doc
+
+		Debug.Println("uri", r.RequestURI)
+		uriParts := strings.Split(r.RequestURI, "/")
+		var uriNew []string
+		uriNew = append(uriNew, config.Repository)
+
+		Debug.Println("parts:", uriParts)
+
+		for i, part := range uriParts {
+
+			Debug.Println("i:", i)
+			Debug.Println("part:", part)
+
+			if strings.HasSuffix(part, ".md") || part == "" || part == "cms" {
+				continue
+			}
+
+			uriNew = append(uriNew, part)
+
+			Debug.Println("path building in progress:", uriNew)
+
+		}
+
+		path := filepath.Join(uriNew...)
+
+		Debug.Println("path built", path)
+
+		if _, err := os.Stat(path); err == nil {
+			Debug.Println("Serving file", path)
+			http.ServeFile(w, r, path)
+		} else {
+			Warning.Println("No findey")
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+	} else if _, err := os.Stat(path); err == nil {
 		http.ServeFile(w, r, path)
 	} else {
 		http.ServeFile(w, r, index)
@@ -765,6 +816,9 @@ func apiGetFileAttachmentsHandler(w http.ResponseWriter, r *http.Request) {
 
 func apiGetFileAttachmentHandler(w http.ResponseWriter, r *http.Request) {
 
+	Debug.Println("***** HANDLING ATTACHMENT!")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("ok"))
 }
 
 // apiEditFileInDirectoryHandler returns a File object representing the

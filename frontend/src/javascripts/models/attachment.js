@@ -46,4 +46,5 @@ export default class CMSFileAttachment {
 		return `![${this.name}](${window.encodeURI(this.relativePath())})`
 	}
 
+
 };

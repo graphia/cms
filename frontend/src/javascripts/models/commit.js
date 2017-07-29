@@ -14,26 +14,35 @@ export default class CMSCommit {
 	toJSON(document) {
 		return JSON.stringify({
 			message: this.message,
-
-			files: [
-
-				{
-					path: document.path,
-					filename: document.filename,
-					body: document.markdown,
-
-					// and the frontmatter
-					frontmatter: {
-						title: document.title,
-						author: document.author,
-						tags: document.tags,
-						synopsis: document.synopsis
-					}
-				}
-
-			]
-
+			files: [this._document(document)].concat(this._attachments(document))
 		});
 	};
+
+	_document(document) {
+		return {
+			path: document.path,
+			filename: document.filename,
+			body: document.markdown,
+
+			// and the frontmatter
+			frontmatter: {
+				title: document.title,
+				author: document.author,
+				tags: document.tags,
+				synopsis: document.synopsis
+			}
+		}
+	}
+
+	_attachments(document) {
+		return document.attachments.map((attachment) => {
+			return {
+				path: document.attachments_directory,
+				filename: attachment.name,
+				base_64_encoded: attachment.options.base64Encoded,
+				body: attachment.contents()
+			}
+		});
+	}
 
 };

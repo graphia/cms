@@ -83,7 +83,6 @@
 
 					return html
 						.map((e) => {return e.outerHTML})
-						.filter((n) => {return n})
 						.join("");
 
 				}
