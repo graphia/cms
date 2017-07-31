@@ -75,7 +75,7 @@
 
 				let attachmentsDir = this.document.attachments_directory;
 
-				let html = $.parseHTML(this.document.html).clone();
+				let html = $.parseHTML(this.document.html);
 
 				$(html)
 					.find('img')
