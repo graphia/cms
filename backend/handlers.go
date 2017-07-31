@@ -246,7 +246,7 @@ func authCreateInitialUser(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	w.WriteHeader(201)
+	w.WriteHeader(http.StatusCreated)
 	w.Write(output)
 
 }
@@ -265,13 +265,15 @@ func cmsGeneralHandler(w http.ResponseWriter, r *http.Request) {
 
 	uri = r.RequestURI
 
-	// if we're dealing with an image we *don't* necessarily know from
-	// where we'll be serving it; it could be from the preview or the
-	// editor but as far as the actual document is concerned the path
-	// is relative
 	if isImageURI(uri) {
+		// if we're dealing with an image we *don't* necessarily know from
+		// where we'll be serving it; it could be from the preview or the
+		// editor but as far as the actual document is concerned the path
+		// is relative
 		path = extractImagePath(uri)
 	} else {
+		// for everything else, the path is the file's path from the static
+		// directory
 		path = filepath.Join(config.Static, r.URL.Path)
 	}
 
@@ -565,7 +567,7 @@ func apiCreateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	w.WriteHeader(201)
+	w.WriteHeader(http.StatusCreated)
 	w.Write(output)
 
 	Debug.Println("File(s) created", oid)
@@ -914,7 +916,7 @@ func apiCreateUser(w http.ResponseWriter, r *http.Request) {
 		JSONResponse(fr, http.StatusBadRequest, w)
 	}
 
-	w.WriteHeader(201)
+	w.WriteHeader(http.StatusCreated)
 	w.Write(output)
 
 }
