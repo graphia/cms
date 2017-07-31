@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"encoding/base64"
+
 	"github.com/graphia/particle"
 	"gopkg.in/libgit2/git2go.v25"
 )
@@ -184,15 +186,19 @@ func writeFiles(repo *git.Repository, nc NewCommit, user User) (oid *git.Oid, er
 	}
 	defer index.Free()
 
-	var contents string
+	var contents []byte
 
 	for _, ncf := range nc.Files {
 
 		var ie git.IndexEntry
 
-		contents = particle.YAMLEncoding.EncodeToString([]byte(ncf.Body), &ncf.FrontMatter)
+		// get the file contents in the correct format
+		contents, err = extractContents(ncf)
+		if err != nil {
+			return nil, err
+		}
 
-		oid, err = repo.CreateBlobFromBuffer([]byte(contents))
+		oid, err = repo.CreateBlobFromBuffer(contents)
 		if err != nil {
 			return nil, err
 		}
@@ -547,11 +553,16 @@ func getFile(directory string, filename string, includeMd, includeHTML bool) (fi
 		html = &str
 	}
 
+	// the attachments directory is the name of the file
+	// minus the extension
+	attachmentsDir := strings.TrimSuffix(entry.Name, filepath.Ext(entry.Name))
+
 	file = &File{
-		Filename: filename,
-		Path:     directory,
-		HTML:     html,
-		Markdown: markdown,
+		Filename:             filename,
+		Path:                 directory,
+		HTML:                 html,
+		Markdown:             markdown,
+		AttachmentsDirectory: attachmentsDir,
 
 		// front matter derived attributes
 		Title:    fm.Title,
@@ -562,6 +573,82 @@ func getFile(directory string, filename string, includeMd, includeHTML bool) (fi
 	}
 
 	return file, err
+}
+
+func getAttachments(directory string) (files []Attachment, err error) {
+
+	repo, err := repository(config)
+	if err != nil {
+		return nil, err
+	}
+	defer repo.Free()
+
+	ht, err := headTree(repo)
+	if err != nil {
+		return nil, err
+	}
+
+	// ensure that the directory exists
+	entry, _ := ht.EntryByPath(directory)
+	if entry == nil {
+		return nil, fmt.Errorf("directory '%s' not found", directory)
+	}
+
+	if entry.Type != git.ObjectTree {
+		return nil, fmt.Errorf("%s is not a directory", directory)
+	}
+
+	tree, err := repo.LookupTree(entry.Id)
+	if err != nil {
+		return nil, fmt.Errorf("couldn't find tree for entry %s", entry.Id)
+	}
+
+	defer tree.Free()
+
+	walkIterator := func(_ string, te *git.TreeEntry) int {
+		var blob *git.Blob
+		var ext string
+		var attachment Attachment
+
+		if te.Type == git.ObjectBlob {
+
+			ext = filepath.Ext(te.Name)
+
+			// skip if a Markdown file
+			if ext == ".md" {
+				Debug.Println("markdown file, skipping:", te.Name)
+				return 0
+			}
+
+			blob, err = repo.LookupBlob(te.Id)
+
+			if err != nil {
+				Warning.Println("Failed to find blob", te.Id)
+				return -1
+			}
+
+			data := blob.Contents()
+
+			attachment = Attachment{
+				Filename:         te.Name,
+				AbsoluteFilename: filepath.Join(directory, te.Name),
+				Extension:        ext,
+				Data:             base64.StdEncoding.EncodeToString(data),
+				Path:             directory,
+				MediaType:        getMediaType(ext),
+			}
+
+			files = append(files, attachment)
+
+		}
+
+		return 0
+	}
+
+	err = tree.Walk(walkIterator)
+
+	return files, err
+
 }
 
 func getConvertedFile(directory, filename string) (file *File, err error) {
@@ -695,4 +782,60 @@ func pathInDirectories(directory string, directories *[]NewCommitDirectory) bool
 	}
 
 	return false
+}
+
+// getMediaType returns the correct media when passed a file extension
+//
+//https://en.wikipedia.org/wiki/Data_URI_scheme#Syntax
+func getMediaType(extension string) string {
+
+	var extensionNoDot string
+
+	if len(config.MediaTypes) == 0 {
+		Error.Println("No media types configured")
+		return "none"
+	}
+
+	extensionNoDot = strings.Replace(extension, ".", "", 1)
+
+	mt := config.MediaTypes[extensionNoDot]
+
+	if mt == "" {
+		fallback := fmt.Sprintf("unknown/%s", extensionNoDot)
+		Warning.Printf("No media type found for '%s', returning '%s'", extension, fallback)
+		return fallback
+	}
+
+	return mt
+}
+
+// extractContents retrieves the contents of the NewCommitFile and prepares
+// them to be written to the repository.
+//
+// * Markdown files are combined with the FrontMatter
+// * Base64 encoded files are decoded to a byte sequence
+// * Plain text files are left untouched, simply converted to a byte slice
+func extractContents(ncf NewCommitFile) (contents []byte, err error) {
+
+	if ncf.Base64Encoded {
+
+		contents, err := base64.StdEncoding.DecodeString(ncf.Body)
+		if err != nil {
+			Error.Println("Failed to decode file:", ncf)
+			return contents, fmt.Errorf("Failed to decode file: %s", ncf.Filename)
+		}
+		return contents, err
+
+	} else if filepath.Ext(ncf.Filename) == ".md" {
+
+		return []byte(
+			particle.YAMLEncoding.EncodeToString(
+				[]byte(ncf.Body), &ncf.FrontMatter,
+			),
+		), err
+
+	} else {
+		return []byte(ncf.Body), err
+	}
+
 }

@@ -246,30 +246,50 @@ func authCreateInitialUser(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	w.WriteHeader(201)
+	w.WriteHeader(http.StatusCreated)
 	w.Write(output)
 
 }
 
-// cmsGeneralHandler takes care of serving the frontend CMS portion
+// cmsGeneralHandler takes care of serving the frontend's CMS portion
 // of the app. Paths that match '/cms' are routed here; if the file exists
-// on the filesystem it's served. If not, cms/index.html is served instead
+// on the filesystem (in the location specified by `config.Static`) it's
+// served. If not, cms/index.html is served instead
 //
 // GET /cms                        -> public/cms/index.html
 // GET /cms/javascripts/app.js     -> public/cms/javascripts/app.js
 // GET /cms/something/nonexistant  -> public/cms/index.html
 func cmsGeneralHandler(w http.ResponseWriter, r *http.Request) {
 
-	// if we can't find a file (asset) to serve but the path begins
-	// with /cms, serve the CMS's index. It is likely someone navigating
-	// directly to a resource or refreshing a page. If Vue's router
-	// *still* can't match it to a page, it'll show an appropriate error
-	path := filepath.Join(config.Static, r.URL.Path)
-	index := filepath.Join(config.Static, "cms", "index.html")
+	var index, path, uri string
 
-	if _, err := os.Stat(path); err == nil {
+	uri = r.RequestURI
+
+	if isImageURI(uri) {
+		// if we're dealing with an image we *don't* necessarily know from
+		// where we'll be serving it; it could be from the preview or the
+		// editor but as far as the actual document is concerned the path
+		// is relative
+		path = extractImagePath(uri)
+	} else {
+		// for everything else, the path is the file's path from the static
+		// directory
+		path = filepath.Join(config.Static, r.URL.Path)
+	}
+
+	// look for the file on the filesystem
+	_, err := os.Stat(path)
+
+	if err == nil {
+		// found it, serve it
 		http.ServeFile(w, r, path)
 	} else {
+		// if we can't find a file (asset) to serve but the path begins
+		// with /cms, serve the CMS's index. It is likely someone
+		// navigating directly to a resource or refreshing a page. If
+		// Vue's route *still* can't match it to a page, it'll show an
+		// appropriate error
+		index = filepath.Join(config.Static, "cms", "index.html")
 		http.ServeFile(w, r, index)
 	}
 }
@@ -547,7 +567,7 @@ func apiCreateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	w.WriteHeader(201)
+	w.WriteHeader(http.StatusCreated)
 	w.Write(output)
 
 	Debug.Println("File(s) created", oid)
@@ -734,6 +754,42 @@ func apiGetFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(output)
 }
 
+func apiGetFileAttachmentsHandler(w http.ResponseWriter, r *http.Request) {
+	var fr FailureResponse
+
+	directory := vestigo.Param(r, "directory")
+	filename := vestigo.Param(r, "filename")
+
+	path := fmt.Sprintf("%s/%s", directory, filename)
+
+	files, err := getAttachments(path)
+	if err != nil {
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Failed to get converted file: %s", err.Error()),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+	}
+
+	output, err := json.Marshal(files)
+	if err != nil {
+		Error.Println("Failed to convert file to JSON", files)
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Failed to create JSON from file: %s", err.Error()),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(output)
+}
+
+func apiGetFileAttachmentHandler(w http.ResponseWriter, r *http.Request) {
+
+	Debug.Println("***** HANDLING ATTACHMENT!")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("ok"))
+}
+
 // apiEditFileInDirectoryHandler returns a File object representing the
 // specified file to be used on the editor page of the application. A
 // server-renedered preview isn't shown, so we don't generate HTML but
@@ -860,7 +916,7 @@ func apiCreateUser(w http.ResponseWriter, r *http.Request) {
 		JSONResponse(fr, http.StatusBadRequest, w)
 	}
 
-	w.WriteHeader(201)
+	w.WriteHeader(http.StatusCreated)
 	w.Write(output)
 
 }

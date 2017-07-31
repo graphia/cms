@@ -159,6 +159,11 @@ func protectedRouter() (r *vestigo.Router) {
 
 	r.Get("/api/directories/:directory/files/:file/history", apiGetFileHistory)
 
+	// attachment endpoint
+	// note filename used rather than :file because we're not using the extension
+	r.Get("/api/directories/:directory/files/:filename/attachments", apiGetFileAttachmentsHandler)
+	r.Get("/api/directories/:directory/files/:filename/attachments/:file", apiGetFileAttachmentHandler)
+
 	r.Get("/api/users", apiListUsers)
 	r.Post("/api/users", apiCreateUser)
 	r.Get("/api/users/:username", apiGetUser)

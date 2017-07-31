@@ -1,6 +1,7 @@
 import store from '../store.js';
 import config from '../config.js';
 import checkResponse from '../response.js';
+import CMSFileAttachment from './attachment.js';
 
 export default class CMSFile {
 
@@ -11,25 +12,28 @@ export default class CMSFile {
 		return file;
 	}
 
-	constructor(author, email, path, filename, title, html, markdown, synopsis, tags) {
+	constructor(author, email, path, filename, title, html, markdown, synopsis, tags, attachments_directory) {
 
 		// TODO this is a bit long and ugly; can it be neatened up?
-		this.author   = author;
-		this.email    = email;
-		this.path     = path;
-		this.filename = filename;
-		this.title    = title;
-		this.html     = html;
-		this.markdown = markdown;
-		this.synopsis = synopsis;
-		this.tags     = tags;
+		this.author                = author;
+		this.email                 = email;
+		this.path                  = path;
+		this.filename              = filename;
+		this.title                 = title;
+		this.html                  = html;
+		this.markdown              = markdown;
+		this.synopsis              = synopsis;
+		this.tags                  = tags;
+		this.attachments_directory = attachments_directory;
 
-		// History is an array of commits, which may be populated later
-		this.history = [];
+		// History and attachments are arrays which may be populated later
+		this.history = [];     // historic commits
+		this.attachments = []; // related files from the directory named after file
 
 		// finally save the initial markdown value so we can detect changes
 		// and display a diff if necessary
 		this.initialMarkdown = markdown;
+
 	};
 
 	// class methods
@@ -93,7 +97,7 @@ export default class CMSFile {
 
 		let file = await response.json()
 		store.state.activeDocument = new CMSFile(
-			file.author, file.email, file.path, file.filename, file.title, file.html, file.markdown, file.synopsis, file.tags
+			file.author, file.email, file.path, file.filename, file.title, file.html, file.markdown, file.synopsis, file.tags, file.attachments_directory
 		);
 
 	};
@@ -159,7 +163,7 @@ export default class CMSFile {
 			return response;
 		}
 		catch(err) {
-			console.error(`There was a problem updating document ${filename} in ${directory}, ${err}`);
+			console.error(`There was a problem updating document ${this.filename} in ${this.directory}, ${err}`);
 		}
 	};
 
@@ -205,6 +209,34 @@ export default class CMSFile {
 
 
 		console.debug("Deleted")
+	};
+
+	async fetchAttachments() {
+		let path = `${config.api}/directories/${this.path}/files/${this.attachments_directory}/attachments`
+
+		try {
+			let response = await fetch(path, {
+				mode: "cors",
+				method: "GET",
+				headers: store.state.auth.authHeader()
+			});
+
+			if (!checkResponse(response.status)) {
+				return
+			};
+
+			let attachments = await response.json()
+			this.attachments = attachments;
+			return attachments;
+
+		}
+		catch(err) {
+			console.error(`There was a problem retriving attachments`);
+		}
+	};
+
+	addAttachment(file) {
+		store.commit("addAttachment", file);
 	};
 
 	// has the markdown changed since loading?

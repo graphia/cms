@@ -2,7 +2,7 @@
 	<section class="row">
 
 		<article id="document-content" class="col-md-8">
-			<div class="content" v-html="document.html"/>
+			<div class="content" v-html="amendRelativeLinks"/>
 		</article>
 
 		<aside class="col-md-4">
@@ -68,6 +68,32 @@
 			},
 			commit() {
 				return this.$store.state.commit;
+			},
+			// Amend any relative links or images to point at the
+			// correct resource
+			amendRelativeLinks() {
+
+				let attachmentsDir = this.document.attachments_directory;
+
+				let html = $.parseHTML(this.document.html);
+
+				$(html)
+					.find('img')
+					.each(function(_, image) {
+
+						if ($(image)
+							.attr('src')
+							.startsWith("images")) {
+								let src = $(image).attr('src');
+								$(image).attr('src', [attachmentsDir, src].join("/"));
+						};
+					});
+
+				return html
+						.map((e) => {return e.outerHTML})
+						.join("");
+
+
 			}
 		},
 		methods: {
