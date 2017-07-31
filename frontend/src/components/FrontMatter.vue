@@ -1,10 +1,6 @@
 <template>
 
 	<div class="frontmatter-fields">
-		<div class="form-group">
-			<label for="title">Title</label>
-			<input name="title" class="form-control" v-model="document.title"/>
-		</div>
 
 		<div class="form-group">
 			<label for="synopsis">Synopsis</label>

@@ -11,7 +11,7 @@
 			<!-- Markdown Editor End -->
 
 			<!-- Metadata Editor Start -->
-			<div class="col-md-5">
+			<div class="metadata-fields col-md-5">
 
 				<div class="form-group">
 					<label for="title">Title</label>
@@ -35,6 +35,7 @@
 								:tabindex="!enableCustomFilename ? '-1' : '0'"
 								name="filename"
 								class="form-control filename"
+								type="text"
 								v-model="customFilename"
 						/>
 

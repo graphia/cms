@@ -20,3 +20,36 @@ Feature: Creating documents
 			| Insert Image   |
 			| Toggle Preview |
 			| Markdown Guide |
+		And I should see the following fields for document metadata
+			| Title    |
+			| Filename |
+			| Synopsis |
+			| Author   |
+			| Tags     |
+		And I should see a text area for the commit message
+
+	Scenario: Creating a file
+		Given I am on the new document page
+		When I enter some text into the editor
+		And I fill in the document metadata
+		And I submit the form
+		Then I should see my correctly-formatted document
+
+	Scenario: Automatically setting the new file name
+		Given I am on the new document page
+		When I set the "title" to "the world's most amazing, fantastic file"
+		Then the "filename" should equal "the-worlds-most-amazing-fantastic-file"
+		And the "filename" field should be read only
+
+	Scenario: Customising the filename
+		Given I am on the new document page
+		And I have entered my new document's details
+		When I check the 'custom-filename' checkbox
+		And the "filename" field should not be read only
+
+	Scenario: Post create redirection
+		Given I am on the new document page
+		When I set the "title" to "sample document 2"
+		And I have edited the document and commit message
+		And I submit the form
+		Then I should be redirected to "/cms/documents/sample-document-2.md"
