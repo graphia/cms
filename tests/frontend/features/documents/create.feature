@@ -20,7 +20,7 @@ Feature: Creating documents
 			| Insert Image   |
 			| Toggle Preview |
 			| Markdown Guide |
-		And I should see the following fields for document metadata
+		And I should see the following fields for document metadata:
 			| Title    |
 			| Filename |
 			| Synopsis |
@@ -47,7 +47,7 @@ Feature: Creating documents
 		When I check the "custom-filename" checkbox
 		And the "filename" field should not be read only
 
-	Scenario: Redirection to new post after post creation
+	Scenario: Redirection to new document after creation
 		Given I am on the new document page
 		When I set the "title" to "sample document 2"
 		And I have edited the document and commit message

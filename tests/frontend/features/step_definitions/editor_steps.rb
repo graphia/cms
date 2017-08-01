@@ -4,6 +4,13 @@ Given %r{^I am on the new document page$} do
   expect(page.current_path).to eql(path)
 end
 
+Given %r{^I am on the edit document page for "(.*?)"$} do |document_filename|
+  path = "/cms/documents/#{document_filename}/edit"
+  visit(path)
+  expect(page.current_path).to eql(path)
+end
+
+
 Then %r{^I should see an editor with the following buttons:$} do |table|
   within("#editor-container") do
     expect(page).to have_css(".CodeMirror")
@@ -14,7 +21,7 @@ Then %r{^I should see an editor with the following buttons:$} do |table|
   end
 end
 
-Then %r{^I should see the following fields for document metadata$} do |table|
+Then %r{^I should see the following fields for document metadata:$} do |table|
   within(".metadata-fields") do
     table.transpose.raw.flatten.each do |field_name|
       input_name = page.find("label", text: field_name)[:for]
@@ -100,4 +107,31 @@ end
 
 Then %r{^the page heading should be "([^"]*)"$} do |text|
   expect(page).to have_css("h1", text: text)
+end
+
+When %r{^the "([^"]*)" is "([^"]*)"$} do |field_name, value|
+  field = page.find("input[name='#{field_name}']")
+  expect(field.value).to eql(value)
+end
+
+When %r{^I clear the "([^"]*)"$} do |field_name|
+  field = page.find("input[name='#{field_name}']")
+  field.send_keys(Array.new("document_1.md".length, :backspace))
+end
+
+Then %r{^I should not see the "([^"]*)" field$} do |field_name|
+  within(".metadata-fields") do
+    expect(page).not_to have_css("input[name='#{field_name}']")
+  end
+end
+
+When %r{^I amend the text in the editor$} do
+  sample = "i have **modified** the *text*"
+  page.execute_script "$('.CodeMirror')[0].CodeMirror.setValue('#{sample}')"
+end
+
+Then %r{^I should see my updated document$} do
+  expect(page).to have_css("p", text: "i have modified the text")
+  expect(page).to have_css("em", text: "text")
+  expect(page).to have_css("strong", text: "modified")
 end
