@@ -47,11 +47,8 @@
 				</div>
 
 				<FrontMatter/>
+				<CommitMessage/>
 
-				<div class="form-group">
-					<label for="commit-message">Commit Message</label>
-					<textarea name="commit-message" class="form-control" v-model="commit.message"/>
-				</div>
 
 				<div class="form-group">
 					<div class="btn-toolbar">
@@ -76,6 +73,7 @@
 <script lang="babel">
 	import Editor from "../components/Editor";
 	import FrontMatter from "../components/FrontMatter";
+	import CommitMessage from "../components/CommitMessage";
 
 	export default {
 		name: "DocumentNew",
@@ -185,6 +183,7 @@
 		},
 		components: {
 			Editor,
+			CommitMessage,
 			FrontMatter
 		}
 	}

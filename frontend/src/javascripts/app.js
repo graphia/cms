@@ -13,6 +13,7 @@ import DocumentEdit from '../components/DocumentEdit.vue';
 import DocumentNew from '../components/DocumentNew.vue';
 import Commit from '../components/Commit.vue';
 import CommitFile from '../components/Commit/File.vue';
+import CommitMessage from '../components/CommitMessage.vue';
 import DocumentHistory from '../components/DocumentHistory.vue';
 
 // Utility Components
