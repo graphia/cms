@@ -58,3 +58,13 @@ Feature: Creating documents
 		Given I am on the new document page
 		When I click the "Cancel" button
 		Then I should be redirected to the documents index
+
+	Scenario: Default page heading
+		Given I am on the new document page
+		When the "title" is blank
+		Then the page heading should be "New Document"
+
+	Scenario: Updating the page heading
+		Given I am on the new document page
+		When I set the "title" to "sample document"
+		Then the page heading should be "sample document"

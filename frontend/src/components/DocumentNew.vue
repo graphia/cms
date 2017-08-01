@@ -5,7 +5,9 @@
 
 			<!-- Markdown Editor Start -->
 			<div class="col-md-7">
-				<h1>New Document</h1>
+				<h1>
+					{{ heading }}
+				</h1>
 				<Editor></Editor>
 			</div>
 			<!-- Markdown Editor End -->
@@ -106,6 +108,15 @@
 			// quick access to route params
 			directory() {
 				return this.$route.params.directory;
+			},
+
+			heading() {
+				let title = this.document.title;
+				if (title) {
+					return title;
+				} else {
+					return "New Document";
+				}
 			},
 
 			/*

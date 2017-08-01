@@ -92,3 +92,12 @@ end
 When %r{^I check the "(.*)" checkbox$} do |checkbox|
   check(checkbox)
 end
+
+When %r{^the "([^"]*)" is blank$} do |field_name|
+  field = page.find("input[name='#{field_name}']")
+  expect(field.value).to be_empty
+end
+
+Then %r{^the page heading should be "([^"]*)"$} do |text|
+  expect(page).to have_css("h1", text: text)
+end
