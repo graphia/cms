@@ -56,7 +56,12 @@
 				<div class="form-group">
 					<div class="btn-toolbar">
 						<input type="submit" value="Update" class="btn btn-success">
-						<a href="#" class="btn btn-text">Cancel</a>
+
+						<router-link class="btn btn-text" :to="{name: 'document_index'}">
+							Cancel
+						</router-link>
+
+
 					</div>
 				</div>
 

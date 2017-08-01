@@ -44,12 +44,17 @@ Feature: Creating documents
 	Scenario: Customising the filename
 		Given I am on the new document page
 		And I have entered my new document's details
-		When I check the 'custom-filename' checkbox
+		When I check the "custom-filename" checkbox
 		And the "filename" field should not be read only
 
-	Scenario: Post create redirection
+	Scenario: Redirection to new post after post creation
 		Given I am on the new document page
 		When I set the "title" to "sample document 2"
 		And I have edited the document and commit message
 		And I submit the form
 		Then I should be redirected to "/cms/documents/sample-document-2.md"
+
+	Scenario: Cancelling document creation
+		Given I am on the new document page
+		When I click the "Cancel" button
+		Then I should be redirected to the documents index

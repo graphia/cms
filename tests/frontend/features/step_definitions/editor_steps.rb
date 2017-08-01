@@ -50,7 +50,7 @@ Then %r{^I should see my correctly-formatted document$} do
   end
 end
 
-When %r{^I set the "(.*)" to "(.*)"$} do |field, value|
+When %r{^I set (?:the)? "(.*)" to "(.*)"$} do |field, value|
   fill_in field.gsub(" ", "-"), with: value
 end
 
@@ -73,12 +73,12 @@ end
 
 Then %r{^the "([^"]*)" field should be read only$} do |field_name|
   field = page.find("input[type=text][name='#{field_name}']")
-  expect(field).to be_readonly
+  expect(field).to(be_readonly)
 end
 
 Then %r{^the "([^"]*)" field should not be read only$} do |field_name|
   field = page.find("input[type=text][name='#{field_name}']")
-  expect(field).not_to be_readonly
+  expect(field).not_to(be_readonly)
 end
 
 Given %r{^I have entered my new document's details$} do
@@ -89,6 +89,6 @@ Given %r{^I have entered my new document's details$} do
   }
 end
 
-When %r{^I check the 'custom\-filename' checkbox$} do
-  check "custom-filename"
+When %r{^I check the "(.*)" checkbox$} do |checkbox|
+  check(checkbox)
 end
