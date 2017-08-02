@@ -76,6 +76,7 @@
 	import Editor from "../components/Editor";
 	import FrontMatter from "../components/FrontMatter";
 	import CommitMessage from "../components/CommitMessage";
+	import checkResponse from '../javascripts/response.js';
 
 	export default {
 		name: "DocumentNew",
@@ -158,14 +159,18 @@
 			}
 		},
 		methods: {
-			create(event) {
+			async create(event) {
 				event.preventDefault();
 
-				this.document.create(this.commit)
-					.then((response) => {
-						console.debug("Document saved, redirecting to 'document_show'");
-						this.redirectToShowDocument(this.document.path, this.document.filename);
-					});
+				let response = await this.document.create(this.commit);
+
+				if (!checkResponse(response.status)) {
+					throw("could not create document");
+				};
+
+				console.debug("Document saved, redirecting to 'document_show'");
+				this.redirectToShowDocument(this.document.path, this.document.filename);
+
 			},
 			redirectToShowDocument(directory, filename) {
 				this.$router.push({

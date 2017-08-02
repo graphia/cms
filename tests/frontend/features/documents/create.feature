@@ -35,6 +35,11 @@ Feature: Creating documents
 		And I submit the form
 		Then I should see my correctly-formatted document
 
+	Scenario: Redirection to new document after creation
+		Given I am on the new document page
+		When I have created a new document titled "sample document 2"
+		Then I should be redirected to "/cms/documents/sample-document-2.md"
+
 	Scenario: Automatically setting the new file name
 		Given I am on the new document page
 		When I set the "title" to "the world's most amazing, fantastic file"
@@ -46,13 +51,6 @@ Feature: Creating documents
 		And I have entered my new document's details
 		When I check the "custom-filename" checkbox
 		And the "filename" field should not be read only
-
-	Scenario: Redirection to new document after creation
-		Given I am on the new document page
-		When I set the "title" to "sample document 2"
-		And I have edited the document and commit message
-		And I submit the form
-		Then I should be redirected to "/cms/documents/sample-document-2.md"
 
 	Scenario: Cancelling document creation
 		Given I am on the new document page

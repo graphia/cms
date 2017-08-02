@@ -1,3 +1,7 @@
+SAMPLE_MARKDOWN = "this is a *minimalistic* markdown **document**"
+SAMPLE_TEXT = "this is a minimalistic markdown document"
+
+
 Given %r{^I am on the new document page$} do
   path = "/cms/documents/new"
   visit(path)
@@ -40,8 +44,7 @@ Then %r{^I should see a text area for the commit message$} do
 end
 
 When %r{^I enter some text into the editor$} do
-  sample = "this is a *minimalistic* markdown **document**"
-  page.execute_script "$('.CodeMirror')[0].CodeMirror.setValue('#{sample}')"
+  page.execute_script "$('.CodeMirror')[0].CodeMirror.setValue('#{SAMPLE_MARKDOWN}')"
 end
 
 When %r{^I fill in the document metadata$} do
@@ -51,7 +54,7 @@ end
 
 Then %r{^I should see my correctly-formatted document$} do
   within(".content") do
-    expect(page).to have_css("p", text: "this is a minimalistic markdown document")
+    expect(page).to have_css("p", text: SAMPLE_TEXT)
     expect(page).to have_css("em", text: "minimalistic")
     expect(page).to have_css("strong", text: "document")
   end
@@ -68,8 +71,18 @@ When %r{^I have edited the document and commit message$} do
   }
 end
 
+When %r{^I have created a new document titled (.*?)$} do |title|
+  steps %{
+    Given I set the "title" to "#{title}"
+    And I enter some text into the editor
+    And I set the "commit message" to "general updates"
+    When I submit the form
+    Then I should see the document containing my recent changes
+  }
+end
+
 Then %r{^I should see the document containing my recent changes$} do
-  expect(page).to have_css("p", text: "this is a minimalistic markdown document")
+  expect(page).to have_css("p", text: SAMPLE_TEXT)
 end
 
 Then %r{^the "([^"]*)" should equal "([^"]*)"$} do |field_name, value|
