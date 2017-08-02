@@ -25,6 +25,7 @@
 				<CommitMessage/>
 
 				<div class="form-group">
+
 					<input type="submit" value="Update" class="btn btn-success">
 
 					<router-link :to="{name: 'document_show', params: {directory: 'documents', filename: document.filename}}" class="btn btn-text">

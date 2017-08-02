@@ -39,6 +39,12 @@ Feature: Creating documents
 		When I set the "title" to "updated document"
 		And I have edited the document and commit message
 		And I submit the form
+		Then I should see the document containing my recent changes
+		And I should have been redirected to "/cms/documents/document_1.md"
+
+	Scenario: Cancelling an edit
+		Given I am on the edit document page for "document_1.md"
+		When I click the "Cancel" button
 		Then I should be redirected to "/cms/documents/document_1.md"
 
 	Scenario: Default page heading

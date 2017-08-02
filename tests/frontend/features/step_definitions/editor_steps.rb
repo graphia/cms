@@ -63,14 +63,13 @@ end
 
 When %r{^I have edited the document and commit message$} do
   steps %{
-    When I set the "commit message" to "added sample doc"
-    And I enter some text into the editor
+    When I enter some text into the editor
+    And I set the "commit message" to "general updates"
   }
 end
 
-Then %r{^I should be redirected to "(.*)"$} do |path|
+Then %r{^I should see the document containing my recent changes$} do
   expect(page).to have_css("p", text: "this is a minimalistic markdown document")
-  expect(page.current_path).to eql(path)
 end
 
 Then %r{^the "([^"]*)" should equal "([^"]*)"$} do |field_name, value|
