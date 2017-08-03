@@ -1,7 +1,7 @@
 <template>
 	<section>
 
-		<form class="row" @submit="create">
+		<form id="create-document-form" class="row" @submit="create">
 
 			<!-- Markdown Editor Start -->
 			<div class="col-md-7">
@@ -181,7 +181,7 @@
 
 			// This method taken from a gist comment by José Quintana
 			// https://gist.github.com/mathewbyrne/1280286#gistcomment-2005392
-			slugify (text) {
+			slugify(text) {
 				const a = 'àáäâèéëêìíïîòóöôùúüûñçßÿœæŕśńṕẃǵǹḿǘẍźḧ·/_,:;'
 				const b = 'aaaaeeeeiiiioooouuuuncsyoarsnpwgnmuxzh------'
 				const p = new RegExp(a.split('').join('|'), 'g')
@@ -195,7 +195,16 @@
 					.replace(/\-\-+/g, '-')         // Replace multiple - with single -
 					.replace(/^-+/, '')             // Trim - from start of text
 					.replace(/-+$/, '')             // Trim - from end of text
-				}
+			},
+
+			validate() {
+
+				let form = document.getElementById("create-document-form");
+				console.log(form);
+				debugger
+				return true;
+			}
+
 		},
 		components: {
 			Editor,

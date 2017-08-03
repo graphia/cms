@@ -30,7 +30,7 @@ Feature: Creating documents
 
 	Scenario: Updating a file
 		Given I am on the edit document page for "document_1.md"
-		When I amend the text in the editor
+		When I amend the text in the editor and add a commit message
 		And I submit the form
 		Then I should see my updated document
 

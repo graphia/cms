@@ -137,13 +137,32 @@ Then %r{^I should not see the "([^"]*)" field$} do |field_name|
   end
 end
 
-When %r{^I amend the text in the editor$} do
+When %r{^I amend the text in the editor and add a commit message$} do
   sample = "i have **modified** the *text*"
-  page.execute_script "$('.CodeMirror')[0].CodeMirror.setValue('#{sample}')"
+  steps %{
+    When I set the editor text to "#{sample}"
+    And I set the "commit message" to "general updates"
+  }
 end
 
 Then %r{^I should see my updated document$} do
   expect(page).to have_css("p", text: "i have modified the text")
   expect(page).to have_css("em", text: "text")
   expect(page).to have_css("strong", text: "modified")
+end
+
+When %r{^I set the editor text to "(.*?)"$} do |text|
+  page.execute_script "$('.CodeMirror')[0].CodeMirror.setValue('#{text}')"
+end
+
+Then %r{^the commit message validation feedback should be visible$} do
+  expect(page).to have_css("div.commit-message.has-danger")
+end
+
+Then %r{^the commit message validation feedback should not be visible$} do
+  expect(page).not_to have_css("div.commit-message.has-danger")
+end
+
+Given %r{^I haven't touched the 'Commit Message' field$} do
+  # do nothing
 end
