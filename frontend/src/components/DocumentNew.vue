@@ -1,7 +1,7 @@
 <template>
 	<section>
 
-		<form id="create-document-form" class="row" @submit="create">
+		<form id="new-document-form" class="row" @submit="create">
 
 			<!-- Markdown Editor Start -->
 			<div class="col-md-7">
@@ -54,7 +54,13 @@
 
 				<div class="form-group">
 					<div class="btn-toolbar">
-						<input type="submit" value="Update" class="btn btn-success">
+
+						<input
+							type="submit"
+							value="Update"
+							class="btn btn-success"
+							v-bind:disabled="!valid"
+						/>
 
 						<router-link class="btn btn-text" :to="{name: 'document_index'}">
 							Cancel
@@ -83,7 +89,9 @@
 		data() {
 			return {
 				enableCustomFilename: false,
-				filename: "" // filename *without* extension
+				filename: "", // filename *without* extension
+				valid: false,
+				form: null
 			};
 		},
 		created() {
@@ -95,6 +103,13 @@
 
 			// set up a fresh new commit
 			this.$store.dispatch("initializeCommit");
+
+			// when child form elements emit checkMetadata we can
+			// check the validity of the form as a whole, used for
+			// disabling/enabling the button
+			this.$bus.$on("checkMetadata", () => {
+				this.validate()
+			});
 		},
 		computed: {
 
@@ -179,6 +194,13 @@
 				});
 			},
 
+			validate() {
+				if (!this.form) {
+					this.form = document.getElementById("new-document-form");
+				};
+				this.valid = this.form.checkValidity();;
+			},
+
 			// This method taken from a gist comment by José Quintana
 			// https://gist.github.com/mathewbyrne/1280286#gistcomment-2005392
 			slugify(text) {
@@ -195,14 +217,6 @@
 					.replace(/\-\-+/g, '-')         // Replace multiple - with single -
 					.replace(/^-+/, '')             // Trim - from start of text
 					.replace(/-+$/, '')             // Trim - from end of text
-			},
-
-			validate() {
-
-				let form = document.getElementById("create-document-form");
-				console.log(form);
-				debugger
-				return true;
 			}
 
 		},

@@ -90,6 +90,17 @@ Vue.filter('format_date', (value) => {
 	return d.toLocaleString();
 });
 
+// Create a global Event Bus
+var EventBus = new Vue()
+
+Object.defineProperties(Vue.prototype, {
+	$bus: {
+		get: function () {
+			return EventBus;
+		}
+	}
+});
+
 var app = new Vue({
 	el: "#app",
 	store,

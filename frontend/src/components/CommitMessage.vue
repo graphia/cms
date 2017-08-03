@@ -45,6 +45,9 @@
 
 		methods: {
 			validate() {
+				// make the parent validate the whole form to control
+				// display of the submit button
+				this.$bus.$emit("checkMetadata");
 
 				if (!this.element) {
 					this.element = document.getElementById("new-document-commit-message");

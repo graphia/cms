@@ -157,12 +157,38 @@ end
 
 Then %r{^the commit message validation feedback should be visible$} do
   expect(page).to have_css("div.commit-message.has-danger")
+  expect(page).to have_css("div.commit-message .form-control-feedback")
 end
 
 Then %r{^the commit message validation feedback should not be visible$} do
   expect(page).not_to have_css("div.commit-message.has-danger")
+  expect(page).not_to have_css("div.commit-message .form-control-feedback")
 end
 
 Given %r{^I haven't touched the 'Commit Message' field$} do
   # do nothing
+end
+
+Given %r{^I haven't interacted with the form$} do
+  # do nothing
+end
+
+Given %r{^I enter invalid information in the form$} do
+  steps %{
+    Given I enter 'abc' in the 'Commit Message' field
+  }
+end
+
+Given %r{^I enter valid information in the form$} do
+  steps %{
+    Given I enter 'abcdef' in the 'Commit Message' field
+  }
+end
+
+Then %r{^the submit button should be enabled$} do
+  expect(page.find("input[type='submit']")).not_to be_disabled
+end
+
+Then %r{^the submit button should be disabled$} do
+  expect(page.find("input[type='submit']")).to be_disabled
 end
