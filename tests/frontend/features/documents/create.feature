@@ -35,6 +35,12 @@ Feature: Creating documents
 		And I submit the form
 		Then I should see my correctly-formatted document
 
+	Scenario: Creating a file with tags
+		Given I am on the new document page
+		When I add content, tags and a commit message
+		And I submit the form
+		Then I should see my document with the correct tags
+
 	Scenario: Redirection to new document after creation
 		Given I am on the new document page
 		When I have created a new document titled "sample document 2"

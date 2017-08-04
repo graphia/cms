@@ -50,6 +50,9 @@ end
 When %r{^I fill in the document metadata$} do
   fill_in 'title', with: "Sample Document"
   fill_in 'commit-message', with: "Added sample document"
+  steps %{
+    Then I add tags for Sales and Marketing
+  }
 end
 
 Then %r{^I should see my correctly-formatted document$} do
@@ -68,6 +71,15 @@ When %r{^I have edited the document and commit message$} do
   steps %{
     When I enter some text into the editor
     And I set the "commit message" to "general updates"
+  }
+end
+
+When %r{^I add content, tags and a commit message$} do
+  steps %{
+    Given I set the "title" to "sales and marketing"
+    And I enter some text into the editor
+    And I set the "commit message" to "general updates"
+    And I add tags for Sales and Marketing
   }
 end
 

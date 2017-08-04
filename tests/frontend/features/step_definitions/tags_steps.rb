@@ -17,3 +17,20 @@ Then %r{^I should see the following tags listed:$} do |table|
     end
   end
 end
+
+Then %r{^I add tags for Sales and Marketing$} do
+  steps %{
+    Given I have selected the tags editor
+    When I enter the following tags and press "enter":
+      | Sales     |
+      | Marketing |
+  }
+end
+
+Then %r{^I should see my document with the correct tags$} do
+  within(".document-meta") do
+    %w{Sales Marketing}.each do |tag|
+      expect(page).to have_css("span.tag", text: tag)
+    end
+  end
+end

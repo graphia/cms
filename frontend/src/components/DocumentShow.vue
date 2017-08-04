@@ -16,6 +16,13 @@
 
 						<dt>Description</dt>
 						<dd>This is the document's description</dd>
+
+						<dt>Tags</dt>
+						<dd>
+							<span v-for="tag in document.tags" class="tag badge badge-primary">
+								{{ tag }}
+							</span>
+						</dd>
 					</dl>
 
 					<div class="btn-toolbar" role="toolbar">
@@ -36,6 +43,12 @@
 <style scoped lang="scss">
 	aside {
 		margin: 2em 0em;
+	}
+
+	.document-meta {
+		span.tag {
+			margin-right: 0.6em;
+		}
 	}
 </style>
 

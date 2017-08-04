@@ -14,6 +14,8 @@ export default class CMSFile {
 
 	constructor(author, email, path, filename, title, html, markdown, synopsis, tags, attachments_directory) {
 
+		console.log("tags:", tags)
+
 		// TODO this is a bit long and ugly; can it be neatened up?
 		this.author                = author;
 		this.email                 = email;
