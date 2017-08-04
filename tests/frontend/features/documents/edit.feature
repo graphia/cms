@@ -34,6 +34,13 @@ Feature: Creating documents
 		And I submit the form
 		Then I should see my updated document
 
+	Scenario: Updating a file with tags
+		Given I am on the edit document page for "document_1.md"
+		When I add tags for Sales and Marketing
+		And I enter "added some tags" in the "Commit Message" field
+		And I submit the form
+		Then I should see my document with the correct tags
+
 	Scenario: Redirection to modified document after post update
 		Given I am on the edit document page for "document_1.md"
 		When I set the "title" to "updated document"

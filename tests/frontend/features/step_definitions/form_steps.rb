@@ -6,6 +6,14 @@ Then %r{^the submit button should be labelled '(.*)'$} do |label|
   expect(page).to have_css("input.btn[value='#{label}']")
 end
 
+# FIXME standardise on single or double quotes
+When %r{^I enter "(.*)" in the "(.*)" field$} do |value, field|
+  input = page.find("label", text: /^#{field}$/)['for']
+
+  fill_in input, with: value
+end
+
+# FIXME standardise on single or double quotes
 When %r{^I enter '(.*)' in the '(.*)' field$} do |value, field|
   input = page.find("label", text: /^#{field}$/)['for']
 
