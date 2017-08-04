@@ -22,7 +22,7 @@
 
 				<FrontMatter/>
 
-				<CommitMessage/>
+				<CommitMessageField/>
 
 				<div class="form-group">
 
@@ -43,9 +43,8 @@
 
 <script lang="babel">
 	import Editor from "../components/Editor";
-	import FrontMatter from "../components/FrontMatter";
-	import CommitMessage from "../components/CommitMessage";
-
+	import FrontMatter from "../components/Editor/FrontMatter";
+	import CommitMessageField from "../components/Editor/CommitMessageField";
 
 	export default {
 		name: "DocumentEdit",
@@ -108,7 +107,7 @@
 		components: {
 			Editor,
 			FrontMatter,
-			CommitMessage,
+			CommitMessageField,
 		}
 	}
 </script>

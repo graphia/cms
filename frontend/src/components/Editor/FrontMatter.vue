@@ -12,14 +12,14 @@
 			<input name="author" class="form-control" v-model="document.author"/>
 		</div>
 
-		<TagField/>
+		<TagsField/>
 
 	</div>
 
 </template>
 
 <script lang="babel">
-	import TagField from "../components/TagField";
+	import TagsField from "../Editor/FrontMatter/TagsField";
 
 	export default {
 		name: "FrontMatter",
@@ -29,7 +29,7 @@
 			}
 		},
 		components: {
-			TagField
+			TagsField
 		}
 	}
 </script>

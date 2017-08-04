@@ -49,7 +49,7 @@
 				</div>
 
 				<FrontMatter/>
-				<CommitMessage/>
+				<CommitMessageField/>
 
 
 				<div class="form-group">
@@ -80,8 +80,8 @@
 
 <script lang="babel">
 	import Editor from "../components/Editor";
-	import FrontMatter from "../components/FrontMatter";
-	import CommitMessage from "../components/CommitMessage";
+	import FrontMatter from "../components/Editor/FrontMatter";
+	import CommitMessageField from "../components/Editor/CommitMessageField";
 	import checkResponse from "../javascripts/response.js";
 
 	export default {
@@ -222,7 +222,7 @@
 		},
 		components: {
 			Editor,
-			CommitMessage,
+			CommitMessageField,
 			FrontMatter
 		}
 	}
