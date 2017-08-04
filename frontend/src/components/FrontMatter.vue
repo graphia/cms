@@ -12,21 +12,24 @@
 			<input name="author" class="form-control" v-model="document.author"/>
 		</div>
 
-		<div class="form-group">
-			<label for="tags">Tags</label>
-			<input name="tags" class="form-control" v-model="document.tags"/>
-		</div>
+		<TagField/>
+
 	</div>
 
 </template>
 
 <script lang="babel">
+	import TagField from "../components/TagField";
+
 	export default {
 		name: "FrontMatter",
 		computed: {
 			document() {
 				return this.$store.state.activeDocument;
 			}
+		},
+		components: {
+			TagField
 		}
 	}
 </script>

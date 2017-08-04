@@ -24,7 +24,7 @@ Feature: Creating documents
 			| Title    |
 			| Synopsis |
 			| Author   |
-			| Tags     |
+		And I should see a tags editing field
 		And I should not see the "Filename" field
 		And I should see a text area for the commit message
 

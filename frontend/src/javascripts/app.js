@@ -15,6 +15,7 @@ import Commit from '../components/Commit.vue';
 import CommitFile from '../components/Commit/File.vue';
 import CommitMessage from '../components/CommitMessage.vue';
 import DocumentHistory from '../components/DocumentHistory.vue';
+import TagField from '../components/TagField.vue';
 
 // Utility Components
 import Octicon from '../components/utilities/Octicon.vue';
@@ -25,6 +26,7 @@ import CMSAuth from './auth.js';
 // Vuex Store
 import store from './store.js';
 import SimpleMDE from 'simplemde';
+import TagsInput from 'tags-input';
 
 // Vue Octicons
 Vue.component('octicon', Octicon);

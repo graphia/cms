@@ -82,7 +82,7 @@
 	import Editor from "../components/Editor";
 	import FrontMatter from "../components/FrontMatter";
 	import CommitMessage from "../components/CommitMessage";
-	import checkResponse from '../javascripts/response.js';
+	import checkResponse from "../javascripts/response.js";
 
 	export default {
 		name: "DocumentNew",

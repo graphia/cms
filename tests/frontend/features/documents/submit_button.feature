@@ -9,13 +9,13 @@ Feature: The commit message
 		And I am on the new document page
 
 	Scenario: Submit disabled when form is initialised
-		Given I haven't interacted with the form
+		When I haven't interacted with the form
 		Then the submit button should be disabled
 
 	Scenario: Submit button is disabled when form is invalid
-		Given I enter invalid information in the form
+		When I enter invalid information in the form
 		Then the submit button should be disabled
 
 	Scenario: Submit button is enabled when form is valid
-		Given I enter valid information in the form
+		When I enter valid information in the form
 		Then the submit button should be enabled

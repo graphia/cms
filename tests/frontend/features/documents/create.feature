@@ -25,7 +25,7 @@ Feature: Creating documents
 			| Filename |
 			| Synopsis |
 			| Author   |
-			| Tags     |
+		And I should see a tags editing field
 		And I should see a text area for the commit message
 
 	Scenario: Creating a file

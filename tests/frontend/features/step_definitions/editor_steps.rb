@@ -192,3 +192,9 @@ end
 Then %r{^the submit button should be disabled$} do
   expect(page.find("input[type='submit']")).to be_disabled
 end
+
+Then %r{^I should see a tags editing field$} do
+  within(".metadata-fields") do
+    expect(page).to have_css(".tags-input")
+  end
+end
