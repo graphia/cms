@@ -12,3 +12,5 @@ tags
 tests/tmp/**/*
 tests/frontend/.byebug_history
 backend/.virtualgo
+backend/debug
+backend/debug.test

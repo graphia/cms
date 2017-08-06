@@ -16,8 +16,14 @@ import (
 )
 
 var (
-	config         Config
-	configFilePath = flag.String("config", "/etc/graphia.yml", "the config file")
+	config Config
+
+	// This was set to default to /etc/ but VSCode's Go debugger config isn't working properly
+	// see, https://github.com/Microsoft/vscode-go/issues/1134 so for ease now set it to the
+	// location of the test config
+	//
+	// configFilePath = flag.String("config", "/etc/graphia.yml", "the config file")
+	configFilePath = flag.String("config", "../config/test.yml", "the config file")
 	logEnabled     = flag.Bool("log-to-file", false, "enable logging")
 	verifyKey      *rsa.PublicKey
 	signKey        *rsa.PrivateKey
