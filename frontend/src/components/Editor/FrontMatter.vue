@@ -2,6 +2,8 @@
 
 	<div class="frontmatter-fields">
 
+		<TitleField/>
+
 		<div class="form-group">
 			<label for="synopsis">Synopsis</label>
 			<textarea name="synopsis" class="form-control" v-model="document.synopsis"/>
@@ -19,6 +21,7 @@
 </template>
 
 <script lang="babel">
+	import TitleField from "../Editor/FrontMatter/TitleField";
 	import TagsField from "../Editor/FrontMatter/TagsField";
 
 	export default {
@@ -29,6 +32,7 @@
 			}
 		},
 		components: {
+			TitleField,
 			TagsField
 		}
 	}

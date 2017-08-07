@@ -15,17 +15,10 @@
 			<!-- Metadata Editor Start -->
 			<div class="metadata-fields col-md-3">
 
-				<div class="form-group">
-					<label for="title">Title</label>
-					<input name="title" class="form-control" v-model="document.title"/>
-				</div>
-
 				<FrontMatter/>
-
 				<CommitMessageField/>
 
 				<div class="form-group">
-
 					<input type="submit" value="Update" class="btn btn-success">
 
 					<router-link :to="{name: 'document_show', params: {directory: 'documents', filename: document.filename}}" class="btn btn-text">

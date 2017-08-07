@@ -14,39 +14,20 @@
 	import TagsInput from "tags-input";
 
 	export default {
-		name: "Tags",
-		data() {
-			return {
-				taggle: null
-			};
-		},
+		name: "TagField",
 		computed: {
 			document() {
 				return this.$store.state.activeDocument;
 			}
 		},
 		mounted() {
-			console.log("Creating");
-
-
-
 			TagsInput(document.querySelector('input[type="tags"]'));
-
 		}
 	};
 </script>
 
 <style lang="scss">
 .tags-input {
-	/*
-	display: inline-block;
-	padding: 0 2px;
-	background: #FFF;
-	border: 1px solid #CCC;
-	width: 16em;
-	border-radius: 2px;
-	box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
-	*/
 	width: 100%;
 	background-color: #fff;
 	background-image: none;
