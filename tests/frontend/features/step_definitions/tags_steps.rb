@@ -28,7 +28,7 @@ Then %r{^I add tags for Sales and Marketing$} do
 end
 
 Then %r{^I should see my document with the correct tags$} do
-  within(".document-meta") do
+  within(".document-metadata") do
     %w{Sales Marketing}.each do |tag|
       expect(page).to have_css("span.tag", text: tag)
     end

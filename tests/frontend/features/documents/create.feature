@@ -72,3 +72,8 @@ Feature: Creating documents
 		Given I am on the new document page
 		When I set the "title" to "sample document"
 		Then the page heading should be "sample document"
+
+	Scenario: Submit button disabled by default
+		Given I am on the new document page
+		When I haven't interacted with the form
+		Then the submit button should be disabled

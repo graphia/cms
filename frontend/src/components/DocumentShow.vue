@@ -6,7 +6,7 @@
 		</article>
 
 		<aside class="col-md-4">
-			<div class="card document-meta">
+			<div class="card document-metadata">
 				<div class="card-block">
 					<dl>
 
@@ -15,7 +15,10 @@
 
 
 						<dt>Description</dt>
-						<dd>This is the document's description</dd>
+						<dd>{{ document.synopsis }}</dd>
+
+						<dt>Version</dt>
+						<dd>{{ document.version }}</dd>
 
 						<dt>Tags</dt>
 						<dd>
@@ -45,7 +48,7 @@
 		margin: 2em 0em;
 	}
 
-	.document-meta {
+	.document-metadata {
 		span.tag {
 			margin-right: 0.6em;
 		}

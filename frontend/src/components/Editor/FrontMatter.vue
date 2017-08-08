@@ -14,6 +14,7 @@
 			<input name="author" class="form-control" v-model="document.author"/>
 		</div>
 
+		<VersionField/>
 		<TagsField/>
 
 	</div>
@@ -23,6 +24,7 @@
 <script lang="babel">
 	import TitleField from "../Editor/FrontMatter/TitleField";
 	import TagsField from "../Editor/FrontMatter/TagsField";
+	import VersionField from "../Editor/FrontMatter/VersionField";
 
 	export default {
 		name: "FrontMatter",
@@ -33,7 +35,8 @@
 		},
 		components: {
 			TitleField,
-			TagsField
+			TagsField,
+			VersionField
 		}
 	}
 </script>

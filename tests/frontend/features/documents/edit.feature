@@ -30,7 +30,7 @@ Feature: Creating documents
 
 	Scenario: Updating a file
 		Given I am on the edit document page for "document_1.md"
-		When I amend the text in the editor and add a commit message
+		When I amend the text in the editor, modify the metadata and add a commit message
 		And I submit the form
 		Then I should see my updated document
 
@@ -63,3 +63,8 @@ Feature: Creating documents
 		Given I am on the edit document page for "document_1.md"
 		When I clear the "title"
 		Then the page heading should be "No title"
+
+	Scenario: Submit button disabled by default
+		Given I am on the new document page
+		When I haven't interacted with the form
+		Then the submit button should be disabled

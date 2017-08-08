@@ -50,6 +50,7 @@ end
 When %r{^I fill in the document metadata$} do
   fill_in 'title', with: "Sample Document"
   fill_in 'commit-message', with: "Added sample document"
+  fill_in 'version', with: "1.0.2"
   steps %{
     Then I add tags for Sales and Marketing
   }
@@ -60,6 +61,10 @@ Then %r{^I should see my correctly-formatted document$} do
     expect(page).to have_css("p", text: SAMPLE_TEXT)
     expect(page).to have_css("em", text: "minimalistic")
     expect(page).to have_css("strong", text: "document")
+  end
+  within(".document-metadata") do
+    expect(page).to have_content("Sample Document")
+    expect(page).to have_content("1.0.2")
   end
 end
 
@@ -149,7 +154,10 @@ Then %r{^I should not see the "([^"]*)" field$} do |field_name|
   end
 end
 
-When %r{^I amend the text in the editor and add a commit message$} do
+When %r{^I amend the text in the editor, modify the metadata and add a commit message$} do
+  fill_in 'title', with: "Edited Document"
+  fill_in 'version', with: "1.2.0"
+
   sample = "i have **modified** the *text*"
   steps %{
     When I set the editor text to "#{sample}"
@@ -158,9 +166,15 @@ When %r{^I amend the text in the editor and add a commit message$} do
 end
 
 Then %r{^I should see my updated document$} do
-  expect(page).to have_css("p", text: "i have modified the text")
-  expect(page).to have_css("em", text: "text")
-  expect(page).to have_css("strong", text: "modified")
+  within(".content") do
+    expect(page).to have_css("p", text: "i have modified the text")
+    expect(page).to have_css("em", text: "text")
+    expect(page).to have_css("strong", text: "modified")
+  end
+  within(".document-metadata") do
+    expect(page).to have_content("Edited Document")
+    expect(page).to have_content("1.2.0")
+  end
 end
 
 When %r{^I set the editor text to "(.*?)"$} do |text|
