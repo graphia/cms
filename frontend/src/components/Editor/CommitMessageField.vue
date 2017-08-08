@@ -2,15 +2,12 @@
 
 	<div class="commit-message form-group" v-bind:class="{'has-danger': !valid}">
 
-		<label
-			class="form-control-label"
-			for="commit-message"
-		>
+		<label class="form-control-label" for="commit-message">
 			Commit Message
 		</label>
 
 		<textarea
-			id="new-document-commit-message"
+			id="document-commit-message"
 			name="commit-message"
 			class="form-control"
 			v-model="commit.message"
@@ -29,7 +26,7 @@
 
 <script lang="babel">
 	export default {
-		name: "CommitMessage",
+		name: "CommitMessageField",
 		data() {
 			return {
 				element: null,
@@ -50,7 +47,7 @@
 				this.$bus.$emit("checkMetadata");
 
 				if (!this.element) {
-					this.element = document.getElementById("new-document-commit-message");
+					this.element = document.getElementById("document-commit-message");
 				};
 
 				this.valid = this.element.checkValidity();

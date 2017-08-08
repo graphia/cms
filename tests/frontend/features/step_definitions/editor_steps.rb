@@ -177,7 +177,7 @@ Then %r{^the commit message validation feedback should not be visible$} do
   expect(page).not_to have_css("div.commit-message .form-control-feedback")
 end
 
-Given %r{^I haven't touched the 'Commit Message' field$} do
+Given %r{^I haven't touched the '(.*)' field$} do |field|
   # do nothing
 end
 
@@ -187,13 +187,15 @@ end
 
 Given %r{^I enter invalid information in the form$} do
   steps %{
-    Given I enter 'abc' in the 'Commit Message' field
+    Given I enter 'a' in the 'Title' field
+    And I enter 'abc' in the 'Commit Message' field
   }
 end
 
 Given %r{^I enter valid information in the form$} do
   steps %{
-    Given I enter 'abcdef' in the 'Commit Message' field
+    Given I enter 'title' in the 'Title' field
+    And I enter 'commit-message' in the 'Commit Message' field
   }
 end
 
@@ -209,4 +211,15 @@ Then %r{^I should see a tags editing field$} do
   within(".metadata-fields") do
     expect(page).to have_css(".tags-input")
   end
+end
+
+
+Then %r{^the title validation feedback should be visible$} do
+  expect(page).to have_css("div.document-title.has-danger")
+  expect(page).to have_css("div.document-title .form-control-feedback")
+end
+
+Then %r{^the title validation feedback should not be visible$} do
+  expect(page).not_to have_css("div.document-title.has-danger")
+  expect(page).not_to have_css("div.document-title .form-control-feedback")
 end
