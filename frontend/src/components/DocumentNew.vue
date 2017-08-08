@@ -26,7 +26,7 @@
 
 						<input
 							type="submit"
-							value="Update"
+							value="Create"
 							class="btn btn-success"
 							v-bind:disabled="!valid"
 						/>

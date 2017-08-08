@@ -65,6 +65,6 @@ Feature: Creating documents
 		Then the page heading should be "No title"
 
 	Scenario: Submit button disabled by default
-		Given I am on the new document page
+		Given I am on the edit document page for "document_1.md"
 		When I haven't interacted with the form
 		Then the submit button should be disabled

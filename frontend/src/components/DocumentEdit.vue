@@ -1,7 +1,7 @@
 <template>
 	<section>
 
-		<form class="row" @submit="update">
+		<form id="edit-document-form" class="row" @submit="update">
 
 			<!-- Markdown Editor Start -->
 			<div class="col-md-9">
@@ -19,7 +19,13 @@
 				<CommitMessageField/>
 
 				<div class="form-group">
-					<input type="submit" value="Update" class="btn btn-success">
+
+					<input
+						type="submit"
+						value="Update"
+						class="btn btn-success"
+						v-bind:disabled="!valid"
+					/>
 
 					<router-link :to="{name: 'document_show', params: {directory: 'documents', filename: document.filename}}" class="btn btn-text">
 						Cancel
@@ -42,7 +48,11 @@
 	export default {
 		name: "DocumentEdit",
 		data() {
-			return {markdownLoaded: false};
+			return {
+				markdownLoaded: false,
+				valid: false,
+				form: null,
+			};
 		},
 		async created() {
 			// set up a fresh new commit
@@ -51,6 +61,10 @@
 			// retrieve the document and add it to vuex's store
 			await this.$store.dispatch("editDocument", {directory: this.directory, filename: this.filename});
 			this.markdownLoaded = true;
+
+			this.$bus.$on("checkMetadata", () => {
+				this.validate()
+			});
 
 		},
 		computed: {
@@ -95,6 +109,13 @@
 					name: 'document_show',
 					params:{directory, filename}
 				});
+			},
+
+			validate() {
+				if (!this.form) {
+					this.form = document.getElementById("edit-document-form");
+				};
+				this.valid = this.form.checkValidity();;
 			}
 		},
 		components: {

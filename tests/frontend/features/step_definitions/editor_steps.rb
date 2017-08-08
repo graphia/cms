@@ -14,6 +14,9 @@ Given %r{^I am on the edit document page for "(.*?)"$} do |document_filename|
   expect(page.current_path).to eql(path)
 end
 
+Given %r{^I am on the edit document page for a document$} do
+  steps %q{Given I am on the edit document page for "document_1.md"}
+end
 
 Then %r{^I should see an editor with the following buttons:$} do |table|
   within("#editor-container") do
