@@ -20,11 +20,6 @@ export default class CMSCommit {
 
 	_document(document) {
 
-		let tags = []
-		if (document.tags) {
-			tags = document.tags.split(",")
-		}
-
 		return {
 			path: document.path,
 			filename: document.filename,
@@ -34,8 +29,9 @@ export default class CMSCommit {
 			frontmatter: {
 				title: document.title,
 				author: document.author,
-				tags: tags,
-				synopsis: document.synopsis
+				tags: document.tags,
+				synopsis: document.synopsis,
+				version: document.version
 			}
 		}
 	}

@@ -36,6 +36,20 @@ export default class CMSFile {
 
 	};
 
+	set tags(tags) {
+		if (typeof tags == 'string') {
+			this._tags = tags.split(",");
+		} else if (tags instanceof Array) {
+			this._tags = tags;
+		} else {
+			console.warn("tags must be an array or a comma-separated string");
+		}
+	}
+
+	get tags() {
+		return this._tags;
+	};
+
 	// class methods
 
 	/*
