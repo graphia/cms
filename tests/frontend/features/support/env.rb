@@ -37,7 +37,7 @@ Capybara.register_driver(:chrome) do |app|
     browser: :chrome,
     desired_capabilities: Selenium::WebDriver::Remote::Capabilities.chrome(
       chromeOptions: {
-        binary: "/Applications/Google\ Chrome\ Canary.app/Contents/MacOS/Google\ Chrome\ Canary",
+        binary: "/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome",
         args: %w{--no-sandbox --disable-gpu}
       }
     )

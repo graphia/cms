@@ -19,6 +19,7 @@ export default class CMSCommit {
 	};
 
 	_document(document) {
+
 		return {
 			path: document.path,
 			filename: document.filename,
@@ -29,7 +30,8 @@ export default class CMSCommit {
 				title: document.title,
 				author: document.author,
 				tags: document.tags,
-				synopsis: document.synopsis
+				synopsis: document.synopsis,
+				version: document.version
 			}
 		}
 	}

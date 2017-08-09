@@ -9,7 +9,8 @@ const (
 		blackfriday.HTML_USE_XHTML |
 		blackfriday.HTML_USE_SMARTYPANTS |
 		blackfriday.HTML_SMARTYPANTS_FRACTIONS |
-		blackfriday.HTML_SMARTYPANTS_LATEX_DASHES
+		blackfriday.HTML_SMARTYPANTS_LATEX_DASHES |
+		blackfriday.HTML_SMARTYPANTS_ANGLED_QUOTES
 	extensions = 0 |
 		blackfriday.EXTENSION_AUTOLINK |
 		blackfriday.EXTENSION_DEFINITION_LISTS |

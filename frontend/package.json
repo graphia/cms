@@ -17,6 +17,7 @@
     "octicons": "^5.0.1",
     "remarkable": "^1.7.1",
     "simplemde": "^1.11.2",
+    "tags-input": "^1.1.1",
     "vue-octicons": "^0.1.7"
   },
   "devDependencies": {

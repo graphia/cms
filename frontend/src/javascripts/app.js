@@ -2,18 +2,18 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 
 // Pages
-import Broadcast from '../components/Broadcast.vue';
-import Login from '../components/Login.vue';
 import App from '../components/App.vue';
+
 import Setup from '../components/Setup.vue';
+import Login from '../components/Login.vue';
+import Commit from '../components/Commit.vue';
 import Home from '../components/Home.vue';
 import DocumentIndex from '../components/DocumentIndex.vue';
 import DocumentShow from '../components/DocumentShow.vue';
 import DocumentEdit from '../components/DocumentEdit.vue';
 import DocumentNew from '../components/DocumentNew.vue';
-import Commit from '../components/Commit.vue';
-import CommitFile from '../components/Commit/File.vue';
 import DocumentHistory from '../components/DocumentHistory.vue';
+import Broadcast from '../components/Broadcast.vue';
 
 // Utility Components
 import Octicon from '../components/utilities/Octicon.vue';
@@ -24,6 +24,7 @@ import CMSAuth from './auth.js';
 // Vuex Store
 import store from './store.js';
 import SimpleMDE from 'simplemde';
+import TagsInput from 'tags-input';
 
 // Vue Octicons
 Vue.component('octicon', Octicon);
@@ -87,6 +88,17 @@ router.onError((err) => {
 Vue.filter('format_date', (value) => {
 	let d = new Date(Date.parse(value));
 	return d.toLocaleString();
+});
+
+// Create a global Event Bus
+var EventBus = new Vue()
+
+Object.defineProperties(Vue.prototype, {
+	$bus: {
+		get: function () {
+			return EventBus;
+		}
+	}
 });
 
 var app = new Vue({

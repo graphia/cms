@@ -1,3 +1,6 @@
+---
+title: "document 1"
+---
 # Document 1
 
 Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo

@@ -12,7 +12,7 @@ export default class CMSFile {
 		return file;
 	}
 
-	constructor(author, email, path, filename, title, html, markdown, synopsis, tags, attachments_directory) {
+	constructor(author, email, path, filename, title, html, markdown, synopsis, tags, attachments_directory, version) {
 
 		// TODO this is a bit long and ugly; can it be neatened up?
 		this.author                = author;
@@ -25,6 +25,7 @@ export default class CMSFile {
 		this.synopsis              = synopsis;
 		this.tags                  = tags;
 		this.attachments_directory = attachments_directory;
+		this.version               = version;
 
 		// History and attachments are arrays which may be populated later
 		this.history = [];     // historic commits
@@ -34,6 +35,20 @@ export default class CMSFile {
 		// and display a diff if necessary
 		this.initialMarkdown = markdown;
 
+	};
+
+	set tags(tags) {
+		if (typeof tags == 'string') {
+			this._tags = tags.split(",");
+		} else if (tags instanceof Array) {
+			this._tags = tags;
+		} else {
+			console.warn("tags must be an array or a comma-separated string");
+		}
+	}
+
+	get tags() {
+		return this._tags;
 	};
 
 	// class methods
@@ -60,7 +75,7 @@ export default class CMSFile {
 
 			// map documents
 			store.state.documents = json.map((file) => {
-				return new CMSFile(file.author, file.email, file.path, file.filename, file.title, null, null, file.synopsis, file.tags);
+				return new CMSFile(file.author, file.email, file.path, file.filename, file.title, null, null, file.synopsis, file.tags, file.version);
 			});
 
 		}
@@ -97,7 +112,7 @@ export default class CMSFile {
 
 		let file = await response.json()
 		store.state.activeDocument = new CMSFile(
-			file.author, file.email, file.path, file.filename, file.title, file.html, file.markdown, file.synopsis, file.tags, file.attachments_directory
+			file.author, file.email, file.path, file.filename, file.title, file.html, file.markdown, file.synopsis, file.tags, file.attachments_directory, file.version
 		);
 
 	};

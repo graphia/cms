@@ -6,7 +6,7 @@
 		</article>
 
 		<aside class="col-md-4">
-			<div class="card document-meta">
+			<div class="card document-metadata">
 				<div class="card-block">
 					<dl>
 
@@ -15,7 +15,17 @@
 
 
 						<dt>Description</dt>
-						<dd>This is the document's description</dd>
+						<dd>{{ document.synopsis }}</dd>
+
+						<dt>Version</dt>
+						<dd>{{ document.version }}</dd>
+
+						<dt>Tags</dt>
+						<dd>
+							<span v-for="tag in document.tags" class="tag badge badge-primary">
+								{{ tag }}
+							</span>
+						</dd>
 					</dl>
 
 					<div class="btn-toolbar" role="toolbar">
@@ -36,6 +46,12 @@
 <style scoped lang="scss">
 	aside {
 		margin: 2em 0em;
+	}
+
+	.document-metadata {
+		span.tag {
+			margin-right: 0.6em;
+		}
 	}
 </style>
 

@@ -1,10 +1,8 @@
 <template>
 
 	<div class="frontmatter-fields">
-		<div class="form-group">
-			<label for="title">Title</label>
-			<input name="title" class="form-control" v-model="document.title"/>
-		</div>
+
+		<TitleField/>
 
 		<div class="form-group">
 			<label for="synopsis">Synopsis</label>
@@ -16,21 +14,29 @@
 			<input name="author" class="form-control" v-model="document.author"/>
 		</div>
 
-		<div class="form-group">
-			<label for="tags">Tags</label>
-			<input name="tags" class="form-control" v-model="document.tags"/>
-		</div>
+		<VersionField/>
+		<TagsField/>
+
 	</div>
 
 </template>
 
 <script lang="babel">
+	import TitleField from "../Editor/FrontMatter/TitleField";
+	import TagsField from "../Editor/FrontMatter/TagsField";
+	import VersionField from "../Editor/FrontMatter/VersionField";
+
 	export default {
 		name: "FrontMatter",
 		computed: {
 			document() {
 				return this.$store.state.activeDocument;
 			}
+		},
+		components: {
+			TitleField,
+			TagsField,
+			VersionField
 		}
 	}
 </script>
