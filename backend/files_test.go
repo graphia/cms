@@ -338,11 +338,12 @@ func TestExtractContents(t *testing.T) {
 			args: args{
 				ncf: NewCommitFile{
 					FrontMatter: FrontMatter{
-						Title:    "Pangram",
 						Author:   "Bernice Hibbert",
+						Slug:     "pangram",
 						Synopsis: "Use all of the characters",
-						Version:  "1.0",
 						Tags:     nil,
+						Title:    "Pangram",
+						Version:  "1.0",
 					},
 					Body:     "the quick *brown* fox jumped over the **lazy** dog",
 					Filename: "pangram.md",
@@ -350,11 +351,12 @@ func TestExtractContents(t *testing.T) {
 			},
 			// Multiline string so any leading whitespace remains 😒
 			wantContents: []byte(`---
-title: Pangram
 author: Bernice Hibbert
+slug: pangram
 synopsis: Use all of the characters
-version: "1.0"
 tags: []
+title: Pangram
+version: "1.0"
 ---
 
 the quick *brown* fox jumped over the **lazy** dog`,

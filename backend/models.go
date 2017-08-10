@@ -49,11 +49,12 @@ type FailureResponse struct {
 
 // FrontMatter contains the document's metadata
 type FrontMatter struct {
-	Title    string   `yaml:"title"`
 	Author   string   `yaml:"author"`
+	Slug     string   `yaml:"slug"`
 	Synopsis string   `yaml:"synopsis"`
-	Version  string   `yaml:"version"`
 	Tags     []string `yaml:"tags"`
+	Title    string   `yaml:"title"`
+	Version  string   `yaml:"version"`
 }
 
 // Directory contains the directory's metadata
