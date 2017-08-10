@@ -553,16 +553,11 @@ func getFile(directory string, filename string, includeMd, includeHTML bool) (fi
 		html = &str
 	}
 
-	// the attachments directory is the name of the file
-	// minus the extension
-	attachmentsDir := strings.TrimSuffix(entry.Name, filepath.Ext(entry.Name))
-
 	file = &File{
-		Filename:             filename,
-		Path:                 directory,
-		HTML:                 html,
-		Markdown:             markdown,
-		AttachmentsDirectory: attachmentsDir,
+		Filename: filename,
+		Path:     directory,
+		HTML:     html,
+		Markdown: markdown,
 
 		// front matter derived attributes
 		Title:    fm.Title,
