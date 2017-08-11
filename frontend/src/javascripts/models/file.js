@@ -114,9 +114,12 @@ export default class CMSFile {
 		 }
 
 		let file = await response.json()
-		store.state.activeDocument = new CMSFile(
+		let doc = new CMSFile(
 			file.author, file.email, file.path, file.filename, file.title, file.html, file.markdown, file.synopsis, file.tags, file.slug, file.version
 		);
+		store.state.activeDocument = doc;
+
+		doc.fetchAttachments();
 
 	};
 
@@ -230,6 +233,7 @@ export default class CMSFile {
 	};
 
 	async fetchAttachments() {
+
 		let path = `${config.api}/directories/${this.path}/files/${this.slug}/attachments`
 
 		try {
@@ -243,9 +247,25 @@ export default class CMSFile {
 				return
 			};
 
-			let attachments = await response.json()
-			this.attachments = attachments;
-			return attachments;
+			let data = await response.json()
+			console.log(data);
+			this.attachments = data;
+
+			this.attachments = data.map((att) => {
+				return CMSFileAttachment.fromData(att)
+			});
+
+
+			/*
+			this.attachments = data.map((attachment) => {
+
+
+				return file;
+			});
+			*/
+
+
+			return;
 
 		}
 		catch(err) {

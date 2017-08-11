@@ -9,21 +9,7 @@
 					v-model="document.markdown"
 		/>
 
-		<div class="row attachments">
-			<ul>
-				<li v-for="(attachment, index) in document.attachments">
-
-					<img
-						class="col-md-3 img-thumbnail"
-						:src="attachment.dataURI()"
-						:data-size="attachment.size"
-						:data-type="attachment.type"
-					/>
-
-				</li>
-
-			</ul>
-		</div>
+		<Gallery/>
 
 	</div>
 
@@ -34,6 +20,7 @@
 
 	import SimpleMDE from 'simplemde';
 	import CMSFileAttachment from '../javascripts/models/attachment.js';
+	import Gallery from '../components/Editor/Gallery';
 
 	export default {
 		name: "Editor",
@@ -157,6 +144,9 @@
 				console.debug("syncing content");
 				this.simpleMDE.value(this.document.markdown);
 			}
+		},
+		components: {
+			Gallery
 		}
 	}
 </script>
