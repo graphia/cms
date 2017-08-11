@@ -72,11 +72,12 @@
 
 			/*
 			 * when the filename on the form is changed (either manually or automatically)
-			 * update the document's filename attribute by adding the markdown extension
+			 * update the document's filename attribute by adding the markdown extension, and
+			 * make sure the slug matches it
 			 */
 			filename() {
 				this.document.filename = `${this.filename}.md`;
-				this.document.attachments_directory = [this.document.path, this.filename].join("/");
+				this.document.slug = this.filename;
 			}
 		},
 		methods: {

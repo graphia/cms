@@ -12,19 +12,22 @@ export default class CMSFile {
 		return file;
 	}
 
-	constructor(author, email, path, filename, title, html, markdown, synopsis, tags, attachments_directory, version) {
+	constructor(author, email, path, filename, title, html, markdown, synopsis, tags, slug, version) {
 
 		// TODO this is a bit long and ugly; can it be neatened up?
-		this.author                = author;
+
 		this.email                 = email;
 		this.path                  = path;
 		this.filename              = filename;
 		this.title                 = title;
 		this.html                  = html;
 		this.markdown              = markdown;
+
+		this.author                = author;
 		this.synopsis              = synopsis;
 		this.tags                  = tags;
-		this.attachments_directory = attachments_directory;
+		this.slug                  = slug;
+
 		this.version               = version;
 
 		// History and attachments are arrays which may be populated later
@@ -112,7 +115,7 @@ export default class CMSFile {
 
 		let file = await response.json()
 		store.state.activeDocument = new CMSFile(
-			file.author, file.email, file.path, file.filename, file.title, file.html, file.markdown, file.synopsis, file.tags, file.attachments_directory, file.version
+			file.author, file.email, file.path, file.filename, file.title, file.html, file.markdown, file.synopsis, file.tags, file.slug, file.version
 		);
 
 	};
@@ -227,7 +230,7 @@ export default class CMSFile {
 	};
 
 	async fetchAttachments() {
-		let path = `${config.api}/directories/${this.path}/files/${this.attachments_directory}/attachments`
+		let path = `${config.api}/directories/${this.path}/files/${this.slug}/attachments`
 
 		try {
 			let response = await fetch(path, {

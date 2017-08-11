@@ -2,7 +2,7 @@
 	<section class="row">
 
 		<article id="document-content" class="col-md-8">
-			<div class="content" v-html="amendRelativeLinks"/>
+			<div class="content" v-html="relativeHTML"/>
 		</article>
 
 		<aside class="col-md-4">
@@ -87,16 +87,14 @@
 			},
 			// Amend any relative links or images to point at the
 			// correct resource
-			amendRelativeLinks() {
+			relativeHTML() {
 
-				let attachmentsDir = this.document.attachments_directory;
-
+				let attachmentsDir = this.document.slug;
 				let html = $.parseHTML(this.document.html);
 
 				$(html)
 					.find('img')
 					.each(function(_, image) {
-
 						if ($(image)
 							.attr('src')
 							.startsWith("images")) {

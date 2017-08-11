@@ -31,7 +31,8 @@ export default class CMSCommit {
 				author: document.author,
 				tags: document.tags,
 				synopsis: document.synopsis,
-				version: document.version
+				version: document.version,
+				slug: document.slug
 			}
 		}
 	}
@@ -39,7 +40,7 @@ export default class CMSCommit {
 	_attachments(document) {
 		return document.attachments.map((attachment) => {
 			return {
-				path: [document.attachments_directory, "images"].join("/"),
+				path: [document.path, document.slug, "images"].join("/"),
 				filename: attachment.name,
 				base_64_encoded: attachment.options.base64Encoded,
 				body: attachment.contents()

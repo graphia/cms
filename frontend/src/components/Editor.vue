@@ -67,7 +67,7 @@
 
 							if ($(element)
 								.attr('src')
-								.startsWith(self.document.attachments_directory)) {
+								.startsWith(self.document.slug)) {
 
 								let attachment = attachments
 									.find(

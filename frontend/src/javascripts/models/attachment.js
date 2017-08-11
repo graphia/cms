@@ -24,7 +24,7 @@ export default class CMSFileAttachment {
 
 	dataURI() {
 		return this.data;
-	}
+	};
 
 	// Get rid of the base64, prefix if this attachment
 	// file is encoded, otherwise return the data as is
@@ -35,15 +35,19 @@ export default class CMSFileAttachment {
 		}
 
 		return this.data;
-	}
+	};
+
+	filePath() {
+		return [this.dir, "images", this.name].join('/');
+	};
 
 	relativePath() {
 		return ["images", this.name].join('/');
-	}
+	};
 
 	markdownImage() {
 		return `![${this.name}](${window.encodeURI(this.relativePath())})`
-	}
+	};
 
 
 };

@@ -76,6 +76,7 @@ type FileItem struct {
 	Version          string    `json:"version"`
 	Tags             []string  `json:"tags"`
 	Title            string    `json:"title"`
+	Slug             string    `json:"slug"`
 }
 
 // File represents a Markdown file and can be returned with
@@ -91,6 +92,7 @@ type File struct {
 	Synopsis         string   `json:"synopsis"`
 	Version          string   `json:"version"`
 	Tags             []string `json:"tags"`
+	Slug             string   `json:"slug"`
 }
 
 // Attachment belongs to a File, usually an image

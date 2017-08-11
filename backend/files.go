@@ -89,6 +89,7 @@ func getFilesInDir(directory string) (files []FileItem, err error) {
 				Version:          fm.Version,
 				Tags:             fm.Tags,
 				Synopsis:         fm.Synopsis,
+				Slug:             fm.Slug,
 			}
 
 			files = append(files, fi)
@@ -565,6 +566,7 @@ func getFile(directory string, filename string, includeMd, includeHTML bool) (fi
 		Synopsis: fm.Synopsis,
 		Version:  fm.Version,
 		Tags:     fm.Tags,
+		Slug:     fm.Slug,
 	}
 
 	return file, err
