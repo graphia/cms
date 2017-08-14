@@ -87,10 +87,12 @@
 					this.$store.state.activeDocument.markdown = this.simpleMDE.value();
 				});
 
-				simpleMDE.codemirror.on('drop', (editor, dropEvent) => {
+				simpleMDE.codemirror.on('drop', async (editor, dropEvent) => {
 
 					dropEvent.stopPropagation();
 					dropEvent.preventDefault();
+
+					console.log("Dropped!")
 
 					// grab some information from the editor so we know where to insert
 					// the image's placeholder later
@@ -103,14 +105,32 @@
 					};
 
 
-					for (var item in dropEvent.dataTransfer.items) {
-						console.log("item:", item);
+					// if we've dropped an image from the gallery we just care about
+					// entering the placeholder into the editor
+					for (var i = 0; i < dropEvent.dataTransfer.items.length; i++) {
+						let item = dropEvent.dataTransfer.items[i];
+
+						console.debug("dropped a gallery image");
+
+						if (item.type != "text/plain") {
+							console.debug(`item.type is ${item.type}, ignoring`);
+							continue;
+						};
+
+						console.debug("got a text/plain, continuing")
+
+						item.getAsString((imagePlaceholder) => {
+							doc.replaceRange(`\n${imagePlaceholder}\n`, pos);
+						});
+
 					};
 
 					// surely there's a nicer way of looping with an index in es6? 🤷
 					for (var i = 0; i < dropEvent.dataTransfer.files.length; i++) {
+						console.debug("dropped a filesystem image");
 
 						let file = dropEvent.dataTransfer.files[i];
+
 						let reader = new FileReader();
 
 						reader.onloadend = (onloadendEvent) => {

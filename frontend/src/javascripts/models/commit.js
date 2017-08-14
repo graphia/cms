@@ -38,6 +38,7 @@ export default class CMSCommit {
 	}
 
 	_attachments(document) {
+		// FIXME filter to only get new files
 		return document.attachments.map((attachment) => {
 			return {
 				path: [document.path, document.slug, "images"].join("/"),

@@ -247,23 +247,11 @@ export default class CMSFile {
 				return
 			};
 
-			let data = await response.json()
-			console.log(data);
-			this.attachments = data;
+			let data = await response.json();
 
 			this.attachments = data.map((att) => {
 				return CMSFileAttachment.fromData(att)
 			});
-
-
-			/*
-			this.attachments = data.map((attachment) => {
-
-
-				return file;
-			});
-			*/
-
 
 			return;
 

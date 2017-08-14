@@ -4,16 +4,17 @@
 
 		<div class="row attachments">
 			<ul>
-				<li v-for="(attachment, index) in document.attachments">
+				<li v-for="(attachment, _) in document.attachments">
 
 					<img
-							class="col-md-3 img-thumbnail"
-							:src="attachment.dataURI()"
-							:data-size="attachment.size"
-							:data-type="attachment.type"
+						class="col-md-3 img-thumbnail"
+						:src="attachment.dataURI()"
+						:data-size="attachment.size"
+						:data-type="attachment.type"
+						:data-markdown="attachment.markdownImage()"
+						draggable="true"
+						@dragstart="dragImage"
 					/>
-
-					{{ attachment }}
 
 				</li>
 			</ul>
@@ -28,6 +29,16 @@
 		computed: {
 			document() {
 				return this.$store.state.activeDocument;
+			}
+		},
+		methods: {
+			dragImage(event) {
+				console.log("dragging initiated!");
+				console.debug(event);
+				event.dataTransfer.setData(
+					"text/plain",
+					event.currentTarget.getAttribute('data-markdown')
+				);
 			}
 		}
 	};
