@@ -155,25 +155,6 @@ func updateFiles(nc NewCommit, user User) (oid *git.Oid, err error) {
 	}
 	defer repo.Free()
 
-	ht, err := headTree(repo)
-	if err != nil {
-		return nil, err
-	}
-
-	// check all of the files already exist
-	// check none of the files already exist
-	for _, ncf := range nc.Files {
-
-		target := filepath.Join(ncf.Path, ncf.Filename)
-
-		_, err := ht.EntryByPath(target)
-
-		if err != nil {
-			return nil, fmt.Errorf("file not found: %s", target)
-		}
-
-	}
-
 	oid, err = writeFiles(repo, nc, user)
 
 	return oid, err
