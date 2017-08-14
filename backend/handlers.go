@@ -813,6 +813,9 @@ func apiEditFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 
 	file, err := getRawFile(directory, filename)
 	if err != nil {
+		Debug.Println("***FAILING***")
+		Debug.Println("directory", directory)
+		Debug.Println("filename", filename)
 		panic(fmt.Errorf("failed to get file %s", err.Error()))
 	}
 

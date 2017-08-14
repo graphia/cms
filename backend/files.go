@@ -583,7 +583,7 @@ func getAttachments(directory string) (files []Attachment, err error) {
 
 	defer tree.Free()
 
-	walkIterator := func(_ string, te *git.TreeEntry) int {
+	walkIterator := func(path string, te *git.TreeEntry) int {
 		var blob *git.Blob
 		var ext string
 		var attachment Attachment
@@ -609,10 +609,10 @@ func getAttachments(directory string) (files []Attachment, err error) {
 
 			attachment = Attachment{
 				Filename:         te.Name,
-				AbsoluteFilename: filepath.Join(directory, te.Name),
+				AbsoluteFilename: filepath.Join(directory, path, te.Name),
 				Extension:        ext,
 				Data:             base64.StdEncoding.EncodeToString(data),
-				Path:             directory,
+				Path:             filepath.Join(directory, path),
 				MediaType:        getMediaType(ext),
 			}
 

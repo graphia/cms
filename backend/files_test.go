@@ -265,39 +265,39 @@ func TestGetAttachments(t *testing.T) {
 	//assert.Contains(t assert.TestingT, s interface{}, contains interface{}, msgAndArgs ...interface{})
 
 	// JSON doc
-	jsonAttachmentContents, _ := ioutil.ReadFile(filepath.Join(repoPath, "appendices", "appendix_1", "data.json"))
-	xmlAttachmentContents, _ := ioutil.ReadFile(filepath.Join(repoPath, "appendices", "appendix_1", "data.xml"))
-	pngAttachmentContents, _ := ioutil.ReadFile(filepath.Join(repoPath, "appendices", "appendix_1", "image_1.png"))
-	jpegAttachmentContents, _ := ioutil.ReadFile(filepath.Join(repoPath, "appendices", "appendix_1", "image_2.jpg"))
+	jsonAttachmentContents, _ := ioutil.ReadFile(filepath.Join(repoPath, "appendices", "appendix_1", "data", "data.json"))
+	xmlAttachmentContents, _ := ioutil.ReadFile(filepath.Join(repoPath, "appendices", "appendix_1", "data", "data.xml"))
+	pngAttachmentContents, _ := ioutil.ReadFile(filepath.Join(repoPath, "appendices", "appendix_1", "images", "image_1.png"))
+	jpegAttachmentContents, _ := ioutil.ReadFile(filepath.Join(repoPath, "appendices", "appendix_1", "images", "image_2.jpg"))
 
 	expectedAttachments := []Attachment{
 		Attachment{
-			Path:             "appendices/appendix_1",
-			AbsoluteFilename: "appendices/appendix_1/data.json",
+			Path:             "appendices/appendix_1/data",
+			AbsoluteFilename: "appendices/appendix_1/data/data.json",
 			Extension:        ".json",
 			MediaType:        "text/json",
 			Data:             base64.StdEncoding.EncodeToString(jsonAttachmentContents),
 			Filename:         "data.json",
 		},
 		Attachment{
-			Path:             "appendices/appendix_1",
-			AbsoluteFilename: "appendices/appendix_1/data.xml",
+			Path:             "appendices/appendix_1/data",
+			AbsoluteFilename: "appendices/appendix_1/data/data.xml",
 			Extension:        ".xml",
 			MediaType:        "text/xml",
 			Data:             base64.StdEncoding.EncodeToString(xmlAttachmentContents),
 			Filename:         "data.xml",
 		},
 		Attachment{
-			Path:             "appendices/appendix_1",
-			AbsoluteFilename: "appendices/appendix_1/image_1.png",
+			Path:             "appendices/appendix_1/images",
+			AbsoluteFilename: "appendices/appendix_1/images/image_1.png",
 			Extension:        ".png",
 			MediaType:        "image/png",
 			Data:             base64.StdEncoding.EncodeToString(pngAttachmentContents),
 			Filename:         "image_1.png",
 		},
 		Attachment{
-			Path:             "appendices/appendix_1",
-			AbsoluteFilename: "appendices/appendix_1/image_2.jpg",
+			Path:             "appendices/appendix_1/images",
+			AbsoluteFilename: "appendices/appendix_1/images/image_2.jpg",
 			Extension:        ".jpg",
 			MediaType:        "image/jpeg",
 			Data:             base64.StdEncoding.EncodeToString(jpegAttachmentContents),
@@ -319,9 +319,9 @@ func TestExtractContents(t *testing.T) {
 
 	var gifImage, jpegImage, pngImage []byte
 
-	gifImage, _ = ioutil.ReadFile(filepath.Join(repoPath, "documents", "document_1", "image_1.gif"))
-	pngImage, _ = ioutil.ReadFile(filepath.Join(repoPath, "appendices", "appendix_1", "image_1.png"))
-	jpegImage, _ = ioutil.ReadFile(filepath.Join(repoPath, "appendices", "appendix_1", "image_2.jpg"))
+	gifImage, _ = ioutil.ReadFile(filepath.Join(repoPath, "documents", "document_1", "images", "image_1.gif"))
+	pngImage, _ = ioutil.ReadFile(filepath.Join(repoPath, "appendices", "appendix_1", "images", "image_1.png"))
+	jpegImage, _ = ioutil.ReadFile(filepath.Join(repoPath, "appendices", "appendix_1", "images", "image_2.jpg"))
 
 	type args struct {
 		ncf NewCommitFile

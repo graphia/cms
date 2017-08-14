@@ -1,7 +1,6 @@
 SAMPLE_MARKDOWN = "this is a *minimalistic* markdown **document**"
 SAMPLE_TEXT = "this is a minimalistic markdown document"
 
-
 Given %r{^I am on the new document page$} do
   path = "/cms/documents/new"
   visit(path)

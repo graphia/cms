@@ -1,3 +1,7 @@
+---
+slug: document_2
+---
+
 # Document 2
 
 Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo

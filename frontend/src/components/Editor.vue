@@ -44,9 +44,12 @@
 				// makes those switches.
 				let previewRender = function(text) {
 
+
 					let attachments = self.document.attachments;
 
 					let html = $.parseHTML(this.parent.markdown(text));
+
+					console.debug("slug", self.document.slug);
 
 					$(html)
 						.find('img')
@@ -54,7 +57,7 @@
 
 							if ($(element)
 								.attr('src')
-								.startsWith(self.document.slug)) {
+								.startsWith("images/")) {
 
 								let attachment = attachments
 									.find(
