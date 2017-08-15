@@ -1,40 +1,9 @@
 <template>
 	<section>
 
-		<form id="edit-document-form" class="row" @submit="update">
-
-			<!-- Markdown Editor Start -->
-			<div class="col-md-9">
-				<h1>
-					{{ heading }}
-				</h1>
-				<Editor></Editor>
-			</div>
-			<!-- Markdown Editor End -->
-
-			<!-- Metadata Editor Start -->
-			<div class="metadata-fields col-md-3">
-
-				<FrontMatter/>
-				<CommitMessageField/>
-
-				<div class="form-group">
-
-					<input
-						type="submit"
-						value="Update"
-						class="btn btn-success"
-						v-bind:disabled="!valid"
-					/>
-
-					<router-link :to="{name: 'document_show', params: {directory: 'documents', filename: document.filename}}" class="btn btn-text">
-						Cancel
-					</router-link>
-				</div>
-
-			</div>
-			<!-- Metadata Editor End -->
-
+		<form id="edit-document-form" @submit="update">
+			<h1>{{ heading }}</h1>
+			<Editor/>
 		</form>
 
 	</section>
@@ -42,16 +11,14 @@
 
 <script lang="babel">
 	import Editor from "../components/Editor";
-	import FrontMatter from "../components/Editor/FrontMatter";
-	import CommitMessageField from "../components/Editor/CommitMessageField";
 
 	export default {
 		name: "DocumentEdit",
 		data() {
 			return {
 				markdownLoaded: false,
-				valid: false,
 				form: null,
+				formID: "edit-document-form"
 			};
 		},
 		async created() {
@@ -60,11 +27,9 @@
 
 			// retrieve the document and add it to vuex's store
 			await this.$store.dispatch("editDocument", {directory: this.directory, filename: this.filename});
-			this.markdownLoaded = true;
 
-			this.$bus.$on("checkMetadata", () => {
-				this.validate()
-			});
+			// FIMXE use the bus 🚌
+			this.markdownLoaded = true;
 
 		},
 		computed: {
@@ -109,19 +74,10 @@
 					name: 'document_show',
 					params:{directory, filename}
 				});
-			},
-
-			validate() {
-				if (!this.form) {
-					this.form = document.getElementById("edit-document-form");
-				};
-				this.valid = this.form.checkValidity();;
 			}
 		},
 		components: {
-			Editor,
-			FrontMatter,
-			CommitMessageField,
+			Editor
 		}
 	}
 </script>
