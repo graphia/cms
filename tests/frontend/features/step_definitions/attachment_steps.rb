@@ -15,7 +15,7 @@ Then %r{^I should see the image in the gallery$} do
 
   uri = "data:image/jpeg;base64,#{Base64.strict_encode64(image.read)}"
 
-  within(".gallery") do
+  within("#gallery") do
     expect(page).to have_css("img")
     expect(uri).to eql(page.find("img")[:src])
   end
@@ -25,6 +25,12 @@ Given %r{^I am on the edit page for my document$} do
   steps %{
     Given I am on the edit document page for "document_2.md"
   }
+end
+
+When %r{^I click the "([^"]*)" tab in the sidebar$} do |arg1|
+  within(".sidebar") do
+    page.find("a", text: "Images").click
+  end
 end
 
 When %r{^I drag an image from the gallery to the editor$} do

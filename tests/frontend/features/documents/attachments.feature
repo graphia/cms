@@ -11,6 +11,7 @@ Feature: Creating documents
 	Scenario: Images visible in the gallery
 		Given the document I'm working on already has an attachment
 		When I am on the edit page for my document
+		And I click the "Images" tab in the sidebar
 		Then I should see the image in the gallery
 
 	@wip

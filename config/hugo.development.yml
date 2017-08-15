@@ -5,4 +5,4 @@ buildDrafts: true
 theme: ../../graphia-minimal-theme
 contentDir: repo
 relativeURLs: true
-publishDir: dist
+publishDir: frontend/public

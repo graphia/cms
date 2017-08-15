@@ -9,10 +9,7 @@
 					v-model="document.markdown"
 		/>
 
-		<Gallery/>
-
 	</div>
-
 
 </template>
 
@@ -20,7 +17,6 @@
 
 	import SimpleMDE from 'simplemde';
 	import CMSFileAttachment from '../../javascripts/models/attachment.js';
-	import Gallery from './Gallery';
 
 	export default {
 		name: "MarkdownEditor",
@@ -167,17 +163,23 @@
 				console.debug("syncing content");
 				this.simpleMDE.value(this.document.markdown);
 			}
-		},
-		components: {
-			Gallery
 		}
 	}
 </script>
 
 <style lang="scss">
-.attachments > ul > li {
-	img {
-		max-width: 260px;
+	.attachments > ul > li {
+		img {
+			max-width: 260px;
+		}
 	}
-}
+
+	.editor-toolbar {
+		background-color: #f7f7f9;
+		padding: 2px 0px;
+
+		a {
+			color: black !important;
+		}
+	}
 </style>

@@ -2,36 +2,60 @@
 	<div class="editor row">
 
 		<!-- Markdown Editor Start -->
-		<div class="col-md-9">
+		<div class="col-md-8">
 			<MarkdownEditor/>
 		</div>
 		<!-- Markdown Editor End -->
 
-		<!-- Metadata Editor Start -->
-		<div class="metadata-fields col-md-3">
+		<!-- Sidebar Start -->
+		<div class="col-md-4">
+			<div class="sidebar card">
 
-			<FrontMatter/>
+				<div class="card-header">
 
-			<FilenameField v-if="newFile"/>
+					<ul class="nav nav-tabs card-header-tabs" role="tablist">
+						<li class="nav-item">
+							<a class="nav-link active" role="tab" data-toggle="tab" href="#metadata">Document Info</a>
+						</li>
 
-			<CommitMessageField/>
+						<li class="nav-item">
+							<a class="nav-link" role="tab" data-toggle="tab" href="#gallery">Images</a>
+						</li>
+					</ul>
 
-			<div class="form-group">
+				</div>
 
-				<input
-					type="submit"
-					class="btn btn-success"
-					:value="submitButtonText"
-					v-bind:disabled="!valid"
-				/>
+				<div class="tab-content">
 
-				<router-link :to="formCancellationRedirectParams" class="btn btn-text">
-					Cancel
-				</router-link>
+					<div id="metadata" class="active tab-pane card-block metadata-fields" role="tab-panel">
+
+						<FrontMatter/>
+
+						<FilenameField v-if="newFile"/>
+
+						<CommitMessageField/>
+
+						<div class="form-group">
+
+							<input
+								type="submit"
+								class="btn btn-success"
+								:value="submitButtonText"
+								v-bind:disabled="!valid"
+							/>
+
+							<router-link :to="formCancellationRedirectParams" class="btn btn-text">
+								Cancel
+							</router-link>
+						</div>
+					</div>
+
+					<Gallery id="gallery" class="tab-pane card-block" role="tab-panel"/>
+
+				</div>
 			</div>
-
+			<!-- Sidebar Editor End -->
 		</div>
-		<!-- Metadata Editor End -->
 
 	</div>
 
@@ -42,6 +66,7 @@
 	import MarkdownEditor from "../components/Editor/MarkdownEditor";
 	import FrontMatter from "../components/Editor/FrontMatter";
 	import FilenameField from "../components/Editor/FilenameField";
+	import Gallery from "../components/Editor/Gallery";
 	import CommitMessageField from "../components/Editor/CommitMessageField";
 
 	export default {
@@ -82,6 +107,7 @@
 			FrontMatter,
 			FilenameField,
 			CommitMessageField,
+			Gallery
 		},
 		methods: {
 			validate() {
