@@ -11,18 +11,21 @@
 		<div class="metadata-fields col-md-3">
 
 			<FrontMatter/>
+
+			<FilenameField v-if="newFile"/>
+
 			<CommitMessageField/>
 
 			<div class="form-group">
 
 				<input
 					type="submit"
-					value="Update"
 					class="btn btn-success"
+					:value="submitButtonText"
 					v-bind:disabled="!valid"
 				/>
 
-				<router-link :to="{name: 'document_show', params: {directory: 'documents', filename: document.filename}}" class="btn btn-text">
+				<router-link :to="formCancellationRedirectParams" class="btn btn-text">
 					Cancel
 				</router-link>
 			</div>
@@ -38,6 +41,7 @@
 
 	import MarkdownEditor from "../components/Editor/MarkdownEditor";
 	import FrontMatter from "../components/Editor/FrontMatter";
+	import FilenameField from "../components/Editor/FilenameField";
 	import CommitMessageField from "../components/Editor/CommitMessageField";
 
 	export default {
@@ -67,17 +71,24 @@
 				this.markdownLoaded = true;
 			}
 		},
+		props: [
+			'formID',
+			'submitButtonText',
+			'newFile',
+			'formCancellationRedirectParams'
+		],
 		components: {
 			MarkdownEditor,
 			FrontMatter,
+			FilenameField,
 			CommitMessageField,
 		},
 		methods: {
 			validate() {
 				if (!this.form) {
-					this.form = document.getElementById("edit-document-form");
+					this.form = document.getElementById(this.formID);
 				};
-				this.valid = this.form.checkValidity();;
+				this.valid = this.form.checkValidity();
 			}
 		}
 	};

@@ -3,7 +3,11 @@
 
 		<form id="edit-document-form" @submit="update">
 			<h1>{{ heading }}</h1>
-			<Editor/>
+			<Editor
+				:formID="formID"
+				:submitButtonText="submitButtonText"
+				:formCancellationRedirectParams="formCancellationRedirectParams"
+			/>
 		</form>
 
 	</section>
@@ -17,8 +21,8 @@
 		data() {
 			return {
 				markdownLoaded: false,
-				form: null,
-				formID: "edit-document-form"
+				formID: "edit-document-form",
+				submitButtonText: "Update"
 			};
 		},
 		async created() {
@@ -57,9 +61,20 @@
 				} else {
 					return "No title";
 				}
+			},
+
+			formCancellationRedirectParams() {
+				return {
+					name: 'document_show',
+					params: {
+						directory: 'documents',
+						filename: this.document.filename
+					}
+				};
 			}
 		},
 		methods: {
+
 			update(event) {
 				event.preventDefault();
 
@@ -69,6 +84,7 @@
 						this.redirectToShowDocument(this.directory, this.filename);
 					});
 			},
+
 			redirectToShowDocument(directory, filename) {
 				this.$router.push({
 					name: 'document_show',
