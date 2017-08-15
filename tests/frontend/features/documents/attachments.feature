@@ -13,6 +13,7 @@ Feature: Creating documents
 		When I am on the edit page for my document
 		Then I should see the image in the gallery
 
+	@wip # can't get drag/drop working 😞
 	Scenario: Dragging an existing image into a document
 		Given the document I'm working on already has an attachment
 		And I am on the edit page for my document

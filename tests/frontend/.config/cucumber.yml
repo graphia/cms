@@ -2,3 +2,4 @@
 standard_options = "--snippet-type percent --tags ~@wip"
 %>
 default: <%= standard_options %>
+no_wip: --tags ~@wip

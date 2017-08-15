@@ -1,4 +1,6 @@
 ---
+title: Document 2
+author: Troy McClure
 slug: document_2
 ---
 

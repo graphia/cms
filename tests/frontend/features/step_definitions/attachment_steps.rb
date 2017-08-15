@@ -28,9 +28,13 @@ Given %r{^I am on the edit page for my document$} do
 end
 
 When %r{^I drag an image from the gallery to the editor$} do
-  pending # Write code here that turns the phrase above into concrete actions
+  source = page.find(".gallery img")
+  target = page.find('.CodeMirror .CodeMirror-line:last-child')
+  source.drag_to(target)
 end
 
 Then %r{^the markdown image placeholder should be added to the editor$} do
-  pending # Write code here that turns the phrase above into concrete actions
+  within(".CodeMirror") do
+    expect(page).to have_content("![image.jpg](images/image.jpg)")
+  end
 end
