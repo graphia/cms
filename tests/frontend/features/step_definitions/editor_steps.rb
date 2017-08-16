@@ -1,7 +1,6 @@
 SAMPLE_MARKDOWN = "this is a *minimalistic* markdown **document**"
 SAMPLE_TEXT = "this is a minimalistic markdown document"
 
-
 Given %r{^I am on the new document page$} do
   path = "/cms/documents/new"
   visit(path)
@@ -19,7 +18,7 @@ Given %r{^I am on the edit document page for a document$} do
 end
 
 Then %r{^I should see an editor with the following buttons:$} do |table|
-  within("#editor-container") do
+  within(".editor") do
     expect(page).to have_css(".CodeMirror")
 
     table.transpose.raw.flatten.each do |button|

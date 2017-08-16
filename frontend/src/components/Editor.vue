@@ -1,170 +1,121 @@
 <template>
-	<div id="editor-container" class="form-group">
+	<div class="editor row">
 
-		<label for="markdown" class="sr-only">Document Contents</label>
-		<textarea 	id="editor"
-					name="markdown"
-					class="form-control"
-					rows="40"
-					v-model="document.markdown"
-		/>
+		<!-- Markdown Editor Start -->
+		<div class="col-md-8">
+			<MarkdownEditor/>
+		</div>
+		<!-- Markdown Editor End -->
 
-		<div class="row attachments">
-			<ul>
-				<li v-for="(attachment, index) in document.attachments">
+		<!-- Sidebar Start -->
+		<div class="col-md-4">
+			<div class="sidebar card">
 
-					<img
-						class="col-md-3 img-thumbnail"
-						:src="attachment.dataURI()"
-						:data-size="attachment.size"
-						:data-type="attachment.type"
-					/>
+				<div class="card-header">
 
-				</li>
+					<ul class="nav nav-tabs card-header-tabs" role="tablist">
+						<li class="nav-item">
+							<a class="nav-link active" role="tab" data-toggle="tab" href="#metadata">Document Info</a>
+						</li>
 
-			</ul>
+						<li class="nav-item">
+							<a class="nav-link" role="tab" data-toggle="tab" href="#gallery">Images</a>
+						</li>
+					</ul>
+
+				</div>
+
+				<div class="tab-content">
+
+					<div id="metadata" class="active tab-pane card-block metadata-fields" role="tab-panel">
+
+						<FrontMatter/>
+
+						<FilenameField v-if="newFile"/>
+
+						<CommitMessageField/>
+
+						<div class="form-group">
+
+							<input
+								type="submit"
+								class="btn btn-success"
+								:value="submitButtonText"
+								v-bind:disabled="!valid"
+							/>
+
+							<router-link :to="formCancellationRedirectParams" class="btn btn-text">
+								Cancel
+							</router-link>
+						</div>
+					</div>
+
+					<Gallery id="gallery" class="tab-pane card-block" role="tab-panel"/>
+
+				</div>
+			</div>
+			<!-- Sidebar Editor End -->
 		</div>
 
 	</div>
-
 
 </template>
 
 <script lang="babel">
 
-	import SimpleMDE from 'simplemde';
-	import CMSFileAttachment from '../javascripts/models/attachment.js';
+	import MarkdownEditor from "../components/Editor/MarkdownEditor";
+	import FrontMatter from "../components/Editor/FrontMatter";
+	import FilenameField from "../components/Editor/FilenameField";
+	import Gallery from "../components/Editor/Gallery";
+	import CommitMessageField from "../components/Editor/CommitMessageField";
 
 	export default {
 		name: "Editor",
+
+		created() {
+			this.$bus.$on("checkMetadata", () => {
+				this.validate()
+			});
+		},
+
+		data() {
+			return {
+				markdownLoaded: false,
+				valid: false
+			};
+		},
 		computed: {
+			// quick access to things in the store
 			document() {
 				return this.$store.state.activeDocument;
 			}
 		},
-		mounted() {
-				console.log("MarkdownEditor Created");
-				this.simpleMDE = this.initializeSimpleMDE();
+		watch: {
+			// FIXME use bus instead of cascading
+			"$parent.markdownLoaded": function() {
+				this.markdownLoaded = true;
+			}
+		},
+		props: [
+			'formID',
+			'submitButtonText',
+			'newFile',
+			'formCancellationRedirectParams'
+		],
+		components: {
+			MarkdownEditor,
+			FrontMatter,
+			FilenameField,
+			CommitMessageField,
+			Gallery
 		},
 		methods: {
-			initializeSimpleMDE() {
-				console.log("initializing SimpleMDE");
-
-				let self = this;
-
-				// Because our images might not be on the server yet, we need to
-				// switch the `src` prior to displaying the preview. This function
-				// makes those switches.
-				let previewRender = function(text) {
-
-					let attachments = self.document.attachments;
-
-					let html = $.parseHTML(this.parent.markdown(text));
-
-					$(html)
-						.find('img')
-						.each(function(_, element) {
-
-							if ($(element)
-								.attr('src')
-								.startsWith(self.document.attachments_directory)) {
-
-								let attachment = attachments
-									.find(
-										function(a) {
-											return a.relativePath() === $(element).attr('src')
-										}
-									);
-
-								$(element).attr('src', attachment.dataURI());
-
-							};
-						});
-
-					return html
-						.map((e) => {return e.outerHTML})
-						.join("");
-
-				}
-
-				let simpleMDE = new SimpleMDE({
-					element: document.getElementById("editor"),
-					forceSync: true,
-					autoFocus: true,
-					dragDrop: true,
-					allowDropFileTypes: ["image/jpeg", "image/jpg", "image/png", "image/gif"],
-					previewRender
-				});
-
-				simpleMDE.codemirror.on('change', () => {
-					this.$store.state.activeDocument.markdown = this.simpleMDE.value();
-				});
-
-				simpleMDE.codemirror.on('drop', (editor, dropEvent) => {
-
-					dropEvent.stopPropagation();
-					dropEvent.preventDefault();
-
-					// grab some information from the editor so we know where to insert
-					// the image's placeholder later
-					let cursor = editor.getCursor();
-					let doc = editor.getDoc();
-					let line = doc.getLine(cursor.line);
-					let pos = {
-						line: cursor.line,
-						ch: line.length
-					};
-
-
-					for (var item in dropEvent.dataTransfer.items) {
-						console.log("item:", item);
-					};
-
-					// surely there's a nicer way of looping with an index in es6? 🤷
-					for (var i = 0; i < dropEvent.dataTransfer.files.length; i++) {
-
-						let file = dropEvent.dataTransfer.files[i];
-						let reader = new FileReader();
-
-						reader.onloadend = (onloadendEvent) => {
-
-							// add a CMSFileAtachment to the attachments list
-							let attachment = new CMSFileAttachment(
-								file,
-								onloadendEvent.target.result,
-								{base64Encoded: true}
-							);
-
-							this.document.addAttachment(attachment);
-
-							let imagePlaceholder = attachment.markdownImage();
-
-							doc.replaceRange(`\n${imagePlaceholder}\n`, pos);
-
-						};
-
-						reader.readAsDataURL(file);
-
-					};
-
-				});
-
-				return simpleMDE;
-			}
-		},
-		watch: {
-			"$parent.markdownLoaded": function() {
-				console.debug("syncing content");
-				this.simpleMDE.value(this.document.markdown);
+			validate() {
+				if (!this.form) {
+					this.form = document.getElementById(this.formID);
+				};
+				this.valid = this.form.checkValidity();
 			}
 		}
-	}
+	};
 </script>
-
-<style lang="scss">
-.attachments > ul > li {
-	img {
-		max-width: 260px;
-	}
-}
-</style>

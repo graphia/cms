@@ -217,10 +217,10 @@ func TestApiCreateImageFileInDirectory(t *testing.T) {
 
 	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files")
 
-	pngImage, _ := ioutil.ReadFile(filepath.Join(repoPath, "appendices", "appendix_1", "image_1.png"))
+	pngImage, _ := ioutil.ReadFile(filepath.Join(repoPath, "appendices", "appendix_1", "images", "image_1.png"))
 
 	ncf := NewCommitFile{
-		Path:          "documents/document_1",
+		Path:          "documents/document_1/images",
 		Filename:      "image_4.png",
 		Base64Encoded: true,
 		Body:          base64.StdEncoding.EncodeToString(pngImage),

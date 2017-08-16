@@ -1,46 +1,14 @@
 <template>
 	<section>
 
-		<form id="new-document-form" class="row" @submit="create">
-
-			<!-- Markdown Editor Start -->
-			<div class="col-md-7">
-				<h1>
-					{{ heading }}
-				</h1>
-				<Editor></Editor>
-			</div>
-			<!-- Markdown Editor End -->
-
-			<!-- Metadata Editor Start -->
-			<div class="metadata-fields col-md-5">
-
-
-
-				<FrontMatter/>
-				<FilenameField/>
-				<CommitMessageField/>
-
-				<div class="form-group">
-					<div class="btn-toolbar">
-
-						<input
-							type="submit"
-							value="Create"
-							class="btn btn-success"
-							v-bind:disabled="!valid"
-						/>
-
-						<router-link class="btn btn-text" :to="{name: 'document_index'}">
-							Cancel
-						</router-link>
-
-					</div>
-				</div>
-
-			</div>
-			<!-- Metadata Editor End -->
-
+		<form id="new-document-form" @submit="create">
+			<h1>{{ heading }}</h1>
+			<Editor
+				:formID="formID"
+				:submitButtonText="submitButtonText"
+				:newFile="true"
+				:formCancellationRedirectParams="formCancellationRedirectParams"
+			/>
 		</form>
 
 	</section>
@@ -49,18 +17,14 @@
 <script lang="babel">
 	import Editor from "../components/Editor";
 
-	import FrontMatter from "../components/Editor/FrontMatter";
-	import CommitMessageField from "../components/Editor/CommitMessageField";
-	import FilenameField from "../components/Editor/FilenameField";
-
 	import checkResponse from "../javascripts/response.js";
 
 	export default {
 		name: "DocumentNew",
 		data() {
 			return {
-				valid: false,
-				form: null
+				formID: "new-document-form",
+				submitButtonText: "Create",
 			};
 		},
 		created() {
@@ -73,12 +37,6 @@
 			// set up a fresh new commit
 			this.$store.dispatch("initializeCommit");
 
-			// when child form elements emit checkMetadata we can
-			// check the validity of the form as a whole, used for
-			// disabling/enabling the button
-			this.$bus.$on("checkMetadata", () => {
-				this.validate()
-			});
 		},
 		computed: {
 
@@ -104,6 +62,12 @@
 				}
 			},
 
+			formCancellationRedirectParams() {
+				return {
+					name: 'document_index'
+				};
+			}
+
 		},
 		methods: {
 			async create(event) {
@@ -119,26 +83,17 @@
 				this.redirectToShowDocument(this.document.path, this.document.filename);
 
 			},
+
 			redirectToShowDocument(directory, filename) {
 				this.$router.push({
 					name: 'document_show',
 					params:{directory, filename}
 				});
-			},
-
-			validate() {
-				if (!this.form) {
-					this.form = document.getElementById("new-document-form");
-				};
-				this.valid = this.form.checkValidity();;
 			}
 
 		},
 		components: {
-			Editor,
-			CommitMessageField,
-			FilenameField,
-			FrontMatter
+			Editor
 		}
 	}
 </script>

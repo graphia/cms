@@ -4,7 +4,7 @@ logfile: logs/development.log
 corsenabled: true
 corsorigin: localhost:8080
 database: db/development.db
-static: ./dist
+static: ./frontend/public
 hugo_config_file: config/hugo.development.yml
 hugo_bin: /usr/local/bin/hugo
 private_key_path: keys/app.rsa

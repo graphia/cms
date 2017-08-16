@@ -11,7 +11,7 @@ require 'pry-byebug'
 require 'selenium-webdriver'
 
 REPO_PATH = '../tmp/repositories/cucumber'
-REPO_TEMPLATE_PATH = '../backend/repositories/small'
+REPO_TEMPLATE_PATH = '../backend/repositories/multiple_filetypes'
 PID_PATH = '../tmp/cucumber-browser.pid'
 DB_PATH = '../../db/cucumber.db'
 SAMPLES_PATH = '../backend/samples'
@@ -24,7 +24,7 @@ Capybara.register_driver(:headless_chrome) do |app|
     browser: :chrome,
     desired_capabilities: Selenium::WebDriver::Remote::Capabilities.chrome(
       chromeOptions: {
-        binary: "/Applications/Google\ Chrome\ Canary.app/Contents/MacOS/Google\ Chrome\ Canary",
+        binary: "/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome",
         args: %w{--headless --no-sandbox --disable-gpu}
       }
     )
@@ -64,14 +64,19 @@ Capybara.configure do |c|
   c.app_host = "http://localhost:9095"
 end
 
-Before do
+def setup_repo(path = REPO_TEMPLATE_PATH)
   FileUtils.rm_rf(REPO_PATH)
-  FileUtils.cp_r(REPO_TEMPLATE_PATH, REPO_PATH)
+  FileUtils.cp_r(path, REPO_PATH)
 
   Git.init(REPO_PATH).tap do |g|
     g.add(all: true)
     g.commit("Initial commit")
   end
+end
+
+Before do
+
+  setup_repo
 
   # kill existing pid first
   if FileTest.exist?(PID_PATH)

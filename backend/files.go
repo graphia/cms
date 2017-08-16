@@ -89,6 +89,7 @@ func getFilesInDir(directory string) (files []FileItem, err error) {
 				Version:          fm.Version,
 				Tags:             fm.Tags,
 				Synopsis:         fm.Synopsis,
+				Slug:             fm.Slug,
 			}
 
 			files = append(files, fi)
@@ -153,25 +154,6 @@ func updateFiles(nc NewCommit, user User) (oid *git.Oid, err error) {
 		return nil, err
 	}
 	defer repo.Free()
-
-	ht, err := headTree(repo)
-	if err != nil {
-		return nil, err
-	}
-
-	// check all of the files already exist
-	// check none of the files already exist
-	for _, ncf := range nc.Files {
-
-		target := filepath.Join(ncf.Path, ncf.Filename)
-
-		_, err := ht.EntryByPath(target)
-
-		if err != nil {
-			return nil, fmt.Errorf("file not found: %s", target)
-		}
-
-	}
 
 	oid, err = writeFiles(repo, nc, user)
 
@@ -553,16 +535,11 @@ func getFile(directory string, filename string, includeMd, includeHTML bool) (fi
 		html = &str
 	}
 
-	// the attachments directory is the name of the file
-	// minus the extension
-	attachmentsDir := strings.TrimSuffix(entry.Name, filepath.Ext(entry.Name))
-
 	file = &File{
-		Filename:             filename,
-		Path:                 directory,
-		HTML:                 html,
-		Markdown:             markdown,
-		AttachmentsDirectory: attachmentsDir,
+		Filename: filename,
+		Path:     directory,
+		HTML:     html,
+		Markdown: markdown,
 
 		// front matter derived attributes
 		Title:    fm.Title,
@@ -570,6 +547,7 @@ func getFile(directory string, filename string, includeMd, includeHTML bool) (fi
 		Synopsis: fm.Synopsis,
 		Version:  fm.Version,
 		Tags:     fm.Tags,
+		Slug:     fm.Slug,
 	}
 
 	return file, err
@@ -605,7 +583,7 @@ func getAttachments(directory string) (files []Attachment, err error) {
 
 	defer tree.Free()
 
-	walkIterator := func(_ string, te *git.TreeEntry) int {
+	walkIterator := func(path string, te *git.TreeEntry) int {
 		var blob *git.Blob
 		var ext string
 		var attachment Attachment
@@ -631,10 +609,10 @@ func getAttachments(directory string) (files []Attachment, err error) {
 
 			attachment = Attachment{
 				Filename:         te.Name,
-				AbsoluteFilename: filepath.Join(directory, te.Name),
+				AbsoluteFilename: filepath.Join(directory, path, te.Name),
 				Extension:        ext,
 				Data:             base64.StdEncoding.EncodeToString(data),
-				Path:             directory,
+				Path:             filepath.Join(directory, path),
 				MediaType:        getMediaType(ext),
 			}
 

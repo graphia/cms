@@ -39,7 +39,7 @@ run-backend:
 
 run-frontend:
 	#brunch watch --server frontend
-	cd frontend && brunch watch --server --env development
+	cd frontend && brunch watch --env development
 
 cleanup:
 	rm -rf tests/tmp/**/*

@@ -7,7 +7,6 @@ import (
 )
 
 // NewCommit will replace RepoWrite and allow multiple files
-// TODO rename to NewCommit
 type NewCommit struct {
 	Message     string               `json:"message"`
 	Files       []NewCommitFile      `json:"files"`
@@ -49,11 +48,12 @@ type FailureResponse struct {
 
 // FrontMatter contains the document's metadata
 type FrontMatter struct {
-	Title    string   `yaml:"title"`
 	Author   string   `yaml:"author"`
+	Slug     string   `yaml:"slug"`
 	Synopsis string   `yaml:"synopsis"`
-	Version  string   `yaml:"version"`
 	Tags     []string `yaml:"tags"`
+	Title    string   `yaml:"title"`
+	Version  string   `yaml:"version"`
 }
 
 // Directory contains the directory's metadata
@@ -75,22 +75,23 @@ type FileItem struct {
 	Version          string    `json:"version"`
 	Tags             []string  `json:"tags"`
 	Title            string    `json:"title"`
+	Slug             string    `json:"slug"`
 }
 
 // File represents a Markdown file and can be returned with
 // HTML or Markdown contents (or both if required)
 type File struct {
-	AbsoluteFilename     string   `json:"absolute_filename"`
-	Filename             string   `json:"filename"`
-	AttachmentsDirectory string   `json:"attachments_directory"`
-	Path                 string   `json:"path"`
-	HTML                 *string  `json:"html"`
-	Markdown             *string  `json:"markdown"`
-	Author               string   `json:"author"`
-	Title                string   `json:"title"`
-	Synopsis             string   `json:"synopsis"`
-	Version              string   `json:"version"`
-	Tags                 []string `json:"tags"`
+	AbsoluteFilename string   `json:"absolute_filename"`
+	Filename         string   `json:"filename"`
+	Path             string   `json:"path"`
+	HTML             *string  `json:"html"`
+	Markdown         *string  `json:"markdown"`
+	Author           string   `json:"author"`
+	Title            string   `json:"title"`
+	Synopsis         string   `json:"synopsis"`
+	Version          string   `json:"version"`
+	Tags             []string `json:"tags"`
+	Slug             string   `json:"slug"`
 }
 
 // Attachment belongs to a File, usually an image

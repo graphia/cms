@@ -22,9 +22,47 @@ export default class CMSFileAttachment {
 		return this;
 	};
 
+	// Convert a file retrieved from the CMS into a CMSFileAttachment
+	static fromData(object) {
+
+		console.log("extracting attachment object from", object);
+
+		let ab = new ArrayBuffer(object.data.length);
+
+		let ia = new Uint8Array(ab);
+
+		for (const [i, _] of object.data) {
+			ia[i] = object.data.charCodeAt(i)
+		}
+
+		// write the ArrayBuffer to a blob
+		let blob = new Blob([ia], { type: object.filetype });
+
+		// Make the blob look like a File by adding name and timestamp
+		blob.lastModifiedDate = new Date();
+		blob.name = object.filename;
+
+		let attachment = new CMSFileAttachment(
+			blob,
+			`data:${object.filetype};base64,${object.data}`,
+			{base64Encoded: true}
+		);
+
+		console.log("new obj", attachment);
+
+		return attachment;
+	}
+
+	isNew() {
+		if (this.options.newFile) {
+			return true;
+		};
+		return false;
+	};
+
 	dataURI() {
 		return this.data;
-	}
+	};
 
 	// Get rid of the base64, prefix if this attachment
 	// file is encoded, otherwise return the data as is
@@ -35,15 +73,19 @@ export default class CMSFileAttachment {
 		}
 
 		return this.data;
-	}
+	};
+
+	filePath() {
+		return [this.dir, "images", this.name].join('/');
+	};
 
 	relativePath() {
 		return ["images", this.name].join('/');
-	}
+	};
 
 	markdownImage() {
 		return `![${this.name}](${window.encodeURI(this.relativePath())})`
-	}
+	};
 
 
 };
