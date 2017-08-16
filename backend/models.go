@@ -69,13 +69,8 @@ type FileItem struct {
 	AbsoluteFilename string    `json:"absolute_filename"`
 	Filename         string    `json:"filename"`
 	Path             string    `json:"path"`
-	Author           string    `json:"author"`
 	Date             time.Time `json:"updated_at"`
-	Synopsis         string    `json:"synopsis"`
-	Version          string    `json:"version"`
-	Tags             []string  `json:"tags"`
-	Title            string    `json:"title"`
-	Slug             string    `json:"slug"`
+	FrontMatter      `json:"frontmatter"`
 }
 
 // File represents a Markdown file and can be returned with

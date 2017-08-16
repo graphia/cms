@@ -1,5 +1,5 @@
 ---
-title: "document 1"
+title: document 1
 ---
 # Document 1
 

@@ -84,12 +84,7 @@ func getFilesInDir(directory string) (files []FileItem, err error) {
 				AbsoluteFilename: fmt.Sprintf("%s/%s", directory, te.Name),
 				Filename:         te.Name,
 				Path:             directory,
-				Author:           fm.Author,
-				Title:            fm.Title,
-				Version:          fm.Version,
-				Tags:             fm.Tags,
-				Synopsis:         fm.Synopsis,
-				Slug:             fm.Slug,
+				FrontMatter:      fm,
 			}
 
 			files = append(files, fi)

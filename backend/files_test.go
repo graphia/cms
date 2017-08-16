@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/graphia/particle"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -109,11 +110,13 @@ func TestGetRawFile(t *testing.T) {
 		t.Error("error", err)
 	}
 
-	contents, _ := ioutil.ReadFile(filepath.Join(
+	raw, _ := ioutil.ReadFile(filepath.Join(
 		config.Repository,
 		"documents",
 		"document_2.md",
 	))
+
+	contents, err := particle.YAMLEncoding.DecodeString(string(raw), &FrontMatter{})
 
 	assert.Equal(t, file.Filename, "document_2.md")
 	assert.Equal(t, file.Path, "documents")
@@ -133,11 +136,13 @@ func TestGetFileBothMarkdownAndHTML(t *testing.T) {
 		t.Error("error", err)
 	}
 
-	contents, _ := ioutil.ReadFile(filepath.Join(
+	raw, _ := ioutil.ReadFile(filepath.Join(
 		config.Repository,
 		"documents",
 		"document_2.md",
 	))
+
+	contents, err := particle.YAMLEncoding.DecodeString(string(raw), &FrontMatter{})
 
 	assert.Equal(t, file.Filename, "document_2.md")
 	assert.Equal(t, file.Path, "documents")
