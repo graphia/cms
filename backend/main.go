@@ -119,7 +119,6 @@ func unprotectedRouter() (r *vestigo.Router) {
 	r.HandleFunc("/cms/*", cmsGeneralHandler)
 
 	// serve everything in build by default
-	// TODO make this path configurable
 	r.Handle("/*", http.FileServer(http.Dir(config.Static)))
 
 	if config.CORSEnabled {

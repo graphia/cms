@@ -7,7 +7,6 @@ import (
 )
 
 // NewCommit will replace RepoWrite and allow multiple files
-// TODO rename to NewCommit
 type NewCommit struct {
 	Message     string               `json:"message"`
 	Files       []NewCommitFile      `json:"files"`
