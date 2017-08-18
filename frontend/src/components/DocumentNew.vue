@@ -29,14 +29,11 @@
 		},
 		async created() {
 
-			console.debug("new doc...");
-
 			// set up a fresh new commit
 			this.$store.dispatch("initializeCommit");
 
 			// initialize a fresh new document
-			let doc = await this.$store.dispatch("initializeDocument", this.directory);
-			this.$store.commit("setActiveDocument", doc);
+			this.$store.commit("initializeDocument", this.directory);
 
 
 		},

@@ -16,9 +16,19 @@ export default class CMSFile {
 
 		if (file && file.initialzing) {
 
-			this.path     = file.directory;
-			this.filename = "";
-			this.slug     = "";
+			this.path            = file.path;
+			this.filename        = "";
+			this.slug            = "";
+			this.html            = "";
+			this.markdown        = "";
+			this.title           = "";
+			this.author          = "";
+			this.synopsis        = "";
+			this.tags            = "";
+			this.version         = "";
+			this.history         = [];
+			this.attachments     = [];
+			this.initialMarkdown = "";
 
 		} else if (file) {
 
@@ -249,14 +259,19 @@ export default class CMSFile {
 				headers: store.state.auth.authHeader()
 			});
 
+			if (response.status == 404) {
+				console.debug("No attachments found");
+				return;
+			}
+
 			if (!checkResponse(response.status)) {
-				return
+				return;
 			};
 
 			let data = await response.json();
 
 			this.attachments = data.map((att) => {
-				return CMSFileAttachment.fromData(att)
+				return CMSFileAttachment.fromData(att);
 			});
 
 			return;
