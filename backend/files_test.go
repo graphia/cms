@@ -62,11 +62,11 @@ func TestGetFilesInDirContents(t *testing.T) {
 	assert.Equal(t, "appendices/appendix_1.md", file.AbsoluteFilename)
 
 	// frontmattter metadata
-	assert.Equal(t, "Appendix 1", file.Title)
-	assert.Equal(t, "1.1", file.Version)
-	assert.Equal(t, "Arnold Pye", file.Author)
-	assert.Equal(t, []string{"Traffic News", "KBBL TV"}, file.Tags)
-	assert.Equal(t, "The first appendix is the best appendix", file.Synopsis)
+	assert.Equal(t, "Appendix 1", file.FrontMatter.Title)
+	assert.Equal(t, "1.1", file.FrontMatter.Version)
+	assert.Equal(t, "Arnold Pye", file.FrontMatter.Author)
+	assert.Equal(t, []string{"Traffic News", "KBBL TV"}, file.FrontMatter.Tags)
+	assert.Equal(t, "The first appendix is the best appendix", file.FrontMatter.Synopsis)
 }
 
 func TestGetFilesInNonExistantDir(t *testing.T) {

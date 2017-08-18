@@ -27,15 +27,17 @@
 				submitButtonText: "Create",
 			};
 		},
-		created() {
+		async created() {
 
 			console.debug("new doc...");
 
-			// initialize a fresh new document
-			this.$store.dispatch("initializeDocument", this.directory);
-
 			// set up a fresh new commit
 			this.$store.dispatch("initializeCommit");
+
+			// initialize a fresh new document
+			let doc = await this.$store.dispatch("initializeDocument", this.directory);
+			this.$store.commit("setActiveDocument", doc);
+
 
 		},
 		computed: {

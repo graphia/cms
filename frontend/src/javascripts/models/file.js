@@ -6,37 +6,45 @@ import CMSFileAttachment from './attachment.js';
 export default class CMSFile {
 
 	static initialize(directory) {
-		console.debug("Initialising file");
-		let file = new CMSFile(null, null, directory, null, null, null, null);
+		console.debug("Initialising file in", directory);
+		let file = new CMSFile({initialzing: true, path: directory});
 		store.state.activeDocument = file;
 		return file;
 	}
 
-	constructor(author, email, path, filename, title, html, markdown, synopsis, tags, slug, version) {
+	constructor(file) {
 
-		// TODO this is a bit long and ugly; can it be neatened up?
+		if (file && file.initialzing) {
 
-		this.email                 = email;
-		this.path                  = path;
-		this.filename              = filename;
-		this.title                 = title;
-		this.html                  = html;
-		this.markdown              = markdown;
+			this.path     = file.directory;
+			this.filename = "";
+			this.slug     = "";
 
-		this.author                = author;
-		this.synopsis              = synopsis;
-		this.tags                  = tags;
-		this.slug                  = slug;
+		} else if (file) {
 
-		this.version               = version;
+			// TODO this is a bit long and ugly; can it be neatened up?
+			this.path                  = file.path;
+			this.filename              = file.filename;
+			this.html                  = file.html;
+			this.markdown              = file.markdown;
 
-		// History and attachments are arrays which may be populated later
-		this.history = [];     // historic commits
-		this.attachments = []; // related files from the directory named after file
+			// frontmatter fields
+			this.title                 = file.frontmatter.title;
+			this.author                = file.frontmatter.author;
+			this.synopsis              = file.frontmatter.synopsis;
+			this.tags                  = file.frontmatter.tags;
+			this.slug                  = file.frontmatter.slug;
+			this.version               = file.frontmatter.version;
 
-		// finally save the initial markdown value so we can detect changes
-		// and display a diff if necessary
-		this.initialMarkdown = markdown;
+			// History and attachments are arrays which may be populated later
+			this.history = [];     // historic commits
+			this.attachments = []; // related files from the directory named after file
+
+			// finally save the initial markdown value so we can detect changes
+			// and display a diff if necessary
+			this.initialMarkdown = file.markdown;
+
+		};
 
 	};
 
@@ -45,9 +53,9 @@ export default class CMSFile {
 			this._tags = tags.split(",");
 		} else if (tags instanceof Array) {
 			this._tags = tags;
-		} else {
-			console.warn("tags must be an array or a comma-separated string");
-		}
+		} else if (tags) {
+			console.warn("tags must be an array or a comma-separated string", tags);
+		};
 	}
 
 	get tags() {
@@ -78,7 +86,7 @@ export default class CMSFile {
 
 			// map documents
 			store.state.documents = json.map((file) => {
-				return new CMSFile(file.author, file.email, file.path, file.filename, file.title, null, null, file.synopsis, file.tags, file.version);
+				return new CMSFile(file);
 			});
 
 		}
@@ -114,9 +122,7 @@ export default class CMSFile {
 		 }
 
 		let file = await response.json()
-		let doc = new CMSFile(
-			file.author, file.email, file.path, file.filename, file.title, file.html, file.markdown, file.synopsis, file.tags, file.slug, file.version
-		);
+		let doc = new CMSFile(file);
 		store.state.activeDocument = doc;
 
 		doc.fetchAttachments();

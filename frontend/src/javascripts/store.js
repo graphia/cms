@@ -12,14 +12,18 @@ Vue.use(Vuex);
 
 const state = {
 	documents: [],
-	activeDocument: new CMSFile,
-	commit: new CMSCommit,
+	activeDocument: null,
+	commit: null,
 	auth: new CMSAuth,
 	broadcast: new CMSBroadcast
 };
 const mutations = {
 	addAttachment(context, file) {
 		return state.activeDocument.attachments.push(file);
+	},
+	setActiveDocument(context, document) {
+		console.debug("setting active document", document);
+		state.activeDocument = document;
 	}
 };
 const getters = {};

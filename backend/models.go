@@ -48,12 +48,12 @@ type FailureResponse struct {
 
 // FrontMatter contains the document's metadata
 type FrontMatter struct {
-	Author   string   `yaml:"author"`
-	Slug     string   `yaml:"slug"`
-	Synopsis string   `yaml:"synopsis"`
-	Tags     []string `yaml:"tags"`
-	Title    string   `yaml:"title"`
-	Version  string   `yaml:"version"`
+	Author   string   `json:"author"   yaml:"author"`
+	Slug     string   `json:"slug"     yaml:"slug"`
+	Synopsis string   `json:"synopsis" yaml:"synopsis"`
+	Tags     []string `json:"tags"     yaml:"tags"`
+	Title    string   `json:"title"    yaml:"title"`
+	Version  string   `json:"version"  yaml:"version"`
 }
 
 // Directory contains the directory's metadata
@@ -66,27 +66,22 @@ type Directory struct {
 // FileItem contains enough file information for listing
 // HTML and raw Markdown content is omitted
 type FileItem struct {
-	AbsoluteFilename string    `json:"absolute_filename"`
-	Filename         string    `json:"filename"`
-	Path             string    `json:"path"`
-	Date             time.Time `json:"updated_at"`
-	FrontMatter      `json:"frontmatter"`
+	AbsoluteFilename string      `json:"absolute_filename"`
+	Filename         string      `json:"filename"`
+	Path             string      `json:"path"`
+	Date             time.Time   `json:"updated_at"`
+	FrontMatter      FrontMatter `json:"frontmatter"`
 }
 
 // File represents a Markdown file and can be returned with
 // HTML or Markdown contents (or both if required)
 type File struct {
-	AbsoluteFilename string   `json:"absolute_filename"`
-	Filename         string   `json:"filename"`
-	Path             string   `json:"path"`
-	HTML             *string  `json:"html"`
-	Markdown         *string  `json:"markdown"`
-	Author           string   `json:"author"`
-	Title            string   `json:"title"`
-	Synopsis         string   `json:"synopsis"`
-	Version          string   `json:"version"`
-	Tags             []string `json:"tags"`
-	Slug             string   `json:"slug"`
+	AbsoluteFilename string      `json:"absolute_filename"`
+	Filename         string      `json:"filename"`
+	Path             string      `json:"path"`
+	HTML             *string     `json:"html"`
+	Markdown         *string     `json:"markdown"`
+	FrontMatter      FrontMatter `json:"frontmatter"`
 }
 
 // Attachment belongs to a File, usually an image
