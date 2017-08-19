@@ -20,10 +20,21 @@
 		name: "DocumentIndex",
 		created() {
 			// populate $store.state.documents with docs from api
-
-			console.debug("retrieving all files from", this.directory);
-
-			this.$store.dispatch("getDocumentsInDirectory", this.directory);
+			this.fetchDocuments(this.directory);
+		},
+		watch: {
+			// if we navigate from one dir index to another, reload the
+			// contents
+			"$route"(to, from) {
+				console.log("changed");
+				this.fetchDocuments(this.directory);
+			}
+		},
+		methods: {
+			fetchDocuments(directory) {
+				console.debug("retrieving all files from", directory);
+				this.$store.dispatch("getDocumentsInDirectory", directory);
+			}
 		},
 		computed: {
 			documents() {
