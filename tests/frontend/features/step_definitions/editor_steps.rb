@@ -94,7 +94,7 @@ When %r{^I have created a new document titled (.*?)$} do |title|
   steps %{
     Given I set the "title" to "#{title}"
     And I enter some text into the editor
-    And I set the "commit message" to "general updates"
+    And I set the "commit message" to "new doc"
     When I submit the form
     Then I should see the document containing my recent changes
   }
@@ -228,7 +228,6 @@ Then %r{^I should see a tags editing field$} do
     expect(page).to have_css(".tags-input")
   end
 end
-
 
 Then %r{^the title validation feedback should be visible$} do
   expect(page).to have_css("div.document-title.has-danger")

@@ -765,9 +765,9 @@ func apiGetFileAttachmentsHandler(w http.ResponseWriter, r *http.Request) {
 	files, err := getAttachments(path)
 	if err != nil {
 		fr = FailureResponse{
-			Message: fmt.Sprintf("Failed to get converted file: %s", err.Error()),
+			Message: "No attachments",
 		}
-		JSONResponse(fr, http.StatusBadRequest, w)
+		JSONResponse(fr, http.StatusNotFound, w)
 	}
 
 	output, err := json.Marshal(files)

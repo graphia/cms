@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/graphia/particle"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -61,11 +62,11 @@ func TestGetFilesInDirContents(t *testing.T) {
 	assert.Equal(t, "appendices/appendix_1.md", file.AbsoluteFilename)
 
 	// frontmattter metadata
-	assert.Equal(t, "Appendix 1", file.Title)
-	assert.Equal(t, "1.1", file.Version)
-	assert.Equal(t, "Arnold Pye", file.Author)
-	assert.Equal(t, []string{"Traffic News", "KBBL TV"}, file.Tags)
-	assert.Equal(t, "The first appendix is the best appendix", file.Synopsis)
+	assert.Equal(t, "Appendix 1", file.FrontMatter.Title)
+	assert.Equal(t, "1.1", file.FrontMatter.Version)
+	assert.Equal(t, "Arnold Pye", file.FrontMatter.Author)
+	assert.Equal(t, []string{"Traffic News", "KBBL TV"}, file.FrontMatter.Tags)
+	assert.Equal(t, "The first appendix is the best appendix", file.FrontMatter.Synopsis)
 }
 
 func TestGetFilesInNonExistantDir(t *testing.T) {
@@ -109,11 +110,13 @@ func TestGetRawFile(t *testing.T) {
 		t.Error("error", err)
 	}
 
-	contents, _ := ioutil.ReadFile(filepath.Join(
+	raw, _ := ioutil.ReadFile(filepath.Join(
 		config.Repository,
 		"documents",
 		"document_2.md",
 	))
+
+	contents, err := particle.YAMLEncoding.DecodeString(string(raw), &FrontMatter{})
 
 	assert.Equal(t, file.Filename, "document_2.md")
 	assert.Equal(t, file.Path, "documents")
@@ -133,11 +136,13 @@ func TestGetFileBothMarkdownAndHTML(t *testing.T) {
 		t.Error("error", err)
 	}
 
-	contents, _ := ioutil.ReadFile(filepath.Join(
+	raw, _ := ioutil.ReadFile(filepath.Join(
 		config.Repository,
 		"documents",
 		"document_2.md",
 	))
+
+	contents, err := particle.YAMLEncoding.DecodeString(string(raw), &FrontMatter{})
 
 	assert.Equal(t, file.Filename, "document_2.md")
 	assert.Equal(t, file.Path, "documents")

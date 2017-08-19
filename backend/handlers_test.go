@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/graphia/particle"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/libgit2/git2go.v25"
 )
@@ -50,6 +51,45 @@ func TestApiListDirectoriesHandler(t *testing.T) {
 	}
 
 	assert.Equal(t, directoryNames, directoriesExpected)
+
+}
+
+func Test_apiListFilesInDirectoryHandler(t *testing.T) {
+	server = httptest.NewServer(protectedRouter())
+	repoPath := "../tests/tmp/repositories/list_files_in_directory"
+	setupSmallTestRepo(repoPath)
+
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files")
+
+	req, _ := http.NewRequest("GET", target, nil)
+	client := &http.Client{}
+	resp, _ := client.Do(req)
+
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+	var receiver []FileItem
+	json.NewDecoder(resp.Body).Decode(&receiver)
+
+	// ensure we get 3 files back
+	assert.Equal(t, 3, len(receiver))
+
+	// ensure all files are returned
+	var expectedFilenames, actualFilenames []string
+
+	expectedFilenames = []string{"document_1.md", "document_2.md", "document_3.md"}
+	for _, fi := range receiver {
+		actualFilenames = append(actualFilenames, fi.Filename)
+	}
+	assert.Equal(t, expectedFilenames, actualFilenames)
+
+	// ensure frontmatter is returned correctly
+	var expectedTitles, actualTitles []string
+
+	expectedTitles = []string{"document 1", "document 2", "document 3"}
+	for _, fi := range receiver {
+		actualTitles = append(actualTitles, fi.FrontMatter.Title)
+	}
+	assert.Equal(t, expectedTitles, actualTitles)
 
 }
 
@@ -756,12 +796,109 @@ func TestApiEditFileInDirectory(t *testing.T) {
 	assert.Equal(t, file.Filename, "document_3.md")
 	assert.Equal(t, file.Path, "documents")
 
-	contents, _ := ioutil.ReadFile(filepath.Join(
+	raw, _ := ioutil.ReadFile(filepath.Join(
 		config.Repository,
 		"documents",
 		"document_3.md",
 	))
 
+	contents, err := particle.YAMLEncoding.DecodeString(string(raw), &FrontMatter{})
+
 	assert.Equal(t, *file.Markdown, string(contents))
+
+}
+
+func TestApiGetAttachmentsHandler(t *testing.T) {
+	server = createTestServerWithContext()
+
+	repoPath := "../tests/tmp/repositories/get_attachments_handler"
+	setupMultipleFiletypesTestRepo(repoPath)
+
+	target := fmt.Sprintf(
+		"%s/%s",
+		server.URL,
+		"api/directories/appendices/files/appendix_1/attachments",
+	)
+
+	resp, err := http.Get(target)
+
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+	if err != nil {
+		panic(err)
+	}
+
+	var attachments []Attachment
+
+	json.NewDecoder(resp.Body).Decode(&attachments)
+
+	jsonAttachmentContents, _ := ioutil.ReadFile(filepath.Join(repoPath, "appendices", "appendix_1", "data", "data.json"))
+	xmlAttachmentContents, _ := ioutil.ReadFile(filepath.Join(repoPath, "appendices", "appendix_1", "data", "data.xml"))
+	pngAttachmentContents, _ := ioutil.ReadFile(filepath.Join(repoPath, "appendices", "appendix_1", "images", "image_1.png"))
+	jpegAttachmentContents, _ := ioutil.ReadFile(filepath.Join(repoPath, "appendices", "appendix_1", "images", "image_2.jpg"))
+
+	expectedAttachments := []Attachment{
+		Attachment{
+			Path:             "appendices/appendix_1/data",
+			AbsoluteFilename: "appendices/appendix_1/data/data.json",
+			Extension:        ".json",
+			MediaType:        "text/json",
+			Data:             base64.StdEncoding.EncodeToString(jsonAttachmentContents),
+			Filename:         "data.json",
+		},
+		Attachment{
+			Path:             "appendices/appendix_1/data",
+			AbsoluteFilename: "appendices/appendix_1/data/data.xml",
+			Extension:        ".xml",
+			MediaType:        "text/xml",
+			Data:             base64.StdEncoding.EncodeToString(xmlAttachmentContents),
+			Filename:         "data.xml",
+		},
+		Attachment{
+			Path:             "appendices/appendix_1/images",
+			AbsoluteFilename: "appendices/appendix_1/images/image_1.png",
+			Extension:        ".png",
+			MediaType:        "image/png",
+			Data:             base64.StdEncoding.EncodeToString(pngAttachmentContents),
+			Filename:         "image_1.png",
+		},
+		Attachment{
+			Path:             "appendices/appendix_1/images",
+			AbsoluteFilename: "appendices/appendix_1/images/image_2.jpg",
+			Extension:        ".jpg",
+			MediaType:        "image/jpeg",
+			Data:             base64.StdEncoding.EncodeToString(jpegAttachmentContents),
+			Filename:         "image_2.jpg",
+		},
+	}
+
+	for _, a := range expectedAttachments {
+		t.Run(a.Filename, func(t *testing.T) {
+			assert.Contains(t, attachments, a)
+		})
+	}
+
+}
+
+func TestApiGetAttachmentsNoDirectoryHandler(t *testing.T) {
+	server = createTestServerWithContext()
+
+	repoPath := "../tests/tmp/repositories/get_attachments_handler"
+	setupMultipleFiletypesTestRepo(repoPath)
+
+	target := fmt.Sprintf(
+		"%s/%s",
+		server.URL,
+		"api/directories/documents/files/document_3/attachments",
+	)
+
+	resp, _ := http.Get(target)
+
+	var fr FailureResponse
+
+	json.NewDecoder(resp.Body).Decode(&fr)
+
+	assert.Equal(t, http.StatusNotFound, resp.StatusCode)
+	assert.Equal(t, "No attachments", fr.Message)
 
 }

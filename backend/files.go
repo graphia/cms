@@ -84,12 +84,7 @@ func getFilesInDir(directory string) (files []FileItem, err error) {
 				AbsoluteFilename: fmt.Sprintf("%s/%s", directory, te.Name),
 				Filename:         te.Name,
 				Path:             directory,
-				Author:           fm.Author,
-				Title:            fm.Title,
-				Version:          fm.Version,
-				Tags:             fm.Tags,
-				Synopsis:         fm.Synopsis,
-				Slug:             fm.Slug,
+				FrontMatter:      fm,
 			}
 
 			files = append(files, fi)
@@ -536,18 +531,11 @@ func getFile(directory string, filename string, includeMd, includeHTML bool) (fi
 	}
 
 	file = &File{
-		Filename: filename,
-		Path:     directory,
-		HTML:     html,
-		Markdown: markdown,
-
-		// front matter derived attributes
-		Title:    fm.Title,
-		Author:   fm.Author,
-		Synopsis: fm.Synopsis,
-		Version:  fm.Version,
-		Tags:     fm.Tags,
-		Slug:     fm.Slug,
+		Filename:    filename,
+		Path:        directory,
+		HTML:        html,
+		Markdown:    markdown,
+		FrontMatter: fm,
 	}
 
 	return file, err
