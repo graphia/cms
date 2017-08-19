@@ -4,7 +4,6 @@ Feature: Creating documents
 	I want to add graphics and images
 
 	Background:
-		#Given the repository contains multiple filetypes
 		Given my user account exists
 		And I have logged in
 

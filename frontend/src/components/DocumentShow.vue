@@ -29,7 +29,7 @@
 					</dl>
 
 					<div class="btn-toolbar" role="toolbar">
-						<router-link class="btn btn-success mr-2" :to="{name: 'document_edit', params: {directory: 'documents', filename: this.filename}}">
+						<router-link class="btn btn-success mr-2" :to="{name: 'document_edit', params: {directory: this.directory, filename: this.filename}}">
 							Edit
 						</router-link>
 
@@ -111,18 +111,21 @@
 			}
 		},
 		methods: {
-			destroy(event) {
+			async destroy(event) {
 				event.preventDefault();
 				console.debug("delete clicked!");
 
 				let commit = this.commit;
 				let file = this.document;
 
-				this.document.destroy(this.commit)
-					.then((response) => {
-						console.debug("File deleted, redirecting to document index");
-						this.redirectToDirectoryIndex(this.directory);
-					});
+				let response = await this.document.destroy(this.commit);
+
+				if (!checkResponse(response.status)) {
+					throw("could not delete document");
+				}
+
+				console.debug("File deleted, redirecting to document index");
+				this.redirectToDirectoryIndex(this.directory);
 
 			},
 			redirectToDirectoryIndex(directory) {

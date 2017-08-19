@@ -73,7 +73,13 @@ router.beforeEach((to, from, next) => {
 		window.originalDestination = to.path;
 
 		// if token exists, continue, otherwise redirect to login page
-		CMSAuth.isLoggedIn() ? next() : next(new Error("NotLoggedIn"));
+		if (CMSAuth.isLoggedIn()) {
+			console.debug("yes, they're logged in, continue");
+			next();
+		} else {
+			console.warn("No, redirect them to the login page");
+			next(new Error("NotLoggedIn"));
+		};
 	}
 
 });

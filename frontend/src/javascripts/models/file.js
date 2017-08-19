@@ -136,6 +136,7 @@ export default class CMSFile {
 		store.state.activeDocument = doc;
 
 		doc.fetchAttachments();
+		return doc;
 
 	};
 
@@ -249,6 +250,11 @@ export default class CMSFile {
 	};
 
 	async fetchAttachments() {
+
+		if (!this.path || !this.slug) {
+			console.warn("Missing params, cannot retrieve attachments", this.path, this.slug);
+			return;
+		}
 
 		let path = `${config.api}/directories/${this.path}/files/${this.slug}/attachments`
 
