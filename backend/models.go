@@ -8,7 +8,7 @@ import (
 
 // NewCommit will replace RepoWrite and allow multiple files
 type NewCommit struct {
-	Message     string               `json:"message"`
+	Message     string               `json:"message" validate:"required,min=5"`
 	Files       []NewCommitFile      `json:"files"`
 	Directories []NewCommitDirectory `json:"directories"`
 }
@@ -20,8 +20,8 @@ type NewCommitDirectory struct {
 
 // NewCommitFile will replace RepoWrite's file attributes
 type NewCommitFile struct {
-	Filename      string      `json:"filename"`
-	Path          string      `json:"path"`
+	Filename      string      `json:"filename" validate:"required"`
+	Path          string      `json:"path" validate:"required"`
 	Body          string      `json:"body"`
 	FrontMatter   FrontMatter `json:"frontmatter"`
 	Base64Encoded bool        `json:"base_64_encoded"`
