@@ -249,6 +249,51 @@ func TestApiCreateFileInDirectory(t *testing.T) {
 
 }
 
+func TestApiCreateFileInDirectoryWithErrors(t *testing.T) {
+	server = createTestServerWithContext()
+
+	repoPath := "../tests/tmp/repositories/create_file"
+	setupSmallTestRepo(repoPath)
+
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files")
+
+	ncf := NewCommitFile{
+		Path:     "documents",
+		Filename: "document_6.md",
+		Body:     "# The quick brown fox",
+		FrontMatter: FrontMatter{
+			Title:  "Document Six",
+			Author: "Kent Brockman & Troy McClure",
+		},
+	}
+
+	nc := &NewCommit{
+		// No Message
+		Files: []NewCommitFile{ncf},
+	}
+
+	payload, err := json.Marshal(nc)
+	if err != nil {
+		panic(err)
+	}
+
+	b := bytes.NewBuffer(payload)
+
+	client := &http.Client{}
+
+	req, _ := http.NewRequest("POST", target, b)
+
+	resp, err := client.Do(req)
+
+	errors := make(map[string]string)
+
+	json.NewDecoder(resp.Body).Decode(&errors)
+
+	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+	assert.Contains(t, "is a required field", errors["message"])
+
+}
+
 func TestApiCreateImageFileInDirectory(t *testing.T) {
 	server = createTestServerWithContext()
 
@@ -374,6 +419,51 @@ func TestApiUpdateFileInDirectory(t *testing.T) {
 	user := apiTestUser()
 	assert.Equal(t, lastCommit.Committer().Name, user.Name)
 	assert.Equal(t, lastCommit.Committer().Email, user.Email)
+
+}
+
+func TestApiUpdateFileInDirectoryWithErrors(t *testing.T) {
+	server = createTestServerWithContext()
+
+	repoPath := "../tests/tmp/repositories/update_file"
+	setupSmallTestRepo(repoPath)
+
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files/document_3.md")
+
+	ncf := NewCommitFile{
+		Path:     "documents",
+		Filename: "document_3.md",
+		Body:     "# The quick brown fox",
+		FrontMatter: FrontMatter{
+			Title:  "Document Three",
+			Author: "Timothy Lovejoy",
+		},
+	}
+
+	nc := &NewCommit{
+		// No Message
+		Files: []NewCommitFile{ncf},
+	}
+
+	payload, err := json.Marshal(nc)
+	if err != nil {
+		panic(err)
+	}
+
+	buff := bytes.NewBuffer(payload)
+
+	client := &http.Client{}
+
+	req, _ := http.NewRequest("PATCH", target, buff)
+
+	resp, err := client.Do(req)
+
+	errors := make(map[string]string)
+
+	json.NewDecoder(resp.Body).Decode(&errors)
+
+	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+	assert.Contains(t, "is a required field", errors["message"])
 
 }
 

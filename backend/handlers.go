@@ -545,9 +545,17 @@ func apiCreateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 	var nc NewCommit
 	var fr FailureResponse
 	var sr SuccessResponse
+	var err error
 
 	// FIXME should check that params match at least once file in nc.Files
 	json.NewDecoder(r.Body).Decode(&nc)
+
+	err = validate.Struct(nc)
+	if err != nil {
+		errors := validationErrorsToJSON(err)
+		JSONResponse(errors, http.StatusBadRequest, w)
+		return
+	}
 
 	user := getCurrentUser(r.Context())
 
@@ -589,12 +597,19 @@ func apiUpdateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 	var nc NewCommit
 	var fr FailureResponse
 	var sr SuccessResponse
+	var err error
 
 	filename = vestigo.Param(r, "file")
 	directory = vestigo.Param(r, "directory")
 
-	//  FIXME should check that params match at least once file in nc.Files
 	json.NewDecoder(r.Body).Decode(&nc)
+
+	err = validate.Struct(nc)
+	if err != nil {
+		errors := validationErrorsToJSON(err)
+		JSONResponse(errors, http.StatusBadRequest, w)
+		return
+	}
 
 	if len(nc.Files) == 0 {
 		fr = FailureResponse{
