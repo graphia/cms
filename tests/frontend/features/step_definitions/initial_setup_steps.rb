@@ -62,7 +62,7 @@ Then %r{^no password\-related warnings should be visible$} do
 end
 
 Then %r{^the new user should have been saved to the database$} do
-  uri = URI('http://127.0.0.1:9095/auth/create_initial_user')
+  uri = URI('http://127.0.0.1:9095/setup/create_initial_user')
   req = Net::HTTP::Get.new(uri, "Content-Type" => "application/json")
   res = Net::HTTP.start(uri.hostname, uri.port) do |http|
     http.request(req)

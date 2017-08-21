@@ -8,7 +8,7 @@ def user
 end
 
 Given %r{^(?:a user account has been created|my user account exists)$} do
-  uri = URI('http://127.0.0.1:9095/auth/create_initial_user')
+  uri = URI('http://127.0.0.1:9095/setup/create_initial_user')
   req = Net::HTTP::Post.new(uri, "Content-Type" => "application/json")
   req.body = user.to_json
   res = Net::HTTP.start(uri.hostname, uri.port) do |http|

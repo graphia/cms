@@ -6,7 +6,7 @@ import VueConfig from 'vue-config';
 switch(process.env.NODE_ENV) {
 
 	case "production":
-		config = {api: "/api", auth: "/auth"};
+		config = {api: "/api", auth: "/auth", setup: "/setup"};
 		break;
 
 	default:  // development
