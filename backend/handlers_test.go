@@ -285,12 +285,12 @@ func TestApiCreateFileInDirectoryWithErrors(t *testing.T) {
 
 	resp, err := client.Do(req)
 
-	expectedJSON := make(map[string]string)
+	errors := make(map[string]string)
 
-	json.NewDecoder(resp.Body).Decode(&expectedJSON)
+	json.NewDecoder(resp.Body).Decode(&errors)
 
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
-	assert.Contains(t, "is a required field", expectedJSON["message"])
+	assert.Contains(t, "is a required field", errors["message"])
 
 }
 
@@ -458,12 +458,12 @@ func TestApiUpdateFileInDirectoryWithErrors(t *testing.T) {
 
 	resp, err := client.Do(req)
 
-	expectedJSON := make(map[string]string)
+	errors := make(map[string]string)
 
-	json.NewDecoder(resp.Body).Decode(&expectedJSON)
+	json.NewDecoder(resp.Body).Decode(&errors)
 
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
-	assert.Contains(t, "is a required field", expectedJSON["message"])
+	assert.Contains(t, "is a required field", errors["message"])
 
 }
 
