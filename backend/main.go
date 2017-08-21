@@ -110,8 +110,13 @@ func unprotectedRouter() (r *vestigo.Router) {
 
 	// authentication endpoints
 	r.Post("/auth/login", authLoginHandler)
-	r.Post("/auth/create_initial_user", authCreateInitialUser)
-	r.Get("/auth/create_initial_user", authAllowCreateInitialUser)
+
+	// setup endpoints
+	r.Get("/setup/create_initial_user", setupAllowCreateInitialUser)
+	r.Post("/setup/create_initial_user", setupCreateInitialUser)
+
+	r.Get("/setup/initialise_repository", setupAllowInitializeRepository)
+	r.Post("/setup/initialise_repository", setupInitializeRepository)
 
 	// rather than above rule, do a check to see if the file exists and serve it
 	// if it doesn't, serve index.html :>

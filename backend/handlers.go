@@ -153,13 +153,13 @@ func authRenewTokenHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// authAllowCreateInitialUser will simply return true if there are no users
+// setupAllowCreateInitialUser will simply return true if there are no users
 // and false if there are some
 //
-// GET /auth/show_initial_setup
+// GET /setup/show_initial_setup
 //
 // {"enabled": false}
-func authAllowCreateInitialUser(w http.ResponseWriter, r *http.Request) {
+func setupAllowCreateInitialUser(w http.ResponseWriter, r *http.Request) {
 	var zeroUsers bool
 
 	count, err := countUsers()
@@ -178,17 +178,36 @@ func authAllowCreateInitialUser(w http.ResponseWriter, r *http.Request) {
 	w.Write(output)
 }
 
-// authCreateInitialUser allows for the creation of the system's first user and
+// setupAllowInitializeRepository will return true if a Git repository does not
+// exist at the location specified in `config.Repository`
+//
+// GET /setup/initialise_repository
+//
+// {"enabled": false}
+
+func setupAllowInitializeRepository(w http.ResponseWriter, r *http.Request) {
+}
+
+// setupInitializeRepository will initialize an empty Git repository in the location
+// specified by `config.Repository`, providing one doesn't already exist there
+//
+// POST /setup/initialise_repository
+//
+// {"created": true}
+func setupInitializeRepository(w http.ResponseWriter, r *http.Request) {
+}
+
+// setupCreateInitialUser allows for the creation of the system's first user and
 // unlike typical user creation, doesn't require the instigator to be logged in
 //
-// POST /auth/create_initial_user
+// POST /setup/create_initial_user
 //
 // {"username": "lhutz", "name": "Lionel Hutz" ...}
 //
 // If successful, the response should be a token:
 //
 // {token: "xxxxx.yyyyy.zzzzz"}
-func authCreateInitialUser(w http.ResponseWriter, r *http.Request) {
+func setupCreateInitialUser(w http.ResponseWriter, r *http.Request) {
 
 	var sr SuccessResponse
 	var fr FailureResponse
