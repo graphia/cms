@@ -84,12 +84,26 @@
 				try {
 					let response = await fetch(path, {mode: "cors", headers: store.state.auth.authHeader()});
 
+					let json = await response.json();
+
+					// handle 404
+					if (response.status == 404 && json.message == "No repository found") {
+						console.log("No repository found", 404)
+						// redirect to create repo component
+					};
+
+					if (response.status == 400 && json.message == "Not a git repository") {
+						console.log("Not a git repository", 400)
+						// redirect to initialize repo component
+					};
+
 					if (!checkResponse(response.status)) {
 						console.warn("error:", response);
 						return;
 					};
 
-					this.directories = await response.json();
+					// everything's ok, set directories to the response's json
+					this.directories = json;
 
 					return;
 
