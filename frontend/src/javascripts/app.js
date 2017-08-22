@@ -16,7 +16,7 @@ import DocumentHistory from '../components/DocumentHistory.vue';
 import Broadcast from '../components/Broadcast.vue';
 
 // Utility Components
-import Octicon from '../components/utilities/Octicon.vue';
+import Octicon from '../components/Utilities/Octicon.vue';
 
 // Authentication Helpers
 import CMSAuth from './auth.js';
