@@ -211,13 +211,13 @@ func listRootDirectories() (directories []Directory, err error) {
 
 	repo, err := repository(config)
 	if err != nil {
-		return nil, err
+		return directories, err
 	}
 	defer repo.Free()
 
 	ht, err := headTree(repo)
 	if err != nil {
-		return nil, err
+		return directories, err
 	}
 
 	defer ht.Free()

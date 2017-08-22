@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/dgrijalva/jwt-go/request"
@@ -331,8 +332,40 @@ func apiListDirectoriesHandler(w http.ResponseWriter, r *http.Request) {
 
 	var directories []Directory
 	var err error
+	var fr FailureResponse
 
 	directories, err = listRootDirectories()
+
+	if err != nil {
+
+		var msg = err.Error()
+
+		// no directory found 404
+		if strings.HasPrefix(msg, "Failed to resolve path") {
+			fr = FailureResponse{
+				Message: fmt.Sprintf("No repository found"),
+			}
+			JSONResponse(fr, http.StatusNotFound, w)
+			return
+		}
+
+		// directory found but not git-controlled 400
+		if strings.HasPrefix(msg, "Could not find repository") {
+			fr = FailureResponse{
+				Message: fmt.Sprintf("Not a git repository"),
+			}
+			JSONResponse(fr, http.StatusBadRequest, w)
+			return
+		}
+
+		// anything else
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Could not retrieve directories: %s", msg),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+
+	}
 
 	output, err := json.Marshal(directories)
 	if err != nil {

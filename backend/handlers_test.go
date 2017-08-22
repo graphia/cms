@@ -54,6 +54,65 @@ func TestApiListDirectoriesHandler(t *testing.T) {
 
 }
 
+func TestApiListDirectoriesHandlerNoDirectory(t *testing.T) {
+	server = httptest.NewServer(protectedRouter())
+
+	testConfigPath := "../config/test.yml"
+	config, _ = loadConfig(&testConfigPath)
+	config.Repository = "../tests/tmp/repositories/non_existant_repo"
+
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories")
+
+	client := &http.Client{}
+
+	req, _ := http.NewRequest("GET", target, nil)
+
+	resp, _ := client.Do(req)
+
+	var fr FailureResponse
+
+	json.NewDecoder(resp.Body).Decode(&fr)
+
+	assert.Equal(t, http.StatusNotFound, resp.StatusCode)
+	assert.Equal(t, "No repository found", fr.Message)
+
+}
+
+func TestApiListDirectoriesHandlerNoGit(t *testing.T) {
+
+	// remove any existing repo
+	repoPath := "../tests/tmp/repositories/uninitialized"
+	_ = os.RemoveAll(repoPath)
+
+	// copy the repo template to the expected location
+	// but don't initialise the git repo
+	template := "../tests/backend/repositories/small"
+
+	_ = CopyDir(template, repoPath)
+
+	testConfigPath := "../config/test.yml"
+	config, _ = loadConfig(&testConfigPath)
+	config.Repository = repoPath
+
+	server = httptest.NewServer(protectedRouter())
+
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories")
+
+	client := &http.Client{}
+
+	req, _ := http.NewRequest("GET", target, nil)
+
+	resp, _ := client.Do(req)
+
+	var fr FailureResponse
+
+	json.NewDecoder(resp.Body).Decode(&fr)
+
+	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+	assert.Equal(t, "Not a git repository", fr.Message)
+
+}
+
 func Test_apiListFilesInDirectoryHandler(t *testing.T) {
 	server = httptest.NewServer(protectedRouter())
 	repoPath := "../tests/tmp/repositories/list_files_in_directory"
