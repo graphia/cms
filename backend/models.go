@@ -60,7 +60,7 @@ type FrontMatter struct {
 // FIXME eventually it will, currently just the name, need to
 // work out how best to store it
 type Directory struct {
-	Name string
+	Name string `json:"name"`
 }
 
 // FileItem contains enough file information for listing
