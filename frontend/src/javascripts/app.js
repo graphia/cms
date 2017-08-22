@@ -7,6 +7,7 @@ import App from '../components/App.vue';
 import SetupInitialUser from '../components/Setup/InitialUser.vue';
 import SetupCreateRepo from '../components/Setup/CreateRepository.vue';
 import SetupInitializeRepo from '../components/Setup/InitializeRepository.vue';
+
 import Login from '../components/Login.vue';
 import Commit from '../components/Commit.vue';
 import Home from '../components/Home.vue';
@@ -34,7 +35,7 @@ Vue.use(VueRouter);
 
 const routes = [
 	// Unprotected pages
-	{path: '/cms/setup', component: SetupInitialUser, name: 'initial_setup'},
+	{path: '/cms/setup/initial_user', component: SetupInitialUser, name: 'initial_setup'},
 	{path: '/cms/login', component: Login, name: 'login'},
 
 	// Protected pages
@@ -65,7 +66,7 @@ router.beforeEach((to, from, next) => {
 	console.debug("checking user is accessing a 'safe' path", to.path)
 
 	// is the destination somewhere other than the login page?
-	if (to.path == '/cms/login' || to.path == '/cms/setup') {
+	if (to.path == '/cms/login' || to.path == '/cms/setup/initial_user') {
 		// destination is login page, continue
 		next();
 	}

@@ -7,13 +7,13 @@ When %r{^I navigate to the login page$} do
 end
 
 When %r{^I navigate to the setup page$} do
-  path = '/cms/setup'
+  path = '/cms/setup/initial_user'
   visit(path)
-  expect(page.current_path).to eql('/cms/setup')
+  expect(page.current_path).to eql(path)
 end
 
 Then %r{^I should be redirected to the initial setup page$} do
-  expect(page.current_path).to eql('/cms/setup')
+  expect(page.current_path).to eql('/cms/setup/initial_user')
 end
 
 Given %r{^I am on the initial setup page$} do
