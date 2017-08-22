@@ -125,8 +125,8 @@ type Token struct {
 	Token string `json:"token"`
 }
 
-// InitialSetup indicates whether or not to display initial setup screen
-type InitialSetup struct {
+// SetupOption indicates whether or not to display initial setup screen
+type SetupOption struct {
 	Enabled bool `json:"enabled"`
 }
 

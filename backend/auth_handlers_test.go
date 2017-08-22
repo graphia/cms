@@ -395,10 +395,10 @@ func TestAuthAllowCreateInitialUserWithUsers(t *testing.T) {
 	target := fmt.Sprintf("%s/%s", server.URL, "auth/create_initial_user")
 
 	resp, _ := http.Get(target)
-	var is InitialSetup
+	var is SetupOption
 
 	json.NewDecoder(resp.Body).Decode(&is)
 
 	// one user exists, initial setup should not be allowed
-	assert.Equal(t, is, InitialSetup{Enabled: false})
+	assert.Equal(t, is, SetupOption{Enabled: false})
 }

@@ -170,7 +170,7 @@ func setupAllowCreateInitialUser(w http.ResponseWriter, r *http.Request) {
 
 	zeroUsers = (count == 0)
 
-	output, err := json.Marshal(InitialSetup{Enabled: zeroUsers})
+	output, err := json.Marshal(SetupOption{Enabled: zeroUsers})
 	if err != nil {
 		panic(err)
 	}
