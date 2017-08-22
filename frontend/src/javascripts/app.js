@@ -5,6 +5,8 @@ import VueRouter from 'vue-router';
 import App from '../components/App.vue';
 
 import SetupInitialUser from '../components/Setup/InitialUser.vue';
+import SetupCreateRepo from '../components/Setup/CreateRepository.vue';
+import SetupInitializeRepo from '../components/Setup/InitializeRepository.vue';
 import Login from '../components/Login.vue';
 import Commit from '../components/Commit.vue';
 import Home from '../components/Home.vue';
@@ -37,6 +39,8 @@ const routes = [
 
 	// Protected pages
 
+	{path: '/cms/setup/create_repo', component: SetupCreateRepo, name: 'create_repo'},
+	{path: '/cms/setup/initialize_repo', component: SetupInitializeRepo, name: 'initialize_repo'},
 	{path: '/cms/commits/:hash', component: Commit, name: 'commit'},
 
 	{path: '/cms/', component: Home, name: 'home'},

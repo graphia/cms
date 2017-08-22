@@ -78,6 +78,13 @@
 			};
 		},
 		methods: {
+
+			redirectToInitializeRepo() {
+				this.$router.push({name: 'initialize_repo'});
+			},
+			redirectToCreateRepo() {
+				this.$router.push({name: 'create_repo'});
+			},
 			async fetchDirectories() {
 				let path = `${config.api}/directories`
 
@@ -86,15 +93,14 @@
 
 					let json = await response.json();
 
-					// handle 404
 					if (response.status == 404 && json.message == "No repository found") {
-						console.log("No repository found", 404)
-						// redirect to create repo component
+						console.warn("No repository found, redirect to create", 404)
+						this.redirectToCreateRepo();
 					};
 
 					if (response.status == 400 && json.message == "Not a git repository") {
-						console.log("Not a git repository", 400)
-						// redirect to initialize repo component
+						console.warn("Directory found, not git repo", 400)
+						this.redirectToInitializeRepo();
 					};
 
 					if (!checkResponse(response.status)) {
