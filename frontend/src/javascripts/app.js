@@ -4,7 +4,7 @@ import VueRouter from 'vue-router';
 // Pages
 import App from '../components/App.vue';
 
-import Setup from '../components/Setup.vue';
+import SetupInitialUser from '../components/Setup/InitialUser.vue';
 import Login from '../components/Login.vue';
 import Commit from '../components/Commit.vue';
 import Home from '../components/Home.vue';
@@ -32,7 +32,7 @@ Vue.use(VueRouter);
 
 const routes = [
 	// Unprotected pages
-	{path: '/cms/setup', component: Setup, name: 'initial_setup'},
+	{path: '/cms/setup', component: SetupInitialUser, name: 'initial_setup'},
 	{path: '/cms/login', component: Login, name: 'login'},
 
 	// Protected pages
