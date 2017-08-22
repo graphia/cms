@@ -14,7 +14,7 @@
 					<li class="nav-item active">Files</li>
 
 					<router-link v-for="directory in directories" :to="{name: 'document_index', params: {directory: directory.name}}" class="nav-link directory-link">
-						{{ directory.name }}
+						{{ directory.name | capitalize }}
 					</router-link>
 
 					<li><a class="nav-link" href="#">History</a></li>
@@ -118,9 +118,5 @@
 
 	.fade-enter, .fade-leave-active {
 		opacity: 0
-	}
-
-	.navbar-nav a:first-letter {
-		text-transform: capitalize;
 	}
 </style>

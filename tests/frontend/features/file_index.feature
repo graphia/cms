@@ -15,6 +15,13 @@ Feature: Listing documents
 
 	Scenario: Documents are visible on the documents page
 		Given I am on the "documents" index page
-		When I click the "appendices" navigation link
+		When I click the "Appendices" navigation link
 		Then I should be on the "appendices" index page
 		And I should see a list containing the contents of the "appendices" directory
+
+	Scenario: The page title should match the directory name
+		Given there are directories called "documents" and "appendices"
+		Then each directory index page should have the correct title:
+			| Directory  | Title      |
+			| documents  | Documents  |
+			| appendices | Appendices |

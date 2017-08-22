@@ -42,3 +42,10 @@ end
 Then %r{^I should be on the "([^"]*)" index page$} do |name|
   expect(page.current_path).to eql("/cms/#{name}")
 end
+
+Then %r{^each directory index page should have the correct title:$} do |table|
+	table.hashes.each do |row|
+		visit("/cms/#{row['Directory']}")
+		expect(page).to have_css("h2", text: row['Title'])
+	end
+end

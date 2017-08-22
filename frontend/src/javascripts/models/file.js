@@ -95,9 +95,11 @@ export default class CMSFile {
 			let json = await response.json()
 
 			// map documents
-			store.state.documents = json.map((file) => {
+			let docs = json.map((file) => {
 				return new CMSFile(file);
 			});
+
+			store.state.documents = docs;
 
 		}
 		catch(err) {
@@ -127,9 +129,9 @@ export default class CMSFile {
 
 		let response = await fetch(path, {mode: "cors", headers: store.state.auth.authHeader()})
 
-		 if (!checkResponse(response.status)) {
-			 return
-		 }
+		if (!checkResponse(response.status)) {
+			return
+		}
 
 		let file = await response.json()
 		let doc = new CMSFile(file);

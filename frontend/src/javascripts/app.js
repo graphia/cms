@@ -96,6 +96,10 @@ Vue.filter('format_date', (value) => {
 	return d.toLocaleString();
 });
 
+Vue.filter('capitalize', (value) => {
+	return value.charAt(0).toUpperCase() + value.slice(1);
+});
+
 // Create a global Event Bus
 var EventBus = new Vue()
 
