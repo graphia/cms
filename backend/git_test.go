@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"sort"
 	"testing"
-
 	"time"
 
 	"github.com/graphia/particle"
@@ -48,7 +47,9 @@ func TestNoHeadCommit(t *testing.T) {
 	var repo *git.Repository
 
 	wd, _ := os.Getwd()
+
 	path := filepath.Join(wd, "../tests/tmp/repositories/empty")
+	os.RemoveAll(path)
 
 	// initialise the empty repo or open it if it's there
 	if _, err := os.Stat(path); os.IsNotExist(err) {
@@ -513,5 +514,68 @@ func historicSign(user User, time time.Time) *git.Signature {
 		Name:  user.Name,
 		Email: user.Email,
 		When:  time,
+	}
+}
+
+func Test_canInitializeGitRepository(t *testing.T) {
+
+	// setup actual git repo
+	gitRepoPath := "../tests/tmp/repositories/get_history_test"
+	_, _ = setupSmallTestRepo(gitRepoPath)
+
+	// setup empty dir
+	emptyDirPath := "../tests/tmp/repositories/empty"
+	os.RemoveAll(emptyDirPath)
+	os.Mkdir(emptyDirPath, 0777)
+
+	// setup full dir
+	fullDirPath := "../tests/tmp/repositories/full"
+	os.RemoveAll(fullDirPath)
+	CopyDir("../tests/backend/repositories/small", fullDirPath)
+
+	// setup file
+	filePath := "../tests/tmp/repositories/file"
+	os.OpenFile(filePath, os.O_RDONLY|os.O_CREATE, 0666)
+
+	// setup non-existant target
+	nonExistantPath := "../tests/tmp/repositories/non_existant_directory"
+
+	type args struct {
+		path string
+	}
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		{
+			name: "Actual Git Repository",
+			args: args{path: gitRepoPath},
+			want: false,
+		},
+		{
+			name: "Empty Directory",
+			args: args{path: emptyDirPath},
+			want: true,
+		},
+		{
+			name: "Directory with files",
+			args: args{path: fullDirPath},
+			want: true,
+		},
+		{
+			name: "File",
+			args: args{path: filePath},
+			want: false,
+		},
+		{
+			name: "Non-existant directory",
+			args: args{path: nonExistantPath},
+			want: false,
+		},
+	}
+
+	for _, tt := range tests {
+		assert.Equal(t, tt.want, canInitializeGitRepository(tt.args.path))
 	}
 }

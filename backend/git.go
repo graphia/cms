@@ -330,3 +330,30 @@ func lookupFileHistory(repo *git.Repository, path string, size int) ([]HistoricC
 	return fh, nil
 
 }
+
+func canInitializeGitRepository(path string) bool {
+
+	stat, err := os.Stat(path)
+	if err != nil {
+		Warning.Printf("directory '%s' doesn't exist, can't initialize, must create, return false", path)
+		return false
+	}
+
+	if !stat.IsDir() {
+		Warning.Printf("file exists at '%s'", path)
+		return false
+	}
+
+	_, err = git.OpenRepository(path)
+	if err == nil {
+		Warning.Printf("git repo already exists at '%s'", path)
+		return false
+	}
+
+	// TODO
+	// Q. what do we do if it's a subdirectory of a git repo?
+	// A. nothing - for the time being! 😎
+
+	Warning.Printf("nothing obstructing git repo initialisation at '%s'", path)
+	return true
+}
