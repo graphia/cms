@@ -331,23 +331,20 @@ func lookupFileHistory(repo *git.Repository, path string, size int) ([]HistoricC
 
 }
 
-func canInitializeGitRepository(path string) bool {
+func canInitializeGitRepository(path string) error {
 
 	stat, err := os.Stat(path)
 	if err != nil {
-		Warning.Printf("directory '%s' doesn't exist, can't initialize, must create, return false", path)
-		return false
+		return fmt.Errorf("directory does not exist '%s'", path)
 	}
 
 	if !stat.IsDir() {
-		Warning.Printf("file exists at '%s'", path)
-		return false
+		return fmt.Errorf("file exists at '%s'", path)
 	}
 
 	_, err = git.OpenRepository(path)
 	if err == nil {
-		Warning.Printf("git repo already exists at '%s'", path)
-		return false
+		return fmt.Errorf("git repo already exists at '%s'", path)
 	}
 
 	// TODO
@@ -355,5 +352,63 @@ func canInitializeGitRepository(path string) bool {
 	// A. nothing - for the time being! 😎
 
 	Warning.Printf("nothing obstructing git repo initialisation at '%s'", path)
-	return true
+	return nil
+}
+
+func initializeGitRepository(user User, path string) (oid *git.Oid, err error) {
+
+	err = canInitializeGitRepository(path)
+
+	if err != nil {
+		return oid, fmt.Errorf("cannot initialise repo")
+	}
+
+	repo, err := git.InitRepository(path, false)
+	if err != nil {
+		return oid, err
+	}
+
+	idx, err := repo.Index()
+	if err != nil {
+		return oid, err
+	}
+
+	err = idx.AddAll([]string{}, git.IndexAddForce, nil)
+	if err != nil {
+		return oid, err
+	}
+
+	err = idx.Write()
+	if err != nil {
+		return oid, err
+	}
+
+	treeID, err := idx.WriteTree()
+	if err != nil {
+		return oid, err
+	}
+
+	tree, err := repo.LookupTree(treeID)
+	if err != nil {
+		return oid, err
+	}
+
+	// git signatures
+	author := sign(user)
+	committer := sign(user)
+	message := "Initialising repository"
+
+	oid, err = repo.CreateCommit("HEAD", author, committer, message, tree)
+	if err != nil {
+		return oid, err
+	}
+
+	fmt.Println("Commit created", oid)
+
+	// checkout to keep file system in sync with git
+	//err = repo.CheckoutHead(
+	//	&git.CheckoutOpts{Strategy: git.CheckoutSafe | git.CheckoutRecreateMissing | git.CheckoutForce},
+	//)
+
+	return oid, err
 }

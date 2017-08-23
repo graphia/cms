@@ -187,15 +187,66 @@ func setupAllowCreateInitialUser(w http.ResponseWriter, r *http.Request) {
 // {"enabled": false}
 
 func setupAllowInitializeRepository(w http.ResponseWriter, r *http.Request) {
+	var err error
+	var response SetupOption
+
+	// does a directory exist? is it under git control?
+
+	path := config.Repository
+
+	err = canInitializeGitRepository(path)
+
+	if err != nil {
+		response = SetupOption{Enabled: false, Meta: err.Error()}
+		JSONResponse(response, http.StatusOK, w)
+		return
+	}
+
+	response = SetupOption{Enabled: true}
+
+	JSONResponse(response, http.StatusOK, w)
+
 }
 
 // setupInitializeRepository will initialize an empty Git repository in the location
 // specified by `config.Repository`, providing one doesn't already exist there
 //
-// POST /setup/initialise_repository
+// POST /setup/create_repository
 //
 // {"created": true}
 func setupInitializeRepository(w http.ResponseWriter, r *http.Request) {
+	var err error
+
+	path := config.Repository
+
+	err = canInitializeGitRepository(path)
+	if err != nil {
+		JSONResponse("Cannot initialize repository, see log", http.StatusBadRequest, w)
+	}
+
+	// do initialise
+
+	JSONResponse("Repository initialised", http.StatusOK, w)
+
+}
+
+// setupAllowCreateRepository will return true if a directory does not
+// exist at the location specified in `config.Repository`
+//
+// GET /setup/create_repository
+//
+// {"enabled": false}
+
+func setupAllowCreateRepository(w http.ResponseWriter, r *http.Request) {
+}
+
+// setupCreateRepository will initialize an empty Git repository in the location
+// specified by `config.Repository`, providing one doesn't already exist there
+//
+// POST /setup/create_repository
+//
+// {"created": true}
+func setupCreateRepository(w http.ResponseWriter, r *http.Request) {
 }
 
 // setupCreateInitialUser allows for the creation of the system's first user and

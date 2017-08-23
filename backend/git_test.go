@@ -520,7 +520,7 @@ func historicSign(user User, time time.Time) *git.Signature {
 func Test_canInitializeGitRepository(t *testing.T) {
 
 	// setup actual git repo
-	gitRepoPath := "../tests/tmp/repositories/get_history_test"
+	gitRepoPath := "../tests/tmp/repositories/initialize_repo"
 	_, _ = setupSmallTestRepo(gitRepoPath)
 
 	// setup empty dir
@@ -543,39 +543,139 @@ func Test_canInitializeGitRepository(t *testing.T) {
 	type args struct {
 		path string
 	}
+	type want struct {
+		err     bool
+		message string
+	}
 	tests := []struct {
 		name string
 		args args
-		want bool
+		want want
 	}{
 		{
 			name: "Actual Git Repository",
 			args: args{path: gitRepoPath},
-			want: false,
+			want: want{err: true, message: "git repo already exists at"},
 		},
 		{
 			name: "Empty Directory",
 			args: args{path: emptyDirPath},
-			want: true,
+			want: want{err: false},
 		},
 		{
 			name: "Directory with files",
 			args: args{path: fullDirPath},
-			want: true,
+			want: want{err: false},
 		},
 		{
 			name: "File",
 			args: args{path: filePath},
-			want: false,
+			want: want{err: true, message: "file exists at"},
 		},
 		{
 			name: "Non-existant directory",
 			args: args{path: nonExistantPath},
-			want: false,
+			want: want{err: true, message: "directory does not exist"},
 		},
 	}
 
+	var err error
+
 	for _, tt := range tests {
-		assert.Equal(t, tt.want, canInitializeGitRepository(tt.args.path))
+
+		err = canInitializeGitRepository(tt.args.path)
+
+		//assert.Equal(t, tt.want, canInitializeGitRepository(tt.args.path))
+		if tt.want.err {
+			assert.NotNil(t, err)
+		}
+	}
+}
+
+func Test_initializeGitRepository(t *testing.T) {
+
+	_ = createUser(ck)
+	ck, _ := getUserByUsername("cookie.kwan")
+
+	// setup actual git repo
+	gitRepoPath := "../tests/tmp/repositories/initialize_repo"
+	_, _ = setupSmallTestRepo(gitRepoPath)
+
+	// setup empty dir
+	emptyDirPath := "../tests/tmp/repositories/empty"
+	os.RemoveAll(emptyDirPath)
+	os.Mkdir(emptyDirPath, 0777)
+
+	// setup full dir
+	fullDirPath := "../tests/tmp/repositories/full"
+	os.RemoveAll(fullDirPath)
+	CopyDir("../tests/backend/repositories/small", fullDirPath)
+
+	// setup file
+	filePath := "../tests/tmp/repositories/file"
+	os.OpenFile(filePath, os.O_RDONLY|os.O_CREATE, 0666)
+
+	// setup non-existant target
+	nonExistantPath := "../tests/tmp/repositories/non_existant_directory"
+
+	type args struct {
+		path string
+	}
+	type want struct {
+		oid     bool
+		err     bool
+		message string
+	}
+	tests := []struct {
+		name string
+		args args
+		want want
+	}{
+
+		{
+			name: "Actual Git Repository",
+			args: args{path: gitRepoPath},
+			want: want{oid: false, err: true, message: "cannot initialise repo"},
+		},
+		{
+			name: "Empty Directory",
+			args: args{path: emptyDirPath},
+			want: want{oid: true, err: false},
+		},
+
+		{
+			name: "Directory with files",
+			args: args{path: fullDirPath},
+		},
+
+		{
+			name: "File",
+			args: args{path: filePath},
+			want: want{oid: false, err: true, message: "cannot initialise repo"},
+		},
+		{
+			name: "Non-existant directory",
+			args: args{path: nonExistantPath},
+			want: want{oid: false, err: true, message: "cannot initialise repo"},
+		},
+	}
+
+	var oid *git.Oid
+	var err error
+
+	for _, tt := range tests {
+		//assert.Equal(t, tt.want, canInitializeGitRepository(tt.args.path))
+		oid, err = initializeGitRepository(ck, tt.args.path)
+
+		// ensure a commit has been made to the repo
+		if tt.want.oid {
+			assert.NotNil(t, oid)
+		}
+
+		if tt.want.err {
+			assert.NotNil(t, err)
+			assert.Equal(t, tt.want.message, err.Error())
+		}
+
 	}
 }

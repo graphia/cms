@@ -127,7 +127,8 @@ type Token struct {
 
 // SetupOption indicates whether or not to display initial setup screen
 type SetupOption struct {
-	Enabled bool `json:"enabled"`
+	Enabled bool   `json:"enabled"`
+	Meta    string `json:"meta,omitempty"`
 }
 
 // Commit holds metadata for a Git Commit
