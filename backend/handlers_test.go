@@ -1099,6 +1099,58 @@ func Test_setupAllowInitializeRepository_Fail(t *testing.T) {
 	assert.Contains(t, so.Meta, "git repo already exists at")
 }
 
-func Test_setupInitializeRepository(t *testing.T) {
+func Test_setupInitializeRepository_Success(t *testing.T) {
+	server = createTestServerWithContext()
 
+	newDir := "../tests/tmp/repositories/full"
+	os.RemoveAll(newDir)
+	CopyDir("../tests/backend/repositories/small", newDir)
+
+	config.Repository = newDir
+
+	target := fmt.Sprintf(
+		"%s/%s",
+		server.URL,
+		"api/setup/initialize_repository",
+	)
+
+	resp, _ := http.Post(target, "application/json", nil)
+
+	var sr SuccessResponse
+	json.NewDecoder(resp.Body).Decode(&sr)
+
+	// make sure the returned oid is at the head of the repo
+	repo, _ := repository(config)
+	hc, _ := headCommit(repo)
+	assert.Equal(t, hc.Id().String(), sr.Oid)
+
+	// and that the status and message are correct
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+	assert.Contains(t, sr.Message, "Repository initialised")
+
+}
+
+func Test_setupInitializeRepository_Failure(t *testing.T) {
+	server = createTestServerWithContext()
+
+	gitRepoPath := "../tests/tmp/repositories/allow_initialize"
+	_, _ = setupSmallTestRepo(gitRepoPath)
+
+	target := fmt.Sprintf(
+		"%s/%s",
+		server.URL,
+		"api/setup/initialize_repository",
+	)
+
+	resp, _ := http.Post(target, "application/json", nil)
+	Debug.Println(resp)
+
+	var fr FailureResponse
+	json.NewDecoder(resp.Body).Decode(&fr)
+
+	Debug.Println(resp.Body)
+
+	// and that the status and message are correct
+	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+	assert.Equal(t, fr.Message, "Cannot initialize repository, see log")
 }

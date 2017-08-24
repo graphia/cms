@@ -403,12 +403,10 @@ func initializeGitRepository(user User, path string) (oid *git.Oid, err error) {
 		return oid, err
 	}
 
-	fmt.Println("Commit created", oid)
-
 	// checkout to keep file system in sync with git
-	//err = repo.CheckoutHead(
-	//	&git.CheckoutOpts{Strategy: git.CheckoutSafe | git.CheckoutRecreateMissing | git.CheckoutForce},
-	//)
+	err = repo.CheckoutHead(
+		&git.CheckoutOpts{Strategy: git.CheckoutSafe | git.CheckoutRecreateMissing | git.CheckoutForce},
+	)
 
 	return oid, err
 }

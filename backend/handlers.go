@@ -190,11 +190,8 @@ func apiSetupAllowInitializeRepository(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var response SetupOption
 
-	// does a directory exist? is it under git control?
-
-	path := config.Repository
-
-	err = canInitializeGitRepository(path)
+	Debug.Println("GOT HERE")
+	err = canInitializeGitRepository(config.Repository)
 
 	if err != nil {
 		response = SetupOption{Enabled: false, Meta: err.Error()}
@@ -212,7 +209,7 @@ func apiSetupAllowInitializeRepository(w http.ResponseWriter, r *http.Request) {
 //
 // POST /setup/create_repository
 //
-// {"created": true}
+// {"oid": "a741330fec...", message: "Repository initialised"}
 func apiSetupInitializeRepository(w http.ResponseWriter, r *http.Request) {
 	var err error
 
@@ -220,32 +217,18 @@ func apiSetupInitializeRepository(w http.ResponseWriter, r *http.Request) {
 
 	err = canInitializeGitRepository(path)
 	if err != nil {
-		JSONResponse("Cannot initialize repository, see log", http.StatusBadRequest, w)
+		fr := FailureResponse{Message: "Cannot initialize repository, see log"}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
 	}
 
-	// do initialise
+	user := getCurrentUser(r.Context())
 
-	JSONResponse("Repository initialised", http.StatusOK, w)
+	oid, err := initializeGitRepository(user, config.Repository)
 
-}
+	sr := SuccessResponse{Message: "Repository initialised", Oid: oid.String()}
+	JSONResponse(sr, http.StatusOK, w)
 
-// setupAllowCreateRepository will return true if a directory does not
-// exist at the location specified in `config.Repository`
-//
-// GET /setup/create_repository
-//
-// {"enabled": false}
-
-func apiSetupAllowCreateRepository(w http.ResponseWriter, r *http.Request) {
-}
-
-// setupCreateRepository will initialize an empty Git repository in the location
-// specified by `config.Repository`, providing one doesn't already exist there
-//
-// POST /setup/create_repository
-//
-// {"created": true}
-func apiSetupCreateRepository(w http.ResponseWriter, r *http.Request) {
 }
 
 // setupCreateInitialUser allows for the creation of the system's first user and
