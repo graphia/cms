@@ -186,7 +186,7 @@ func setupAllowCreateInitialUser(w http.ResponseWriter, r *http.Request) {
 //
 // {"enabled": false}
 
-func setupAllowInitializeRepository(w http.ResponseWriter, r *http.Request) {
+func apiSetupAllowInitializeRepository(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var response SetupOption
 
@@ -203,7 +203,6 @@ func setupAllowInitializeRepository(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response = SetupOption{Enabled: true}
-
 	JSONResponse(response, http.StatusOK, w)
 
 }
@@ -214,7 +213,7 @@ func setupAllowInitializeRepository(w http.ResponseWriter, r *http.Request) {
 // POST /setup/create_repository
 //
 // {"created": true}
-func setupInitializeRepository(w http.ResponseWriter, r *http.Request) {
+func apiSetupInitializeRepository(w http.ResponseWriter, r *http.Request) {
 	var err error
 
 	path := config.Repository
@@ -237,7 +236,7 @@ func setupInitializeRepository(w http.ResponseWriter, r *http.Request) {
 //
 // {"enabled": false}
 
-func setupAllowCreateRepository(w http.ResponseWriter, r *http.Request) {
+func apiSetupAllowCreateRepository(w http.ResponseWriter, r *http.Request) {
 }
 
 // setupCreateRepository will initialize an empty Git repository in the location
@@ -246,7 +245,7 @@ func setupAllowCreateRepository(w http.ResponseWriter, r *http.Request) {
 // POST /setup/create_repository
 //
 // {"created": true}
-func setupCreateRepository(w http.ResponseWriter, r *http.Request) {
+func apiSetupCreateRepository(w http.ResponseWriter, r *http.Request) {
 }
 
 // setupCreateInitialUser allows for the creation of the system's first user and

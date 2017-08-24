@@ -1051,3 +1051,54 @@ func TestApiGetAttachmentsNoDirectoryHandler(t *testing.T) {
 	assert.Equal(t, "No attachments", fr.Message)
 
 }
+
+// Setup tests
+
+func Test_setupAllowInitializeRepository_Success(t *testing.T) {
+	server = createTestServerWithContext()
+
+	fullDirPath := "../tests/tmp/repositories/full"
+	os.RemoveAll(fullDirPath)
+	CopyDir("../tests/backend/repositories/small", fullDirPath)
+
+	config.Repository = fullDirPath
+
+	target := fmt.Sprintf(
+		"%s/%s",
+		server.URL,
+		"api/setup/initialize_repository",
+	)
+
+	resp, _ := http.Get(target)
+	var so SetupOption
+	json.NewDecoder(resp.Body).Decode(&so)
+
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+	assert.True(t, so.Enabled)
+
+}
+
+func Test_setupAllowInitializeRepository_Fail(t *testing.T) {
+	server = createTestServerWithContext()
+
+	gitRepoPath := "../tests/tmp/repositories/allow_initialize"
+	_, _ = setupSmallTestRepo(gitRepoPath)
+
+	target := fmt.Sprintf(
+		"%s/%s",
+		server.URL,
+		"api/setup/initialize_repository",
+	)
+
+	resp, _ := http.Get(target)
+	var so SetupOption
+	json.NewDecoder(resp.Body).Decode(&so)
+
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+	assert.False(t, so.Enabled)
+	assert.Contains(t, so.Meta, "git repo already exists at")
+}
+
+func Test_setupInitializeRepository(t *testing.T) {
+
+}

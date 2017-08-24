@@ -115,9 +115,6 @@ func unprotectedRouter() (r *vestigo.Router) {
 	r.Get("/setup/create_initial_user", setupAllowCreateInitialUser)
 	r.Post("/setup/create_initial_user", setupCreateInitialUser)
 
-	r.Get("/setup/initialise_repository", setupAllowInitializeRepository)
-	r.Post("/setup/initialise_repository", setupInitializeRepository)
-
 	// rather than above rule, do a check to see if the file exists and serve it
 	// if it doesn't, serve index.html :>
 	r.HandleFunc("/cms", cmsGeneralHandler)
@@ -148,6 +145,10 @@ func protectedRouter() (r *vestigo.Router) {
 	r = vestigo.NewRouter()
 
 	r.Get("/api", apiRootHandler)
+
+	// initial setup endpoints
+	r.Get("/api/setup/initialize_repository", apiSetupAllowInitializeRepository)
+	r.Post("/api/setup/initialize_repository", apiSetupInitializeRepository)
 
 	// auth-related endpoints
 	r.Post("/api/renew", authRenewTokenHandler)
