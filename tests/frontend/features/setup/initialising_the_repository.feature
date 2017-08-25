@@ -5,6 +5,14 @@ Feature: Setting up an initial user
 	I want to set up a workspace
 
 	Background:
-		Given there are no users
-		When I navigate to the login page
-		Then I should be redirected to the initial setup page
+		Given a user account has been created
+		And I have logged in
+		And there is an empty directory in place of a repository
+
+	Scenario: Redirecting to the initialise repo screen
+		Given I try to navigate to the home page
+		Then I should be redirected to the initialize repository page
+
+	Scenario: Initialize repository page contents
+		Given I am on the initialize repository page
+		Then I should see a button with text 'Initialise Repository'
