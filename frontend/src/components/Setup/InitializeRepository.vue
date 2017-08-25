@@ -49,7 +49,7 @@
 
 					this.redirectToHome();
 
-				}
+			}
 				catch (error) {
 					console.error(error);
 				}

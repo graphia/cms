@@ -1,9 +1,7 @@
 When %r{^I click the "(.*?)" button$} do |button_text|
-  # FIXME this works for a link styled as a button but not
-  # for an actual `<button/>` or `<input type="submit"/>`
-  button = page.find("a", text: button_text)
+  button = page.find("a,button", text: button_text)
   scroll_into_view(button)
-  page.click_link button_text
+  button.click
 end
 
 Then %r{^I should be redirected to the documents index$} do

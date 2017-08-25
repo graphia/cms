@@ -16,3 +16,9 @@ Feature: Setting up an initial user
 	Scenario: Initialize repository page contents
 		Given I am on the initialize repository page
 		Then I should see a button with text 'Initialise Repository'
+
+	Scenario: Actually initialising a repository
+		Given I am on the initialize repository page
+		When I click the "Initialise Repository" button
+		Then a repository should have been initialised
+		And I should see a message containing 'Repository initialised'
