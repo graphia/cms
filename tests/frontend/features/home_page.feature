@@ -5,7 +5,8 @@ Feature: Home page contents
 	I want the homepage to provide me with useful information
 
 	Background:
-		Given my user account exists
+		Given a repository has been initialised
+		And my user account exists
 		And I have logged in
 
 	Scenario: Home page sections

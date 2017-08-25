@@ -4,7 +4,8 @@ Feature: The submit button
 	I want the submit button to enable itself when the data is valid
 
 	Background:
-		Given my user account exists
+		Given a repository has been initialised
+		And my user account exists
 		And I have logged in
 
 	Scenario: Submit disabled when the create document form is initialised

@@ -9,3 +9,13 @@ def scroll_into_view(element)
 
   page.execute_script(script, element.native)
 end
+
+def setup_repo(path = REPO_TEMPLATE_PATH)
+  FileUtils.rm_rf(REPO_PATH)
+  FileUtils.cp_r(path, REPO_PATH)
+
+  Git.init(REPO_PATH).tap do |g|
+    g.add(all: true)
+    g.commit("Initial commit")
+  end
+end

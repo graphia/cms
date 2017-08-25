@@ -4,7 +4,8 @@ Feature: Listing documents
 	I want to view listings for a directory
 
 	Background:
-		Given my user account exists
+		Given a repository has been initialised
+		And my user account exists
 		And I have logged in
 
 	Scenario: Documents are visible on the documents page

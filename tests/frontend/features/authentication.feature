@@ -4,7 +4,8 @@ Feature: Authentication
 	I want be redirected to the login screen if I'm not authenticated
 
 	Background:
-		Given my user account exists
+		Given a repository has been initialised
+		And my user account exists
 
 	Scenario: Navigating to the homepage with no session
 		Given I am not logged in

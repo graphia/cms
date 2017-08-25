@@ -4,7 +4,8 @@ Feature: Creating documents
 	I want to be able to create new documents
 
 	Background:
-		Given my user account exists
+		Given a repository has been initialised
+		And my user account exists
 		And I have logged in
 
 	Scenario: The editor

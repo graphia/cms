@@ -64,19 +64,10 @@ Capybara.configure do |c|
   c.app_host = "http://localhost:9095"
 end
 
-def setup_repo(path = REPO_TEMPLATE_PATH)
-  FileUtils.rm_rf(REPO_PATH)
-  FileUtils.cp_r(path, REPO_PATH)
-
-  Git.init(REPO_PATH).tap do |g|
-    g.add(all: true)
-    g.commit("Initial commit")
-  end
-end
-
 Before do
 
-  setup_repo
+  # ensure no repo exists
+  FileUtils.rm_rf(REPO_PATH)
 
   # kill existing pid first
   if FileTest.exist?(PID_PATH)
