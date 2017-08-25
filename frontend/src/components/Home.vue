@@ -116,7 +116,8 @@
 
 
 				} catch(err) {
-					throw(err);
+					//throw(err);
+					console.error("Couldn't retrieve latest commits")
 				}
 
 			}

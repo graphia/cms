@@ -190,7 +190,6 @@ func apiSetupAllowInitializeRepository(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var response SetupOption
 
-	Debug.Println("GOT HERE")
 	err = canInitializeGitRepository(config.Repository)
 
 	if err != nil {

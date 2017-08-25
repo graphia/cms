@@ -89,7 +89,7 @@
 				let path = `${config.api}/directories`
 
 				try {
-					let response = await fetch(path, {mode: "cors", headers: store.state.auth.authHeader()});
+					let response = await fetch(path, {method: "GET", mode: "cors", headers: store.state.auth.authHeader()});
 
 					let json = await response.json();
 
@@ -115,7 +115,7 @@
 
 				}
 				catch(err) {
-					console.error(`Couldn't retrieve top level directory list ${err}`);
+					console.error("Couldn't retrieve top level directory list");
 				};
 
 			}
