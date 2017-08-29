@@ -13,6 +13,8 @@
 				<ul class="navbar-nav mr-auto">
 					<li class="nav-item active">Files</li>
 
+					<router-link :to="{name: 'home'}" class="nav-link home-link">Home</router-link>
+
 					<router-link v-for="directory in directories" :to="{name: 'document_index', params: {directory: directory.name}}" class="nav-link directory-link">
 						{{ directory.name | capitalize }}
 					</router-link>
