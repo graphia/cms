@@ -7,13 +7,13 @@ When %r{^I navigate to the login page$} do
 end
 
 When %r{^I navigate to the setup page$} do
-  path = '/cms/setup'
+  path = '/cms/setup/initial_user'
   visit(path)
-  expect(page.current_path).to eql('/cms/setup')
+  expect(page.current_path).to eql(path)
 end
 
 Then %r{^I should be redirected to the initial setup page$} do
-  expect(page.current_path).to eql('/cms/setup')
+  expect(page.current_path).to eql('/cms/setup/initial_user')
 end
 
 Given %r{^I am on the initial setup page$} do
@@ -62,7 +62,7 @@ Then %r{^no password\-related warnings should be visible$} do
 end
 
 Then %r{^the new user should have been saved to the database$} do
-  uri = URI('http://127.0.0.1:9095/auth/create_initial_user')
+  uri = URI('http://127.0.0.1:9095/setup/create_initial_user')
   req = Net::HTTP::Get.new(uri, "Content-Type" => "application/json")
   res = Net::HTTP.start(uri.hostname, uri.port) do |http|
     http.request(req)

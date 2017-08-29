@@ -4,7 +4,8 @@ Feature: Document tags
 	I want to be able to add appropriate and informative tags
 
 	Background:
-		Given my user account exists
+		Given a repository has been initialised
+		And my user account exists
 		And I have logged in
 		And I am on the new document page
 

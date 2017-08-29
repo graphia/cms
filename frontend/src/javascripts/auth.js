@@ -35,7 +35,7 @@ export default class CMSAuth {
 	}
 
 	static async doInitialSetup() {
-		let response = await fetch(`${config.auth}/create_initial_user`, {});
+		let response = await fetch(`${config.setup}/create_initial_user`, {});
 
 		console.debug("Checking for initial users!");
 
@@ -107,7 +107,7 @@ export default class CMSAuth {
 	static async createInitialUser(user) {
 		console.debug("creating initial user");
 
-		let response = await fetch(`${config.auth}/create_initial_user`, {
+		let response = await fetch(`${config.setup}/create_initial_user`, {
 			method: "POST",
 			mode: "cors",
 			body: JSON.stringify(user)

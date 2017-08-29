@@ -60,7 +60,7 @@ type FrontMatter struct {
 // FIXME eventually it will, currently just the name, need to
 // work out how best to store it
 type Directory struct {
-	Name string
+	Name string `json:"name"`
 }
 
 // FileItem contains enough file information for listing
@@ -125,9 +125,10 @@ type Token struct {
 	Token string `json:"token"`
 }
 
-// InitialSetup indicates whether or not to display initial setup screen
-type InitialSetup struct {
-	Enabled bool `json:"enabled"`
+// SetupOption indicates whether or not to display initial setup screen
+type SetupOption struct {
+	Enabled bool   `json:"enabled"`
+	Meta    string `json:"meta,omitempty"`
 }
 
 // Commit holds metadata for a Git Commit

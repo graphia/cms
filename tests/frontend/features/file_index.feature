@@ -4,7 +4,8 @@ Feature: Listing documents
 	I want to view listings for a directory
 
 	Background:
-		Given my user account exists
+		Given a repository has been initialised
+		And my user account exists
 		And I have logged in
 
 	Scenario: Documents are visible on the documents page
@@ -18,3 +19,10 @@ Feature: Listing documents
 		When I click the "Appendices" navigation link
 		Then I should be on the "appendices" index page
 		And I should see a list containing the contents of the "appendices" directory
+
+	Scenario: The page title should match the directory name
+		Given there are directories called "documents" and "appendices"
+		Then each directory index page should have the correct title:
+			| Directory  | Title      |
+			| documents  | Documents  |
+			| appendices | Appendices |

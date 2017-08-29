@@ -330,3 +330,83 @@ func lookupFileHistory(repo *git.Repository, path string, size int) ([]HistoricC
 	return fh, nil
 
 }
+
+func canInitializeGitRepository(path string) error {
+
+	stat, err := os.Stat(path)
+	if err != nil {
+		return fmt.Errorf("directory does not exist '%s'", path)
+	}
+
+	if !stat.IsDir() {
+		return fmt.Errorf("file exists at '%s'", path)
+	}
+
+	_, err = git.OpenRepository(path)
+	if err == nil {
+		return fmt.Errorf("git repo already exists at '%s'", path)
+	}
+
+	// TODO
+	// Q. what do we do if it's a subdirectory of a git repo?
+	// A. nothing - for the time being! 😎
+
+	Warning.Printf("nothing obstructing git repo initialisation at '%s'", path)
+	return nil
+}
+
+func initializeGitRepository(user User, path string) (oid *git.Oid, err error) {
+
+	err = canInitializeGitRepository(path)
+
+	if err != nil {
+		return oid, fmt.Errorf("cannot initialise repo")
+	}
+
+	repo, err := git.InitRepository(path, false)
+	if err != nil {
+		return oid, err
+	}
+
+	idx, err := repo.Index()
+	if err != nil {
+		return oid, err
+	}
+
+	err = idx.AddAll([]string{}, git.IndexAddForce, nil)
+	if err != nil {
+		return oid, err
+	}
+
+	err = idx.Write()
+	if err != nil {
+		return oid, err
+	}
+
+	treeID, err := idx.WriteTree()
+	if err != nil {
+		return oid, err
+	}
+
+	tree, err := repo.LookupTree(treeID)
+	if err != nil {
+		return oid, err
+	}
+
+	// git signatures
+	author := sign(user)
+	committer := sign(user)
+	message := "Initialising repository"
+
+	oid, err = repo.CreateCommit("HEAD", author, committer, message, tree)
+	if err != nil {
+		return oid, err
+	}
+
+	// checkout to keep file system in sync with git
+	err = repo.CheckoutHead(
+		&git.CheckoutOpts{Strategy: git.CheckoutSafe | git.CheckoutRecreateMissing | git.CheckoutForce},
+	)
+
+	return oid, err
+}

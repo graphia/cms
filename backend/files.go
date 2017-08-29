@@ -18,6 +18,10 @@ import (
 // getFilesInDir returns a list of FileItems for listing
 func getFilesInDir(directory string) (files []FileItem, err error) {
 
+	// Initialising the slice so json.Marshal returns an empty
+	// array instead of `null`
+	files = []FileItem{}
+
 	repo, err := repository(config)
 	if err != nil {
 		return nil, err
@@ -201,15 +205,19 @@ func writeFiles(repo *git.Repository, nc NewCommit, user User) (oid *git.Oid, er
 
 func listRootDirectories() (directories []Directory, err error) {
 
+	// Initialising the slice so json.Marshal returns an empty
+	// array instead of `null`
+	directories = []Directory{}
+
 	repo, err := repository(config)
 	if err != nil {
-		return nil, err
+		return directories, err
 	}
 	defer repo.Free()
 
 	ht, err := headTree(repo)
 	if err != nil {
-		return nil, err
+		return directories, err
 	}
 
 	defer ht.Free()

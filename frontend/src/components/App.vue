@@ -13,13 +13,10 @@
 				<ul class="navbar-nav mr-auto">
 					<li class="nav-item active">Files</li>
 
+					<router-link :to="{name: 'home'}" class="nav-link home-link">Home</router-link>
 
-					<router-link :to="{name: 'document_index', params: {directory: 'documents'}}" class="nav-link">
-						Documents
-					</router-link>
-
-					<router-link :to="{name: 'document_index', params: {directory: 'appendices'}}" class="nav-link">
-						Appendices
+					<router-link v-for="directory in directories" :to="{name: 'document_index', params: {directory: directory.name}}" class="nav-link directory-link">
+						{{ directory.name | capitalize }}
 					</router-link>
 
 					<li><a class="nav-link" href="#">History</a></li>
@@ -43,6 +40,10 @@
 </template>
 
 <script lang="babel">
+	import store from '../javascripts/store.js';
+	import config from '../javascripts/config.js';
+
+	import checkResponse from '../javascripts/response.js';
 	import CMSAuth from '../javascripts/auth.js';
 	import Broadcast from '../components/Broadcast';
 
@@ -62,11 +63,63 @@
 				console.debug("token is present and has not expired, renewing");
 				this.$store.state.auth.renew();
 
+
+				this.fetchDirectories();
+
 			}
 			catch(err) {
 				// Token rejected for renewal
 				console.warn(err);
 				this.$store.state.auth.redirectToLogin();
+			}
+		},
+
+		data() {
+			return {
+				directories: []
+			};
+		},
+		methods: {
+
+			redirectToInitializeRepo() {
+				this.$router.push({name: 'initialize_repo'});
+			},
+			redirectToCreateRepo() {
+				this.$router.push({name: 'create_repo'});
+			},
+			async fetchDirectories() {
+				let path = `${config.api}/directories`
+
+				try {
+					let response = await fetch(path, {method: "GET", mode: "cors", headers: store.state.auth.authHeader()});
+
+					let json = await response.json();
+
+					if (response.status == 404 && json.message == "No repository found") {
+						console.warn("No repository found, redirect to create", 404)
+						this.redirectToCreateRepo();
+					};
+
+					if (response.status == 400 && json.message == "Not a git repository") {
+						console.warn("Directory found, not git repo", 400)
+						this.redirectToInitializeRepo();
+					};
+
+					if (!checkResponse(response.status)) {
+						console.warn("error:", response);
+						return;
+					};
+
+					// everything's ok, set directories to the response's json
+					this.directories = json;
+
+					return;
+
+				}
+				catch(err) {
+					console.error("Couldn't retrieve top level directory list");
+				};
+
 			}
 		},
 		components: {

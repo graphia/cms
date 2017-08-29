@@ -66,7 +66,7 @@
 </style>
 
 <script>
-	import CMSAuth from '../javascripts/auth.js';
+	import CMSAuth from '../../javascripts/auth.js';
 
 	export default {
 		name: "Setup",

@@ -4,7 +4,8 @@ Feature: Commits
 	I want to be able to view individual commits and their details
 
 	Background:
-		Given my user account exists
+		Given a repository has been initialised
+		And my user account exists
 		And I have logged in
 
 	Scenario: Commit metadata

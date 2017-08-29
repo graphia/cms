@@ -6,11 +6,16 @@ import VueConfig from 'vue-config';
 switch(process.env.NODE_ENV) {
 
 	case "production":
-		config = {api: "/api", auth: "/auth"};
+		config = {api: "/api", auth: "/auth", setup: "/setup"};
 		break;
 
 	default:  // development
-		config = {api: "http://localhost:8080/api", auth: "http://localhost:8080/auth"};
+		let base_url = "http://localhost:8080";
+		config = {
+			api: `${base_url}/api`,
+			auth: `${base_url}/auth`,
+			setup: `${base_url}/setup`
+		};
 		break;
 
 }

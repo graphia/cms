@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/dgrijalva/jwt-go/request"
@@ -153,13 +154,13 @@ func authRenewTokenHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// authAllowCreateInitialUser will simply return true if there are no users
+// setupAllowCreateInitialUser will simply return true if there are no users
 // and false if there are some
 //
-// GET /auth/show_initial_setup
+// GET /setup/show_initial_setup
 //
 // {"enabled": false}
-func authAllowCreateInitialUser(w http.ResponseWriter, r *http.Request) {
+func setupAllowCreateInitialUser(w http.ResponseWriter, r *http.Request) {
 	var zeroUsers bool
 
 	count, err := countUsers()
@@ -169,7 +170,7 @@ func authAllowCreateInitialUser(w http.ResponseWriter, r *http.Request) {
 
 	zeroUsers = (count == 0)
 
-	output, err := json.Marshal(InitialSetup{Enabled: zeroUsers})
+	output, err := json.Marshal(SetupOption{Enabled: zeroUsers})
 	if err != nil {
 		panic(err)
 	}
@@ -178,17 +179,68 @@ func authAllowCreateInitialUser(w http.ResponseWriter, r *http.Request) {
 	w.Write(output)
 }
 
-// authCreateInitialUser allows for the creation of the system's first user and
+// setupAllowInitializeRepository will return true if a Git repository does not
+// exist at the location specified in `config.Repository`
+//
+// GET /setup/initialise_repository
+//
+// {"enabled": false}
+
+func apiSetupAllowInitializeRepository(w http.ResponseWriter, r *http.Request) {
+	var err error
+	var response SetupOption
+
+	err = canInitializeGitRepository(config.Repository)
+
+	if err != nil {
+		response = SetupOption{Enabled: false, Meta: err.Error()}
+		JSONResponse(response, http.StatusOK, w)
+		return
+	}
+
+	response = SetupOption{Enabled: true}
+	JSONResponse(response, http.StatusOK, w)
+
+}
+
+// setupInitializeRepository will initialize an empty Git repository in the location
+// specified by `config.Repository`, providing one doesn't already exist there
+//
+// POST /setup/create_repository
+//
+// {"oid": "a741330fec...", message: "Repository initialised"}
+func apiSetupInitializeRepository(w http.ResponseWriter, r *http.Request) {
+	var err error
+
+	path := config.Repository
+
+	err = canInitializeGitRepository(path)
+	if err != nil {
+		fr := FailureResponse{Message: "Cannot initialize repository, see log"}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	user := getCurrentUser(r.Context())
+
+	oid, err := initializeGitRepository(user, config.Repository)
+
+	sr := SuccessResponse{Message: "Repository initialised", Oid: oid.String()}
+	JSONResponse(sr, http.StatusOK, w)
+
+}
+
+// setupCreateInitialUser allows for the creation of the system's first user and
 // unlike typical user creation, doesn't require the instigator to be logged in
 //
-// POST /auth/create_initial_user
+// POST /setup/create_initial_user
 //
 // {"username": "lhutz", "name": "Lionel Hutz" ...}
 //
 // If successful, the response should be a token:
 //
 // {token: "xxxxx.yyyyy.zzzzz"}
-func authCreateInitialUser(w http.ResponseWriter, r *http.Request) {
+func setupCreateInitialUser(w http.ResponseWriter, r *http.Request) {
 
 	var sr SuccessResponse
 	var fr FailureResponse
@@ -312,8 +364,40 @@ func apiListDirectoriesHandler(w http.ResponseWriter, r *http.Request) {
 
 	var directories []Directory
 	var err error
+	var fr FailureResponse
 
 	directories, err = listRootDirectories()
+
+	if err != nil {
+
+		var msg = err.Error()
+
+		// no directory found 404
+		if strings.HasPrefix(msg, "Failed to resolve path") {
+			fr = FailureResponse{
+				Message: fmt.Sprintf("No repository found"),
+			}
+			JSONResponse(fr, http.StatusNotFound, w)
+			return
+		}
+
+		// directory found but not git-controlled 400
+		if strings.HasPrefix(msg, "Could not find repository") {
+			fr = FailureResponse{
+				Message: fmt.Sprintf("Not a git repository"),
+			}
+			JSONResponse(fr, http.StatusBadRequest, w)
+			return
+		}
+
+		// anything else
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Could not retrieve directories: %s", msg),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+
+	}
 
 	output, err := json.Marshal(directories)
 	if err != nil {

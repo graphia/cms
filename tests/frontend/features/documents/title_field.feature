@@ -4,7 +4,8 @@ Feature: The title field
 	I want to be able to give them custom titles
 
 	Background:
-		Given my user account exists
+		Given a repository has been initialised
+		And my user account exists
 		And I have logged in
 		And I am on the new document page
 

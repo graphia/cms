@@ -4,7 +4,8 @@ Feature: The commit message
 	I want to be able to create a valid commit message
 
 	Background:
-		Given my user account exists
+		Given a repository has been initialised
+		And my user account exists
 		And I have logged in
 		And I am on the new document page
 

@@ -4,7 +4,8 @@ Feature: Creating documents
 	I want to add graphics and images
 
 	Background:
-		Given my user account exists
+		Given a repository has been initialised
+		And my user account exists
 		And I have logged in
 
 	Scenario: Images visible in the gallery

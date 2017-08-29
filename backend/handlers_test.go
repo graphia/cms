@@ -54,6 +54,65 @@ func TestApiListDirectoriesHandler(t *testing.T) {
 
 }
 
+func TestApiListDirectoriesHandlerNoDirectory(t *testing.T) {
+	server = httptest.NewServer(protectedRouter())
+
+	testConfigPath := "../config/test.yml"
+	config, _ = loadConfig(&testConfigPath)
+	config.Repository = "../tests/tmp/repositories/non_existant_repo"
+
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories")
+
+	client := &http.Client{}
+
+	req, _ := http.NewRequest("GET", target, nil)
+
+	resp, _ := client.Do(req)
+
+	var fr FailureResponse
+
+	json.NewDecoder(resp.Body).Decode(&fr)
+
+	assert.Equal(t, http.StatusNotFound, resp.StatusCode)
+	assert.Equal(t, "No repository found", fr.Message)
+
+}
+
+func TestApiListDirectoriesHandlerNoGit(t *testing.T) {
+
+	// remove any existing repo
+	repoPath := "../tests/tmp/repositories/uninitialized"
+	_ = os.RemoveAll(repoPath)
+
+	// copy the repo template to the expected location
+	// but don't initialise the git repo
+	template := "../tests/backend/repositories/small"
+
+	_ = CopyDir(template, repoPath)
+
+	testConfigPath := "../config/test.yml"
+	config, _ = loadConfig(&testConfigPath)
+	config.Repository = repoPath
+
+	server = httptest.NewServer(protectedRouter())
+
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories")
+
+	client := &http.Client{}
+
+	req, _ := http.NewRequest("GET", target, nil)
+
+	resp, _ := client.Do(req)
+
+	var fr FailureResponse
+
+	json.NewDecoder(resp.Body).Decode(&fr)
+
+	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+	assert.Equal(t, "Not a git repository", fr.Message)
+
+}
+
 func Test_apiListFilesInDirectoryHandler(t *testing.T) {
 	server = httptest.NewServer(protectedRouter())
 	repoPath := "../tests/tmp/repositories/list_files_in_directory"
@@ -991,4 +1050,107 @@ func TestApiGetAttachmentsNoDirectoryHandler(t *testing.T) {
 	assert.Equal(t, http.StatusNotFound, resp.StatusCode)
 	assert.Equal(t, "No attachments", fr.Message)
 
+}
+
+// Setup tests
+
+func Test_setupAllowInitializeRepository_Success(t *testing.T) {
+	server = createTestServerWithContext()
+
+	fullDirPath := "../tests/tmp/repositories/full"
+	os.RemoveAll(fullDirPath)
+	CopyDir("../tests/backend/repositories/small", fullDirPath)
+
+	config.Repository = fullDirPath
+
+	target := fmt.Sprintf(
+		"%s/%s",
+		server.URL,
+		"api/setup/initialize_repository",
+	)
+
+	resp, _ := http.Get(target)
+	var so SetupOption
+	json.NewDecoder(resp.Body).Decode(&so)
+
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+	assert.True(t, so.Enabled)
+
+}
+
+func Test_setupAllowInitializeRepository_Fail(t *testing.T) {
+	server = createTestServerWithContext()
+
+	gitRepoPath := "../tests/tmp/repositories/allow_initialize"
+	_, _ = setupSmallTestRepo(gitRepoPath)
+
+	target := fmt.Sprintf(
+		"%s/%s",
+		server.URL,
+		"api/setup/initialize_repository",
+	)
+
+	resp, _ := http.Get(target)
+	var so SetupOption
+	json.NewDecoder(resp.Body).Decode(&so)
+
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+	assert.False(t, so.Enabled)
+	assert.Contains(t, so.Meta, "git repo already exists at")
+}
+
+func Test_setupInitializeRepository_Success(t *testing.T) {
+	server = createTestServerWithContext()
+
+	newDir := "../tests/tmp/repositories/full"
+	os.RemoveAll(newDir)
+	CopyDir("../tests/backend/repositories/small", newDir)
+
+	config.Repository = newDir
+
+	target := fmt.Sprintf(
+		"%s/%s",
+		server.URL,
+		"api/setup/initialize_repository",
+	)
+
+	resp, _ := http.Post(target, "application/json", nil)
+
+	var sr SuccessResponse
+	json.NewDecoder(resp.Body).Decode(&sr)
+
+	// make sure the returned oid is at the head of the repo
+	repo, _ := repository(config)
+	hc, _ := headCommit(repo)
+	assert.Equal(t, hc.Id().String(), sr.Oid)
+
+	// and that the status and message are correct
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+	assert.Contains(t, sr.Message, "Repository initialised")
+
+}
+
+func Test_setupInitializeRepository_Failure(t *testing.T) {
+	server = createTestServerWithContext()
+
+	gitRepoPath := "../tests/tmp/repositories/allow_initialize"
+	_, _ = setupSmallTestRepo(gitRepoPath)
+
+	target := fmt.Sprintf(
+		"%s/%s",
+		server.URL,
+		"api/setup/initialize_repository",
+	)
+
+	resp, _ := http.Post(target, "application/json", nil)
+	Debug.Println(resp)
+
+	var fr FailureResponse
+	json.NewDecoder(resp.Body).Decode(&fr)
+
+	Debug.Println(resp.Body)
+
+	// and that the status and message are correct
+	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+	assert.Equal(t, fr.Message, "Cannot initialize repository, see log")
 }

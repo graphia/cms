@@ -1,6 +1,6 @@
 <template>
 	<div id="document-index">
-		<h2>Documents</h2>
+		<h2>{{ title | capitalize }}</h2>
 		<ul>
 			<li v-for="document in documents">
 				<router-link :to="{name: 'document_show', params: {filename: document.filename}}">
@@ -41,6 +41,9 @@
 				return this.$store.state.documents;
 			},
 			directory() {
+				return this.$route.params.directory;
+			},
+			title() {
 				return this.$route.params.directory;
 			}
 		}
