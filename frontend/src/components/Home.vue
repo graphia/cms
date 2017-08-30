@@ -1,7 +1,16 @@
 <template>
 	<div>
 
+
 		<div class="row">
+
+			<div class="col-md-6">
+
+				<Directories class="directories"/>
+
+			</div>
+
+
 			<div class="col-md-6">
 				<div class="card recent-updates">
 					<div class="card-block">
@@ -54,6 +63,8 @@
 
 <script lang="babel">
 	import Broadcast from '../components/Broadcast';
+	import Directories from '../components/Directories';
+
 	import CMSPublisher from '../javascripts/publish.js';
 	import config from '../javascripts/config.js';
 	import checkResponse from '../javascripts/response.js';
@@ -72,8 +83,11 @@
 			};
 		},
 
-		methods: {
+		components: {
+			Directories
+		},
 
+		methods: {
 
 			async publish(event) {
 

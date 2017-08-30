@@ -21,7 +21,8 @@ exports.paths = {
 		'node_modules/simplemde/dist',
 		'node_modules/bootstrap/dist',
 		'node_modules/octicons',
-		'node_modules/text-diff'
+		'node_modules/text-diff',
+		'node_modules/babel-runtime/core-js/object'
 	]
 };
 
