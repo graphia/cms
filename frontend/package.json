@@ -12,12 +12,16 @@
   "dependencies": {
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-polyfill": "^6.23.0",
+    "babel-runtime": "^6.26.0",
     "bootstrap": "^4.0.0-alpha.6",
+    "jquery": "^3.2.1",
     "jwt-decode": "^2.2.0",
     "octicons": "^5.0.1",
+    "popper.js": "^1.12.5",
     "remarkable": "^1.7.1",
     "simplemde": "^1.11.2",
     "tags-input": "^1.1.1",
+    "tether": "^1.4.0",
     "vue-octicons": "^0.1.7"
   },
   "devDependencies": {

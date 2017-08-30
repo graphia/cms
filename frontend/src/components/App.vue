@@ -2,16 +2,17 @@
 	<div id="application">
 
 		<!-- Primary Navigation Start -->
-		<nav class="navbar navbar-toggleable-md navbar-inverse static-top bg-inverse">
+		<nav class="navbar navbar-dark bg-dark">
+
+			<router-link class="navbar-brand" :to="{name: 'home'}">Graphia CMS</router-link>
+
+
 			<button class="navbar-toggler navbar-toggler-right hidden-lg-up" type="button" data-toggle="collapse" data-target="#primary" aria-label="Toggle navigation">
 				<span class="navbar-toggler-icon"></span>
 			</button>
 
-			<router-link class="navbar-brand" :to="{name: 'home'}">Graphia CMS</router-link>
-
 			<div id="primary" class="collapse navbar-collapse">
 				<ul class="navbar-nav mr-auto">
-					<li class="nav-item active">Files</li>
 
 					<router-link :to="{name: 'home'}" class="nav-link home-link">Home</router-link>
 
@@ -24,6 +25,7 @@
 
 				</ul>
 			</div>
+
 		</nav>
 		<!-- Primary Navigation End -->
 
