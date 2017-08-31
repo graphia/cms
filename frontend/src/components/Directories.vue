@@ -7,16 +7,44 @@
 			{{ directories.length }}
 			<p>No directories</p>
 
-			<button class="btn btn-primary" @click="createDirectory">
-				Create Directory
-			</button>
 		</div>
 
-		<ul v-else-if="numberOfDirectories > 0">
-			<li v-for="(contents, directory) in directories">
-				{{ directory }}
-			</li>
-		</ul>
+		<div v-else-if="numberOfDirectories > 0">
+
+
+
+			<div class="card" v-for="(contents, directory) in directories">
+
+				<div class="card-header">
+					<h3 class="card-title">{{ directory | capitalize }}</h3>
+				</div>
+
+				<div class="list-group list-group-flush">
+
+					<a href="#" class="list-group-item list-group-item-action" v-for="document in contents">
+						{{ document.frontmatter.title }}
+					</a>
+
+				</div>
+
+			</div>
+		</div>
+
+		<div class="new-directory">
+
+			<form>
+
+				<div class="input-group">
+					<input class="form-control" placeholder="stories"/>
+
+					<span class="input-group-btn">
+						<input type="submit" class="form-control btn btn-success" @click="createDirectory" value="Create Directory"/>
+					</span>
+
+				</div>
+			</form>
+
+		</div>
 
 	</div>
 </template>
@@ -25,9 +53,7 @@
 
 	import checkResponse from '../javascripts/response.js';
 	import config from '../javascripts/config.js';
-	import __Object from 'babel-runtime/core-js/object/keys';
-
-	//import _object from '../../../node_modules/babel-runtime/core-js/object/keys';
+	import _ from 'babel-runtime/core-js/object/keys';
 
 	export default {
 		name: "Directories",
@@ -58,7 +84,6 @@
 
 				console.log("fetching directories", path);
 
-
 				try {
 					let response = await fetch(path, {
 						mode: "cors",
@@ -73,6 +98,8 @@
 
 					let json = await response.json();
 					console.log("got json", json)
+
+					// TODO map the directories into CMSFile objects
 					this.directories = json;
 					console.log("directories", json);
 
