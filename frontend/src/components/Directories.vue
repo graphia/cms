@@ -21,9 +21,14 @@
 
 				<div class="list-group list-group-flush">
 
-					<a href="#" class="list-group-item list-group-item-action" v-for="document in contents">
+					<router-link
+						v-for="document in contents"
+						class="list-group-item list-group-item-action"
+						:to="{name: 'document_show', params: {directory: directory, filename: document.filename}}"
+					>
 						{{ document.frontmatter.title }}
-					</a>
+
+					</router-link>
 
 				</div>
 
@@ -35,10 +40,19 @@
 			<form>
 
 				<div class="input-group">
-					<input class="form-control" placeholder="stories"/>
+					<input
+						class="form-control"
+						placeholder="stories"
+						v-model="directory.path"
+					/>
 
 					<span class="input-group-btn">
-						<input type="submit" class="form-control btn btn-success" @click="createDirectory" value="Create Directory"/>
+						<input
+							type="submit"
+							class="form-control btn btn-success"
+							value="Create Directory"
+							@click="createDirectory"
+						/>
 					</span>
 
 				</div>
@@ -53,28 +67,39 @@
 
 	import checkResponse from '../javascripts/response.js';
 	import config from '../javascripts/config.js';
-	import _ from 'babel-runtime/core-js/object/keys';
+	import CMSDirectory from '../javascripts/models/directory.js';
+	import 'babel-runtime/core-js/object/keys';
 
 	export default {
 		name: "Directories",
 		data() {
 			return {
-				directories: {}
+				directories: {},
+				directory: new CMSDirectory()
 			}
 		},
 		created() {
 			this.fetchDirectorySummary();
+
+			// set up a fresh new commit
+			this.$store.dispatch("initializeCommit");
+
 		},
 		computed: {
 			numberOfDirectories() {
 				let count = Object.keys(this.directories).length;
 				console.debug("directory count", count);
 				return count;
-			}
+			},
+			commit() {
+				return this.$store.state.commit;
+			},
 		},
 		methods: {
 			createDirectory(event) {
 				event.preventDefault();
+
+				this.directory.create(this.commit);
 
 				console.debug("clicked");
 			},

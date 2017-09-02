@@ -11,31 +11,58 @@ export default class CMSCommit {
 		store.state.commit = new CMSCommit(null);
 	};
 
-	toJSON(document) {
+	filesJSON(files) {
 		return JSON.stringify({
 			message: this.message,
-			files: [this._document(document)].concat(this._attachments(document))
+			files: this._buildFilesArray(files)
 		});
 	};
 
-	_document(document) {
+	directoriesJSON(directory) {
+		return JSON.stringify({
+			//message: "creating dir",
+			directories: this._buildDirectoriesArray(directory)
+		})
+	};
+
+	_buildFilesArray(file) {
+		// FIXME (maybe), only works for one file + attachments
+		return [
+			this._file(document)
+		].concat(this._attachments(file));
+	}
+
+	_buildDirectoriesArray(directory) {
+		// FIXME (maybe), only works for one directory
+		let da =  [this._directory(directory)];
+		console.debug("dir array", da);
+		return da;
+	}
+
+	_file(file) {
 
 		return {
-			path: document.path,
-			filename: document.filename,
-			body: document.markdown,
+			path: file.path,
+			filename: file.filename,
+			body: file.markdown,
 
 			// and the frontmatter
 			frontmatter: {
-				title: document.title,
-				author: document.author,
-				tags: document.tags,
-				synopsis: document.synopsis,
-				version: document.version,
-				slug: document.slug
+				title: file.title,
+				author: file.author,
+				tags: file.tags,
+				synopsis: file.synopsis,
+				version: file.version,
+				slug: file.slug
 			}
 		}
-	}
+	};
+
+	_directory(directory) {
+		return {
+			name: directory.path
+		};
+	};
 
 	_attachments(document) {
 		// FIXME filter to only get new files
@@ -47,6 +74,6 @@ export default class CMSCommit {
 				body: attachment.contents()
 			}
 		});
-	}
+	};
 
 };

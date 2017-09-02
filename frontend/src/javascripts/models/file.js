@@ -157,14 +157,14 @@ export default class CMSFile {
 			console.warn("Update called but content hasn't changed");
 		}
 
-		var path = `${config.api}/directories/${this.path}/files`
+		let path = `${config.api}/directories/${this.path}/files`
 
 		try {
 			let response = await fetch(path, {
 				mode: "cors",
 				method: "POST",
 				headers: store.state.auth.authHeader(),
-				body: commit.toJSON(this)
+				body: commit.filesJSON(this)
 			});
 
 			if (!checkResponse(response.status)) {
@@ -193,7 +193,7 @@ export default class CMSFile {
 				mode: "cors",
 				method: "PATCH",
 				headers: store.state.auth.authHeader(),
-				body: commit.toJSON(this)
+				body: commit.filesJSON(this)
 			});
 
 			if (!checkResponse(response.status)) {
