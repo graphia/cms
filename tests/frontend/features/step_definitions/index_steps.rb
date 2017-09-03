@@ -33,7 +33,7 @@ Given %r{^I am on the "([^"]*)" index page$} do |name|
 end
 
 When %r{^I click the "([^"]*)" navigation link$} do |link_text|
-  within(".navbar.static-top") do
+  within("#application > .navbar") do
     page.find(".navbar-toggler-icon").click
     click_link(link_text)
   end

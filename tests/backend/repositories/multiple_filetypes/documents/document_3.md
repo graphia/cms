@@ -1,3 +1,8 @@
+---
+title: document 3
+author: Troy McClure
+slug: document_3
+---
 # Document 3
 
 Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo

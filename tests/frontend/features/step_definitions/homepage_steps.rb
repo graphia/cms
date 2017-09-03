@@ -42,3 +42,52 @@ Then %r{^the recent changes summary should contain a list of commits$} do
     )
   end
 end
+
+Given %r{^the following directories exist in the repository$} do |table|
+  table.transpose.raw.flatten.each do |name|
+    expect(Dir.exist?(File.join(REPO_PATH, name))).to be true
+  end
+end
+
+Then %r{^I should see a section for each directory$} do
+  %w{appendices documents}.each do |name|
+    expect(page).to have_css("h4.card-header", text: name.capitalize)
+  end
+end
+
+Given %r{^the documents directory contains the following files:$} do |table|
+
+    %w{document_1.md document_2.md document_3.md}.each do |name|
+    expect(File.exist?(File.join(REPO_PATH, "documents", name))).to be true
+  end
+end
+
+Then %r{^I should see all three documents listed$} do
+  within(".card.documents") do
+    {
+      "document_1.md" => "document 1",
+      "document_2.md" => "document 2",
+      "document_3.md" => "document 3"
+    }.each do |filename, title|
+      expect(page).to have_css("a[data-filename='#{filename}']", text: title)
+    end
+  end
+end
+
+Then %r{^there should be a 'new file' button$} do
+  within(".card.documents") do
+    expect(page).to have_css("a.btn", text: "Create a document")
+  end
+end
+
+Given %r{^the '(.*?)' directory contains no files$} do |dir|
+  # This could be improved with Dir.children, but need a newer Ruby
+  # than 2.4.0 https://ruby-doc.org/core-2.4.1/Dir.html
+  expect(Dir.entries(File.join(REPO_PATH, "empty"))).to eql(['.', '..', '.keep'])
+end
+
+Then %r{^I see a 'no files' alert in the operating procedures section$} do
+  within(".card.empty") do
+    expect(page).to have_css("div.alert", text: "There's nothing here yet")
+  end
+end

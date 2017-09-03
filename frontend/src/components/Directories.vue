@@ -10,13 +10,13 @@
 		<!-- listing directories -->
 		<div class="row" v-else-if="numberOfDirectories > 0">
 
-			<div  class="col-lg-4 mt-4"  v-for="(contents, directory) in directories">
+			<div class="col-lg-4 mt-4" v-for="(contents, directory) in directories">
 
-				<div class="card">
+				<div class="card" :class="directory" >
 
 					<h4 class="card-header">
 						<router-link :to="{name: 'document_index', params: {directory: directory}}">
-								{{ directory | capitalize }}
+							{{ directory | capitalize }}
 						</router-link>
 					</h4>
 
@@ -27,11 +27,19 @@
 							v-for="document in contents"
 							class="list-group-item list-group-item-action"
 							:to="{name: 'document_show', params: {directory: directory, filename: document.filename}}"
+							:data-filename="document.filename"
 						>
 
 							{{ document.frontmatter.title }}
 
 						</router-link>
+
+						<div class="card-body">
+							<router-link class="btn btn-sm btn-primary" :to="{name: 'document_new', params: {directory: directory}}">
+								Create a document
+							</router-link>
+						</div>
+
 
 					</div>
 					<!-- /listing documents inside a directory -->
