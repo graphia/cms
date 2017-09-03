@@ -1,7 +1,5 @@
 <template>
 	<div>
-		<h1>New Directory</h1>
-
 
 		<div v-if="numberOfDirectories == 0">
 			{{ directories.length }}
@@ -9,56 +7,82 @@
 
 		</div>
 
-		<div v-else-if="numberOfDirectories > 0">
+		<!-- listing directories -->
+		<div class="row" v-else-if="numberOfDirectories > 0">
 
+			<div  class="col-lg-4 mt-4"  v-for="(contents, directory) in directories">
 
+				<div class="card">
 
-			<div class="card" v-for="(contents, directory) in directories">
+					<h4 class="card-header">
+						<router-link :to="{name: 'document_index', params: {directory: directory}}">
+								{{ directory | capitalize }}
+						</router-link>
+					</h4>
 
-				<div class="card-header">
-					<h3 class="card-title">{{ directory | capitalize }}</h3>
+					<!-- listing documents inside a directory -->
+					<div class="list-group list-group-flush" v-if="contents.length > 0">
+
+						<router-link
+							v-for="document in contents"
+							class="list-group-item list-group-item-action"
+							:to="{name: 'document_show', params: {directory: directory, filename: document.filename}}"
+						>
+
+							{{ document.frontmatter.title }}
+
+						</router-link>
+
+					</div>
+					<!-- /listing documents inside a directory -->
+
+					<div class="card-body" v-else-if="contents.length == 0">
+
+						<div class="alert alert-info">
+							There's nothing here yet
+						</div>
+
+						<router-link class="btn btn-sm btn-primary" :to="{name: 'document_new', params: {directory: directory}}">
+							Create a document
+						</router-link>
+
+					</div>
+
 				</div>
+			</div>
 
-				<div class="list-group list-group-flush">
+			<!-- new directory form -->
+			<div class="new-directory col-md-4">
 
-					<router-link
-						v-for="document in contents"
-						class="list-group-item list-group-item-action"
-						:to="{name: 'document_show', params: {directory: directory, filename: document.filename}}"
-					>
-						{{ document.frontmatter.title }}
+				<form>
 
-					</router-link>
+					<div class="input-group">
+						<input
+							class="form-control"
+							placeholder="stories"
+							v-model="directory.path"
+						/>
 
-				</div>
+						<span class="input-group-btn">
+							<input
+								type="submit"
+								class="form-control btn btn-success"
+								value="Create Directory"
+								@click="createDirectory"
+							/>
+						</span>
+
+					</div>
+				</form>
 
 			</div>
-		</div>
+			<!-- /new directory form -->
 
-		<div class="new-directory">
-
-			<form>
-
-				<div class="input-group">
-					<input
-						class="form-control"
-						placeholder="stories"
-						v-model="directory.path"
-					/>
-
-					<span class="input-group-btn">
-						<input
-							type="submit"
-							class="form-control btn btn-success"
-							value="Create Directory"
-							@click="createDirectory"
-						/>
-					</span>
-
-				</div>
-			</form>
 
 		</div>
+		<!-- /listing directories -->
+
+
 
 	</div>
 </template>
@@ -96,12 +120,28 @@
 			},
 		},
 		methods: {
-			createDirectory(event) {
+			async createDirectory(event) {
 				event.preventDefault();
 
-				this.directory.create(this.commit);
+				let response = await this.directory.create(this.commit);
 
-				console.debug("clicked");
+				if (!checkResponse(response)) {
+					console.error(response);
+					return;
+				}
+
+				// new directory created successfully, show a message
+				this.$store.state.broadcast.addMessage(
+					"success",
+					"Welcome",
+					`created directory ${this.directory.path}`,
+					3
+				);
+
+				// refresh the dir list and initialise a new dir for form
+				this.fetchDirectorySummary();
+				this.directory = new CMSDirectory()
+				return;
 			},
 			async fetchDirectorySummary() {
 
@@ -127,7 +167,6 @@
 					// TODO map the directories into CMSFile objects
 					this.directories = json;
 					console.log("directories", json);
-
 
 				}
 				catch(error) {

@@ -11,10 +11,10 @@ export default class CMSCommit {
 		store.state.commit = new CMSCommit(null);
 	};
 
-	filesJSON(files) {
+	filesJSON(file) {
 		return JSON.stringify({
 			message: this.message,
-			files: this._buildFilesArray(files)
+			files: this._buildFilesArray(file)
 		});
 	};
 
@@ -28,20 +28,18 @@ export default class CMSCommit {
 	_buildFilesArray(file) {
 		// FIXME (maybe), only works for one file + attachments
 		return [
-			this._file(document)
+			this._file(file)
 		].concat(this._attachments(file));
 	}
 
 	_buildDirectoriesArray(directory) {
 		// FIXME (maybe), only works for one directory
-		let da =  [this._directory(directory)];
-		console.debug("dir array", da);
-		return da;
+		return [this._directory(directory)];
 	}
 
 	_file(file) {
 
-		return {
+		let json = {
 			path: file.path,
 			filename: file.filename,
 			body: file.markdown,
@@ -56,6 +54,10 @@ export default class CMSCommit {
 				slug: file.slug
 			}
 		}
+
+		console.debug("json:", json);
+
+		return json;
 	};
 
 	_directory(directory) {

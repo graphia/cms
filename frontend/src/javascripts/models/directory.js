@@ -27,7 +27,7 @@ export default class CMSDirectory {
 			});
 
 			if (!checkResponse(response.status)) {
-				return
+				return;
 			}
 
 			return response;
@@ -35,7 +35,7 @@ export default class CMSDirectory {
 		}
 		catch(err) {
 			console.error("There was a problem creating the new directory", err);
-		}
+		};
 
 	};
 
