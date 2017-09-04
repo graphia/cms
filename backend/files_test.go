@@ -182,13 +182,13 @@ func TestListRootDirectories(t *testing.T) {
 		t.Error("error", err)
 	}
 
-	var directoryNames []string
+	var directoryPaths []string
 	for _, directory := range directories {
-		directoryNames = append(directoryNames, directory.Name)
+		directoryPaths = append(directoryPaths, directory.Path)
 	}
 
-	assert.Equal(t, 2, len(directoryNames))
-	assert.Equal(t, directoriesExpected, directoryNames)
+	assert.Equal(t, 2, len(directoryPaths))
+	assert.Equal(t, directoriesExpected, directoryPaths)
 }
 
 func TestRootDirectorySummary(t *testing.T) {

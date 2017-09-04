@@ -13,6 +13,7 @@ import (
 
 	"github.com/graphia/particle"
 	"gopkg.in/libgit2/git2go.v25"
+	yaml "gopkg.in/yaml.v2"
 )
 
 // getFilesInDir returns a list of FileItems for listing
@@ -229,7 +230,7 @@ func listRootDirectories() (directories []Directory, err error) {
 			Debug.Println("Found Dir", te)
 
 			directories = append(directories, Directory{
-				Name: te.Name,
+				Path: te.Name,
 			})
 
 			return 1
@@ -325,7 +326,7 @@ func writeDirectories(repo *git.Repository, nc NewCommit, user User) (oid *git.O
 	}
 	defer index.Free()
 
-	var contents string
+	var meta []byte
 
 	for _, ncd := range nc.Directories {
 
@@ -343,7 +344,12 @@ func writeDirectories(repo *git.Repository, nc NewCommit, user User) (oid *git.O
 
 		var ie git.IndexEntry
 
-		oid, err = repo.CreateBlobFromBuffer([]byte(contents))
+		meta, err = yaml.Marshal(ncd.DirectoryInfo)
+		if err != nil {
+			return oid, fmt.Errorf("failed to decode directory metadata: %s", ncd.DirectoryInfo)
+		}
+
+		oid, err = repo.CreateBlobFromBuffer(meta)
 		if err != nil {
 			return nil, err
 		}
@@ -492,7 +498,7 @@ func buildIndexEntry(oid *git.Oid, ncf NewCommitFile) git.IndexEntry {
 func buildIndexEntryForNewDirectory(oid *git.Oid, ncf NewCommitDirectory) git.IndexEntry {
 	return git.IndexEntry{
 		Id:   oid,
-		Path: filepath.Join(ncf.Path, ".keep"),
+		Path: filepath.Join(ncf.Path, ".info"),
 		Size: uint32(0),
 
 		Ctime: git.IndexTime{},

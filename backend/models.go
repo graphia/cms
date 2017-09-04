@@ -15,7 +15,8 @@ type NewCommit struct {
 
 // NewCommitDirectory holds directory info for creating new dirs
 type NewCommitDirectory struct {
-	Path string `json:"name"`
+	Path          string        `json:"name"`
+	DirectoryInfo DirectoryInfo `json:"directory_info"`
 }
 
 // NewCommitFile will replace RepoWrite's file attributes
@@ -60,7 +61,15 @@ type FrontMatter struct {
 // FIXME eventually it will, currently just the name, need to
 // work out how best to store it
 type Directory struct {
-	Name string `json:"name"`
+	Path          string `json:"path" yaml:"path"`
+	DirectoryInfo `json:"info"`
+}
+
+// DirectoryInfo contains the fields that will be written to
+// a directory's .info file
+type DirectoryInfo struct {
+	Name        string `json:"name" yaml:"name"`
+	Description string `json:"description" yaml:"description"`
 }
 
 // FileItem contains enough file information for listing

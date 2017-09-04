@@ -45,12 +45,12 @@ func TestApiListDirectoriesHandler(t *testing.T) {
 
 	directoriesExpected := []string{"appendices", "documents"}
 
-	var directoryNames []string
+	var directoryPaths []string
 	for _, directory := range receiver {
-		directoryNames = append(directoryNames, directory.Name)
+		directoryPaths = append(directoryPaths, directory.Path)
 	}
 
-	assert.Equal(t, directoryNames, directoriesExpected)
+	assert.Equal(t, directoryPaths, directoriesExpected)
 
 }
 
@@ -195,7 +195,13 @@ func TestApiCreateDirectory(t *testing.T) {
 
 	target := fmt.Sprintf("%s/%s", server.URL, "api/directories")
 
-	ncd := NewCommitDirectory{Path: "bobbins"}
+	ncd := NewCommitDirectory{
+		Path: "leftorium",
+		DirectoryInfo: DirectoryInfo{
+			Name:        "The Leftorium",
+			Description: "Left-handed goods for all!",
+		},
+	}
 
 	nc := &NewCommit{
 		Message:     "Forty whacks with a wet noodle",
@@ -228,8 +234,9 @@ func TestApiCreateDirectory(t *testing.T) {
 	assert.Equal(t, receiver.Oid, hc.Id().String())
 
 	// ensure the file exists and has the right content
-	contents, _ := ioutil.ReadFile(filepath.Join(repoPath, ncd.Path, ".keep"))
-	assert.Equal(t, "", string(contents))
+	contents, _ := ioutil.ReadFile(filepath.Join(repoPath, ncd.Path, ".info"))
+	assert.Contains(t, string(contents), fmt.Sprintf("%s: %s", "name", ncd.DirectoryInfo.Name))
+	assert.Contains(t, string(contents), fmt.Sprintf("%s: %s", "description", ncd.DirectoryInfo.Description))
 
 	// ensure the most recent commit has the right name and email
 	oid, _ := git.NewOid(receiver.Oid)
