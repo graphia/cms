@@ -62,29 +62,33 @@
 			<!-- new directory form -->
 			<div class="new-directory col-md-4">
 
-				<form>
+				<div class="card text-white bg-light">
 
-					<div class="input-group">
-						<input
-							class="form-control"
-							placeholder="stories"
-							v-model="directory.path"
-						/>
+					<form class="card-body">
 
-						<span class="input-group-btn">
+						<div class="input-group">
 							<input
-								type="submit"
-								class="form-control btn btn-success"
-								value="Create Directory"
-								@click="createDirectory"
+								class="form-control"
+								placeholder="stories"
+								v-model="directory.path"
 							/>
-						</span>
 
-					</div>
-				</form>
+							<span class="input-group-btn">
+								<input
+									type="submit"
+									class="form-control btn btn-success"
+									value="Create Directory"
+									@click="createDirectory"
+								/>
+							</span>
+
+						</div>
+					</form>
+
+				</div>
+				<!-- /new directory form -->
 
 			</div>
-			<!-- /new directory form -->
 
 
 		</div>
