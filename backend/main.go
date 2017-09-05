@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/asdine/storm"
@@ -22,23 +23,35 @@ var (
 	// see, https://github.com/Microsoft/vscode-go/issues/1134 so for ease now set it to the
 	// location of the test config
 	//
-	// configFilePath = flag.String("config", "/etc/graphia.yml", "the config file")
-	configFilePath = flag.String("config", "../config/test.yml", "the config file")
-	logEnabled     = flag.Bool("log-to-file", false, "enable logging")
-	verifyKey      *rsa.PublicKey
-	signKey        *rsa.PrivateKey
-	db             storm.DB
-	validate       *validator.Validate
+	argConfigPath = flag.String("config", "/etc/graphia.yml", "the config file")
+	logEnabled    = flag.Bool("log-to-file", false, "enable logging")
+	verifyKey     *rsa.PublicKey
+	signKey       *rsa.PrivateKey
+	db            storm.DB
+	validate      *validator.Validate
 )
 
 // init loads config and sets up logging without requiring
 // main to be run, allowing us to log while testing too
 func init() {
+
+	var p, envConfigPath string
 	var err error
 
 	flag.Parse()
 
-	config, err = loadConfig(configFilePath)
+	// If a CONFIG env var exists, use its value
+	// to retrieve the config file, otherwise fall
+	// back to the command line arg
+	envConfigPath = os.Getenv("CONFIG")
+
+	if envConfigPath != "" {
+		p = envConfigPath
+	} else {
+		p = *argConfigPath
+	}
+
+	config, err = loadConfig(&p)
 	if err != nil {
 		if err != nil {
 			panic(err)

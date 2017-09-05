@@ -8,6 +8,7 @@ dist/*
 frontend/node_modules
 frontend/public/**/*
 repo
+hugo
 tags
 tests/tmp/**/*
 tests/frontend/.byebug_history
