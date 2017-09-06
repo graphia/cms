@@ -1,0 +1,7 @@
+languageCode: "en-gb"
+title: "My New Hugo Site"
+baseURL: "http://localhost:1313"
+buildDrafts: true
+theme: ../../../graphia-minimal-theme
+relativeURLs: true
+publishDir: ../dist

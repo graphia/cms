@@ -1039,6 +1039,7 @@ func apiPublish(w http.ResponseWriter, r *http.Request) {
 			Meta:    string(output),
 		}
 		JSONResponse(fr, http.StatusBadRequest, w)
+		return
 	}
 
 	Info.Println("Site published!")

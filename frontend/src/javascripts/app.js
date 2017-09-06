@@ -101,7 +101,11 @@ Vue.filter('format_date', (value) => {
 });
 
 Vue.filter('capitalize', (value) => {
-	return value.charAt(0).toUpperCase() + value.slice(1);
+	try {
+		return value.charAt(0).toUpperCase() + value.slice(1);
+	} catch(err) {
+		console.warn("cannot capitalize:", value, err);
+	}
 });
 
 // Create a global Event Bus
