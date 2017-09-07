@@ -171,6 +171,8 @@ func setupTestRepo(src, dest string) (oid *git.Oid, err error) {
 		[]string{
 			filepath.Join("appendices", "*.md"),
 			filepath.Join("documents", "*.md"),
+			filepath.Join("documents", "*.json"),
+			filepath.Join("appendices", "*.json"),
 			filepath.Join("documents", "document_1", "*.*"),
 			filepath.Join("appendices", "appendix_1", "*.*"),
 		},

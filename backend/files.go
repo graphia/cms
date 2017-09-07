@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"encoding/base64"
+	"encoding/json"
 
 	"github.com/graphia/particle"
 	"gopkg.in/libgit2/git2go.v25"
@@ -223,15 +224,31 @@ func listRootDirectories() (directories []Directory, err error) {
 
 	defer ht.Free()
 
-	walkIterator := func(_ string, te *git.TreeEntry) int {
+	walkIterator := func(dirName string, te *git.TreeEntry) int {
 
 		if te.Type == git.ObjectTree {
 
 			Debug.Println("Found Dir", te)
 
+			// check for .info.json file
+
+			// See if there's a info.json file. The reason it's JSON
+			// and not YAML like the other "frontmatter" is because
+			// Hugo's templating layer only supports getJSON and getCSV
+
+			tree, err := repo.LookupTree(te.Id)
+			if err != nil {
+				return 0
+			}
+
+			di, err := getMetadataFile(repo, tree, dirName)
+
 			directories = append(directories, Directory{
-				Path: te.Name,
+				Path:          te.Name,
+				DirectoryInfo: di,
 			})
+
+			fmt.Println("directories", directories)
 
 			return 1
 
@@ -818,4 +835,28 @@ func extractContents(ncf NewCommitFile) (contents []byte, err error) {
 		return []byte(ncf.Body), err
 	}
 
+}
+
+func getMetadataFile(repo *git.Repository, tree *git.Tree, dirName string) (di DirectoryInfo, err error) {
+
+	infoEntry, err := tree.EntryByPath(filepath.Join(dirName, "info.json"))
+	if err != nil {
+		Warning.Println("info.json does not exist in the repository, skipping for", dirName)
+		return di, err
+	}
+
+	blob, err := repo.LookupBlob(infoEntry.Id)
+	if err != nil {
+		Warning.Println("info.json cannot be retrieved, exiting")
+		return di, err
+	}
+	defer blob.Free()
+
+	err = json.Unmarshal(blob.Contents(), &di)
+	if err != nil {
+		Warning.Println("info.json cannot be decoded, exiting")
+		return di, err
+	}
+
+	return di, err
 }

@@ -175,20 +175,29 @@ func TestListRootDirectories(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/list_directories_subdirs"
 	setupSubdirsTestRepo(repoPath)
 
-	directoriesExpected := []string{"appendices", "documents"}
+	//directoriesExpected := []string{"appendices", "documents"}
+
+	directoriesExpected := []Directory{
+		Directory{
+			Path:          "appendices",
+			DirectoryInfo: DirectoryInfo{},
+		},
+		Directory{
+			Path: "documents",
+			DirectoryInfo: DirectoryInfo{
+				Name:        "Documents",
+				Description: "Documents go here",
+			},
+		},
+	}
 
 	directories, err := listRootDirectories()
 	if err != nil {
 		t.Error("error", err)
 	}
 
-	var directoryPaths []string
-	for _, directory := range directories {
-		directoryPaths = append(directoryPaths, directory.Path)
-	}
-
-	assert.Equal(t, 2, len(directoryPaths))
-	assert.Equal(t, directoriesExpected, directoryPaths)
+	assert.Equal(t, 2, len(directories))
+	assert.Equal(t, directoriesExpected, directories)
 }
 
 func TestRootDirectorySummary(t *testing.T) {
