@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -15,6 +16,12 @@ import (
 	"github.com/graphia/particle"
 	"gopkg.in/libgit2/git2go.v25"
 	yaml "gopkg.in/yaml.v2"
+)
+
+var (
+	// ErrMetaDataNotFound is returned when the info.json file is missing
+	// this isn't a catestrophic problem, but should be logged
+	ErrMetaDataNotFound = errors.New("info.json not found")
 )
 
 // getFilesInDir returns a list of FileItems for listing
@@ -242,6 +249,13 @@ func listRootDirectories() (directories []Directory, err error) {
 			}
 
 			di, err := getMetadataFile(repo, tree, dirName)
+
+			// if there is any kind of error except ErrMetaDataNotFound,
+			// something's wrong, quit
+			if err != ErrMetaDataNotFound && err != nil {
+				Error.Println("Metadata found but not retrievable", err.Error())
+				return 0
+			}
 
 			directories = append(directories, Directory{
 				Path:          te.Name,
@@ -842,7 +856,7 @@ func getMetadataFile(repo *git.Repository, tree *git.Tree, dirName string) (di D
 	infoEntry, err := tree.EntryByPath(filepath.Join(dirName, "info.json"))
 	if err != nil {
 		Warning.Println("info.json does not exist in the repository, skipping for", dirName)
-		return di, err
+		return di, ErrMetaDataNotFound
 	}
 
 	blob, err := repo.LookupBlob(infoEntry.Id)
