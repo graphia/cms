@@ -137,8 +137,8 @@
 
 				let response = await this.directory.create(this.commit);
 
-				if (!checkResponse(response)) {
-					console.error(response);
+				if (!checkResponse(response.status)) {
+					console.error(response.status);
 					return;
 				}
 

@@ -119,7 +119,7 @@ export default class CMSFile {
 	static async find(directory, filename, edit = false) {
 		console.debug(`finding ${filename} in ${directory}`);
 
-		var path = `${config.api}/directories/${directory}/files/${filename}`
+		let path = `${config.api}/directories/${directory}/files/${filename}`
 
 		// if we need the uncompiled markdown (for loading the editor), amend '/edit' to the path
 		if (edit) {
@@ -207,18 +207,27 @@ export default class CMSFile {
 		}
 	};
 
-	destroy(commit) {
+	async destroy(commit) {
 		console.debug(commit);
 
 		var path = `${config.api}/directories/${this.path}/files/${this.filename}`
 
 		try {
-			return fetch(path, {mode: "cors", method: "DELETE", headers: store.state.auth.authHeader(), body: commit.toJSON(this)})
-				.then((response) => {
-					if (!checkResponse(response.status)) {
-						return
-					}
-				});
+
+			let response = await fetch(path, {
+				mode: "cors",
+				method: "DELETE",
+				headers: store.state.auth.authHeader(),
+				body: commit.toJSON(this)
+			});
+
+			if (!checkResponse(response.status)) {
+				console.warn("could not destroy file", response);
+				return;
+			};
+
+			// if delete was successful
+			return;
 		}
 		catch(err) {
 			console.error(`There was a problem deleting document ${this.filename} from ${this.path}, ${err}`);

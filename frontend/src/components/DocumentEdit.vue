@@ -67,7 +67,7 @@
 				return {
 					name: 'document_show',
 					params: {
-						directory: 'documents',
+						directory: this.directory,
 						filename: this.document.filename
 					}
 				};
