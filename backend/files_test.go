@@ -9,6 +9,7 @@ import (
 
 	"github.com/graphia/particle"
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/libgit2/git2go.v25"
 )
 
 func TestGetFilesInDocumentsDir(t *testing.T) {
@@ -440,5 +441,62 @@ the quick *brown* fox jumped over the **lazy** dog`,
 			contents, _ := extractContents(tt.args.ncf)
 			assert.Equal(t, tt.wantContents, contents)
 		})
+	}
+}
+
+func Test_getMetadata(t *testing.T) {
+	repoPath := "../tests/tmp/repositories/get_metadata"
+	setupSubdirsTestRepo(repoPath)
+	repo, _ := repository(config)
+
+	ht, _ := headTree(repo)
+
+	docs, _ := ht.EntryByPath("documents")
+	docsTree, _ := repo.LookupTree(docs.Id)
+
+	appendices, _ := ht.EntryByPath("appendices")
+	appendicesTree, _ := repo.LookupTree(appendices.Id)
+
+	type args struct {
+		repo *git.Repository
+		tree *git.Tree
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantDi  DirectoryInfo
+		wantErr bool
+	}{
+		{
+			name: "Directory with _index.md",
+			args: args{
+				repo: repo,
+				tree: docsTree,
+			},
+			wantDi: DirectoryInfo{
+				Title:       "Documents",
+				Description: "Documents go here",
+			},
+			wantErr: false,
+		},
+		{
+			name: "Directory without _index.md",
+			args: args{
+				repo: repo,
+				tree: appendicesTree,
+			},
+			wantDi:  DirectoryInfo{},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+
+		if !tt.wantErr {
+			md, _ := getMetadata(tt.args.repo, tt.args.tree)
+			assert.Equal(t, tt.wantDi, md)
+		} else {
+			_, err := getMetadata(tt.args.repo, tt.args.tree)
+			assert.Equal(t, ErrMetaDataNotFound, err)
+		}
 	}
 }
