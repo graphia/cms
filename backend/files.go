@@ -11,17 +11,15 @@ import (
 	"time"
 
 	"encoding/base64"
-	"encoding/json"
 
 	"github.com/graphia/particle"
 	"gopkg.in/libgit2/git2go.v25"
-	yaml "gopkg.in/yaml.v2"
 )
 
 var (
-	// ErrMetaDataNotFound is returned when the info.json file is missing
+	// ErrMetaDataNotFound is returned when the _index.md file is missing
 	// this isn't a catestrophic problem, but should be logged
-	ErrMetaDataNotFound = errors.New("info.json not found")
+	ErrMetaDataNotFound = errors.New("_index.md not found")
 )
 
 // getFilesInDir returns a list of FileItems for listing
@@ -231,24 +229,17 @@ func listRootDirectories() (directories []Directory, err error) {
 
 	defer ht.Free()
 
-	walkIterator := func(dirName string, te *git.TreeEntry) int {
+	walkIterator := func(_ string, te *git.TreeEntry) int {
 
 		if te.Type == git.ObjectTree {
 
-			Debug.Println("Found Dir", te)
-
-			// check for .info.json file
-
-			// See if there's a info.json file. The reason it's JSON
-			// and not YAML like the other "frontmatter" is because
-			// Hugo's templating layer only supports getJSON and getCSV
-
+			// check for _index.md file
 			tree, err := repo.LookupTree(te.Id)
 			if err != nil {
 				return 0
 			}
 
-			di, err := getMetadataFile(repo, tree, dirName)
+			di, err := getMetadata(repo, tree)
 
 			// if there is any kind of error except ErrMetaDataNotFound,
 			// something's wrong, quit
@@ -261,8 +252,6 @@ func listRootDirectories() (directories []Directory, err error) {
 				Path:          te.Name,
 				DirectoryInfo: di,
 			})
-
-			fmt.Println("directories", directories)
 
 			return 1
 
@@ -357,8 +346,6 @@ func writeDirectories(repo *git.Repository, nc NewCommit, user User) (oid *git.O
 	}
 	defer index.Free()
 
-	var meta []byte
-
 	for _, ncd := range nc.Directories {
 
 		target := filepath.Join(ncd.Path)
@@ -373,11 +360,14 @@ func writeDirectories(repo *git.Repository, nc NewCommit, user User) (oid *git.O
 			return nil, fmt.Errorf("path must be specified when creating a directory: %s", ncd)
 		}
 
+		var meta = []byte("")
 		var ie git.IndexEntry
 
-		meta, err = yaml.Marshal(ncd.DirectoryInfo)
-		if err != nil {
-			return oid, fmt.Errorf("failed to decode directory metadata: %s", ncd.DirectoryInfo)
+		// if we have some DirectoryInfo metadata, overwrite meta with it in the
+		// usual FrontMatter manner
+		if (ncd.DirectoryInfo != DirectoryInfo{}) {
+			meta = make([]byte, particle.YAMLEncoding.EncodeLen(meta, &ncd.DirectoryInfo))
+			particle.YAMLEncoding.Encode(meta, []byte(""), &ncd.DirectoryInfo)
 		}
 
 		oid, err = repo.CreateBlobFromBuffer(meta)
@@ -529,7 +519,7 @@ func buildIndexEntry(oid *git.Oid, ncf NewCommitFile) git.IndexEntry {
 func buildIndexEntryForNewDirectory(oid *git.Oid, ncf NewCommitDirectory) git.IndexEntry {
 	return git.IndexEntry{
 		Id:   oid,
-		Path: filepath.Join(ncf.Path, ".info"),
+		Path: filepath.Join(ncf.Path, "_index.md"),
 		Size: uint32(0),
 
 		Ctime: git.IndexTime{},
@@ -851,24 +841,28 @@ func extractContents(ncf NewCommitFile) (contents []byte, err error) {
 
 }
 
-func getMetadataFile(repo *git.Repository, tree *git.Tree, dirName string) (di DirectoryInfo, err error) {
+func getMetadata(repo *git.Repository, tree *git.Tree) (di DirectoryInfo, err error) {
+	var reader io.Reader
 
-	infoEntry, err := tree.EntryByPath(filepath.Join(dirName, "info.json"))
+	infoEntry, err := tree.EntryByPath("_index.md")
 	if err != nil {
-		Warning.Println("info.json does not exist in the repository, skipping for", dirName)
+		Warning.Println("_index.md does not exist in the repository, skipping for", tree.Object.Id())
 		return di, ErrMetaDataNotFound
 	}
 
 	blob, err := repo.LookupBlob(infoEntry.Id)
 	if err != nil {
-		Warning.Println("info.json cannot be retrieved, exiting")
+		Warning.Println("_index.md cannot be retrieved, exiting", infoEntry.Id)
 		return di, err
 	}
 	defer blob.Free()
 
-	err = json.Unmarshal(blob.Contents(), &di)
+	reader = bytes.NewReader(blob.Contents())
+
+	_, err = particle.YAMLEncoding.DecodeReader(reader, &di)
+
 	if err != nil {
-		Warning.Println("info.json cannot be decoded, exiting")
+		Warning.Println("_index.md cannot be decoded, exiting", blob.Contents())
 		return di, err
 	}
 

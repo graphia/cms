@@ -175,8 +175,6 @@ func TestListRootDirectories(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/list_directories_subdirs"
 	setupSubdirsTestRepo(repoPath)
 
-	//directoriesExpected := []string{"appendices", "documents"}
-
 	directoriesExpected := []Directory{
 		Directory{
 			Path:          "appendices",
@@ -185,7 +183,7 @@ func TestListRootDirectories(t *testing.T) {
 		Directory{
 			Path: "documents",
 			DirectoryInfo: DirectoryInfo{
-				Name:        "Documents",
+				Title:       "Documents",
 				Description: "Documents go here",
 			},
 		},

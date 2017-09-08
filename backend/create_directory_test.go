@@ -40,7 +40,7 @@ func TestCreateDirectory(t *testing.T) {
 	assert.Equal(t, oid, hc.Id())
 
 	// ensure the file exists and has the right content
-	_, err = os.Stat(filepath.Join(repoPath, newDir, ".info"))
+	_, err = os.Stat(filepath.Join(repoPath, newDir, "_index.md"))
 	assert.False(t, os.IsNotExist(err))
 
 	// ensure the most recent commit has the right name and email

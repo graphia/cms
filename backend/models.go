@@ -68,7 +68,7 @@ type Directory struct {
 // DirectoryInfo contains the fields that will be written to
 // a directory's .info file
 type DirectoryInfo struct {
-	Name        string `json:"name" yaml:"name"`
+	Title       string `json:"title" yaml:"title"`
 	Description string `json:"description" yaml:"description"`
 }
 

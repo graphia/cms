@@ -198,7 +198,7 @@ func TestApiCreateDirectory(t *testing.T) {
 	ncd := NewCommitDirectory{
 		Path: "leftorium",
 		DirectoryInfo: DirectoryInfo{
-			Name:        "The Leftorium",
+			Title:       "The Leftorium",
 			Description: "Left-handed goods for all!",
 		},
 	}
@@ -234,8 +234,9 @@ func TestApiCreateDirectory(t *testing.T) {
 	assert.Equal(t, receiver.Oid, hc.Id().String())
 
 	// ensure the file exists and has the right content
-	contents, _ := ioutil.ReadFile(filepath.Join(repoPath, ncd.Path, ".info"))
-	assert.Contains(t, string(contents), fmt.Sprintf("%s: %s", "name", ncd.DirectoryInfo.Name))
+	contents, _ := ioutil.ReadFile(filepath.Join(repoPath, ncd.Path, "_index.md"))
+
+	assert.Contains(t, string(contents), fmt.Sprintf("%s: %s", "title", ncd.DirectoryInfo.Title))
 	assert.Contains(t, string(contents), fmt.Sprintf("%s: %s", "description", ncd.DirectoryInfo.Description))
 
 	// ensure the most recent commit has the right name and email
