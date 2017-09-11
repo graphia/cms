@@ -158,7 +158,7 @@ func TestApiListDirectorySummaryHandler(t *testing.T) {
 
 	// setup and send the request
 	repoPath := "../tests/tmp/repositories/list_directory_summary"
-	setupSmallTestRepo(repoPath)
+	setupSubdirsTestRepo(repoPath)
 
 	target := fmt.Sprintf("%s/%s", server.URL, "api/summary")
 
@@ -170,16 +170,27 @@ func TestApiListDirectorySummaryHandler(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
-	var receiver map[string][]FileItem
+	var receiver []DirectorySummary
 	json.NewDecoder(resp.Body).Decode(&receiver)
 
 	// prepare the expected output
 	documentFiles, _ := getFilesInDir("documents")
 	appendicesFiles, _ := getFilesInDir("appendices")
 
-	expectedSummary := map[string][]FileItem{
-		"documents":  documentFiles,
-		"appendices": appendicesFiles,
+	expectedSummary := []DirectorySummary{
+		DirectorySummary{
+			Path:          "appendices",
+			DirectoryInfo: DirectoryInfo{},
+			Contents:      appendicesFiles,
+		},
+		DirectorySummary{
+			Path: "documents",
+			DirectoryInfo: DirectoryInfo{
+				Title:       "Documents",
+				Description: "Documents go here",
+			},
+			Contents: documentFiles,
+		},
 	}
 
 	assert.Equal(t, 2, len(receiver))

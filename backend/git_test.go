@@ -166,9 +166,10 @@ func TestDiffForCommit(t *testing.T) {
 	cs, _ := diffForCommit(oid.String())
 
 	// Make sure only the correct five markdown files were added
-	assert.Equal(t, 5, cs.NumDeltas)
+	assert.Equal(t, 6, cs.NumDeltas)
 	assert.Equal(t, 0, cs.NumDeleted)
-	assert.Equal(t, 5, cs.NumAdded)
+	assert.Equal(t, 6, cs.NumAdded)
+	assert.Contains(t, cs.FullDiff, "+++ b/documents/_index.md")
 	assert.Contains(t, cs.FullDiff, "+++ b/documents/document_1.md")
 	assert.Contains(t, cs.FullDiff, "+++ b/documents/document_2.md")
 	assert.Contains(t, cs.FullDiff, "+++ b/documents/document_3.md")
@@ -179,6 +180,7 @@ func TestDiffForCommit(t *testing.T) {
 	assert.Contains(t, cs.FullDiff, "+Lorem ipsum dolor sit")
 
 	var allFilesInRepo = []string{
+		"documents/_index.md",
 		"documents/document_1.md",
 		"documents/document_2.md",
 		"documents/document_3.md",

@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"io"
@@ -9,8 +10,6 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
-
-	"encoding/base64"
 
 	"github.com/graphia/particle"
 	"gopkg.in/libgit2/git2go.v25"
@@ -71,6 +70,11 @@ func getFilesInDir(directory string) (files []FileItem, err error) {
 
 			if ext != ".md" {
 				Warning.Println("not a markdown file, skipping:", te.Name)
+				return 0
+			}
+
+			if te.Name == "_index.md" {
+				Warning.Println("is a metadata file, skipping:", te.Name)
 				return 0
 			}
 
@@ -266,10 +270,9 @@ func listRootDirectories() (directories []Directory, err error) {
 
 }
 
-func listRootDirectorySummary() (summary map[string][]FileItem, err error) {
+func listRootDirectorySummary() (summary []DirectorySummary, err error) {
 
-	var filesInDir []FileItem
-	summary = make(map[string][]FileItem)
+	var contents []FileItem
 
 	repo, err := repository(config)
 	if err != nil {
@@ -288,13 +291,25 @@ func listRootDirectorySummary() (summary map[string][]FileItem, err error) {
 
 		if te.Type == git.ObjectTree {
 
-			filesInDir, err = getFilesInDir(te.Name)
+			contents, err = getFilesInDir(te.Name)
 			if err != nil {
 				Error.Println("Failed to retrieve files when generating summary", te.Name, err)
 				return 0
 			}
 
-			summary[te.Name] = filesInDir
+			// check for _index.md file
+			tree, err := repo.LookupTree(te.Id)
+			if err != nil {
+				return 0
+			}
+
+			di, err := getMetadata(repo, tree)
+
+			summary = append(summary, DirectorySummary{
+				Path:          te.Name,
+				DirectoryInfo: di,
+				Contents:      contents,
+			})
 
 			return 1
 

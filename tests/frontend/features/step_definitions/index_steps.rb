@@ -18,8 +18,9 @@ When %r{^I navigate to the "([^"]*)" index page$} do |name|
 end
 
 Then %r{^I should see a list containing the contents of the "(.*?)" directory$} do |dir|
-
-  files = Dir.glob(File.join(REPO_PATH, dir, "*.md"))
+  files = Dir
+    .glob(File.join(REPO_PATH, dir, "*.md"))
+    .reject {|path| File.basename(path) == "_index.md"}
 
   files.each do |filename|
     expect(page).to have_content(File.basename(filename))

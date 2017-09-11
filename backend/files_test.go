@@ -209,9 +209,20 @@ func TestRootDirectorySummary(t *testing.T) {
 	documentFiles, _ := getFilesInDir("documents")
 	appendicesFiles, _ := getFilesInDir("appendices")
 
-	expectedSummary := map[string][]FileItem{
-		"appendices": appendicesFiles,
-		"documents":  documentFiles,
+	expectedSummary := []DirectorySummary{
+		DirectorySummary{
+			Path:          "appendices",
+			DirectoryInfo: DirectoryInfo{},
+			Contents:      appendicesFiles,
+		},
+		DirectorySummary{
+			Path: "documents",
+			DirectoryInfo: DirectoryInfo{
+				Title:       "Documents",
+				Description: "Documents go here",
+			},
+			Contents: documentFiles,
+		},
 	}
 
 	summary, err := listRootDirectorySummary()
@@ -230,7 +241,7 @@ func TestCountFiles(t *testing.T) {
 
 	expectedCounts := map[string]int{
 		"images":          3,
-		"documents":       5,
+		"documents":       6,
 		"structured data": 2,
 		"tabular data":    1,
 		"other":           1,

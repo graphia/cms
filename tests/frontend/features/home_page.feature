@@ -40,3 +40,9 @@ Feature: Home page contents
 		When I am on the homepage
 		Then I see a 'no files' alert in the operating procedures section
 		And there should be a 'new file' button
+
+	Scenario: When a directory has metadata
+		Given the 'documents' directory has title and description metadata
+		When I am on the homepage
+		Then I should see the custom description
+		And I should see the custom title

@@ -5,12 +5,14 @@ import checkResponse from '../response.js';
 export default class CMSDirectory {
 
 	static initialize(path) {
-		let dir = new CMSDirectory(path)
+		let dir = new CMSDirectory(path, null, null)
 		return dir;
 	};
 
-	constructor(path) {
-		this.path = path || "";
+	constructor(path, title, description) {
+		this.path        = path        || "";
+		this.title       = title       || "";
+		this.description = description || "";
 	};
 
 	async create(commit) {

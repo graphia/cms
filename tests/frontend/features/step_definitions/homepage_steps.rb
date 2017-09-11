@@ -50,8 +50,8 @@ Given %r{^the following directories exist in the repository$} do |table|
 end
 
 Then %r{^I should see a section for each directory$} do
-  %w{appendices documents}.each do |name|
-    expect(page).to have_css("h4.card-header", text: name.capitalize)
+  ["Appendices", "Important Documents"].each do |name|
+    expect(page).to have_css("h4.card-header", text: name)
   end
 end
 
@@ -83,11 +83,34 @@ end
 Given %r{^the '(.*?)' directory contains no files$} do |dir|
   # This could be improved with Dir.children, but need a newer Ruby
   # than 2.4.0 https://ruby-doc.org/core-2.4.1/Dir.html
-  expect(Dir.entries(File.join(REPO_PATH, "empty"))).to eql(['.', '..', '.keep'])
+  expect(Dir.entries(File.join(REPO_PATH, "empty"))).to eql(['.', '..', '_index.md'])
 end
 
 Then %r{^I see a 'no files' alert in the operating procedures section$} do
   within(".card.empty") do
     expect(page).to have_css("div.alert", text: "There's nothing here yet")
   end
+end
+
+Given %r{^the 'documents' directory has title and description metadata$} do
+  contents = File.read(File.join(REPO_PATH, "documents", "_index.md"))
+
+  expect(contents).to eql(
+    <<~FM
+    ---
+    title: Important Documents
+    description: Documents go here
+    ---
+    FM
+  )
+end
+
+Then %r{^I should see the custom description$} do
+  within(".card.documents") do
+    expect(page).to have_css(".card-body", text: "Documents go here")
+  end
+end
+
+Then %r{^I should see the custom title$} do
+  expect(page).to have_css("h4.card-header", text: "Important Documents")
 end

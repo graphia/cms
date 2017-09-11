@@ -425,10 +425,8 @@ func apiListDirectoriesHandler(w http.ResponseWriter, r *http.Request) {
 // }
 func apiDirectorySummary(w http.ResponseWriter, r *http.Request) {
 
-	var summary map[string][]FileItem
+	var summary []DirectorySummary
 	var err error
-
-	summary = make(map[string][]FileItem)
 
 	summary, err = listRootDirectorySummary()
 

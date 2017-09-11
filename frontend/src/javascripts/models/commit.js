@@ -62,7 +62,11 @@ export default class CMSCommit {
 
 	_directory(directory) {
 		return {
-			name: directory.path
+			name: directory.path,
+			info: {
+				title: directory.title,
+				description: directory.description
+			}
 		};
 	};
 
