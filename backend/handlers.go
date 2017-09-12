@@ -442,7 +442,7 @@ func apiDirectorySummary(w http.ResponseWriter, r *http.Request) {
 }
 
 // apiCreateDirectoryHandler creates an 'empty' directory. It actually
-// contains a hidden `.keep` file, so it's trackable by git
+// contains a _index.md file, so it's trackable by git
 //
 // POST /api/directories
 // {
@@ -470,6 +470,7 @@ func apiCreateDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 			Message: fmt.Sprintf("Failed to create directory: %s", err.Error()),
 		}
 		JSONResponse(fr, http.StatusBadRequest, w)
+		return
 	}
 
 	sr = SuccessResponse{
@@ -490,6 +491,60 @@ func apiCreateDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 func apiRenameDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 	// TODO
 	w.WriteHeader(http.StatusOK)
+}
+
+// apiUpdateDirectoriesHandler can update one or more sets of directory metadata,
+// this is stored in the `_index.md` file as regular Frontmatter, eg:
+// ---
+// title: My favourite document
+// description: The greatest doc ever!
+// ---
+func apiUpdateDirectoriesHandler(w http.ResponseWriter, r *http.Request) {
+	var directory string
+	var nc NewCommit
+	var sr SuccessResponse
+	var fr FailureResponse
+
+	directory = vestigo.Param(r, "directory")
+
+	nc = NewCommit{}
+
+	json.NewDecoder(r.Body).Decode(&nc)
+
+	if len(nc.Directories) == 0 {
+		fr = FailureResponse{
+			Message: "No directories specified for updates",
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	if !pathInDirectories(directory, &nc.Directories) {
+		fr = FailureResponse{
+			Message: "No specified directory matches path",
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	user := getCurrentUser(r.Context())
+	oid, err := updateDirectories(nc, user)
+
+	if err != nil {
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Failed to update directories: %s", err.Error()),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	sr = SuccessResponse{
+		Message: "Directories updated",
+		Oid:     oid.String(),
+	}
+
+	JSONResponse(sr, http.StatusOK, w)
+
 }
 
 // apiDeleteDirectoryHandler deletes a directory and all of its contents.

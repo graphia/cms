@@ -1071,6 +1071,149 @@ func TestApiGetAttachmentsNoDirectoryHandler(t *testing.T) {
 
 }
 
+func TestApiUpdateDirectoriesHandler(t *testing.T) {
+	server = createTestServerWithContext()
+
+	repoPath := "../tests/tmp/repositories/update_directories"
+	setupSmallTestRepo(repoPath)
+
+	nc := NewCommit{
+		Message: "Added beverage information",
+		Directories: []NewCommitDirectory{
+			NewCommitDirectory{
+				Path: "documents", // there is already a _index.md in documents
+				DirectoryInfo: DirectoryInfo{
+					Title:       "Buzz Cola",
+					Description: "Twice the sugar, twice the caffeine",
+				},
+			},
+		},
+	}
+
+	target := fmt.Sprintf(
+		"%s/%s",
+		server.URL,
+		"api/directories/documents",
+	)
+
+	payload, err := json.Marshal(nc)
+	if err != nil {
+		panic(err)
+	}
+
+	buff := bytes.NewBuffer(payload)
+
+	client := &http.Client{}
+
+	req, _ := http.NewRequest("PATCH", target, buff)
+
+	resp, err := client.Do(req)
+
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+	var receiver SuccessResponse
+	json.NewDecoder(resp.Body).Decode(&receiver)
+
+	// make sure the committer info is correct
+	repo, _ := repository(config)
+	oid, _ := git.NewOid(receiver.Oid)
+	lc, _ := repo.LookupCommit(oid)
+
+	user := apiTestUser()
+
+	assert.Equal(t, lc.Committer().Name, user.Name)
+	assert.Equal(t, lc.Committer().Email, user.Email)
+	assert.Equal(t, lc.Message(), nc.Message)
+
+	// finally ensure that the file has been written properly
+	for _, f := range nc.Directories {
+		contents, _ := ioutil.ReadFile(filepath.Join(repoPath, f.Path, "_index.md"))
+		assert.Contains(t, string(contents), "---\ntitle: Buzz Cola\ndescription: Twice the sugar, twice the caffeine\n---")
+	}
+
+}
+
+func TestApiUpdateDirectoriesHandlerNoDirectories(t *testing.T) {
+	server = createTestServerWithContext()
+
+	repoPath := "../tests/tmp/repositories/update_directories"
+	setupSmallTestRepo(repoPath)
+
+	nc := NewCommit{
+		Message:     "Added beverage information",
+		Directories: []NewCommitDirectory{},
+	}
+
+	target := fmt.Sprintf(
+		"%s/%s",
+		server.URL,
+		"api/directories/documents",
+	)
+
+	payload, err := json.Marshal(nc)
+	if err != nil {
+		panic(err)
+	}
+
+	buff := bytes.NewBuffer(payload)
+	client := &http.Client{}
+	req, _ := http.NewRequest("PATCH", target, buff)
+	resp, err := client.Do(req)
+	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+
+	var receiver FailureResponse
+	json.NewDecoder(resp.Body).Decode(&receiver)
+
+	// make sure the error message is correct
+	assert.Equal(t, "No directories specified for updates", receiver.Message)
+
+}
+
+func TestApiUpdateDirectoriesHandlerWrongDirectories(t *testing.T) {
+	// in this example the path doesn't match the supplied dirs
+	server = createTestServerWithContext()
+
+	repoPath := "../tests/tmp/repositories/update_directories"
+	setupSmallTestRepo(repoPath)
+
+	nc := NewCommit{
+		Message: "Added beverage information",
+		Directories: []NewCommitDirectory{
+			NewCommitDirectory{
+				Path: "documents", // there is already a _index.md in documents
+				DirectoryInfo: DirectoryInfo{
+					Title:       "Buzz Cola",
+					Description: "Twice the sugar, twice the caffeine",
+				},
+			},
+		},
+	}
+
+	target := fmt.Sprintf(
+		"%s/%s",
+		server.URL,
+		"api/directories/appendices", // note that in nc we're changing 'documents'
+	)
+
+	payload, err := json.Marshal(nc)
+	if err != nil {
+		panic(err)
+	}
+
+	buff := bytes.NewBuffer(payload)
+	client := &http.Client{}
+	req, _ := http.NewRequest("PATCH", target, buff)
+	resp, err := client.Do(req)
+	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+
+	var receiver FailureResponse
+	json.NewDecoder(resp.Body).Decode(&receiver)
+
+	// make sure the error message is correct
+	assert.Equal(t, "No specified directory matches path", receiver.Message)
+
+}
+
 // Setup tests
 
 func Test_setupAllowInitializeRepository_Success(t *testing.T) {

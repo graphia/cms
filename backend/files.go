@@ -214,6 +214,51 @@ func writeFiles(repo *git.Repository, nc NewCommit, user User) (oid *git.Oid, er
 
 }
 
+func writeMetadataFiles(repo *git.Repository, nc NewCommit, user User) (oid *git.Oid, err error) {
+
+	index, err := repo.Index()
+	if err != nil {
+		return nil, err
+	}
+	defer index.Free()
+
+	var meta []byte
+
+	for _, ncd := range nc.Directories {
+
+		var ie git.IndexEntry
+
+		// FIXME allow for metadata file contents too
+
+		if (ncd.DirectoryInfo != DirectoryInfo{}) {
+			meta = make([]byte, particle.YAMLEncoding.EncodeLen(meta, &ncd.DirectoryInfo))
+			particle.YAMLEncoding.Encode(meta, []byte(""), &ncd.DirectoryInfo)
+		}
+
+		oid, err = repo.CreateBlobFromBuffer(meta)
+		if err != nil {
+			return nil, err
+		}
+
+		// build the git index entry and add it to the index
+		ie = buildIndexEntryDirectory(oid, ncd)
+
+		err = index.Add(&ie)
+		if err != nil {
+			return nil, err
+		}
+
+	}
+
+	oid, err = writeTreeAndCommit(repo, index, nc, user)
+	if err != nil {
+		return oid, err
+	}
+
+	return oid, err
+
+}
+
 func listRootDirectories() (directories []Directory, err error) {
 
 	// Initialising the slice so json.Marshal returns an empty
@@ -354,6 +399,30 @@ func createDirectories(nc NewCommit, user User) (oid *git.Oid, err error) {
 	return oid, err
 }
 
+func updateDirectories(nc NewCommit, user User) (oid *git.Oid, err error) {
+
+	// loop through nc files modifying the metadata
+	// if the _index.md file does not exist, it should create it!
+	repo, err := repository(config)
+	if err != nil {
+		return oid, err
+	}
+
+	// make sure that the dirs included in the nc are in the commit
+
+	if len(nc.Directories) == 0 {
+		return oid, fmt.Errorf("at least one directory must be specified")
+	}
+
+	oid, err = writeMetadataFiles(repo, nc, user)
+	if err != nil {
+		Error.Printf("Failed to write metadata files %s", err.Error())
+		return oid, err
+	}
+
+	return oid, err
+}
+
 func writeDirectories(repo *git.Repository, nc NewCommit, user User) (oid *git.Oid, err error) {
 	index, err := repo.Index()
 	if err != nil {
@@ -391,7 +460,7 @@ func writeDirectories(repo *git.Repository, nc NewCommit, user User) (oid *git.O
 		}
 
 		// build the git index entry and add it to the index
-		ie = buildIndexEntryForNewDirectory(oid, ncd)
+		ie = buildIndexEntryDirectory(oid, ncd)
 
 		err = index.Add(&ie)
 		if err != nil {
@@ -437,11 +506,8 @@ func deleteDirectories(nc NewCommit, user User) (oid *git.Oid, err error) {
 			return nil, fmt.Errorf("directory does not exist: %s", ncd.Path)
 		}
 
-		// now go ahead and remove it
-
-		Debug.Println("Removing directory:", ncd.Path)
-
 		// and remove the target by path and everything beneath it
+		Debug.Println("Removing directory:", ncd.Path)
 		err = index.RemoveDirectory(ncd.Path, 0)
 		if err != nil {
 			return nil, err
@@ -531,10 +597,10 @@ func buildIndexEntry(oid *git.Oid, ncf NewCommitFile) git.IndexEntry {
 	}
 }
 
-func buildIndexEntryForNewDirectory(oid *git.Oid, ncf NewCommitDirectory) git.IndexEntry {
+func buildIndexEntryDirectory(oid *git.Oid, ncd NewCommitDirectory) git.IndexEntry {
 	return git.IndexEntry{
 		Id:   oid,
-		Path: filepath.Join(ncf.Path, "_index.md"),
+		Path: filepath.Join(ncd.Path, "_index.md"),
 		Size: uint32(0),
 
 		Ctime: git.IndexTime{},
