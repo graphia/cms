@@ -35,6 +35,7 @@ func Test_updateDirectories(t *testing.T) {
 						DirectoryInfo: DirectoryInfo{
 							Title:       "Buzz Cola",
 							Description: "Twice the sugar, twice the caffeine",
+							Body:        "# Buzz Cola\nThe taste you'll kill for!",
 						},
 					}},
 				},
@@ -51,6 +52,7 @@ func Test_updateDirectories(t *testing.T) {
 						DirectoryInfo: DirectoryInfo{
 							Title:       "Buzz Cola",
 							Description: "Twice the sugar, twice the caffeine",
+							Body:        "# Buzz Cola\nThe taste you'll kill for!",
 						},
 					}},
 				},
@@ -90,6 +92,8 @@ func Test_updateDirectories(t *testing.T) {
 				for _, f := range tt.args.nc.Directories {
 					contents, _ := ioutil.ReadFile(filepath.Join(repoPath, f.Path, "_index.md"))
 					assert.Contains(t, string(contents), "---\ntitle: Buzz Cola\ndescription: Twice the sugar, twice the caffeine\n---")
+					assert.Contains(t, string(contents), "kill")
+
 				}
 			} else {
 				assert.Contains(t, err.Error(), tt.errMsg)

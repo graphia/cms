@@ -1085,6 +1085,7 @@ func TestApiUpdateDirectoriesHandler(t *testing.T) {
 				DirectoryInfo: DirectoryInfo{
 					Title:       "Buzz Cola",
 					Description: "Twice the sugar, twice the caffeine",
+					Body:        "# Buzz Cola\nThe taste you'll kill for!",
 				},
 			},
 		},
@@ -1128,7 +1129,14 @@ func TestApiUpdateDirectoriesHandler(t *testing.T) {
 	// finally ensure that the file has been written properly
 	for _, f := range nc.Directories {
 		contents, _ := ioutil.ReadFile(filepath.Join(repoPath, f.Path, "_index.md"))
-		assert.Contains(t, string(contents), "---\ntitle: Buzz Cola\ndescription: Twice the sugar, twice the caffeine\n---")
+
+		assert.Contains(t, string(contents), "---") // make sure yaml is delimited
+		assert.Contains(t, string(contents), "title: Buzz Cola")
+		assert.Contains(t, string(contents), "description: Twice the sugar, twice the caffeine")
+
+		assert.Contains(t, string(contents), "# Buzz Cola")
+		assert.Contains(t, string(contents), "The taste you'll kill for!")
+
 	}
 
 }

@@ -78,6 +78,7 @@ type DirectorySummary struct {
 type DirectoryInfo struct {
 	Title       string `json:"title" yaml:"title"`
 	Description string `json:"description" yaml:"description"`
+	Body        string `json:"body" yaml:"-"`
 }
 
 // FileItem contains enough file information for listing

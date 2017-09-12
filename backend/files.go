@@ -228,11 +228,11 @@ func writeMetadataFiles(repo *git.Repository, nc NewCommit, user User) (oid *git
 
 		var ie git.IndexEntry
 
-		// FIXME allow for metadata file contents too
+		body := []byte(ncd.DirectoryInfo.Body)
 
 		if (ncd.DirectoryInfo != DirectoryInfo{}) {
-			meta = make([]byte, particle.YAMLEncoding.EncodeLen(meta, &ncd.DirectoryInfo))
-			particle.YAMLEncoding.Encode(meta, []byte(""), &ncd.DirectoryInfo)
+			meta = make([]byte, particle.YAMLEncoding.EncodeLen(body, &ncd.DirectoryInfo))
+			particle.YAMLEncoding.Encode(meta, body, &ncd.DirectoryInfo)
 		}
 
 		oid, err = repo.CreateBlobFromBuffer(meta)
