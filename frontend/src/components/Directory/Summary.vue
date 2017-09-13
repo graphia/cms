@@ -73,14 +73,15 @@
 
 <script lang="babel">
 
-	import checkResponse from '../javascripts/response.js';
-	import config from '../javascripts/config.js';
-	import CMSDirectory from '../javascripts/models/directory.js';
 	import 'babel-runtime/core-js/object/keys';
-	import DirectoryNew from '../components/DirectoryNew';
+
+	import checkResponse from '../../javascripts/response.js';
+	import config from '../../javascripts/config.js';
+	import CMSDirectory from '../../javascripts/models/directory.js';
+	import DirectoryNew from './New';
 
 	export default {
-		name: "Directories",
+		name: "DirectorySummary",
 		data() {
 			return {
 				directories: {}

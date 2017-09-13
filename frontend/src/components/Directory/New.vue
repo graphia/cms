@@ -61,9 +61,9 @@
 </template>
 
 <script lang="babel">
-	import checkResponse from '../javascripts/response.js';
-	import config from '../javascripts/config.js';
-	import CMSDirectory from '../javascripts/models/directory.js';
+	import checkResponse from '../../javascripts/response.js';
+	import config from '../../javascripts/config.js';
+	import CMSDirectory from '../../javascripts/models/directory.js';
 
 	export default {
 		name: "DirectoryNew",

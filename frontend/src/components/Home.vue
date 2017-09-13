@@ -6,7 +6,7 @@
 
 			<div class="col-md-12">
 
-				<Directories class="directories"/>
+				<DirectorySummary class="directories"/>
 
 			</div>
 
@@ -63,7 +63,7 @@
 
 <script lang="babel">
 	import Broadcast from '../components/Broadcast';
-	import Directories from '../components/Directories';
+	import DirectorySummary from '../components/Directory/Summary';
 
 	import CMSPublisher from '../javascripts/publish.js';
 	import config from '../javascripts/config.js';
@@ -84,7 +84,7 @@
 		},
 
 		components: {
-			Directories
+			DirectorySummary
 		},
 
 		methods: {
