@@ -1,11 +1,12 @@
 <template>
 	<section>
 
-		<form id="edit-document-form" @submit="update">
+		<form id="new-document-form" @submit="create">
 			<h1>{{ heading }}</h1>
 			<Editor
 				:formID="formID"
 				:submitButtonText="submitButtonText"
+				:newFile="true"
 				:formCancellationRedirectParams="formCancellationRedirectParams"
 			/>
 		</form>
@@ -14,26 +15,25 @@
 </template>
 
 <script lang="babel">
-	import Editor from "../components/Editor";
+	import Editor from "../../components/Editor";
+	import checkResponse from "../../javascripts/response.js";
 
 	export default {
-		name: "DocumentEdit",
+		name: "DocumentNew",
 		data() {
 			return {
-				markdownLoaded: false,
-				formID: "edit-document-form",
-				submitButtonText: "Update"
+				formID: "new-document-form",
+				submitButtonText: "Create",
 			};
 		},
 		async created() {
+
 			// set up a fresh new commit
 			this.$store.dispatch("initializeCommit");
 
-			// retrieve the document and add it to vuex's store
-			await this.$store.dispatch("editDocument", {directory: this.directory, filename: this.filename});
+			// initialize a fresh new document
+			this.$store.commit("initializeDocument", this.directory);
 
-			// FIMXE use the bus 🚌
-			this.markdownLoaded = true;
 
 		},
 		computed: {
@@ -50,39 +50,36 @@
 			directory() {
 				return this.$route.params.directory;
 			},
-			filename() {
-				return this.$route.params.filename;
-			},
 
 			heading() {
 				let title = this.document.title;
 				if (title) {
 					return title;
 				} else {
-					return "No title";
+					return "New Document";
 				}
 			},
 
 			formCancellationRedirectParams() {
 				return {
-					name: 'document_show',
-					params: {
-						directory: this.directory,
-						filename: this.document.filename
-					}
+					name: 'document_index'
 				};
 			}
+
 		},
 		methods: {
-
-			update(event) {
+			async create(event) {
 				event.preventDefault();
 
-				this.document.update(this.commit)
-					.then((response) => {
-						console.debug("Document saved, redirecting to 'document_show'");
-						this.redirectToShowDocument(this.directory, this.filename);
-					});
+				let response = await this.document.create(this.commit);
+
+				if (!checkResponse(response.status)) {
+					throw("could not create document");
+				};
+
+				console.debug("Document saved, redirecting to 'document_show'");
+				this.redirectToShowDocument(this.document.path, this.document.filename);
+
 			},
 
 			redirectToShowDocument(directory, filename) {
@@ -91,6 +88,7 @@
 					params:{directory, filename}
 				});
 			}
+
 		},
 		components: {
 			Editor

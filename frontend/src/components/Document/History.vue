@@ -35,7 +35,7 @@
 
 <script lang="babel">
 
-	import checkResponse from '../javascripts/response.js';
+	import checkResponse from '../../javascripts/response.js';
 
 	export default {
 		name: "DocumentHistory",

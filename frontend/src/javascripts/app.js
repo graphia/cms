@@ -10,11 +10,11 @@ import SetupInitializeRepo from '../components/Setup/InitializeRepository.vue';
 import Login from '../components/Login.vue';
 import Commit from '../components/Commit.vue';
 import Home from '../components/Home.vue';
-import DocumentIndex from '../components/DocumentIndex.vue';
-import DocumentShow from '../components/DocumentShow.vue';
-import DocumentEdit from '../components/DocumentEdit.vue';
-import DocumentNew from '../components/DocumentNew.vue';
-import DocumentHistory from '../components/DocumentHistory.vue';
+import DocumentIndex from '../components/Document/Index.vue';
+import DocumentShow from '../components/Document/Show.vue';
+import DocumentEdit from '../components/Document/Edit.vue';
+import DocumentNew from '../components/Document/New.vue';
+import DocumentHistory from '../components/Document/History.vue';
 import Broadcast from '../components/Broadcast.vue';
 
 // Utility Components
