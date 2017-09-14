@@ -445,13 +445,16 @@ func writeDirectories(repo *git.Repository, nc NewCommit, user User) (oid *git.O
 		}
 
 		var meta = []byte("")
+		body := []byte(ncd.DirectoryInfo.Body)
+
 		var ie git.IndexEntry
 
 		// if we have some DirectoryInfo metadata, overwrite meta with it in the
 		// usual FrontMatter manner
+
 		if (ncd.DirectoryInfo != DirectoryInfo{}) {
-			meta = make([]byte, particle.YAMLEncoding.EncodeLen(meta, &ncd.DirectoryInfo))
-			particle.YAMLEncoding.Encode(meta, []byte(""), &ncd.DirectoryInfo)
+			meta = make([]byte, particle.YAMLEncoding.EncodeLen(body, &ncd.DirectoryInfo))
+			particle.YAMLEncoding.Encode(meta, body, &ncd.DirectoryInfo)
 		}
 
 		oid, err = repo.CreateBlobFromBuffer(meta)

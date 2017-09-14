@@ -450,8 +450,10 @@ func apiDirectorySummary(w http.ResponseWriter, r *http.Request) {
 //	  "email": "mp@springfield-elementary.gov",
 //	  "message": "Added new directory called Bobbins",
 //	  "directories": [
-//	    {"path": "documents"},
-//	    {"path": "appendices"}
+//	    {
+//	      "path": "documents",
+//	      "info": {"title": "Documents", "description": "Blah", "body": "Markdown"}
+//	    },
 //	  ]
 // }
 func apiCreateDirectoryHandler(w http.ResponseWriter, r *http.Request) {

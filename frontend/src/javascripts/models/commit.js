@@ -65,7 +65,8 @@ export default class CMSCommit {
 			name: directory.path,
 			info: {
 				title: directory.title,
-				description: directory.description
+				description: directory.description,
+				body: directory.body
 			}
 		};
 	};

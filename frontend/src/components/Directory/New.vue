@@ -2,7 +2,6 @@
 
 	<div class="new-directory">
 
-
 		<h4>
 			Create a new directory
 		</h4>
@@ -14,19 +13,22 @@
 				<label for="title">Title</label>
 				<input
 					name="title"
+					type="text"
 					class="form-control"
 					placeholder="Operating Procedures"
 					v-model="directory.title"
+					required="true"
 				/>
 			</div>
 
 			<div class="form-group">
-				<label for="path">Path name</label>
+				<label for="path">Path</label>
 				<input
 					name="path"
 					class="form-control"
 					placeholder="operating-procedures"
 					v-model="directory.path"
+					required="true"
 				/>
 			</div>
 
@@ -40,11 +42,15 @@
 				/>
 			</div>
 
+			<div>
+				<MinimalMarkdownEditor/>
+			</div>
+
 			<div class="form-group">
 				<input
 					type="submit"
 					class="form-control btn btn-success"
-					value="Create Directory"
+					value="Create directory"
 				/>
 			</div>
 
@@ -59,21 +65,27 @@
 	import checkResponse from '../../javascripts/response.js';
 	import config from '../../javascripts/config.js';
 	import CMSDirectory from '../../javascripts/models/directory.js';
+	import MinimalMarkdownEditor from './Editor';
 
 	export default {
 		name: "DirectoryNew",
 		data() {
 			return {
-				directory: new CMSDirectory()
+				//directory: new CMSDirectory(),
+				markdownLoaded: true
 			};
 		},
 		created() {
+			this.$store.commit("initializeDirectory");
 			this.$store.dispatch("initializeCommit");
 		},
 		computed: {
+			directory() {
+				return this.$store.state.activeDirectory;
+			},
 			commit() {
 				return this.$store.state.commit;
-			},
+			}
 		},
 		methods: {
 			async createDirectory(event) {
@@ -89,8 +101,8 @@
 				// new directory created successfully, show a message
 				this.$store.state.broadcast.addMessage(
 					"success",
-					"Welcome",
-					`created directory ${this.directory.path}`,
+					"Directory Created",
+					`You have created the directory ${this.directory.title}, it has the path ${this.directory.path}`,
 					3
 				);
 
@@ -101,6 +113,9 @@
 			redirectToIndex(directory) {
 				this.$router.push({name: 'document_index', params: {directory}});
 			},
+		},
+		components: {
+			MinimalMarkdownEditor
 		}
 	};
 </script>

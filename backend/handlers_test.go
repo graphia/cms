@@ -211,6 +211,7 @@ func TestApiCreateDirectory(t *testing.T) {
 		DirectoryInfo: DirectoryInfo{
 			Title:       "The Leftorium",
 			Description: "Left-handed goods for all!",
+			Body:        "# Hi-didly-ho, neighbourinos!",
 		},
 	}
 
@@ -249,6 +250,7 @@ func TestApiCreateDirectory(t *testing.T) {
 
 	assert.Contains(t, string(contents), fmt.Sprintf("%s: %s", "title", ncd.DirectoryInfo.Title))
 	assert.Contains(t, string(contents), fmt.Sprintf("%s: %s", "description", ncd.DirectoryInfo.Description))
+	assert.Contains(t, string(contents), ncd.DirectoryInfo.Body)
 
 	// ensure the most recent commit has the right name and email
 	oid, _ := git.NewOid(receiver.Oid)

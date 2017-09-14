@@ -4,6 +4,7 @@ import router from './app';
 
 import CMSFile from '../javascripts/models/file.js';
 import CMSCommit from '../javascripts/models/commit.js';
+import CMSDirectory from '../javascripts/models/directory.js';
 
 import CMSAuth from '../javascripts/auth.js';
 import CMSBroadcast from '../javascripts/broadcast.js';
@@ -13,6 +14,7 @@ Vue.use(Vuex);
 const state = {
 	documents: [],
 	activeDocument: new CMSFile,
+	activeDirectory: new CMSDirectory,
 	commit: null,
 	auth: new CMSAuth,
 	broadcast: new CMSBroadcast
@@ -26,11 +28,16 @@ const mutations = {
 		state.activeDocument = doc;
 		return doc;
 	},
+	initializeDirectory(context) {
+		let dir = CMSDirectory.initialize(null);
+		state.activeDirectory = dir;
+		return dir;
+	}
 };
 const getters = {};
 const actions = {
 	initializeCommit(context, directory) {
-		return CMSCommit.initialize(directory)
+		return CMSCommit.initialize(directory);
 	},
 	getDocumentsInDirectory(context, directory) {
 		return CMSFile.all(directory);

@@ -22,6 +22,7 @@ func TestCreateDirectory(t *testing.T) {
 		DirectoryInfo: DirectoryInfo{
 			Title:       "Recipes",
 			Description: "A list of my favourite tasty treats",
+			Body:        "# Recipes go here, sweet first then savoury",
 		},
 	}
 
@@ -48,15 +49,13 @@ func TestCreateDirectory(t *testing.T) {
 	assert.False(t, os.IsNotExist(err))
 	assert.Contains(t, string(contents), fmt.Sprintf("title: %s", ncd.DirectoryInfo.Title))
 	assert.Contains(t, string(contents), fmt.Sprintf("description: %s", ncd.DirectoryInfo.Description))
+	assert.Contains(t, string(contents), ncd.DirectoryInfo.Body)
 
 	// ensure the most recent commit has the right name and email
 	lastCommit, _ := repo.LookupCommit(oid)
 	assert.Equal(t, lastCommit.Committer().Name, user.Name)
 	assert.Equal(t, lastCommit.Committer().Email, user.Email)
 	assert.Equal(t, lastCommit.Message(), commitMessage)
-
-	// finally clean up by removing the tmp repo
-	_ = os.RemoveAll(repoPath)
 
 }
 

@@ -40,7 +40,6 @@
 				// makes those switches.
 				let previewRender = function(text) {
 
-
 					let attachments = self.document.attachments;
 
 					let html = $.parseHTML(this.parent.markdown(text));

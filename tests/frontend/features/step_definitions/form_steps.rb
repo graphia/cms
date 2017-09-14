@@ -2,6 +2,10 @@ Then %r{^I should see a '(.*)' field with type '(.*)'$} do |name, field_type|
   expect(page).to have_css("input[name='#{name.downcase}'][type='#{field_type}']")
 end
 
+Then %r{^I should see a text area called '(.*?)'} do |name|
+  expect(page).to have_css("textarea[name='#{name.downcase}']")
+end
+
 Then %r{^the submit button should be labelled '(.*)'$} do |label|
   expect(page).to have_css("input.btn[value='#{label}']")
 end
