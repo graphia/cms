@@ -29,9 +29,9 @@
 
 						<router-link
 							v-for="document in directory.contents"
-							class="list-group-item list-group-item-action"
 							:to="{name: 'document_show', params: {directory: directory.path, filename: document.filename}}"
 							:data-filename="document.filename"
+							class="list-group-item list-group-item-action"
 						>
 
 							{{ document.frontmatter.title }}
@@ -62,9 +62,6 @@
 
 				</div>
 			</div>
-
-			<DirectoryNew/>
-
 		</div>
 		<!-- /listing directories -->
 
@@ -78,7 +75,6 @@
 	import checkResponse from '../../javascripts/response.js';
 	import config from '../../javascripts/config.js';
 	import CMSDirectory from '../../javascripts/models/directory.js';
-	import DirectoryNew from './New';
 
 	export default {
 		name: "DirectorySummary",
@@ -128,9 +124,6 @@
 					console.error(error);
 				}
 			}
-		},
-		components: {
-			DirectoryNew
 		}
 	}
 </script>

@@ -86,9 +86,6 @@
 			redirectToInitializeRepo() {
 				this.$router.push({name: 'initialize_repo'});
 			},
-			redirectToCreateRepo() {
-				this.$router.push({name: 'create_repo'});
-			},
 			async fetchDirectories() {
 				let path = `${config.api}/directories`
 
@@ -97,9 +94,9 @@
 
 					let json = await response.json();
 
+					// FIXME is this still required?
 					if (response.status == 404 && json.message == "No repository found") {
 						console.warn("No repository found, redirect to create", 404)
-						this.redirectToCreateRepo();
 					};
 
 					if (response.status == 400 && json.message == "Not a git repository") {

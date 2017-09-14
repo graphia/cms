@@ -1,59 +1,54 @@
 <template>
 
-	<!-- new directory form -->
-	<div class="new-directory col-md-4">
-
-		<div class="card bg-light">
-
-			<h4 class="card-header">
-				New directory
-			</h4>
-
-			<!-- FIXME move to new comp -->
-			<form class="card-body" @submit="createDirectory">
-
-				<div class="form-group">
-					<label for="title">Title</label>
-					<input
-						name="title"
-						class="form-control"
-						placeholder="Operating Procedures"
-						v-model="directory.title"
-					/>
-				</div>
-
-				<div class="form-group">
-					<label for="path">Path name</label>
-					<input
-						name="path"
-						class="form-control"
-						placeholder="operating-procedures"
-						v-model="directory.path"
-					/>
-				</div>
+	<div class="new-directory">
 
 
-				<div class="form-group">
-					<label for="description">Description</label>
-					<textarea
-						name="description"
-						class="form-control"
-						v-model="directory.description"
-						placeholder="A set of detailed step-by-step instructions compiled to help workers carry out complex routine operations"
-					/>
-				</div>
+		<h4>
+			Create a new directory
+		</h4>
 
-				<div class="form-group">
-					<input
-						type="submit"
-						class="form-control btn btn-success"
-						value="Create Directory"
-					/>
-				</div>
+		<!-- new directory form -->
+		<form @submit="createDirectory">
 
-			</form>
+			<div class="form-group">
+				<label for="title">Title</label>
+				<input
+					name="title"
+					class="form-control"
+					placeholder="Operating Procedures"
+					v-model="directory.title"
+				/>
+			</div>
 
-		</div>
+			<div class="form-group">
+				<label for="path">Path name</label>
+				<input
+					name="path"
+					class="form-control"
+					placeholder="operating-procedures"
+					v-model="directory.path"
+				/>
+			</div>
+
+			<div class="form-group">
+				<label for="description">Description</label>
+				<textarea
+					name="description"
+					class="form-control"
+					v-model="directory.description"
+					placeholder="A set of detailed step-by-step instructions compiled to help workers carry out complex routine operations"
+				/>
+			</div>
+
+			<div class="form-group">
+				<input
+					type="submit"
+					class="form-control btn btn-success"
+					value="Create Directory"
+				/>
+			</div>
+
+		</form>
 		<!-- /new directory form -->
 
 	</div>
@@ -99,11 +94,13 @@
 					3
 				);
 
-				// refresh the dir list and initialise a new dir for form
-				this.fetchDirectorySummary();
-				this.directory = new CMSDirectory()
+				// redirect to the new directory's index page
+				this.redirectToIndex(this.directory.path);
 				return;
-			}
+			},
+			redirectToIndex(directory) {
+				this.$router.push({name: 'document_index', params: {directory}});
+			},
 		}
 	};
 </script>
