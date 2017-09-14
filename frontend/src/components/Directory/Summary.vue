@@ -39,7 +39,7 @@
 						</router-link>
 
 						<div class="card-body">
-							<router-link class="btn btn-sm btn-primary" :to="{name: 'document_new', params: {directory: directory}}">
+							<router-link class="btn btn-sm btn-primary" :to="{name: 'document_new', params: {directory: directory.path}}">
 								Create a document
 							</router-link>
 						</div>
@@ -54,7 +54,7 @@
 							There's nothing here yet
 						</div>
 
-						<router-link class="btn btn-sm btn-primary" :to="{name: 'document_new', params: {directory: directory}}">
+						<router-link class="btn btn-sm btn-primary" :to="{name: 'document_new', params: {directory: directory.path}}">
 							Create a document
 						</router-link>
 

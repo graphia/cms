@@ -16,7 +16,7 @@
 					type="text"
 					class="form-control"
 					placeholder="Operating Procedures"
-					v-model="directory.title"
+					v-model="title"
 					required="true"
 				/>
 			</div>
@@ -29,6 +29,7 @@
 					placeholder="operating-procedures"
 					v-model="directory.path"
 					required="true"
+					readonly="true"
 				/>
 			</div>
 
@@ -65,13 +66,14 @@
 	import checkResponse from '../../javascripts/response.js';
 	import config from '../../javascripts/config.js';
 	import CMSDirectory from '../../javascripts/models/directory.js';
+	import slugify from '../../javascripts/utilities/slugify.js';
 	import MinimalMarkdownEditor from './Editor';
 
 	export default {
 		name: "DirectoryNew",
 		data() {
 			return {
-				//directory: new CMSDirectory(),
+				title: "",
 				markdownLoaded: true
 			};
 		},
@@ -113,6 +115,16 @@
 			redirectToIndex(directory) {
 				this.$router.push({name: 'document_index', params: {directory}});
 			},
+			updatePath() {
+				console.debug("updating path...");
+				this.directory.path = this.sluggedPath();
+			}
+		},
+		watch: {
+			title() {
+				this.directory.title = this.title;
+				this.directory.path = slugify(this.title);
+			}
 		},
 		components: {
 			MinimalMarkdownEditor
