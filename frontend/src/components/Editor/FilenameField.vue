@@ -14,7 +14,7 @@
 			<input	:readonly="!enableCustomFilename"
 					:tabindex="!enableCustomFilename ? '-1' : '0'"
 					name="filename"
-					class="form-control filename"
+					class="form-control filename form-control-label"
 					type="text"
 					v-model="customFilename"
 			/>

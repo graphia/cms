@@ -2,7 +2,7 @@
 
 	<div class="form-group">
 
-		<label for="tags">Tags</label>
+		<label for="tags" class="form-control-label">Tags</label>
 		<input id="tag-editor" type="tags" name="tags" class="form-control" v-model="document.tags"/>
 
 	</div>

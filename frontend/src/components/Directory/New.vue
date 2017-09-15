@@ -12,7 +12,7 @@
 			<TitleField/>
 
 			<div class="form-group">
-				<label for="path">Path</label>
+				<label class="form-control-label" for="path">Path</label>
 				<input
 					name="path"
 					class="form-control"
@@ -24,7 +24,7 @@
 			</div>
 
 			<div class="form-group">
-				<label for="description">Description</label>
+				<label class="form-control-label" for="description">Description</label>
 				<textarea
 					name="description"
 					class="form-control"

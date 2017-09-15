@@ -1,7 +1,7 @@
 <template>
 	<div class="directory-title form-group" :class="{'has-danger': !valid}">
 
-		<label for="title">Title</label>
+		<label class="form-control-label" for="title">Title</label>
 		<input
 			:id="elementID"
 			name="title"

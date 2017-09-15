@@ -1,7 +1,7 @@
 <template>
 	<div class="document-title form-group" v-bind:class="{'has-danger': !valid}">
 
-		<label for="title">Title</label>
+		<label for="title" class="form-control-label">Title</label>
 
 		<input
 			id="document-title"
