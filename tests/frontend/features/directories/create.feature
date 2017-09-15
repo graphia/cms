@@ -38,3 +38,24 @@ Feature: Creating directories
 		When I submit the form
 		Then I should be redirected to the new directroy's index
 		And the directory should have been created with the correct information
+
+	Scenario: The path field should be the slugged version of the title
+		Given I am on the new directory page
+		When I enter "Kwik E Mart" in the "Title" field
+		Then the "Path" field should be "kwik-e-mart"
+
+	Scenario: The submit button shouldn't be active by default
+		Given I am on the new directory page
+		When I haven't interacted with the form
+		Then the submit button should be disabled
+
+	Scenario: The submit button should become active when the form is valid
+		Given I am on the new directory page
+		When I have filled in the required fields
+		Then the submit button should be enabled
+
+	Scenario: Displaying error messages
+		Given I am on the new directory page
+		When I enter "f" in the "Title" field
+		Then the submit button should be disabled
+		And the "Title" field's error text should contain "Please lengthen this text to 2 characters or more"

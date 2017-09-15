@@ -7,19 +7,9 @@
 		</h4>
 
 		<!-- new directory form -->
-		<form @submit="createDirectory">
+		<form :id="formID" @submit="createDirectory">
 
-			<div class="form-group">
-				<label for="title">Title</label>
-				<input
-					name="title"
-					type="text"
-					class="form-control"
-					placeholder="Operating Procedures"
-					v-model="title"
-					required="true"
-				/>
-			</div>
+			<TitleField/>
 
 			<div class="form-group">
 				<label for="path">Path</label>
@@ -41,6 +31,10 @@
 					v-model="directory.description"
 					placeholder="A set of detailed step-by-step instructions compiled to help workers carry out complex routine operations"
 				/>
+				<p id="display-text-explanation" class="form-text text-muted">
+					The description text is displayed in the summary of document types
+					on the published homepage. It should be <em>short</em> and <em>concise</em>.
+				</p>
 			</div>
 
 			<div>
@@ -52,6 +46,7 @@
 					type="submit"
 					class="form-control btn btn-success"
 					value="Create directory"
+					v-bind:disabled="!valid"
 				/>
 			</div>
 
@@ -68,18 +63,24 @@
 	import CMSDirectory from '../../javascripts/models/directory.js';
 	import slugify from '../../javascripts/utilities/slugify.js';
 	import MinimalMarkdownEditor from './Editor';
+	import TitleField from './Metadata/TitleField';
 
 	export default {
 		name: "DirectoryNew",
 		data() {
 			return {
-				title: "",
-				markdownLoaded: true
+				markdownLoaded: true,
+				formID: "create-directory",
+				valid: false
 			};
 		},
 		created() {
 			this.$store.commit("initializeDirectory");
 			this.$store.dispatch("initializeCommit");
+
+			this.$bus.$on("checkMetadata", () => {
+				this.validate()
+			});
 		},
 		computed: {
 			directory() {
@@ -115,19 +116,21 @@
 			redirectToIndex(directory) {
 				this.$router.push({name: 'document_index', params: {directory}});
 			},
-			updatePath() {
-				console.debug("updating path...");
-				this.directory.path = this.sluggedPath();
+			validate() {
+				if (!this.form) {
+					this.form = document.getElementById(this.formID);
+				};
+				this.valid = this.form.checkValidity();
 			}
 		},
 		watch: {
-			title() {
-				this.directory.title = this.title;
-				this.directory.path = slugify(this.title);
+			"directory.title": function title() {
+				this.directory.path = slugify(this.directory.title);
 			}
 		},
 		components: {
-			MinimalMarkdownEditor
+			MinimalMarkdownEditor,
+			TitleField
 		}
 	};
 </script>

@@ -24,6 +24,12 @@ When %r{^I enter '(.*)' in the '(.*)' field$} do |value, field|
   fill_in input, with: value
 end
 
+Then %r{^the "(.*?)" field should be "(.*?)"$} do |field, value|
+  name = page.find("label", text: /^#{field}$/)['for']
+  input = page.find("input[name='#{name}']")
+  expect(input.value).to eql(value)
+end
+
 Given %r{^I fill in the form with the following data:$} do |table|
   table.rows_hash.each do |field, value|
     step "I enter '#{value}' in the '#{field}' field"

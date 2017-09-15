@@ -1,13 +1,19 @@
 <template>
 	<div id="markdown-editor" class="editor form-group">
 
-		<label for="body" class="sr-only">Document Contents</label>
+		<label for="body">Display text</label>
 		<textarea 	id="editor"
 					name="body"
 					class="form-control"
 					rows="40"
 					v-model="directory.body"
+					aria-describedby="display-text-explanation"
 		/>
+		<p id="display-text-explanation" class="form-text text-muted">
+			The display text will appear at the top of file listings on the
+			directory page. It can be more-detailed than the description and
+			may contain links and additional formatting.
+		</p>
 	</div>
 
 </template>
@@ -37,7 +43,8 @@
 				let simpleMDE = new SimpleMDE({
 					element: document.getElementById("editor"),
 					forceSync: true,
-					autoFocus: true
+					autoFocus: true,
+					status: false
 				});
 
 				simpleMDE.codemirror.on('change', () => {

@@ -15,3 +15,13 @@ Then %r{^the directory should have been created with the correct information$} d
   expect(file).to include("description: A description of ice cream related products")
   expect(file).to include("# Fabulous ices of all colours")
 end
+
+When %r{^I have filled in the required fields$} do
+  fill_in "title", with: "Marge Gets a Job"
+end
+
+Then %r{^the "(.*?)" field's error text should contain "(.*?)"$} do |field, error|
+  within(".directory-#{field.downcase}") do
+    expect(page).to have_content(error)
+  end
+end
