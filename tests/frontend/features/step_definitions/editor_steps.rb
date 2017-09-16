@@ -184,13 +184,15 @@ When %r{^I set the editor text to "(.*?)"$} do |text|
 end
 
 Then %r{^the commit message validation feedback should be visible$} do
-  expect(page).to have_css("div.commit-message.has-danger")
-  expect(page).to have_css("div.commit-message .form-control-feedback")
+  within("div.commit-message") do
+    expect(page).to have_css(".form-control-feedback.invalid-feedback")
+  end
 end
 
 Then %r{^the commit message validation feedback should not be visible$} do
-  expect(page).not_to have_css("div.commit-message.has-danger")
-  expect(page).not_to have_css("div.commit-message .form-control-feedback")
+  within("div.commit-message") do
+    expect(page).not_to have_css(".form-control-feedback.invalid-feedback")
+  end
 end
 
 Given %r{^I haven't touched the '(.*)' field$} do |field|
@@ -230,11 +232,13 @@ Then %r{^I should see a tags editing field$} do
 end
 
 Then %r{^the title validation feedback should be visible$} do
-  expect(page).to have_css("div.document-title.has-danger")
-  expect(page).to have_css("div.document-title .form-control-feedback")
+  within("div.document-title") do
+    expect(page).to have_css(".form-control-feedback.invalid-feedback")
+  end
 end
 
 Then %r{^the title validation feedback should not be visible$} do
-  expect(page).not_to have_css("div.document-title.has-danger")
-  expect(page).not_to have_css("div.document-title .form-control-feedback")
+  within("div.document-title") do
+    expect(page).not_to have_css(".form-control-feedback.invalid-feedback")
+  end
 end

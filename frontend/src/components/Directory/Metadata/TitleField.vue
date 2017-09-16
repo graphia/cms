@@ -1,5 +1,5 @@
 <template>
-	<div class="directory-title form-group" :class="{'has-danger': !valid}">
+	<div class="directory-title form-group">
 
 		<label class="form-control-label" for="title">Title</label>
 		<input
@@ -12,9 +12,10 @@
 			required="true"
 			minlength=2
 			v-on:keyup="validate"
+			:class="{'is-invalid': !valid}"
 		/>
 
-		<div class="form-control-feedback" v-if="validationMessage">
+		<div class="form-control-feedback invalid-feedback" v-if="validationMessage">
 			{{ this.validationMessage }}
 		</div>
 	</div>
