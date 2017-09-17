@@ -126,17 +126,33 @@ func Test_apiListFilesInDirectoryHandler(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
-	var receiver []FileItem
+	type rec struct {
+		Files         []FileItem    `json:"files"`
+		DirectoryInfo DirectoryInfo `json:"info"`
+	}
+
+	var receiver rec
+
 	json.NewDecoder(resp.Body).Decode(&receiver)
 
+	// ensure directory info is correct
+	assert.Equal(
+		t,
+		DirectoryInfo{
+			Title:       "Documents",
+			Description: "Documents go here",
+		},
+		receiver.DirectoryInfo,
+	)
+
 	// ensure we get 3 files back
-	assert.Equal(t, 3, len(receiver))
+	assert.Equal(t, 3, len(receiver.Files))
 
 	// ensure all files are returned
 	var expectedFilenames, actualFilenames []string
 
 	expectedFilenames = []string{"document_1.md", "document_2.md", "document_3.md"}
-	for _, fi := range receiver {
+	for _, fi := range receiver.Files {
 		actualFilenames = append(actualFilenames, fi.Filename)
 	}
 	assert.Equal(t, expectedFilenames, actualFilenames)
@@ -145,7 +161,7 @@ func Test_apiListFilesInDirectoryHandler(t *testing.T) {
 	var expectedTitles, actualTitles []string
 
 	expectedTitles = []string{"document 1", "document 2", "document 3"}
-	for _, fi := range receiver {
+	for _, fi := range receiver.Files {
 		actualTitles = append(actualTitles, fi.FrontMatter.Title)
 	}
 	assert.Equal(t, expectedTitles, actualTitles)

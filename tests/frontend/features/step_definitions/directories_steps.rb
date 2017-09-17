@@ -5,7 +5,7 @@ Given %r{^I am on the new directory page$} do
 end
 
 Then %r{^I should be redirected to the new directroy's index$} do
-  expect(page).to have_content("Ice-creams")
+  expect(page).to have_content("Ice Creams")
   expect(page.current_path).to eql("/cms/ice-creams")
 end
 

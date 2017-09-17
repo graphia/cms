@@ -2,6 +2,7 @@ import store from '../store.js';
 import config from '../config.js';
 import checkResponse from '../response.js';
 import CMSFileAttachment from './attachment.js';
+import CMSDirectory from './directory.js';
 
 export default class CMSFile {
 
@@ -94,8 +95,17 @@ export default class CMSFile {
 
 			let json = await response.json()
 
+			let dir = new CMSDirectory(
+				directory,
+				json.info.title,
+				json.info.description,
+				json.info.body
+			);
+
+			store.commit("setActiveDirectory", dir);
+
 			// map documents
-			let docs = json.map((file) => {
+			let docs = json.files.map((file) => {
 				return new CMSFile(file);
 			});
 
@@ -104,7 +114,7 @@ export default class CMSFile {
 		}
 		catch(err) {
 			console.error(`Couldn't retrieve files from directory ${directory}`);
-		}
+		};
 
 	};
 

@@ -925,6 +925,31 @@ func extractContents(ncf NewCommitFile) (contents []byte, err error) {
 
 }
 
+func getMetadataFromDirectory(directory string) (di DirectoryInfo, err error) {
+
+	repo, err := repository(config)
+	if err != nil {
+		return di, err
+	}
+	defer repo.Free()
+
+	ht, err := headTree(repo)
+	if err != nil {
+		return di, err
+	}
+
+	entry := ht.EntryByName(directory)
+
+	tree, err := repo.LookupTree(entry.Id)
+	if err != nil {
+		return di, err
+	}
+
+	di, err = getMetadata(repo, tree)
+
+	return di, err
+}
+
 func getMetadata(repo *git.Repository, tree *git.Tree) (di DirectoryInfo, err error) {
 	var reader io.Reader
 

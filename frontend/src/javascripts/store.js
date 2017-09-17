@@ -32,6 +32,10 @@ const mutations = {
 		let dir = CMSDirectory.initialize(null);
 		state.activeDirectory = dir;
 		return dir;
+	},
+	setActiveDirectory(context, directory) {
+		console.debug("setting active directory", directory);
+		state.activeDirectory = directory;
 	}
 };
 const getters = {};

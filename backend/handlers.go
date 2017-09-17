@@ -653,10 +653,17 @@ func apiListFilesInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 			Message: fmt.Sprintf("Could not get list of files in directory %s: %s", directory, err.Error()),
 		}
 		JSONResponse(fr, http.StatusBadRequest, w)
-
 	}
 
-	output, err := json.Marshal(files)
+	metadata, err := getMetadataFromDirectory(directory)
+
+	type output struct {
+		Files         []FileItem    `json:"files"`
+		DirectoryInfo DirectoryInfo `json:"info"`
+	}
+
+	result, err := json.Marshal(output{Files: files, DirectoryInfo: metadata})
+
 	if err != nil {
 		fr = FailureResponse{
 			Message: fmt.Sprintf("Could not create JSON: %s", err.Error()),
@@ -667,7 +674,7 @@ func apiListFilesInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	w.WriteHeader(http.StatusOK)
-	w.Write(output)
+	w.Write(result)
 }
 
 // apiCreateFileInDirectory creates a file the specified directory

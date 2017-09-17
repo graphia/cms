@@ -1,6 +1,14 @@
 <template>
 	<div id="document-index">
-		<h2>{{ title | capitalize }}</h2>
+		<h2 v-if="activeDirectory.title">
+			{{ activeDirectory.title }}
+		</h2>
+		<h2 v-else>
+			{{ directory | capitalize }}
+		</h2>
+
+		<p>{{ activeDirectory.description }}</p>
+
 		<ul>
 			<li v-for="document in documents">
 				<router-link :to="{name: 'document_show', params: {filename: document.filename}}">
@@ -43,8 +51,8 @@
 			directory() {
 				return this.$route.params.directory;
 			},
-			title() {
-				return this.$route.params.directory;
+			activeDirectory() {
+				return this.$store.state.activeDirectory;
 			}
 		}
 	}
