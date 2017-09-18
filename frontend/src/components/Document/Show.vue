@@ -7,7 +7,7 @@
 
 		<aside class="col-md-4">
 			<div class="card document-metadata">
-				<div class="card-block">
+				<div class="card-body">
 					<dl>
 
 						<dt>Title</dt>
