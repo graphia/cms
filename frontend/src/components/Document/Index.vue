@@ -19,23 +19,22 @@
 		</div>
 
 
-		<div class="row document-list card-deck">
+		<div class="row document-list">
 
-			<div class="card col col-md-6 col-lg-3 p-3 m-1" v-for="(document, i) in documents" :key="i">
+			<div class="col-md-4" v-for="(document, i) in documents" :key="i">
+
+				<div class="card m-4">
+					<h3 class="card-header">
+						<router-link :to="{name: 'document_show', params: {filename: document.filename}}">
+							{{ document.title }}
+						</router-link>
+					</h3>
 
 					<div class="card-body">
-
-						<h4 class="card-title">
-							{{ document.title }}
-						</h4>
-
-						<p>{{ document.synopsis }}</p>
-
-						<router-link :to="{name: 'document_show', params: {filename: document.filename}}">
-							{{ document.absolutePath }}
-						</router-link>
+						<p class="card-text">{{ document.synopsis }}</p>
 					</div>
 
+				</div>
 			</div>
 
 		</div>
@@ -86,3 +85,6 @@
 		}
 	}
 </script>
+
+<style lang="scss">
+</style>
