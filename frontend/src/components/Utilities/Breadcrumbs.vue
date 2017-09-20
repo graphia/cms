@@ -27,7 +27,7 @@
 			breadcrumbs() {
 				// Home is always the 'first' breadcrumb, so we needn't
 				// specify it elsewhere
-				return [HomeBreadcrumb].concat(this.levels() || []);
+				return [HomeBreadcrumb].concat(this.levels);
 			}
 		},
 		methods: {

@@ -7,4 +7,4 @@ export default class CMSBreadcrumb {
 	}
 };
 
-export const HomeBreadcrumb = new CMSBreadcrumb("Home", "home", {});
+export const HomeBreadcrumb = new CMSBreadcrumb("Dashboard", "home", {});

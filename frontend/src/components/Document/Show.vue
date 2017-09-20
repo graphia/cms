@@ -1,6 +1,8 @@
 <template>
 	<section class="row">
 
+		<Breadcrumbs :levels="breadcrumbs"/>
+
 		<article id="document-content" class="col-md-8">
 			<div class="content" v-html="relativeHTML"/>
 		</article>
@@ -56,6 +58,10 @@
 </style>
 
 <script lang="babel">
+
+	import Breadcrumbs from '../Utilities/Breadcrumbs';
+	import CMSBreadcrumb from '../../javascripts/models/breadcrumb.js';
+
 	export default {
 		name: "DocumentShow",
 		created() {
@@ -108,6 +114,22 @@
 						.join("");
 
 
+			},
+			breadcrumbs() {
+				return [
+					// FIXME if we return some DirectoryInfo with the Document, we can
+					// use it here
+					new CMSBreadcrumb(
+						this.document.path,
+						"document_index",
+						{directory: this.document.title}
+					),
+					new CMSBreadcrumb(
+						this.document.title,
+						"document_show",
+						{directory: this.document.path, document: this.document.filename}
+					)
+				];
 			}
 		},
 		methods: {
@@ -134,6 +156,9 @@
 					params:{directory}
 				});
 			}
+		},
+		components: {
+			Breadcrumbs
 		}
 	}
 </script>

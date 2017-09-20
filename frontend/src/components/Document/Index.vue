@@ -76,15 +76,6 @@
 			fetchDocuments(directory) {
 				console.debug("retrieving all files from", directory);
 				this.$store.dispatch("getDocumentsInDirectory", directory);
-			},
-			breadcrumbs() {
-				return [
-					new CMSBreadcrumb(
-						this.activeDirectory.title || this.directory,
-						"document_index",
-						{directory: "pokemon"}
-					)
-				];
 			}
 		},
 		computed: {
@@ -99,6 +90,15 @@
 			},
 			activeDirectory() {
 				return this.$store.state.activeDirectory;
+			},
+			breadcrumbs() {
+				return [
+					new CMSBreadcrumb(
+						this.activeDirectory.title,
+						"document_index",
+						{directory: "pokemon"}
+					)
+				];
 			}
 		},
 		components: {
