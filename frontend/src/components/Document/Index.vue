@@ -1,6 +1,8 @@
 <template>
 	<div id="document-index">
 
+		<Breadcrumbs :levels="breadcrumbs"/>
+
 		<div class="row document-info">
 			<div class="col-md-12">
 
@@ -52,6 +54,10 @@
 </template>
 
 <script lang="babel">
+
+	import Breadcrumbs from '../Utilities/Breadcrumbs';
+	import CMSBreadcrumb from '../../javascripts/models/breadcrumb.js';
+
 	export default {
 		name: "DocumentIndex",
 		created() {
@@ -70,9 +76,21 @@
 			fetchDocuments(directory) {
 				console.debug("retrieving all files from", directory);
 				this.$store.dispatch("getDocumentsInDirectory", directory);
+			},
+			breadcrumbs() {
+				return [
+					new CMSBreadcrumb(
+						this.activeDirectory.title || this.directory,
+						"document_index",
+						{directory: "pokemon"}
+					)
+				];
 			}
 		},
 		computed: {
+			title() {
+				return this.$store.activeDirectory.title;
+			},
 			documents() {
 				return this.$store.state.documents;
 			},
@@ -82,6 +100,9 @@
 			activeDirectory() {
 				return this.$store.state.activeDirectory;
 			}
+		},
+		components: {
+			Breadcrumbs
 		}
 	}
 </script>

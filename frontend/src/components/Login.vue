@@ -8,7 +8,7 @@
 				<h3 class="card-header">Log in</h3>
 
 				<!-- Login form start -->
-				<div class="card-block">
+				<div class="card-body">
 
 					<form @submit="login" class="login-form">
 

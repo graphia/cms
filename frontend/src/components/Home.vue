@@ -1,6 +1,8 @@
 <template>
 	<div>
 
+		<Breadcrumbs :levels="breadcrumbs" />
+
 		<h1>Dashboard</h1>
 
 
@@ -66,6 +68,8 @@
 <script lang="babel">
 	import Broadcast from '../components/Broadcast';
 	import DirectorySummary from '../components/Directory/Summary';
+	import Breadcrumbs from '../components/Utilities/Breadcrumbs';
+	import CMSBreadcrumb from '../javascripts/models/breadcrumb.js';
 
 	import CMSPublisher from '../javascripts/publish.js';
 	import config from '../javascripts/config.js';
@@ -86,7 +90,14 @@
 		},
 
 		components: {
-			DirectorySummary
+			DirectorySummary,
+			Breadcrumbs
+		},
+
+		computed: {
+			breadcrumbs() {
+				return [];
+			}
 		},
 
 		methods: {
