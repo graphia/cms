@@ -68,7 +68,6 @@
 			// if we navigate from one dir index to another, reload the
 			// contents
 			"$route"(to, from) {
-				console.log("changed");
 				this.fetchDocuments(this.directory);
 			}
 		},

@@ -1,48 +1,50 @@
 <template>
-	<section class="row">
-
+	<div>
 		<Breadcrumbs :levels="breadcrumbs"/>
 
-		<article id="document-content" class="col-md-8">
-			<div class="content" v-html="relativeHTML"/>
-		</article>
+		<section class="row">
 
-		<aside class="col-md-4">
-			<div class="card document-metadata">
-				<div class="card-body">
-					<dl>
+			<article id="document-content" class="col-md-8">
+				<div class="content" v-html="relativeHTML"/>
+			</article>
 
-						<dt>Title</dt>
-						<dd>{{ document.title  }}</dd>
+			<aside class="col-md-4">
+				<div class="card document-metadata">
+					<div class="card-body">
+						<dl>
+
+							<dt>Title</dt>
+							<dd>{{ document.title  }}</dd>
 
 
-						<dt>Description</dt>
-						<dd>{{ document.synopsis }}</dd>
+							<dt>Description</dt>
+							<dd>{{ document.synopsis }}</dd>
 
-						<dt>Version</dt>
-						<dd>{{ document.version }}</dd>
+							<dt>Version</dt>
+							<dd>{{ document.version }}</dd>
 
-						<dt>Tags</dt>
-						<dd>
-							<span v-for="tag in document.tags" class="tag badge badge-primary">
-								{{ tag }}
-							</span>
-						</dd>
-					</dl>
+							<dt>Tags</dt>
+							<dd>
+								<span v-for="tag in document.tags" class="tag badge badge-primary">
+									{{ tag }}
+								</span>
+							</dd>
+						</dl>
 
-					<div class="btn-toolbar" role="toolbar">
-						<router-link class="btn btn-success mr-2" :to="{name: 'document_edit', params: {directory: this.directory, filename: this.filename}}">
-							Edit
-						</router-link>
+						<div class="btn-toolbar" role="toolbar">
+							<router-link class="btn btn-success mr-2" :to="{name: 'document_edit', params: {directory: this.directory, filename: this.filename}}">
+								Edit
+							</router-link>
 
-						<button type="button" @click="destroy" class="btn btn-danger mr-2">
-							Delete
-						</button>
+							<button type="button" @click="destroy" class="btn btn-danger mr-2">
+								Delete
+							</button>
+						</div>
 					</div>
 				</div>
-			</div>
-		</aside>
-	</section>
+			</aside>
+		</section>
+	</div>
 </template>
 
 <style scoped lang="scss">
@@ -116,13 +118,13 @@
 
 			},
 			breadcrumbs() {
+
 				return [
-					// FIXME if we return some DirectoryInfo with the Document, we can
-					// use it here
+
 					new CMSBreadcrumb(
-						this.document.path,
+						this.document.directory_info.title,
 						"document_index",
-						{directory: this.document.title}
+						{directory: this.document.directory_info.path}
 					),
 					new CMSBreadcrumb(
 						this.document.title,

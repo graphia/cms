@@ -649,12 +649,18 @@ func getFile(directory string, filename string, includeMd, includeHTML bool) (fi
 		html = &str
 	}
 
+	di, err := getMetadataFromDirectory(directory)
+	if err != nil {
+		return file, err
+	}
+
 	file = &File{
-		Filename:    filename,
-		Path:        directory,
-		HTML:        html,
-		Markdown:    markdown,
-		FrontMatter: fm,
+		Filename:      filename,
+		Path:          directory,
+		HTML:          html,
+		Markdown:      markdown,
+		FrontMatter:   fm,
+		DirectoryInfo: di,
 	}
 
 	return file, err

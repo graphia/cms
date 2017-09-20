@@ -47,7 +47,18 @@ export default class CMSFile {
 			this.slug                  = file.frontmatter.slug;
 			this.version               = file.frontmatter.version;
 
-			// History and attachments are arrays which may be populated later
+			// we don't *always* need to return directory_info with a file,
+			// but if it is here, set it up
+			if (file.directory_info) {
+				this.directory_info = new CMSDirectory(
+					this.path,
+					file.directory_info.title,
+					file.directory_info.description,
+					file.directory_info.body
+				);
+			};
+
+			// History andattachments are arrays which may be populated later
 			this.history = [];     // historic commits
 			this.attachments = []; // related files from the directory named after file
 
@@ -55,7 +66,10 @@ export default class CMSFile {
 			// and display a diff if necessary
 			this.initialMarkdown = file.markdown;
 
-		};
+		} else {
+			// do the minimum setup needed
+			this.directory_info = new CMSDirectory;
+		}
 
 	};
 
@@ -85,7 +99,7 @@ export default class CMSFile {
 
 		let path = `${config.api}/directories/${directory}/files`;
 
-		try {
+		// try {
 
 			let response = await fetch(path, {mode: "cors", headers: store.state.auth.authHeader()});
 
@@ -111,10 +125,10 @@ export default class CMSFile {
 
 			store.state.documents = docs;
 
-		}
-		catch(err) {
-			console.error(`Couldn't retrieve files from directory ${directory}`);
-		};
+		// }
+		// catch(err) {
+		// 	console.error(`Couldn't retrieve files from directory ${directory}`);
+		// };
 
 	};
 

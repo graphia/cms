@@ -94,12 +94,13 @@ type FileItem struct {
 // File represents a Markdown file and can be returned with
 // HTML or Markdown contents (or both if required)
 type File struct {
-	AbsoluteFilename string      `json:"absolute_filename"`
-	Filename         string      `json:"filename"`
-	Path             string      `json:"path"`
-	HTML             *string     `json:"html"`
-	Markdown         *string     `json:"markdown"`
-	FrontMatter      FrontMatter `json:"frontmatter"`
+	AbsoluteFilename string        `json:"absolute_filename"`
+	Filename         string        `json:"filename"`
+	Path             string        `json:"path"`
+	HTML             *string       `json:"html"`
+	Markdown         *string       `json:"markdown"`
+	FrontMatter      FrontMatter   `json:"frontmatter"`
+	DirectoryInfo    DirectoryInfo `json:"directory_info,omitempty"`
 }
 
 // Attachment belongs to a File, usually an image
