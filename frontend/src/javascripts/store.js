@@ -53,6 +53,10 @@ const actions = {
 	editDocument(context, args) {
 		// set activeDocument to raw doc from API
 		return CMSFile.find(args.directory, args.filename, true);
+	},
+	getDirectory(context, name) {
+		// get and set activeDirectory by name
+		return CMSDirectory.get(name);
 	}
 };
 

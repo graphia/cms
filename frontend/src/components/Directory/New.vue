@@ -46,7 +46,7 @@
 					type="submit"
 					class="form-control btn btn-success"
 					value="Create directory"
-					v-bind:disabled="!valid"
+					:disabled="!valid"
 				/>
 			</div>
 

@@ -1,8 +1,11 @@
 <template>
-	<section>
+	<div>
+
+		<Breadcrumbs :levels="breadcrumbs"/>
+
+		<h1>{{ heading }}</h1>
 
 		<form id="new-document-form" @submit="create">
-			<h1>{{ heading }}</h1>
 			<Editor
 				:formID="formID"
 				:submitButtonText="submitButtonText"
@@ -11,12 +14,16 @@
 			/>
 		</form>
 
-	</section>
+	</div>
+
 </template>
 
 <script lang="babel">
-	import Editor from "../../components/Editor";
 	import checkResponse from "../../javascripts/response.js";
+	import CMSBreadcrumb from '../../javascripts/models/breadcrumb.js';
+
+	import Editor from "../../components/Editor";
+	import Breadcrumbs from '../Utilities/Breadcrumbs';
 
 	export default {
 		name: "DocumentNew",
@@ -30,6 +37,7 @@
 
 			// set up a fresh new commit
 			this.$store.dispatch("initializeCommit");
+			this.$store.dispatch("getDirectory", this.directory);
 
 			// initialize a fresh new document
 			this.$store.commit("initializeDocument", this.directory);
@@ -64,6 +72,21 @@
 				return {
 					name: 'document_index'
 				};
+			},
+
+			breadcrumbs() {
+				return [
+					new CMSBreadcrumb(
+						this.$store.state.activeDirectory.title || this.directory,
+						"document_index",
+						{directory: this.directory}
+					),
+					new CMSBreadcrumb(
+						"New Document",
+						"document_new",
+						{directory: this.directory}
+					)
+				];
 			}
 
 		},
@@ -91,7 +114,8 @@
 
 		},
 		components: {
-			Editor
+			Editor,
+			Breadcrumbs
 		}
 	}
 </script>

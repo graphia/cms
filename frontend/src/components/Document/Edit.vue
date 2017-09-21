@@ -1,21 +1,28 @@
 <template>
-	<section>
+	<div>
+		<Breadcrumbs :levels="breadcrumbs"/>
 
-		<form id="edit-document-form" @submit="update">
-			<h1>{{ heading }}</h1>
-			<Editor
-				:formID="formID"
-				:submitButtonText="submitButtonText"
-				:formCancellationRedirectParams="formCancellationRedirectParams"
-			/>
-		</form>
+		<section>
 
-	</section>
+			<form id="edit-document-form" @submit="update">
+				<h1>{{ heading }}</h1>
+				<Editor
+					:formID="formID"
+					:submitButtonText="submitButtonText"
+					:formCancellationRedirectParams="formCancellationRedirectParams"
+				/>
+			</form>
+
+		</section>
+	</div>
 </template>
 
 <script lang="babel">
 	import Editor from "../../components/Editor";
+	import Breadcrumbs from '../Utilities/Breadcrumbs';
+
 	import checkResponse from "../../javascripts/response.js";
+	import CMSBreadcrumb from '../../javascripts/models/breadcrumb.js';
 
 	export default {
 		name: "DocumentEdit",
@@ -72,6 +79,27 @@
 						filename: this.document.filename
 					}
 				};
+			},
+			breadcrumbs() {
+
+				return [
+
+					new CMSBreadcrumb(
+						this.document.directory_info.title,
+						"document_index",
+						{directory: this.document.directory_info.path}
+					),
+					new CMSBreadcrumb(
+						this.document.title,
+						"document_show",
+						{directory: this.document.path, document: this.document.filename}
+					),
+					new CMSBreadcrumb(
+						"Edit",
+						"document_edit",
+						{directory: this.document.path, document: this.document.filename}
+					)
+				];
 			}
 		},
 		methods: {
@@ -100,7 +128,8 @@
 			}
 		},
 		components: {
-			Editor
+			Editor,
+			Breadcrumbs
 		}
 	}
 </script>
