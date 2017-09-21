@@ -214,6 +214,35 @@ func TestApiListDirectorySummaryHandler(t *testing.T) {
 
 }
 
+func Test_apiGetDirectoryMetadata(t *testing.T) {
+	server = createTestServerWithContext()
+
+	repoPath := "../tests/tmp/repositories/create_directory"
+	setupSmallTestRepo(repoPath)
+
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents")
+
+	client := &http.Client{}
+
+	req, _ := http.NewRequest("GET", target, nil)
+
+	resp, _ := client.Do(req)
+
+	var receiver DirectoryInfo
+
+	json.NewDecoder(resp.Body).Decode(&receiver)
+
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+	assert.Equal(
+		t,
+		DirectoryInfo{
+			Title:       "Documents",
+			Description: "Documents go here",
+		},
+		receiver,
+	)
+}
+
 func TestApiCreateDirectory(t *testing.T) {
 	server = createTestServerWithContext()
 

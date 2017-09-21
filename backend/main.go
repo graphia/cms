@@ -167,10 +167,10 @@ func protectedRouter() (r *vestigo.Router) {
 	r.Post("/api/renew", authRenewTokenHandler)
 
 	// directory endpoints
-	r.Get("/api/directories", apiListDirectoriesHandler)
-	r.Patch("/api/directories/:directory", apiUpdateDirectoriesHandler)
 	r.Get("/api/summary", apiDirectorySummary)
-
+	r.Get("/api/directories", apiListDirectoriesHandler)
+	r.Get("/api/directories/:directory", apiGetDirectoryMetadata)
+	r.Patch("/api/directories/:directory", apiUpdateDirectoriesHandler)
 	r.Post("/api/directories", apiCreateDirectoryHandler)
 	r.Delete("/api/directories/:directory", apiDeleteDirectoryHandler)
 

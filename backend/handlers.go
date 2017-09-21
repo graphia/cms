@@ -662,19 +662,39 @@ func apiListFilesInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 		DirectoryInfo DirectoryInfo `json:"info"`
 	}
 
-	result, err := json.Marshal(output{Files: files, DirectoryInfo: metadata})
+	result := output{Files: files, DirectoryInfo: metadata}
+
+	JSONResponse(result, http.StatusOK, w)
+}
+
+// apiGetDirectoryMetadata returns the `DirectoryInfo` for the
+// given directory
+//
+// GET /api/directories/:directory
+//
+// {
+//   title: "Krusty Burger",
+//   description: "Krusty Burger, Ribwich and Breakfast Balls"
+// }
+func apiGetDirectoryMetadata(w http.ResponseWriter, r *http.Request) {
+	var di DirectoryInfo
+	var fr FailureResponse
+	var err error
+
+	directory := vestigo.Param(r, "directory")
+
+	di, err = getMetadataFromDirectory(directory)
 
 	if err != nil {
+		// FIXME if the _index.md isn't found, return a 404
 		fr = FailureResponse{
-			Message: fmt.Sprintf("Could not create JSON: %s", err.Error()),
+			Message: fmt.Sprintf("Could not get metadata from directory: %s", err.Error()),
 		}
 		JSONResponse(fr, http.StatusBadRequest, w)
 	}
 
-	w.Header().Set("Content-Type", "application/json")
+	JSONResponse(di, http.StatusOK, w)
 
-	w.WriteHeader(http.StatusOK)
-	w.Write(result)
 }
 
 // apiCreateFileInDirectory creates a file the specified directory
