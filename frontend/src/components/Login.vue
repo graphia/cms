@@ -36,7 +36,7 @@
 </template>
 
 <style lang="scss">
-	.card-block .form-group:last-child {
+	.card-body .form-group:last-child {
 		margin-bottom: 0em;
 	}
 </style>

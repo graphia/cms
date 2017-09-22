@@ -9,7 +9,7 @@
 				<h3 class="card-header">Create an administrator</h3>
 
 				<!-- Setup form start -->
-				<div class="card-block">
+				<div class="card-body">
 
 					<form @submit="create">
 

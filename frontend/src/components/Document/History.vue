@@ -14,7 +14,7 @@
 							{{ item.author.When | format_date }}
 						</div>
 
-						<div class="card-block">
+						<div class="card-body">
 
 							<p class="card-text">
 								{{ item.message }}

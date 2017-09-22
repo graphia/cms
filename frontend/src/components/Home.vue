@@ -16,7 +16,7 @@
 
 			<div class="col-md-6">
 				<div class="card recent-updates">
-					<div class="card-block">
+					<div class="card-body">
 						<h4 class="card-title">Recent Updates</h4>
 					</div>
 
@@ -35,7 +35,7 @@
 
 			<div class="col-md-6">
 				<div class="card statistics">
-					<div class="card-block">
+					<div class="card-body">
 						<h4 class="card-title">Statistics</h4>
 
 						<dl class="row">

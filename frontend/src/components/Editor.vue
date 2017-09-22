@@ -50,7 +50,7 @@
 						</div>
 					</div>
 
-					<Gallery id="gallery" class="tab-pane card-block" role="tab-panel"/>
+					<Gallery id="gallery" class="tab-pane card-body" role="tab-panel"/>
 
 				</div>
 			</div>
