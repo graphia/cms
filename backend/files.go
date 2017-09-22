@@ -16,9 +16,9 @@ import (
 )
 
 var (
-	// ErrMetaDataNotFound is returned when the _index.md file is missing
+	// ErrMetadataNotFound is returned when the _index.md file is missing
 	// this isn't a catestrophic problem, but should be logged
-	ErrMetaDataNotFound = errors.New("_index.md not found")
+	ErrMetadataNotFound = errors.New("_index.md not found")
 )
 
 // getFilesInDir returns a list of FileItems for listing
@@ -290,9 +290,9 @@ func listRootDirectories() (directories []Directory, err error) {
 
 			di, err := getMetadata(repo, tree)
 
-			// if there is any kind of error except ErrMetaDataNotFound,
+			// if there is any kind of error except ErrMetadataNotFound,
 			// something's wrong, quit
-			if err != ErrMetaDataNotFound && err != nil {
+			if err != ErrMetadataNotFound && err != nil {
 				Error.Println("Metadata found but not retrievable", err.Error())
 				return 0
 			}
@@ -650,9 +650,9 @@ func getFile(directory string, filename string, includeMd, includeHTML bool) (fi
 	}
 
 	di, err := getMetadataFromDirectory(directory)
-	// if we get any error other than ErrMetaDataNotFound,
+	// if we get any error other than ErrMetadataNotFound,
 	// return it, otherwise it's ok and we can continue
-	if err != nil && err != ErrMetaDataNotFound {
+	if err != nil && err != ErrMetadataNotFound {
 		return file, err
 	}
 
@@ -954,7 +954,7 @@ func getMetadataFromDirectory(directory string) (*DirectoryInfo, error) {
 	}
 
 	md, err := getMetadata(repo, tree)
-	if err == ErrMetaDataNotFound {
+	if err == ErrMetadataNotFound {
 		return nil, err
 	}
 
@@ -967,7 +967,7 @@ func getMetadata(repo *git.Repository, tree *git.Tree) (di DirectoryInfo, err er
 	infoEntry, err := tree.EntryByPath("_index.md")
 	if err != nil {
 		Warning.Println("_index.md does not exist in the repository, skipping for", tree.Object.Id())
-		return di, ErrMetaDataNotFound
+		return di, ErrMetadataNotFound
 	}
 
 	blob, err := repo.LookupBlob(infoEntry.Id)

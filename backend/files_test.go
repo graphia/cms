@@ -175,7 +175,7 @@ func TestGetFileNoRepoMetadata(t *testing.T) {
 	setupSmallTestRepo(repoPath)
 
 	file, err := getFile("appendices", "appendix_1.md", false, false)
-	if err != nil && err != ErrMetaDataNotFound {
+	if err != nil && err != ErrMetadataNotFound {
 		t.Error("error", err)
 	}
 
@@ -523,7 +523,7 @@ func Test_getMetadata(t *testing.T) {
 			assert.Equal(t, tt.wantDi, md)
 		} else {
 			_, err := getMetadata(tt.args.repo, tt.args.tree)
-			assert.Equal(t, ErrMetaDataNotFound, err)
+			assert.Equal(t, ErrMetadataNotFound, err)
 		}
 	}
 }
