@@ -650,7 +650,9 @@ func getFile(directory string, filename string, includeMd, includeHTML bool) (fi
 	}
 
 	di, err := getMetadataFromDirectory(directory)
-	if err != nil {
+	// if we get any error other than ErrMetaDataNotFound,
+	// return it, otherwise it's ok and we can continue
+	if err != nil && err != ErrMetaDataNotFound {
 		return file, err
 	}
 
@@ -952,6 +954,9 @@ func getMetadataFromDirectory(directory string) (di DirectoryInfo, err error) {
 	}
 
 	di, err = getMetadata(repo, tree)
+	if err == ErrMetaDataNotFound {
+		return di, err
+	}
 
 	return di, err
 }

@@ -45,7 +45,7 @@ export default class CMSDirectory {
 	static async get(name) {
 		let path = `${config.api}/directories/${name}`;
 
-		try {
+		// try {
 			let response = await fetch(path, {
 				mode: "cors",
 				method: "GET",
@@ -58,18 +58,16 @@ export default class CMSDirectory {
 
 			let json = await response.json();
 
-			console.debug("JSON RESPONSE", json);
-
 			let dir = new CMSDirectory(dir, json.title, json.description, json.body);
 
 			store.state.activeDirectory = dir;
 
 			return dir;
 
-		}
-		catch(err) {
-			console.error("There was a problem retrieving directory metadata", err);
-		}
+		// }
+		// catch(err) {
+		// 	console.error("There was a problem retrieving directory metadata", err);
+		// };
 	};
 
 };

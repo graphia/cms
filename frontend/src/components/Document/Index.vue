@@ -25,7 +25,8 @@
 
 			<div class="col-md-4" v-for="(document, i) in documents" :key="i">
 
-				<div class="card m-4">
+				<div class="card m-4" :data-filename="document.filename">
+
 					<h3 class="card-header">
 						<router-link :to="{name: 'document_show', params: {filename: document.filename}}">
 							{{ document.title }}
