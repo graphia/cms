@@ -980,7 +980,7 @@ func TestApiGetFileInDirectory(t *testing.T) {
 	assert.Equal(t, file.Filename, "document_3.md")
 	assert.Equal(t, file.Path, "documents")
 	assert.Contains(t, *file.HTML, "<h1>Document 3</h1>")
-	assert.Equal(t, DirectoryInfo{Title: "Documents", Description: "Documents go here"}, file.DirectoryInfo)
+	assert.Equal(t, &DirectoryInfo{Title: "Documents", Description: "Documents go here"}, file.DirectoryInfo)
 
 }
 

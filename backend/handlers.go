@@ -658,11 +658,13 @@ func apiListFilesInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 	metadata, err := getMetadataFromDirectory(directory)
 
 	type output struct {
-		Files         []FileItem    `json:"files"`
-		DirectoryInfo DirectoryInfo `json:"info"`
+		Files         []FileItem     `json:"files"`
+		DirectoryInfo *DirectoryInfo `json:"info,omitempty"`
 	}
 
-	result := output{Files: files, DirectoryInfo: metadata}
+	var result = output{}
+
+	result = output{Files: files, DirectoryInfo: metadata}
 
 	JSONResponse(result, http.StatusOK, w)
 }
@@ -677,11 +679,12 @@ func apiListFilesInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 //   description: "Krusty Burger, Ribwich and Breakfast Balls"
 // }
 func apiGetDirectoryMetadata(w http.ResponseWriter, r *http.Request) {
-	var di DirectoryInfo
+	var di *DirectoryInfo
 	var fr FailureResponse
 	var err error
 
 	directory := vestigo.Param(r, "directory")
+	di = &DirectoryInfo{}
 
 	di, err = getMetadataFromDirectory(directory)
 
@@ -693,7 +696,7 @@ func apiGetDirectoryMetadata(w http.ResponseWriter, r *http.Request) {
 		JSONResponse(fr, http.StatusBadRequest, w)
 	}
 
-	JSONResponse(di, http.StatusOK, w)
+	JSONResponse(&di, http.StatusOK, w)
 
 }
 

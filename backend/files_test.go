@@ -169,6 +169,22 @@ func TestGetFileNeitherMarkdownOrHTML(t *testing.T) {
 
 }
 
+func TestGetFileNoRepoMetadata(t *testing.T) {
+
+	repoPath := "../tests/tmp/repositories/get_file"
+	setupSmallTestRepo(repoPath)
+
+	file, err := getFile("appendices", "appendix_1.md", false, false)
+	if err != nil && err != ErrMetaDataNotFound {
+		t.Error("error", err)
+	}
+
+	assert.Equal(t, file.Filename, "appendix_1.md")
+	assert.Equal(t, file.Path, "appendices")
+	assert.Nil(t, file.DirectoryInfo)
+
+}
+
 func TestListRootDirectories(t *testing.T) {
 
 	// test with subdirectories to ensure we're only returning root

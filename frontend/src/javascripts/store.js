@@ -19,6 +19,7 @@ const state = {
 	auth: new CMSAuth,
 	broadcast: new CMSBroadcast
 };
+
 const mutations = {
 	addAttachment(context, file) {
 		return state.activeDocument.attachments.push(file);

@@ -99,7 +99,7 @@ export default class CMSFile {
 
 		let path = `${config.api}/directories/${directory}/files`;
 
-		// try {
+		try {
 
 			let response = await fetch(path, {mode: "cors", headers: store.state.auth.authHeader()});
 
@@ -109,14 +109,16 @@ export default class CMSFile {
 
 			let json = await response.json()
 
-			let dir = new CMSDirectory(
-				directory,
-				json.info.title,
-				json.info.description,
-				json.info.body
-			);
-
-			store.commit("setActiveDirectory", dir);
+			// if we have the metadata, set up the ActiveDirectory
+			if (json.info) {
+				let dir = new CMSDirectory(
+					directory,
+					json.info.title,
+					json.info.description,
+					json.info.body
+				);
+				store.commit("setActiveDirectory", dir);
+			};
 
 			// map documents
 			let docs = json.files.map((file) => {
@@ -124,11 +126,12 @@ export default class CMSFile {
 			});
 
 			store.state.documents = docs;
+			return docs;
 
-		// }
-		// catch(err) {
-		// 	console.error(`Couldn't retrieve files from directory ${directory}`);
-		// };
+		}
+		catch(err) {
+			console.error(`Couldn't retrieve files from directory ${directory}`);
+		};
 
 	};
 

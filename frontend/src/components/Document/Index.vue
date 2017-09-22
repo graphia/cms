@@ -63,17 +63,17 @@
 		name: "DocumentIndex",
 		created() {
 			// populate $store.state.documents with docs from api
-			this.fetchDocuments(this.directory);
+			this.setup(this.directory);
 		},
 		watch: {
 			// if we navigate from one dir index to another, reload the
 			// contents
 			"$route"(to, from) {
-				this.fetchDocuments(this.directory);
+				this.setup(this.directory);
 			}
 		},
 		methods: {
-			fetchDocuments(directory) {
+			async setup(directory) {
 				console.debug("retrieving all files from", directory);
 				this.$store.dispatch("getDocumentsInDirectory", directory);
 			}
@@ -94,9 +94,9 @@
 			breadcrumbs() {
 				return [
 					new CMSBreadcrumb(
-						this.activeDirectory.title,
+						this.activeDirectory.title || this.directory,
 						"document_index",
-						{directory: "pokemon"}
+						{directory: this.directory}
 					)
 				];
 			}
