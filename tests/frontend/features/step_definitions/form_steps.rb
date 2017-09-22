@@ -81,6 +81,9 @@ end
 
 Then %r{^the '(.*)' field should allow values from '(\d+)' to '(\d+)' characters$} do |field, min, max|
   within("form") do
+    # make sure the form has properly loaded before continuing
+    expect(page).to have_css("label", text: /^#{field}$/)
+
     name = page.find("label", text: /^#{field}$/)['for']
     input = page.find("input[name='#{name}']")
     expect(input['minlength']).to eql(min)
