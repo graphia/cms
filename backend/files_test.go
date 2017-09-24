@@ -175,10 +175,8 @@ func TestGetFileNoRepoMetadata(t *testing.T) {
 	setupSmallTestRepo(repoPath)
 
 	file, err := getFile("appendices", "appendix_1.md", false, false)
-	if err != nil && err != ErrMetadataNotFound {
-		t.Error("error", err)
-	}
 
+	assert.Nil(t, err) // make sure getFile doesn't return an error
 	assert.Equal(t, file.Filename, "appendix_1.md")
 	assert.Equal(t, file.Path, "appendices")
 	assert.Nil(t, file.DirectoryInfo)

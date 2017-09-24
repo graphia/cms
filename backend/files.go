@@ -665,7 +665,7 @@ func getFile(directory string, filename string, includeMd, includeHTML bool) (fi
 		DirectoryInfo: di,
 	}
 
-	return file, err
+	return file, nil
 }
 
 func getAttachments(directory string) (files []Attachment, err error) {

@@ -424,20 +424,21 @@ func apiListDirectoriesHandler(w http.ResponseWriter, r *http.Request) {
 //	 appendices: [...]
 // }
 func apiDirectorySummary(w http.ResponseWriter, r *http.Request) {
-
+	var fr FailureResponse
 	var summary []DirectorySummary
 	var err error
 
 	summary, err = listRootDirectorySummary()
 
-	output, err := json.Marshal(summary)
 	if err != nil {
-		panic(err)
+		fr = FailureResponse{
+			Message: "No specified directory matches path",
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(output)
+	JSONResponse(summary, http.StatusOK, w)
 
 }
 
@@ -694,6 +695,7 @@ func apiGetDirectoryMetadata(w http.ResponseWriter, r *http.Request) {
 			Message: fmt.Sprintf("Could not get metadata from directory: %s", err.Error()),
 		}
 		JSONResponse(fr, http.StatusBadRequest, w)
+		return
 	}
 
 	JSONResponse(&di, http.StatusOK, w)
@@ -923,19 +925,11 @@ func apiGetFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 			Message: fmt.Sprintf("Failed to get converted file: %s", err.Error()),
 		}
 		JSONResponse(fr, http.StatusBadRequest, w)
+		return
 	}
 
-	output, err := json.Marshal(file)
-	if err != nil {
-		Error.Println("Failed to convert file to JSON", file)
-		fr = FailureResponse{
-			Message: fmt.Sprintf("Failed to create JSON from file: %s", err.Error()),
-		}
-		JSONResponse(fr, http.StatusBadRequest, w)
-	}
+	JSONResponse(file, http.StatusOK, w)
 
-	w.WriteHeader(http.StatusOK)
-	w.Write(output)
 }
 
 func apiGetFileAttachmentsHandler(w http.ResponseWriter, r *http.Request) {
