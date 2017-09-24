@@ -23,6 +23,9 @@
 							<dt>Version</dt>
 							<dd>{{ document.version }}</dd>
 
+							<dt>Author</dt>
+							<dd>{{ document.author }}</dd>
+
 							<dt>Tags</dt>
 							<dd>
 								<span v-for="tag in document.tags" class="tag badge badge-primary">
@@ -36,9 +39,14 @@
 								Edit
 							</router-link>
 
+							<router-link class="btn btn-info mr-2" :to="{name: 'document_history', params: {directory: this.directory, filename: this.filename}}">
+								History
+							</router-link>
+
 							<button type="button" @click="destroy" class="btn btn-danger mr-2">
 								Delete
 							</button>
+
 						</div>
 					</div>
 				</div>
@@ -147,14 +155,9 @@
 				event.preventDefault();
 				console.debug("delete clicked!");
 
-				let commit = this.commit;
 				let file = this.document;
 
 				let response = await this.document.destroy(this.commit);
-
-				if (!checkResponse(response.status)) {
-					throw("could not delete document");
-				}
 
 				console.debug("File deleted, redirecting to document index");
 				this.redirectToDirectoryIndex(this.directory);

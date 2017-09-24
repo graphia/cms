@@ -245,7 +245,7 @@ export default class CMSFile {
 				mode: "cors",
 				method: "DELETE",
 				headers: store.state.auth.authHeader(),
-				body: commit.toJSON(this)
+				body: commit.filesJSON(this)
 			});
 
 			if (!checkResponse(response.status)) {

@@ -45,6 +45,7 @@ const actions = {
 		return CMSCommit.initialize(directory);
 	},
 	getDocumentsInDirectory(context, directory) {
+		state.activeDirectory = new CMSDirectory;
 		return CMSFile.all(directory);
 	},
 	getDocument(context, args) {
