@@ -126,7 +126,7 @@ export default class CMSFile {
 			});
 
 			store.state.documents = docs;
-			return docs;
+			return response;
 
 		}
 		catch(err) {

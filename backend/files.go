@@ -18,7 +18,8 @@ import (
 var (
 	// ErrMetadataNotFound is returned when the _index.md file is missing
 	// this isn't a catestrophic problem, but should be logged
-	ErrMetadataNotFound = errors.New("_index.md not found")
+	ErrMetadataNotFound  = errors.New("_index.md not found")
+	ErrDirectoryNotFound = errors.New("directory not found")
 )
 
 // getFilesInDir returns a list of FileItems for listing
@@ -42,7 +43,7 @@ func getFilesInDir(directory string) (files []FileItem, err error) {
 	// ensure that the directory exists
 	entry, _ := ht.EntryByPath(directory)
 	if entry == nil {
-		return nil, fmt.Errorf("directory '%s' not found", directory)
+		return nil, ErrDirectoryNotFound
 	}
 
 	if entry.Type != git.ObjectTree {

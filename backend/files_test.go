@@ -75,10 +75,8 @@ func TestGetFilesInNonExistantDir(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/get_file"
 	setupSmallTestRepo(repoPath)
 
-	// there isn't a directory called fanfic, so should
-	// raise not found error
 	_, err := getFilesInDir("fanfic")
-	assert.Contains(t, err.Error(), "directory 'fanfic' not found")
+	assert.Contains(t, err.Error(), "directory not found")
 }
 
 func TestGetConvertedFile(t *testing.T) {

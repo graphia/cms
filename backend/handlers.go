@@ -649,11 +649,21 @@ func apiListFilesInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 
 	directory := vestigo.Param(r, "directory")
 	files, err := getFilesInDir(directory)
-	if err != nil {
+
+	if err != nil && err != ErrDirectoryNotFound {
 		fr = FailureResponse{
 			Message: fmt.Sprintf("Could not get list of files in directory %s: %s", directory, err.Error()),
 		}
 		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	if err == ErrDirectoryNotFound {
+		fr = FailureResponse{
+			Message: ErrDirectoryNotFound.Error(),
+		}
+		JSONResponse(fr, http.StatusNotFound, w)
+		return
 	}
 
 	metadata, err := getMetadataFromDirectory(directory)

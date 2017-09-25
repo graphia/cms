@@ -1,55 +1,62 @@
 <template>
 	<div id="document-index">
 
-		<Breadcrumbs :levels="breadcrumbs"/>
+		<div v-if="this.documents.length > 0">
 
-		<div class="row document-info">
-			<div class="col-md-12">
+			<Breadcrumbs :levels="breadcrumbs"/>
 
-				<!-- document index header -->
-				<h2 v-if="activeDirectory.title">
-					{{ activeDirectory.title }}
-				</h2>
-				<h2 v-else>
-					{{ directory | capitalize }}
-				</h2>
-				<!-- /document index header -->
+			<div class="row document-info">
+				<div class="col-md-12">
 
-				<p>{{ activeDirectory.description }}</p>
+					<!-- document index header -->
+					<h2 v-if="activeDirectory.title">
+						{{ activeDirectory.title }}
+					</h2>
+					<h2 v-else>
+						{{ directory | capitalize }}
+					</h2>
+					<!-- /document index header -->
 
-			</div>
-		</div>
-
-
-		<div class="row document-list">
-
-			<div class="col-md-4" v-for="(document, i) in documents" :key="i">
-
-				<div class="card m-4" :data-filename="document.filename">
-
-					<h3 class="card-header">
-						<router-link :to="{name: 'document_show', params: {filename: document.filename}}">
-							{{ document.title }}
-						</router-link>
-					</h3>
-
-					<div class="card-body">
-						<p class="card-text">{{ document.synopsis }}</p>
-					</div>
+					<p>{{ activeDirectory.description }}</p>
 
 				</div>
 			</div>
 
-		</div>
 
-		<div class="row document-buttons">
+			<div class="row document-list">
 
-			<div class="col-12">
-				<router-link :to="{name: 'document_new', params: {directory: this.$route.params.directory}}" class="btn btn-primary">
-					New
-				</router-link>
+				<div class="col-md-4" v-for="(document, i) in documents" :key="i">
+
+					<div class="card m-4" :data-filename="document.filename">
+
+						<h3 class="card-header">
+							<router-link :to="{name: 'document_show', params: {filename: document.filename}}">
+								{{ document.title }}
+							</router-link>
+						</h3>
+
+						<div class="card-body">
+							<p class="card-text">{{ document.synopsis }}</p>
+						</div>
+
+					</div>
+				</div>
+
 			</div>
 
+			<div class="row document-buttons">
+
+				<div class="col-12">
+					<router-link :to="{name: 'document_new', params: {directory: this.$route.params.directory}}" class="btn btn-primary">
+						New
+					</router-link>
+				</div>
+
+			</div>
+
+		</div>
+		<div v-else>
+			<Error :code="404"/>
 		</div>
 	</div>
 </template>
@@ -57,6 +64,7 @@
 <script lang="babel">
 
 	import Breadcrumbs from '../Utilities/Breadcrumbs';
+	import Error from '../Errors/Error';
 	import CMSBreadcrumb from '../../javascripts/models/breadcrumb.js';
 
 	export default {
@@ -102,7 +110,8 @@
 			}
 		},
 		components: {
-			Breadcrumbs
+			Breadcrumbs,
+			Error
 		}
 	}
 </script>
