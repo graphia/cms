@@ -89,11 +89,14 @@ func allCommits(repo *git.Repository, qty int) (commits []Commit, err error) {
 	err = revWalk.Push(hc.Id())
 
 	revWalkIterator := func(c *git.Commit) bool {
+
+		Debug.Println("Commited at:", c.Author().When)
 		commit = Commit{
 			Message:    c.Summary(),
 			ID:         c.Id().String(),
 			ObjectType: c.Type().String(),
 			Author:     c.Author(),
+			Time:       c.Author().When,
 		}
 		commits = append(commits, commit)
 		return true

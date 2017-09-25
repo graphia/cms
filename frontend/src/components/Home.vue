@@ -5,60 +5,71 @@
 
 		<h1>Dashboard</h1>
 
-
 		<div class="row">
+			<DirectorySummary class="directories"/>
+		</div>
 
-			<div class="col-md-12">
+		<div class="row mt-4">
 
-				<DirectorySummary class="directories"/>
+			<div class="col-md-4">
+
+				<div class="card bg-light">
+					<div class="card-body">
+
+						<p>
+							When you are happy with the content, you can release it
+							to your audience by publishing it.
+						</p>
+
+						<button class="btn btn-lg btn-success" :class="{'disabled': publishing}" @click="publish">
+							<octicon :icon-name="'cloud-upload'"></octicon>
+							{{ publishing ? "Publishing" : "Publish" }}
+						</button>
+
+					</div>
+				</div>
 
 			</div>
 
-			<div class="col-md-6">
+			<div class="col-md-5">
 				<div class="card recent-updates">
 					<div class="card-body">
 						<h4 class="card-title">Recent Updates</h4>
 					</div>
 
 					<ol class="list-group list-group-flush">
-						<li class="recent-commit-info list-group-item" v-for="commit in commits">
+						<li class="recent-commit-info list-group-item" v-for="(commit, i) in commits" :key="i">
 							<router-link :to="{name: 'commit', params: {hash: commit.id}}">
 								{{ commit.message || "Empty commit message" }}
 							</router-link>
 							<p class="card-text">
-								<small>{{ commit.author.Name }} committed 2 minutes ago</small>
+								<small>{{ commit.author.Name }} committed {{ commit.timestamp | time_ago }}</small>
 							</p>
 						</li>
 					</ol>
 				</div>
 			</div>
 
-			<div class="col-md-6">
+			<div class="col-md-3">
 				<div class="card statistics">
 					<div class="card-body">
 						<h4 class="card-title">Statistics</h4>
 
 						<dl class="row">
-							<dt class="col-sm-2">Users</dt>
-							<dd class="col-sm-10">4</dd>
+							<dt class="col-sm-9">Users</dt>
+							<dd class="col-sm-3">4</dd>
 
-							<dt class="col-sm-2">Commits</dt>
-							<dd class="col-sm-10">38</dd>
+							<dt class="col-sm-9">Commits</dt>
+							<dd class="col-sm-3">38</dd>
 
-							<dt class="col-sm-2">Files</dt>
-							<dd class="col-sm-10">12</dd>
+							<dt class="col-sm-9">Files</dt>
+							<dd class="col-sm-3">12</dd>
 						</dl>
 
 					</div>
 
 				</div>
 			</div>
-		</div>
-
-		<div class="row">
-			<button class="btn btn-primary" :class="{'disabled': publishing}" @click="publish">
-				{{ publishing ? "Publishing" : "Publish" }}
-			</button>
 		</div>
 
 	</div>
@@ -136,10 +147,7 @@
 						throw("Could not retrieve recent commit sumamry");
 					}
 
-					let json = await response.json()
-
-					this.commits = json;
-
+					this.commits = await response.json()
 
 				} catch(err) {
 					//throw(err);

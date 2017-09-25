@@ -1163,25 +1163,17 @@ func apiGetCommits(w http.ResponseWriter, r *http.Request) {
 
 	// TODO manage quantity param
 
-	commits, err = getCommits(20)
+	commits, err = getCommits(5)
 	if err != nil {
 		fr = FailureResponse{
 			Message: fmt.Sprintf("Failed to retrieve recent commits: %s", err.Error()),
 		}
 		JSONResponse(fr, http.StatusBadRequest, w)
+		return
 	}
 
-	response, err := json.Marshal(commits)
+	JSONResponse(commits, http.StatusOK, w)
 
-	if err != nil {
-		fr = FailureResponse{
-			Message: fmt.Sprintf("Failed to convert recent commits to JSON: %s", err.Error()),
-		}
-		JSONResponse(fr, http.StatusBadRequest, w)
-	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Write(response)
 }
 
 // GET /api/commits/:commit_hash

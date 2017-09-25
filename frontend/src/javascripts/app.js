@@ -1,3 +1,4 @@
+// Vue stuff
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 
@@ -32,6 +33,9 @@ import CMSAuth from './auth.js';
 import store from './store.js';
 import SimpleMDE from 'simplemde';
 import TagsInput from 'tags-input';
+
+// Utility libs
+import vagueTime from 'vague-time';
 
 // Vue Octicons
 Vue.component('octicon', Octicon);
@@ -106,6 +110,14 @@ Vue.filter('format_date', (value) => {
 	let d = new Date(Date.parse(value));
 	return d.toLocaleString();
 });
+
+Vue.filter('time_ago', (value) => {
+	return vagueTime.get({
+		from: Date.now(),
+		to: Date.parse(value),
+		units: 'ms'
+	});
+})
 
 Vue.filter('capitalize', (value) => {
 	try {

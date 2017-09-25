@@ -11,6 +11,7 @@
 			v-model="directory.title"
 			required="true"
 			minlength=2
+			autocomplete="off"
 			v-on:keyup="validate"
 			:class="{'is-invalid': !valid}"
 		/>
