@@ -7,8 +7,20 @@ Given %r{^I am on the new document page$} do
   expect(page.current_path).to eql(path)
 end
 
+Given %r{^I am on the new appendix page$} do
+  path = "/cms/appendices/new"
+  visit(path)
+  expect(page.current_path).to eql(path)
+end
+
 Given %r{^I am on the edit document page for "(.*?)"$} do |document_filename|
   path = "/cms/documents/#{document_filename}/edit"
+  visit(path)
+  expect(page.current_path).to eql(path)
+end
+
+Given %r{^I am on the edit appendix page for "(.*?)"$} do |appendix_filename|
+  path = "/cms/appendices/#{appendix_filename}/edit"
   visit(path)
   expect(page.current_path).to eql(path)
 end

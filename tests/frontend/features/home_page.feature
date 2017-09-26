@@ -9,6 +9,10 @@ Feature: Home page contents
 		And my user account exists
 		And I have logged in
 
+	Scenario: Page heading
+		Given I am on the homepage
+		Then the main heading should be "Dashboard"
+
 	Scenario: Home page sections
 		Given I am on the homepage
 		Then I should see a summary of recent changes
@@ -46,3 +50,7 @@ Feature: Home page contents
 		When I am on the homepage
 		Then I should see the custom description
 		And I should see the custom title
+
+	Scenario: Breadcrumbs
+		Given I am on the homepage
+		Then I should only see the inactive 'Dashboard' breadcrumb

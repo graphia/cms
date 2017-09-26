@@ -82,22 +82,29 @@
 			},
 			breadcrumbs() {
 
+				let directory_title, filename;
+
+				if (this.document.directory_info) {
+					directory_title = this.document.directory_info.title;
+					filename = this.document.title;
+				};
+
 				return [
 
 					new CMSBreadcrumb(
-						this.document.directory_info.title,
+						directory_title || this.directory,
 						"document_index",
-						{directory: this.document.directory_info.path}
+						{directory: this.directory}
 					),
 					new CMSBreadcrumb(
-						this.document.title,
+						filename || this.filename,
 						"document_show",
 						{directory: this.document.path, document: this.document.filename}
 					),
 					new CMSBreadcrumb(
 						"Edit",
 						"document_edit",
-						{directory: this.document.path, document: this.document.filename}
+						{directory: this.directory, document: (filename || this.filename)}
 					)
 				];
 			}

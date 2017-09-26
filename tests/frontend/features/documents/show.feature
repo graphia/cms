@@ -45,3 +45,19 @@ Feature: Creating documents
 		Given I am on the document's show page
 		When I click the toolbar's 'History' button
 		Then I should be on the document's history page
+
+	Scenario: Breadcrumbs without metadata
+		Given I am on the document's show page
+		Then I should see the following breadcrumbs:
+			| Text                | Reference           |
+			| Dashboard           | /cms                |
+			| appendices          | /cms/appendices     |
+			| appendix_1.md       | None                |
+
+	Scenario: Breadcrumbs with metadata
+		Given I am on the show page for a document with metadata
+		Then I should see the following breadcrumbs:
+			| Text                | Reference           |
+			| Dashboard           | /cms                |
+			| Important Documents | /cms/documents      |
+			| document 1          | None                |

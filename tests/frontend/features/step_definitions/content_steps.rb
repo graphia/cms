@@ -11,3 +11,7 @@ Then %r{^there should be an alert with the message '(.*)'$} do |message|
     expect(page).to have_content(message)
   end
 end
+
+Then %r{^the main heading should be "(.*?)"$} do |heading|
+  expect(page.first("h1")).to have_content(heading)
+end

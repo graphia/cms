@@ -78,3 +78,19 @@ Feature: Creating documents
 		Given I am on the new document page
 		When I haven't interacted with the form
 		Then the submit button should be disabled
+
+	Scenario: Breadcrumbs without metadata
+		Given I am on the new appendix page
+		Then I should see the following breadcrumbs:
+			| Text                | Reference       |
+			| Dashboard           | /cms            |
+			| appendices          | /cms/appendices |
+			| New Document        | None            |
+
+	Scenario: Breadcrumbs with metadata
+		Given I am on the new document page
+		Then I should see the following breadcrumbs:
+			| Text                | Reference       |
+			| Dashboard           | /cms            |
+			| Important Documents | /cms/documents  |
+			| New Document        | None            |

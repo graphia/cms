@@ -26,3 +26,10 @@ Feature: Listing documents
 			| Directory  | Title      |
 			| documents  | Documents  |
 			| appendices | Appendices |
+
+	Scenario: Breadcrumbs
+		Given I am on the "documents" index page
+		Then I should see the following breadcrumbs:
+			| Text                | Reference |
+			| Dashboard           | /cms      |
+			| Important Documents | None      |

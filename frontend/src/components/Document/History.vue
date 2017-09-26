@@ -1,6 +1,7 @@
 <template>
 	<div class="row history">
 
+		<Breadcrumbs :levels="breadcrumbs"/>
 
 		<div class="col-sm-12">
 
@@ -35,7 +36,10 @@
 
 <script lang="babel">
 
+	import Breadcrumbs from '../Utilities/Breadcrumbs';
+
 	import checkResponse from '../../javascripts/response.js';
+	import CMSBreadcrumb from '../../javascripts/models/breadcrumb.js';
 
 	export default {
 		name: "DocumentHistory",
@@ -52,6 +56,36 @@
 			},
 			filename() {
 				return this.$route.params.filename;
+			},
+			document() {
+				return this.$store.state.activeDocument;
+			},
+			breadcrumbs() {
+				let directory_title, filename;
+
+				if (this.document.directory_info) {
+					directory_title = this.document.directory_info.title;
+					filename = this.document.title;
+				};
+
+				return [
+
+					new CMSBreadcrumb(
+						directory_title || this.directory,
+						"document_index",
+						{directory: this.directory}
+					),
+					new CMSBreadcrumb(
+						filename || this.filename,
+						"document_show",
+						{directory: this.document.path, document: this.document.filename}
+					),
+					new CMSBreadcrumb(
+						"History",
+						"document_history",
+						{directory: this.directory, document: (filename || this.filename)}
+					)
+				];
 			}
 		},
 
@@ -72,6 +106,9 @@
 
 			this.history = await response.json()
 
+		},
+		components: {
+			Breadcrumbs
 		}
 	};
 </script>

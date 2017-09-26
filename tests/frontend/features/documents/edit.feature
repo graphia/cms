@@ -69,3 +69,21 @@ Feature: Creating documents
 		Given I am on the edit document page for "document_1.md"
 		When I haven't interacted with the form
 		Then the submit button should be disabled
+
+	Scenario: Breadcrumbs without metadata
+		Given I am on the edit appendix page for "appendix_1.md"
+		Then I should see the following breadcrumbs:
+			| Text                | Reference                     |
+			| Dashboard           | /cms                          |
+			| appendices          | /cms/appendices               |
+			| appendix_1.md       | /cms/appendices/appendix_1.md |
+			| Edit                | None                          |
+
+	Scenario: Breadcrumbs with metadata
+		Given I am on the edit document page for "document_1.md"
+		Then I should see the following breadcrumbs:
+			| Text                | Reference                    |
+			| Dashboard           | /cms                         |
+			| Important Documents | /cms/documents               |
+			| document 1          | /cms/documents/document_1.md |
+			| Edit                | None                         |
