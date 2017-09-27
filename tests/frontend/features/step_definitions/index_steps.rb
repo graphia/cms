@@ -51,3 +51,12 @@ Then %r{^each directory index page should have the correct title:$} do |table|
 		expect(page).to have_css("h2", text: row['Title'])
 	end
 end
+
+Then %r{^I should be on the new document page for the '(.*?)' directory$} do |directory|
+  expect(page).to have_css("h1", text: "New Document")
+  expect(page.current_path).to eql("/cms/#{directory}/new")
+end
+
+Given %r{^there is no directory called "(.*?)"$} do |directory|
+  expect(Dir.exist?(File.join(REPO_PATH, directory))).to be false
+end

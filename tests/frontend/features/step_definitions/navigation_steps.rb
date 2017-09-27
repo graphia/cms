@@ -11,3 +11,7 @@ end
 Then %r{^I should (?:have been|be) redirected to "(.*)"$} do |path|
   expect(page.current_path).to eql(path)
 end
+
+Then %r{^there should be a '(.*?)' link$} do |text|
+  expect(page).to have_css("a", text: text)
+end

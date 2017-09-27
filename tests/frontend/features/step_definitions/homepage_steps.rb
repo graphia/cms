@@ -86,7 +86,7 @@ Given %r{^the '(.*?)' directory contains no files$} do |dir|
   expect(Dir.entries(File.join(REPO_PATH, "empty"))).to eql(['.', '..', '_index.md'])
 end
 
-Then %r{^I see a 'no files' alert in the operating procedures section$} do
+Then %r{^I see a 'no files' alert in the empty section$} do
   within(".card.empty") do
     expect(page).to have_css("div.alert", text: "There's nothing here yet")
   end

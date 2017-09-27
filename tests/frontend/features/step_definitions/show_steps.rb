@@ -11,7 +11,8 @@ end
 Given %r{^I am on the show page for a document with metadata$} do
   path = "/cms/documents/document_1.md"
   visit(path)
-  expect(page.current_path).to eql(path)end
+  expect(page.current_path).to eql(path)
+end
 
 And %r{^I am on the document's show page$} do
   step "I navigate to that document's 'show' page"

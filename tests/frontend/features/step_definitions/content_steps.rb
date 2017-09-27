@@ -6,7 +6,7 @@ Then %r{^I should see text '(.*?)'$} do |text|
   expect(page).to have_content(text)
 end
 
-Then %r{^there should be an alert with the message '(.*)'$} do |message|
+Then %r{^there should be an alert with the message "(.*)"$} do |message|
   within(".alert") do
     expect(page).to have_content(message)
   end

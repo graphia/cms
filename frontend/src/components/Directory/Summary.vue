@@ -37,9 +37,9 @@
 							class="list-group-item list-group-item-action"
 						>
 
-							<h5>{{ document.frontmatter.title }}</h5>
+							<h5>{{ document.frontmatter.title || document.filename }}</h5>
 
-							<p class="text-muted">{{ document.frontmatter.synopsis }}</p>
+							<p class="text-muted">{{ document.frontmatter.synopsis || "No synopsis has been added" }}</p>
 
 						</router-link>
 

@@ -103,11 +103,18 @@ export default class CMSFile {
 
 			let response = await fetch(path, {mode: "cors", headers: store.state.auth.authHeader()});
 
-			if (!checkResponse(response.status)) {
-				return
-			}
+			// if the api responds with a 404 we'll display a special
+			// error page so handle that separately
+			if (response.status == 404) {
+				console.warn(`directory ${directory} not found`);
+				store.state.documents = null;
+				return;
+			} else if (!checkResponse(response.status)) {
+				// something more serious has happend, abort!
+				throw(response);
+			};
 
-			let json = await response.json()
+			let json = await response.json();
 
 			// if we have the metadata, set up the ActiveDirectory
 			if (json.info) {

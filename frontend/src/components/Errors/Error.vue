@@ -25,8 +25,8 @@
 			return {
 				errors: {
 					404: {
-						message: "The item you were looking for cannot be found. Please "     +
-								 "ensure you are using the correct URL and that the resource" +
+						message: "The item you were looking for cannot be found. Please "      +
+								 "ensure you are using the correct URL and that the resource " +
 								 "hasn't been deleted."
 					}
 				}

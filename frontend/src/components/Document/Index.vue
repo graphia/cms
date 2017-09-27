@@ -1,7 +1,7 @@
 <template>
 	<div id="document-index">
 
-		<div v-if="this.documents.length > 0">
+		<div v-if="this.documents && this.documents.length > 0">
 
 			<Breadcrumbs :levels="breadcrumbs"/>
 
@@ -31,12 +31,12 @@
 
 						<h3 class="card-header">
 							<router-link :to="{name: 'document_show', params: {filename: document.filename}}">
-								{{ document.title }}
+								{{ document.title || document.filename }}
 							</router-link>
 						</h3>
 
 						<div class="card-body">
-							<p class="card-text">{{ document.synopsis }}</p>
+							<p class="card-text">{{ document.synopsis || description_placeholder }}</p>
 						</div>
 
 					</div>
@@ -55,6 +55,26 @@
 			</div>
 
 		</div>
+
+		<div v-else-if="this.documents && this.documents.length === 0">
+
+			<div class="col-12">
+
+				<div class="alert alert-warning">
+
+					<h3>There's nothing here <em>yet!</em></h3>
+
+					<p>
+						This directory is empty. Don't worry, you can add the first document by clicking the button below.
+					</p>
+
+					<router-link :to="{name: 'document_new', params: {directory: this.$route.params.directory}}" class="btn btn-primary">
+						Create a new document
+					</router-link>
+				</div>
+			</div>
+		</div>
+
 		<div v-else>
 			<Error :code="404"/>
 		</div>
@@ -79,6 +99,11 @@
 			"$route"(to, from) {
 				this.setup(this.directory);
 			}
+		},
+		data() {
+			return {
+				description_placeholder: "No description has been added"
+			};
 		},
 		methods: {
 			async setup(directory) {

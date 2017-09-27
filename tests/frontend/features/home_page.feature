@@ -42,7 +42,7 @@ Feature: Home page contents
 	Scenario: When a directory is empty
 		Given the 'empty' directory contains no files
 		When I am on the homepage
-		Then I see a 'no files' alert in the operating procedures section
+		Then I see a 'no files' alert in the empty section
 		And there should be a 'new file' button
 
 	Scenario: When a directory has metadata
