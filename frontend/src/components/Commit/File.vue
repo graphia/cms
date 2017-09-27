@@ -11,7 +11,7 @@
 			<code>{{ this.path }}</code>
 		</h2>
 
-		<div class="card-block">
+		<div class="card-body">
 
 			<!-- file content display, different content shown depending on the git operation -->
 

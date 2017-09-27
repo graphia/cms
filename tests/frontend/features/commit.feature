@@ -1,6 +1,6 @@
 Feature: Commits
 	So I can review historical changes
-	As a user
+	As an author
 	I want to be able to view individual commits and their details
 
 	Background:
@@ -38,3 +38,11 @@ Feature: Commits
 		Given I have modified one file and removed another in a single commit
 		When I navigate to the commit's details page
 		Then I should see two file sections, one for each affected file
+
+	Scenario: Breadcrumbs
+		Given I have made changes to an existing file
+		When I navigate to the commit's details page
+		Then I should see the following breadcrumbs:
+			| Text      | Reference |
+			| Dashboard | /cms      |
+			| Commit    | None      |

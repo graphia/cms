@@ -21,7 +21,8 @@ exports.paths = {
 		'node_modules/simplemde/dist',
 		'node_modules/bootstrap/dist',
 		'node_modules/octicons',
-		'node_modules/text-diff'
+		'node_modules/text-diff',
+		'node_modules/babel-runtime/core-js/object'
 	]
 };
 
@@ -33,8 +34,10 @@ exports.modules = {
 
 exports.plugins = {
 	babel: {
-		presets: ['latest'],
-		plugins: ['transform-runtime']
+		presets: ['es2015', 'es2016', 'es2017'],
+		plugins: [
+			'transform-runtime'
+		]
 	},
 	sass: {
 		mode: 'native',
@@ -57,6 +60,7 @@ exports.npm = {
 		$: 'jquery',
 		jQuery: 'jquery',
 		Tether: 'tether',
+		Popper: 'popper.js',
 		Bootstrap: 'bootstrap'
 	}
 };

@@ -27,7 +27,7 @@
 
 				<div class="tab-content">
 
-					<div id="metadata" class="active tab-pane card-block metadata-fields" role="tab-panel">
+					<div id="metadata" class="active tab-pane card-body metadata-fields" role="tab-panel">
 
 						<FrontMatter/>
 
@@ -50,7 +50,7 @@
 						</div>
 					</div>
 
-					<Gallery id="gallery" class="tab-pane card-block" role="tab-panel"/>
+					<Gallery id="gallery" class="tab-pane card-body" role="tab-panel"/>
 
 				</div>
 			</div>

@@ -42,12 +42,6 @@ Then %r{^I should still be on the login screen$} do
   expect(page.current_path).to eql(path)
 end
 
-Then %r{^there should be an alert with the message '(.*)'$} do |message|
-  within(".row.messages") do
-    expect(page).to have_css("div.alert.alert-danger", text: message)
-  end
-end
-
 Given %r{^I have logged in$} do
   steps %{
 		Given I am on the login screen

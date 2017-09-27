@@ -15,7 +15,8 @@ type NewCommit struct {
 
 // NewCommitDirectory holds directory info for creating new dirs
 type NewCommitDirectory struct {
-	Path string `json:"name"`
+	Path          string        `json:"name"`
+	DirectoryInfo DirectoryInfo `json:"info"`
 }
 
 // NewCommitFile will replace RepoWrite's file attributes
@@ -60,7 +61,24 @@ type FrontMatter struct {
 // FIXME eventually it will, currently just the name, need to
 // work out how best to store it
 type Directory struct {
-	Name string `json:"name"`
+	Path          string `json:"path" yaml:"path"`
+	DirectoryInfo `json:"info"`
+}
+
+// DirectorySummary contains the directory's metadata plus
+// an array of its contents
+type DirectorySummary struct {
+	Path          string `json:"path"`
+	DirectoryInfo `json:"info"`
+	Contents      []FileItem `json:"contents"`
+}
+
+// DirectoryInfo contains the fields that will be written to
+// a directory's .info file
+type DirectoryInfo struct {
+	Title       string `json:"title" yaml:"title"`
+	Description string `json:"description" yaml:"description"`
+	Body        string `json:"body" yaml:"-"`
 }
 
 // FileItem contains enough file information for listing
@@ -76,12 +94,13 @@ type FileItem struct {
 // File represents a Markdown file and can be returned with
 // HTML or Markdown contents (or both if required)
 type File struct {
-	AbsoluteFilename string      `json:"absolute_filename"`
-	Filename         string      `json:"filename"`
-	Path             string      `json:"path"`
-	HTML             *string     `json:"html"`
-	Markdown         *string     `json:"markdown"`
-	FrontMatter      FrontMatter `json:"frontmatter"`
+	AbsoluteFilename string         `json:"absolute_filename"`
+	Filename         string         `json:"filename"`
+	Path             string         `json:"path"`
+	HTML             *string        `json:"html"`
+	Markdown         *string        `json:"markdown"`
+	FrontMatter      FrontMatter    `json:"frontmatter"`
+	DirectoryInfo    *DirectoryInfo `json:"directory_info,omitempty"`
 }
 
 // Attachment belongs to a File, usually an image

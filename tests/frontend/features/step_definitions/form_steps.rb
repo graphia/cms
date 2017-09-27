@@ -2,6 +2,10 @@ Then %r{^I should see a '(.*)' field with type '(.*)'$} do |name, field_type|
   expect(page).to have_css("input[name='#{name.downcase}'][type='#{field_type}']")
 end
 
+Then %r{^I should see a text area called '(.*?)'} do |name|
+  expect(page).to have_css("textarea[name='#{name.downcase}']")
+end
+
 Then %r{^the submit button should be labelled '(.*)'$} do |label|
   expect(page).to have_css("input.btn[value='#{label}']")
 end
@@ -18,6 +22,12 @@ When %r{^I enter '(.*)' in the '(.*)' field$} do |value, field|
   input = page.find("label", text: /^#{field}$/)['for']
 
   fill_in input, with: value
+end
+
+Then %r{^the "(.*?)" field should be "(.*?)"$} do |field, value|
+  name = page.find("label", text: /^#{field}$/)['for']
+  input = page.find("input[name='#{name}']")
+  expect(input.value).to eql(value)
 end
 
 Given %r{^I fill in the form with the following data:$} do |table|
@@ -71,6 +81,9 @@ end
 
 Then %r{^the '(.*)' field should allow values from '(\d+)' to '(\d+)' characters$} do |field, min, max|
   within("form") do
+    # make sure the form has properly loaded before continuing
+    expect(page).to have_css("label", text: /^#{field}$/)
+
     name = page.find("label", text: /^#{field}$/)['for']
     input = page.find("input[name='#{name}']")
     expect(input['minlength']).to eql(min)

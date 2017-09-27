@@ -2,6 +2,8 @@ package main
 
 import (
 	"bytes"
+	"encoding/base64"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -9,10 +11,15 @@ import (
 	"strings"
 	"time"
 
-	"encoding/base64"
-
 	"github.com/graphia/particle"
 	"gopkg.in/libgit2/git2go.v25"
+)
+
+var (
+	// ErrMetadataNotFound is returned when the _index.md file is missing
+	// this isn't a catestrophic problem, but should be logged
+	ErrMetadataNotFound  = errors.New("_index.md not found")
+	ErrDirectoryNotFound = errors.New("directory not found")
 )
 
 // getFilesInDir returns a list of FileItems for listing
@@ -36,7 +43,7 @@ func getFilesInDir(directory string) (files []FileItem, err error) {
 	// ensure that the directory exists
 	entry, _ := ht.EntryByPath(directory)
 	if entry == nil {
-		return nil, fmt.Errorf("directory '%s' not found", directory)
+		return nil, ErrDirectoryNotFound
 	}
 
 	if entry.Type != git.ObjectTree {
@@ -64,6 +71,11 @@ func getFilesInDir(directory string) (files []FileItem, err error) {
 
 			if ext != ".md" {
 				Warning.Println("not a markdown file, skipping:", te.Name)
+				return 0
+			}
+
+			if te.Name == "_index.md" {
+				Warning.Println("is a metadata file, skipping:", te.Name)
 				return 0
 			}
 
@@ -203,6 +215,51 @@ func writeFiles(repo *git.Repository, nc NewCommit, user User) (oid *git.Oid, er
 
 }
 
+func writeMetadataFiles(repo *git.Repository, nc NewCommit, user User) (oid *git.Oid, err error) {
+
+	index, err := repo.Index()
+	if err != nil {
+		return nil, err
+	}
+	defer index.Free()
+
+	var meta []byte
+
+	for _, ncd := range nc.Directories {
+
+		var ie git.IndexEntry
+
+		body := []byte(ncd.DirectoryInfo.Body)
+
+		if (ncd.DirectoryInfo != DirectoryInfo{}) {
+			meta = make([]byte, particle.YAMLEncoding.EncodeLen(body, &ncd.DirectoryInfo))
+			particle.YAMLEncoding.Encode(meta, body, &ncd.DirectoryInfo)
+		}
+
+		oid, err = repo.CreateBlobFromBuffer(meta)
+		if err != nil {
+			return nil, err
+		}
+
+		// build the git index entry and add it to the index
+		ie = buildIndexEntryDirectory(oid, ncd)
+
+		err = index.Add(&ie)
+		if err != nil {
+			return nil, err
+		}
+
+	}
+
+	oid, err = writeTreeAndCommit(repo, index, nc, user)
+	if err != nil {
+		return oid, err
+	}
+
+	return oid, err
+
+}
+
 func listRootDirectories() (directories []Directory, err error) {
 
 	// Initialising the slice so json.Marshal returns an empty
@@ -226,10 +283,24 @@ func listRootDirectories() (directories []Directory, err error) {
 
 		if te.Type == git.ObjectTree {
 
-			Debug.Println("Found Dir", te)
+			// check for _index.md file
+			tree, err := repo.LookupTree(te.Id)
+			if err != nil {
+				return 0
+			}
+
+			di, err := getMetadata(repo, tree)
+
+			// if there is any kind of error except ErrMetadataNotFound,
+			// something's wrong, quit
+			if err != ErrMetadataNotFound && err != nil {
+				Error.Println("Metadata found but not retrievable", err.Error())
+				return 0
+			}
 
 			directories = append(directories, Directory{
-				Name: te.Name,
+				Path:          te.Name,
+				DirectoryInfo: di,
 			})
 
 			return 1
@@ -245,10 +316,9 @@ func listRootDirectories() (directories []Directory, err error) {
 
 }
 
-func listRootDirectorySummary() (summary map[string][]FileItem, err error) {
+func listRootDirectorySummary() (summary []DirectorySummary, err error) {
 
-	var filesInDir []FileItem
-	summary = make(map[string][]FileItem)
+	var contents []FileItem
 
 	repo, err := repository(config)
 	if err != nil {
@@ -267,13 +337,25 @@ func listRootDirectorySummary() (summary map[string][]FileItem, err error) {
 
 		if te.Type == git.ObjectTree {
 
-			filesInDir, err = getFilesInDir(te.Name)
+			contents, err = getFilesInDir(te.Name)
 			if err != nil {
 				Error.Println("Failed to retrieve files when generating summary", te.Name, err)
 				return 0
 			}
 
-			summary[te.Name] = filesInDir
+			// check for _index.md file
+			tree, err := repo.LookupTree(te.Id)
+			if err != nil {
+				return 0
+			}
+
+			di, err := getMetadata(repo, tree)
+
+			summary = append(summary, DirectorySummary{
+				Path:          te.Name,
+				DirectoryInfo: di,
+				Contents:      contents,
+			})
 
 			return 1
 
@@ -318,14 +400,36 @@ func createDirectories(nc NewCommit, user User) (oid *git.Oid, err error) {
 	return oid, err
 }
 
+func updateDirectories(nc NewCommit, user User) (oid *git.Oid, err error) {
+
+	// loop through nc files modifying the metadata
+	// if the _index.md file does not exist, it should create it!
+	repo, err := repository(config)
+	if err != nil {
+		return oid, err
+	}
+
+	// make sure that the dirs included in the nc are in the commit
+
+	if len(nc.Directories) == 0 {
+		return oid, fmt.Errorf("at least one directory must be specified")
+	}
+
+	oid, err = writeMetadataFiles(repo, nc, user)
+	if err != nil {
+		Error.Printf("Failed to write metadata files %s", err.Error())
+		return oid, err
+	}
+
+	return oid, err
+}
+
 func writeDirectories(repo *git.Repository, nc NewCommit, user User) (oid *git.Oid, err error) {
 	index, err := repo.Index()
 	if err != nil {
 		return nil, err
 	}
 	defer index.Free()
-
-	var contents string
 
 	for _, ncd := range nc.Directories {
 
@@ -341,15 +445,26 @@ func writeDirectories(repo *git.Repository, nc NewCommit, user User) (oid *git.O
 			return nil, fmt.Errorf("path must be specified when creating a directory: %s", ncd)
 		}
 
+		var meta = []byte("")
+		body := []byte(ncd.DirectoryInfo.Body)
+
 		var ie git.IndexEntry
 
-		oid, err = repo.CreateBlobFromBuffer([]byte(contents))
+		// if we have some DirectoryInfo metadata, overwrite meta with it in the
+		// usual FrontMatter manner
+
+		if (ncd.DirectoryInfo != DirectoryInfo{}) {
+			meta = make([]byte, particle.YAMLEncoding.EncodeLen(body, &ncd.DirectoryInfo))
+			particle.YAMLEncoding.Encode(meta, body, &ncd.DirectoryInfo)
+		}
+
+		oid, err = repo.CreateBlobFromBuffer(meta)
 		if err != nil {
 			return nil, err
 		}
 
 		// build the git index entry and add it to the index
-		ie = buildIndexEntryForNewDirectory(oid, ncd)
+		ie = buildIndexEntryDirectory(oid, ncd)
 
 		err = index.Add(&ie)
 		if err != nil {
@@ -395,11 +510,8 @@ func deleteDirectories(nc NewCommit, user User) (oid *git.Oid, err error) {
 			return nil, fmt.Errorf("directory does not exist: %s", ncd.Path)
 		}
 
-		// now go ahead and remove it
-
-		Debug.Println("Removing directory:", ncd.Path)
-
 		// and remove the target by path and everything beneath it
+		Debug.Println("Removing directory:", ncd.Path)
 		err = index.RemoveDirectory(ncd.Path, 0)
 		if err != nil {
 			return nil, err
@@ -489,10 +601,10 @@ func buildIndexEntry(oid *git.Oid, ncf NewCommitFile) git.IndexEntry {
 	}
 }
 
-func buildIndexEntryForNewDirectory(oid *git.Oid, ncf NewCommitDirectory) git.IndexEntry {
+func buildIndexEntryDirectory(oid *git.Oid, ncd NewCommitDirectory) git.IndexEntry {
 	return git.IndexEntry{
 		Id:   oid,
-		Path: filepath.Join(ncf.Path, ".keep"),
+		Path: filepath.Join(ncd.Path, "_index.md"),
 		Size: uint32(0),
 
 		Ctime: git.IndexTime{},
@@ -538,15 +650,23 @@ func getFile(directory string, filename string, includeMd, includeHTML bool) (fi
 		html = &str
 	}
 
-	file = &File{
-		Filename:    filename,
-		Path:        directory,
-		HTML:        html,
-		Markdown:    markdown,
-		FrontMatter: fm,
+	di, err := getMetadataFromDirectory(directory)
+	// if we get any error other than ErrMetadataNotFound,
+	// return it, otherwise it's ok and we can continue
+	if err != nil && err != ErrMetadataNotFound {
+		return file, err
 	}
 
-	return file, err
+	file = &File{
+		Filename:      filename,
+		Path:          directory,
+		HTML:          html,
+		Markdown:      markdown,
+		FrontMatter:   fm,
+		DirectoryInfo: di,
+	}
+
+	return file, nil
 }
 
 func getAttachments(directory string) (files []Attachment, err error) {
@@ -812,4 +932,60 @@ func extractContents(ncf NewCommitFile) (contents []byte, err error) {
 		return []byte(ncf.Body), err
 	}
 
+}
+
+func getMetadataFromDirectory(directory string) (*DirectoryInfo, error) {
+
+	repo, err := repository(config)
+	if err != nil {
+		return nil, err
+	}
+	defer repo.Free()
+
+	ht, err := headTree(repo)
+	if err != nil {
+		return nil, err
+	}
+
+	entry := ht.EntryByName(directory)
+
+	tree, err := repo.LookupTree(entry.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	md, err := getMetadata(repo, tree)
+	if err == ErrMetadataNotFound {
+		return nil, err
+	}
+
+	return &md, err
+}
+
+func getMetadata(repo *git.Repository, tree *git.Tree) (di DirectoryInfo, err error) {
+	var reader io.Reader
+
+	infoEntry, err := tree.EntryByPath("_index.md")
+	if err != nil {
+		Warning.Println("_index.md does not exist in the repository, skipping for", tree.Object.Id())
+		return di, ErrMetadataNotFound
+	}
+
+	blob, err := repo.LookupBlob(infoEntry.Id)
+	if err != nil {
+		Warning.Println("_index.md cannot be retrieved, exiting", infoEntry.Id)
+		return di, err
+	}
+	defer blob.Free()
+
+	reader = bytes.NewReader(blob.Contents())
+
+	_, err = particle.YAMLEncoding.DecodeReader(reader, &di)
+
+	if err != nil {
+		Warning.Println("_index.md cannot be decoded, exiting", blob.Contents())
+		return di, err
+	}
+
+	return di, err
 }

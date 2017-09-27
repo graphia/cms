@@ -1,7 +1,7 @@
 <template>
 	<div class="form-group document-version">
 
-		<label for="document-version">Version</label>
+		<label for="document-version" class="form-control-label">Version</label>
 		<input
 			id="tag-editor"
 			type="text"

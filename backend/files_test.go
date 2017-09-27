@@ -9,6 +9,7 @@ import (
 
 	"github.com/graphia/particle"
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/libgit2/git2go.v25"
 )
 
 func TestGetFilesInDocumentsDir(t *testing.T) {
@@ -74,10 +75,8 @@ func TestGetFilesInNonExistantDir(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/get_file"
 	setupSmallTestRepo(repoPath)
 
-	// there isn't a directory called fanfic, so should
-	// raise not found error
 	_, err := getFilesInDir("fanfic")
-	assert.Contains(t, err.Error(), "directory 'fanfic' not found")
+	assert.Contains(t, err.Error(), "directory not found")
 }
 
 func TestGetConvertedFile(t *testing.T) {
@@ -168,6 +167,20 @@ func TestGetFileNeitherMarkdownOrHTML(t *testing.T) {
 
 }
 
+func TestGetFileNoRepoMetadata(t *testing.T) {
+
+	repoPath := "../tests/tmp/repositories/get_file"
+	setupSmallTestRepo(repoPath)
+
+	file, err := getFile("appendices", "appendix_1.md", false, false)
+
+	assert.Nil(t, err) // make sure getFile doesn't return an error
+	assert.Equal(t, file.Filename, "appendix_1.md")
+	assert.Equal(t, file.Path, "appendices")
+	assert.Nil(t, file.DirectoryInfo)
+
+}
+
 func TestListRootDirectories(t *testing.T) {
 
 	// test with subdirectories to ensure we're only returning root
@@ -175,20 +188,27 @@ func TestListRootDirectories(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/list_directories_subdirs"
 	setupSubdirsTestRepo(repoPath)
 
-	directoriesExpected := []string{"appendices", "documents"}
+	directoriesExpected := []Directory{
+		Directory{
+			Path:          "appendices",
+			DirectoryInfo: DirectoryInfo{},
+		},
+		Directory{
+			Path: "documents",
+			DirectoryInfo: DirectoryInfo{
+				Title:       "Documents",
+				Description: "Documents go here",
+			},
+		},
+	}
 
 	directories, err := listRootDirectories()
 	if err != nil {
 		t.Error("error", err)
 	}
 
-	var directoryNames []string
-	for _, directory := range directories {
-		directoryNames = append(directoryNames, directory.Name)
-	}
-
-	assert.Equal(t, 2, len(directoryNames))
-	assert.Equal(t, directoriesExpected, directoryNames)
+	assert.Equal(t, 2, len(directories))
+	assert.Equal(t, directoriesExpected, directories)
 }
 
 func TestRootDirectorySummary(t *testing.T) {
@@ -201,9 +221,20 @@ func TestRootDirectorySummary(t *testing.T) {
 	documentFiles, _ := getFilesInDir("documents")
 	appendicesFiles, _ := getFilesInDir("appendices")
 
-	expectedSummary := map[string][]FileItem{
-		"appendices": appendicesFiles,
-		"documents":  documentFiles,
+	expectedSummary := []DirectorySummary{
+		DirectorySummary{
+			Path:          "appendices",
+			DirectoryInfo: DirectoryInfo{},
+			Contents:      appendicesFiles,
+		},
+		DirectorySummary{
+			Path: "documents",
+			DirectoryInfo: DirectoryInfo{
+				Title:       "Documents",
+				Description: "Documents go here",
+			},
+			Contents: documentFiles,
+		},
 	}
 
 	summary, err := listRootDirectorySummary()
@@ -222,7 +253,7 @@ func TestCountFiles(t *testing.T) {
 
 	expectedCounts := map[string]int{
 		"images":          3,
-		"documents":       5,
+		"documents":       6,
 		"structured data": 2,
 		"tabular data":    1,
 		"other":           1,
@@ -433,5 +464,62 @@ the quick *brown* fox jumped over the **lazy** dog`,
 			contents, _ := extractContents(tt.args.ncf)
 			assert.Equal(t, tt.wantContents, contents)
 		})
+	}
+}
+
+func Test_getMetadata(t *testing.T) {
+	repoPath := "../tests/tmp/repositories/get_metadata"
+	setupSubdirsTestRepo(repoPath)
+	repo, _ := repository(config)
+
+	ht, _ := headTree(repo)
+
+	docs, _ := ht.EntryByPath("documents")
+	docsTree, _ := repo.LookupTree(docs.Id)
+
+	appendices, _ := ht.EntryByPath("appendices")
+	appendicesTree, _ := repo.LookupTree(appendices.Id)
+
+	type args struct {
+		repo *git.Repository
+		tree *git.Tree
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantDi  DirectoryInfo
+		wantErr bool
+	}{
+		{
+			name: "Directory with _index.md",
+			args: args{
+				repo: repo,
+				tree: docsTree,
+			},
+			wantDi: DirectoryInfo{
+				Title:       "Documents",
+				Description: "Documents go here",
+			},
+			wantErr: false,
+		},
+		{
+			name: "Directory without _index.md",
+			args: args{
+				repo: repo,
+				tree: appendicesTree,
+			},
+			wantDi:  DirectoryInfo{},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+
+		if !tt.wantErr {
+			md, _ := getMetadata(tt.args.repo, tt.args.tree)
+			assert.Equal(t, tt.wantDi, md)
+		} else {
+			_, err := getMetadata(tt.args.repo, tt.args.tree)
+			assert.Equal(t, ErrMetadataNotFound, err)
+		}
 	}
 }

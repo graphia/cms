@@ -26,3 +26,28 @@ Feature: Listing documents
 			| Directory  | Title      |
 			| documents  | Documents  |
 			| appendices | Appendices |
+
+	Scenario: Breadcrumbs
+		Given I am on the "documents" index page
+		Then I should see the following breadcrumbs:
+			| Text                | Reference |
+			| Dashboard           | /cms      |
+			| Important Documents | None      |
+
+	Scenario: When the directory is empty
+		Given the 'empty' directory contains no files
+		When I am on the "empty" index page
+		Then there should be an alert with the message "There's nothing here yet"
+		And there should be a 'Create a new document' link
+
+	Scenario: The create a new document button
+		Given the 'empty' directory contains no files
+		And I am on the "empty" index page
+		When I click the "Create a new document" button
+		Then I should be on the new document page for the 'empty' directory
+
+	Scenario: When the directory doesn't exist
+		Given there is no directory called "operating-procedures"
+		When I am on the "operating-procedures" index page
+		Then the main heading should be "404"
+		And there should be an alert with the message "The item you were looking for cannot be found"

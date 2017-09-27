@@ -8,9 +8,11 @@ dist/*
 frontend/node_modules
 frontend/public/**/*
 repo
+hugo/content
 tags
 tests/tmp/**/*
 tests/frontend/.byebug_history
 backend/.virtualgo
 backend/debug
 backend/debug.test
+.vscode

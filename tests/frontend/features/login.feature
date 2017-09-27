@@ -20,7 +20,7 @@ Feature: Logging in
 		When I enter invalid credentials
 		And I submit the form
 		Then I should still be on the login screen
-		And there should be an alert with the message 'Invalid credentials'
+		And there should be an alert with the message "Invalid credentials"
 
 	Scenario: Logging in with valid credentials
 		Given I am on the login screen

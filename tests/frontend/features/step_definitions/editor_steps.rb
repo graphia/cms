@@ -7,8 +7,20 @@ Given %r{^I am on the new document page$} do
   expect(page.current_path).to eql(path)
 end
 
+Given %r{^I am on the new appendix page$} do
+  path = "/cms/appendices/new"
+  visit(path)
+  expect(page.current_path).to eql(path)
+end
+
 Given %r{^I am on the edit document page for "(.*?)"$} do |document_filename|
   path = "/cms/documents/#{document_filename}/edit"
+  visit(path)
+  expect(page.current_path).to eql(path)
+end
+
+Given %r{^I am on the edit appendix page for "(.*?)"$} do |appendix_filename|
+  path = "/cms/appendices/#{appendix_filename}/edit"
   visit(path)
   expect(page.current_path).to eql(path)
 end
@@ -184,13 +196,15 @@ When %r{^I set the editor text to "(.*?)"$} do |text|
 end
 
 Then %r{^the commit message validation feedback should be visible$} do
-  expect(page).to have_css("div.commit-message.has-danger")
-  expect(page).to have_css("div.commit-message .form-control-feedback")
+  within("div.commit-message") do
+    expect(page).to have_css(".form-control-feedback.invalid-feedback")
+  end
 end
 
 Then %r{^the commit message validation feedback should not be visible$} do
-  expect(page).not_to have_css("div.commit-message.has-danger")
-  expect(page).not_to have_css("div.commit-message .form-control-feedback")
+  within("div.commit-message") do
+    expect(page).not_to have_css(".form-control-feedback.invalid-feedback")
+  end
 end
 
 Given %r{^I haven't touched the '(.*)' field$} do |field|
@@ -230,11 +244,13 @@ Then %r{^I should see a tags editing field$} do
 end
 
 Then %r{^the title validation feedback should be visible$} do
-  expect(page).to have_css("div.document-title.has-danger")
-  expect(page).to have_css("div.document-title .form-control-feedback")
+  within("div.document-title") do
+    expect(page).to have_css(".form-control-feedback.invalid-feedback")
+  end
 end
 
 Then %r{^the title validation feedback should not be visible$} do
-  expect(page).not_to have_css("div.document-title.has-danger")
-  expect(page).not_to have_css("div.document-title .form-control-feedback")
+  within("div.document-title") do
+    expect(page).not_to have_css(".form-control-feedback.invalid-feedback")
+  end
 end

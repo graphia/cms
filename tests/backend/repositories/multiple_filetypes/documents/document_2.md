@@ -1,5 +1,5 @@
 ---
-title: Document 2
+title: document 2
 author: Troy McClure
 slug: document_2
 ---

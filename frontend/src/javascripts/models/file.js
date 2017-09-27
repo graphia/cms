@@ -2,6 +2,7 @@ import store from '../store.js';
 import config from '../config.js';
 import checkResponse from '../response.js';
 import CMSFileAttachment from './attachment.js';
+import CMSDirectory from './directory.js';
 
 export default class CMSFile {
 
@@ -46,7 +47,18 @@ export default class CMSFile {
 			this.slug                  = file.frontmatter.slug;
 			this.version               = file.frontmatter.version;
 
-			// History and attachments are arrays which may be populated later
+			// we don't *always* need to return directory_info with a file,
+			// but if it is here, set it up
+			if (file.directory_info) {
+				this.directory_info = new CMSDirectory(
+					this.path,
+					file.directory_info.title,
+					file.directory_info.description,
+					file.directory_info.body
+				);
+			};
+
+			// History andattachments are arrays which may be populated later
 			this.history = [];     // historic commits
 			this.attachments = []; // related files from the directory named after file
 
@@ -54,7 +66,10 @@ export default class CMSFile {
 			// and display a diff if necessary
 			this.initialMarkdown = file.markdown;
 
-		};
+		} else {
+			// do the minimum setup needed
+			this.directory_info = new CMSDirectory;
+		}
 
 	};
 
@@ -88,23 +103,42 @@ export default class CMSFile {
 
 			let response = await fetch(path, {mode: "cors", headers: store.state.auth.authHeader()});
 
-			if (!checkResponse(response.status)) {
-				return
-			}
+			// if the api responds with a 404 we'll display a special
+			// error page so handle that separately
+			if (response.status == 404) {
+				console.warn(`directory ${directory} not found`);
+				store.state.documents = null;
+				return;
+			} else if (!checkResponse(response.status)) {
+				// something more serious has happend, abort!
+				throw(response);
+			};
 
-			let json = await response.json()
+			let json = await response.json();
+
+			// if we have the metadata, set up the ActiveDirectory
+			if (json.info) {
+				let dir = new CMSDirectory(
+					directory,
+					json.info.title,
+					json.info.description,
+					json.info.body
+				);
+				store.commit("setActiveDirectory", dir);
+			};
 
 			// map documents
-			let docs = json.map((file) => {
+			let docs = json.files.map((file) => {
 				return new CMSFile(file);
 			});
 
 			store.state.documents = docs;
+			return response;
 
 		}
 		catch(err) {
 			console.error(`Couldn't retrieve files from directory ${directory}`);
-		}
+		};
 
 	};
 
@@ -119,7 +153,7 @@ export default class CMSFile {
 	static async find(directory, filename, edit = false) {
 		console.debug(`finding ${filename} in ${directory}`);
 
-		var path = `${config.api}/directories/${directory}/files/${filename}`
+		let path = `${config.api}/directories/${directory}/files/${filename}`
 
 		// if we need the uncompiled markdown (for loading the editor), amend '/edit' to the path
 		if (edit) {
@@ -157,14 +191,14 @@ export default class CMSFile {
 			console.warn("Update called but content hasn't changed");
 		}
 
-		var path = `${config.api}/directories/${this.path}/files`
+		let path = `${config.api}/directories/${this.path}/files`
 
 		try {
 			let response = await fetch(path, {
 				mode: "cors",
 				method: "POST",
 				headers: store.state.auth.authHeader(),
-				body: commit.toJSON(this)
+				body: commit.filesJSON(this)
 			});
 
 			if (!checkResponse(response.status)) {
@@ -193,7 +227,7 @@ export default class CMSFile {
 				mode: "cors",
 				method: "PATCH",
 				headers: store.state.auth.authHeader(),
-				body: commit.toJSON(this)
+				body: commit.filesJSON(this)
 			});
 
 			if (!checkResponse(response.status)) {
@@ -207,18 +241,27 @@ export default class CMSFile {
 		}
 	};
 
-	destroy(commit) {
+	async destroy(commit) {
 		console.debug(commit);
 
 		var path = `${config.api}/directories/${this.path}/files/${this.filename}`
 
 		try {
-			return fetch(path, {mode: "cors", method: "DELETE", headers: store.state.auth.authHeader(), body: commit.toJSON(this)})
-				.then((response) => {
-					if (!checkResponse(response.status)) {
-						return
-					}
-				});
+
+			let response = await fetch(path, {
+				mode: "cors",
+				method: "DELETE",
+				headers: store.state.auth.authHeader(),
+				body: commit.filesJSON(this)
+			});
+
+			if (!checkResponse(response.status)) {
+				console.warn("could not destroy file", response);
+				return;
+			};
+
+			// if delete was successful
+			return;
 		}
 		catch(err) {
 			console.error(`There was a problem deleting document ${this.filename} from ${this.path}, ${err}`);

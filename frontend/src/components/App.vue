@@ -2,21 +2,22 @@
 	<div id="application">
 
 		<!-- Primary Navigation Start -->
-		<nav class="navbar navbar-toggleable-md navbar-inverse static-top bg-inverse">
+		<nav class="navbar navbar-dark bg-dark">
+
+			<router-link class="navbar-brand" :to="{name: 'home'}">Graphia CMS</router-link>
+
+
 			<button class="navbar-toggler navbar-toggler-right hidden-lg-up" type="button" data-toggle="collapse" data-target="#primary" aria-label="Toggle navigation">
 				<span class="navbar-toggler-icon"></span>
 			</button>
 
-			<router-link class="navbar-brand" :to="{name: 'home'}">Graphia CMS</router-link>
-
 			<div id="primary" class="collapse navbar-collapse">
 				<ul class="navbar-nav mr-auto">
-					<li class="nav-item active">Files</li>
 
 					<router-link :to="{name: 'home'}" class="nav-link home-link">Home</router-link>
 
-					<router-link v-for="directory in directories" :to="{name: 'document_index', params: {directory: directory.name}}" class="nav-link directory-link">
-						{{ directory.name | capitalize }}
+					<router-link v-for="directory in directories" :to="{name: 'document_index', params: {directory: directory.path}}" class="nav-link directory-link">
+						{{ directory.path | capitalize }}
 					</router-link>
 
 					<li><a class="nav-link" href="#">History</a></li>
@@ -24,6 +25,7 @@
 
 				</ul>
 			</div>
+
 		</nav>
 		<!-- Primary Navigation End -->
 
@@ -84,9 +86,6 @@
 			redirectToInitializeRepo() {
 				this.$router.push({name: 'initialize_repo'});
 			},
-			redirectToCreateRepo() {
-				this.$router.push({name: 'create_repo'});
-			},
 			async fetchDirectories() {
 				let path = `${config.api}/directories`
 
@@ -95,9 +94,9 @@
 
 					let json = await response.json();
 
+					// FIXME is this still required?
 					if (response.status == 404 && json.message == "No repository found") {
 						console.warn("No repository found, redirect to create", 404)
-						this.redirectToCreateRepo();
 					};
 
 					if (response.status == 400 && json.message == "Not a git repository") {

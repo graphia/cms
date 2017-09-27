@@ -424,27 +424,26 @@ func apiListDirectoriesHandler(w http.ResponseWriter, r *http.Request) {
 //	 appendices: [...]
 // }
 func apiDirectorySummary(w http.ResponseWriter, r *http.Request) {
-
-	var summary map[string][]FileItem
+	var fr FailureResponse
+	var summary []DirectorySummary
 	var err error
-
-	summary = make(map[string][]FileItem)
 
 	summary, err = listRootDirectorySummary()
 
-	output, err := json.Marshal(summary)
 	if err != nil {
-		panic(err)
+		fr = FailureResponse{
+			Message: "No specified directory matches path",
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(output)
+	JSONResponse(summary, http.StatusOK, w)
 
 }
 
 // apiCreateDirectoryHandler creates an 'empty' directory. It actually
-// contains a hidden `.keep` file, so it's trackable by git
+// contains a _index.md file, so it's trackable by git
 //
 // POST /api/directories
 // {
@@ -452,8 +451,10 @@ func apiDirectorySummary(w http.ResponseWriter, r *http.Request) {
 //	  "email": "mp@springfield-elementary.gov",
 //	  "message": "Added new directory called Bobbins",
 //	  "directories": [
-//	    {"path": "documents"},
-//	    {"path": "appendices"}
+//	    {
+//	      "path": "documents",
+//	      "info": {"title": "Documents", "description": "Blah", "body": "Markdown"}
+//	    },
 //	  ]
 // }
 func apiCreateDirectoryHandler(w http.ResponseWriter, r *http.Request) {
@@ -472,6 +473,7 @@ func apiCreateDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 			Message: fmt.Sprintf("Failed to create directory: %s", err.Error()),
 		}
 		JSONResponse(fr, http.StatusBadRequest, w)
+		return
 	}
 
 	sr = SuccessResponse{
@@ -492,6 +494,60 @@ func apiCreateDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 func apiRenameDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 	// TODO
 	w.WriteHeader(http.StatusOK)
+}
+
+// apiUpdateDirectoriesHandler can update one or more sets of directory metadata,
+// this is stored in the `_index.md` file as regular Frontmatter, eg:
+// ---
+// title: My favourite document
+// description: The greatest doc ever!
+// ---
+func apiUpdateDirectoriesHandler(w http.ResponseWriter, r *http.Request) {
+	var directory string
+	var nc NewCommit
+	var sr SuccessResponse
+	var fr FailureResponse
+
+	directory = vestigo.Param(r, "directory")
+
+	nc = NewCommit{}
+
+	json.NewDecoder(r.Body).Decode(&nc)
+
+	if len(nc.Directories) == 0 {
+		fr = FailureResponse{
+			Message: "No directories specified for updates",
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	if !pathInDirectories(directory, &nc.Directories) {
+		fr = FailureResponse{
+			Message: "No specified directory matches path",
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	user := getCurrentUser(r.Context())
+	oid, err := updateDirectories(nc, user)
+
+	if err != nil {
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Failed to update directories: %s", err.Error()),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	sr = SuccessResponse{
+		Message: "Directories updated",
+		Oid:     oid.String(),
+	}
+
+	JSONResponse(sr, http.StatusOK, w)
+
 }
 
 // apiDeleteDirectoryHandler deletes a directory and all of its contents.
@@ -593,26 +649,67 @@ func apiListFilesInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 
 	directory := vestigo.Param(r, "directory")
 	files, err := getFilesInDir(directory)
-	if err != nil {
+
+	if err != nil && err != ErrDirectoryNotFound {
 		fr = FailureResponse{
 			Message: fmt.Sprintf("Could not get list of files in directory %s: %s", directory, err.Error()),
 		}
 		JSONResponse(fr, http.StatusBadRequest, w)
-
+		return
 	}
 
-	output, err := json.Marshal(files)
-	if err != nil {
+	if err == ErrDirectoryNotFound {
 		fr = FailureResponse{
-			Message: fmt.Sprintf("Could not create JSON: %s", err.Error()),
+			Message: ErrDirectoryNotFound.Error(),
+		}
+		JSONResponse(fr, http.StatusNotFound, w)
+		return
+	}
+
+	metadata, err := getMetadataFromDirectory(directory)
+
+	type output struct {
+		Files         []FileItem     `json:"files"`
+		DirectoryInfo *DirectoryInfo `json:"info,omitempty"`
+	}
+
+	var result = output{}
+
+	result = output{Files: files, DirectoryInfo: metadata}
+
+	JSONResponse(result, http.StatusOK, w)
+}
+
+// apiGetDirectoryMetadata returns the `DirectoryInfo` for the
+// given directory
+//
+// GET /api/directories/:directory
+//
+// {
+//   title: "Krusty Burger",
+//   description: "Krusty Burger, Ribwich and Breakfast Balls"
+// }
+func apiGetDirectoryMetadata(w http.ResponseWriter, r *http.Request) {
+	var di *DirectoryInfo
+	var fr FailureResponse
+	var err error
+
+	directory := vestigo.Param(r, "directory")
+	di = &DirectoryInfo{}
+
+	di, err = getMetadataFromDirectory(directory)
+
+	if err != nil {
+		// FIXME if the _index.md isn't found, return a 404
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Could not get metadata from directory: %s", err.Error()),
 		}
 		JSONResponse(fr, http.StatusBadRequest, w)
+		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
+	JSONResponse(&di, http.StatusOK, w)
 
-	w.WriteHeader(http.StatusOK)
-	w.Write(output)
 }
 
 // apiCreateFileInDirectory creates a file the specified directory
@@ -838,19 +935,11 @@ func apiGetFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 			Message: fmt.Sprintf("Failed to get converted file: %s", err.Error()),
 		}
 		JSONResponse(fr, http.StatusBadRequest, w)
+		return
 	}
 
-	output, err := json.Marshal(file)
-	if err != nil {
-		Error.Println("Failed to convert file to JSON", file)
-		fr = FailureResponse{
-			Message: fmt.Sprintf("Failed to create JSON from file: %s", err.Error()),
-		}
-		JSONResponse(fr, http.StatusBadRequest, w)
-	}
+	JSONResponse(file, http.StatusOK, w)
 
-	w.WriteHeader(http.StatusOK)
-	w.Write(output)
 }
 
 func apiGetFileAttachmentsHandler(w http.ResponseWriter, r *http.Request) {
@@ -1039,6 +1128,7 @@ func apiPublish(w http.ResponseWriter, r *http.Request) {
 			Meta:    string(output),
 		}
 		JSONResponse(fr, http.StatusBadRequest, w)
+		return
 	}
 
 	Info.Println("Site published!")
@@ -1083,25 +1173,17 @@ func apiGetCommits(w http.ResponseWriter, r *http.Request) {
 
 	// TODO manage quantity param
 
-	commits, err = getCommits(20)
+	commits, err = getCommits(5)
 	if err != nil {
 		fr = FailureResponse{
 			Message: fmt.Sprintf("Failed to retrieve recent commits: %s", err.Error()),
 		}
 		JSONResponse(fr, http.StatusBadRequest, w)
+		return
 	}
 
-	response, err := json.Marshal(commits)
+	JSONResponse(commits, http.StatusOK, w)
 
-	if err != nil {
-		fr = FailureResponse{
-			Message: fmt.Sprintf("Failed to convert recent commits to JSON: %s", err.Error()),
-		}
-		JSONResponse(fr, http.StatusBadRequest, w)
-	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Write(response)
 }
 
 // GET /api/commits/:commit_hash

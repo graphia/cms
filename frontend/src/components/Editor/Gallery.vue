@@ -1,6 +1,6 @@
 <template>
 
-	<div class="image-list row">
+	<div class="card-body image-list row">
 		<div class="col-xs-6" v-for="(attachment, _) in document.attachments">
 
 			<img

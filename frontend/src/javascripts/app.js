@@ -1,3 +1,4 @@
+// Vue stuff
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 
@@ -10,14 +11,19 @@ import SetupInitializeRepo from '../components/Setup/InitializeRepository.vue';
 import Login from '../components/Login.vue';
 import Commit from '../components/Commit.vue';
 import Home from '../components/Home.vue';
-import DocumentIndex from '../components/DocumentIndex.vue';
-import DocumentShow from '../components/DocumentShow.vue';
-import DocumentEdit from '../components/DocumentEdit.vue';
-import DocumentNew from '../components/DocumentNew.vue';
-import DocumentHistory from '../components/DocumentHistory.vue';
-import Broadcast from '../components/Broadcast.vue';
+
+// Document Paths
+import DocumentIndex from '../components/Document/Index.vue';
+import DocumentShow from '../components/Document/Show.vue';
+import DocumentEdit from '../components/Document/Edit.vue';
+import DocumentNew from '../components/Document/New.vue';
+import DocumentHistory from '../components/Document/History.vue';
+
+// Directory Paths
+import DirectoryNew from '../components/Directory/New.vue';
 
 // Utility Components
+import Broadcast from '../components/Broadcast.vue';
 import Octicon from '../components/Utilities/Octicon.vue';
 
 // Authentication Helpers
@@ -27,6 +33,9 @@ import CMSAuth from './auth.js';
 import store from './store.js';
 import SimpleMDE from 'simplemde';
 import TagsInput from 'tags-input';
+
+// Utility libs
+import vagueTime from 'vague-time';
 
 // Vue Octicons
 Vue.component('octicon', Octicon);
@@ -40,6 +49,8 @@ const routes = [
 	// Protected pages
 	{path: '/cms/setup/initialize_repo', component: SetupInitializeRepo, name: 'initialize_repo'},
 
+	// Directory pages
+	{path: '/cms/new', component: DirectoryNew, name: 'directory_new'},
 
 	{path: '/cms/commits/:hash', component: Commit, name: 'commit'},
 
@@ -100,8 +111,20 @@ Vue.filter('format_date', (value) => {
 	return d.toLocaleString();
 });
 
+Vue.filter('time_ago', (value) => {
+	return vagueTime.get({
+		from: Date.now(),
+		to: Date.parse(value),
+		units: 'ms'
+	});
+})
+
 Vue.filter('capitalize', (value) => {
-	return value.charAt(0).toUpperCase() + value.slice(1);
+	try {
+		return value.charAt(0).toUpperCase() + value.slice(1);
+	} catch(err) {
+		console.warn("cannot capitalize:", value, err);
+	}
 });
 
 // Create a global Event Bus

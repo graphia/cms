@@ -1,6 +1,6 @@
 <template>
 
-	<div class="commit-message form-group" v-bind:class="{'has-danger': !valid}">
+	<div class="commit-message form-group">
 
 		<label class="form-control-label" for="commit-message">
 			Commit Message
@@ -14,9 +14,10 @@
 			minlength="5"
 			required="true"
 			v-on:keyup="validate"
+			v-bind:class="{'is-invalid': !valid}"
 		/>
 
-		<div class="form-control-feedback" v-if="validationMessage">
+		<div class="form-control-feedback invalid-feedback" v-if="validationMessage">
 			{{ this.validationMessage }}
 		</div>
 

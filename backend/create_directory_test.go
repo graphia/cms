@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -16,8 +17,16 @@ func TestCreateDirectory(t *testing.T) {
 
 	setupSmallTestRepo(repoPath)
 
-	newDir := "recipes"
-	commitMessage := fmt.Sprintf("Added directories: %s", newDir)
+	ncd := NewCommitDirectory{
+		Path: "recipes",
+		DirectoryInfo: DirectoryInfo{
+			Title:       "Recipes",
+			Description: "A list of my favourite tasty treats",
+			Body:        "# Recipes go here, sweet first then savoury",
+		},
+	}
+
+	commitMessage := fmt.Sprintf("Added directories: %s", ncd.Path)
 
 	user := User{
 		Name:  "Luigi Risotto",
@@ -25,12 +34,7 @@ func TestCreateDirectory(t *testing.T) {
 	}
 
 	nc := NewCommit{
-
-		Directories: []NewCommitDirectory{
-			NewCommitDirectory{
-				Path: newDir,
-			},
-		},
+		Directories: []NewCommitDirectory{ncd},
 	}
 
 	repo, _ := repository(config)
@@ -41,17 +45,17 @@ func TestCreateDirectory(t *testing.T) {
 	assert.Equal(t, oid, hc.Id())
 
 	// ensure the file exists and has the right content
-	_, err = os.Stat(filepath.Join(repoPath, newDir, ".keep"))
+	contents, err := ioutil.ReadFile(filepath.Join(repoPath, ncd.Path, "_index.md"))
 	assert.False(t, os.IsNotExist(err))
+	assert.Contains(t, string(contents), fmt.Sprintf("title: %s", ncd.DirectoryInfo.Title))
+	assert.Contains(t, string(contents), fmt.Sprintf("description: %s", ncd.DirectoryInfo.Description))
+	assert.Contains(t, string(contents), ncd.DirectoryInfo.Body)
 
 	// ensure the most recent commit has the right name and email
 	lastCommit, _ := repo.LookupCommit(oid)
 	assert.Equal(t, lastCommit.Committer().Name, user.Name)
 	assert.Equal(t, lastCommit.Committer().Email, user.Email)
 	assert.Equal(t, lastCommit.Message(), commitMessage)
-
-	// finally clean up by removing the tmp repo
-	_ = os.RemoveAll(repoPath)
 
 }
 

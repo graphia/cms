@@ -13,6 +13,7 @@ When %r{^I navigate to the setup page$} do
 end
 
 Then %r{^I should be redirected to the initial setup page$} do
+  expect(page).to have_css("label", text: "Username")
   expect(page.current_path).to eql('/cms/setup/initial_user')
 end
 

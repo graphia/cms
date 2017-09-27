@@ -1,5 +1,7 @@
 <template>
 	<div class="row">
+		<Breadcrumbs :levels="breadcrumbs"/>
+
 		<div class="col-md-12 commit">
 			<h1>Commit</h1>
 
@@ -34,7 +36,9 @@
 	import config from '../javascripts/config.js';
 	import store from '../javascripts/store.js';
 	import checkResponse from '../javascripts/response.js';
+	import CMSBreadcrumb from '../javascripts/models/breadcrumb.js';
 	import CommitFile from './Commit/File';
+	import Breadcrumbs from './Utilities/Breadcrumbs';
 
 	export default {
 		name: "Commit",
@@ -63,6 +67,15 @@
 				} catch(err) {
 					return "None found";
 				}
+			},
+			breadcrumbs() {
+				return [
+					new CMSBreadcrumb(
+						`Commit ${this.hash.substring(0,8)}`,
+						"commit",
+						{name: this.hash}
+					)
+				]
 			}
 		},
 		created() {
@@ -70,7 +83,8 @@
 			this.retrievePatch(this.hash);
 		},
 		components: {
-			CommitFile
+			CommitFile,
+			Breadcrumbs
 		},
 		methods: {
 			async retrievePatch() {

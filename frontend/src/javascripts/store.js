@@ -4,6 +4,7 @@ import router from './app';
 
 import CMSFile from '../javascripts/models/file.js';
 import CMSCommit from '../javascripts/models/commit.js';
+import CMSDirectory from '../javascripts/models/directory.js';
 
 import CMSAuth from '../javascripts/auth.js';
 import CMSBroadcast from '../javascripts/broadcast.js';
@@ -13,10 +14,12 @@ Vue.use(Vuex);
 const state = {
 	documents: [],
 	activeDocument: new CMSFile,
+	activeDirectory: new CMSDirectory,
 	commit: null,
 	auth: new CMSAuth,
 	broadcast: new CMSBroadcast
 };
+
 const mutations = {
 	addAttachment(context, file) {
 		return state.activeDocument.attachments.push(file);
@@ -26,13 +29,23 @@ const mutations = {
 		state.activeDocument = doc;
 		return doc;
 	},
+	initializeDirectory(context) {
+		let dir = CMSDirectory.initialize(null);
+		state.activeDirectory = dir;
+		return dir;
+	},
+	setActiveDirectory(context, directory) {
+		console.debug("setting active directory", directory);
+		state.activeDirectory = directory;
+	}
 };
 const getters = {};
 const actions = {
 	initializeCommit(context, directory) {
-		return CMSCommit.initialize(directory)
+		return CMSCommit.initialize(directory);
 	},
 	getDocumentsInDirectory(context, directory) {
+		state.activeDirectory = new CMSDirectory;
 		return CMSFile.all(directory);
 	},
 	getDocument(context, args) {
@@ -42,6 +55,10 @@ const actions = {
 	editDocument(context, args) {
 		// set activeDocument to raw doc from API
 		return CMSFile.find(args.directory, args.filename, true);
+	},
+	getDirectory(context, name) {
+		// get and set activeDirectory by name
+		return CMSDirectory.get(name);
 	}
 };
 

@@ -14,7 +14,7 @@
 			<input	:readonly="!enableCustomFilename"
 					:tabindex="!enableCustomFilename ? '-1' : '0'"
 					name="filename"
-					class="form-control filename"
+					class="form-control filename form-control-label"
 					type="text"
 					v-model="customFilename"
 			/>
@@ -28,6 +28,7 @@
 </template>
 
 <script lang="babel">
+	import slugify from '../../javascripts/utilities/slugify.js';
 	export default {
 		name: "Filename",
 		data() {
@@ -55,7 +56,7 @@
 
 					let fn = "";
 					if (this.document.title) {
-						fn = this.slugify(this.document.title);
+						fn = slugify(this.document.title);
 					}
 					this.filename = fn;
 
@@ -63,7 +64,7 @@
 				},
 				set(name) {
 					if (this.enableCustomFilename) {
-						this.filename = this.slugify(name);
+						this.filename = slugify(name);
 					}
 				}
 			}
@@ -79,27 +80,6 @@
 				this.document.filename = `${this.filename}.md`;
 				this.document.slug = this.filename;
 			}
-		},
-		methods: {
-
-			// This method taken from a gist comment by José Quintana
-			// https://gist.github.com/mathewbyrne/1280286#gistcomment-2005392
-			slugify(text) {
-				const a = 'àáäâèéëêìíïîòóöôùúüûñçßÿœæŕśńṕẃǵǹḿǘẍźḧ·/_,:;'
-				const b = 'aaaaeeeeiiiioooouuuuncsyoarsnpwgnmuxzh------'
-				const p = new RegExp(a.split('').join('|'), 'g')
-
-				return text.toString().toLowerCase()
-					.replace(/\s+/g, '-')           // Replace spaces with -
-					.replace(p, c =>
-						b.charAt(a.indexOf(c)))     // Replace special chars
-					.replace(/&/g, '-and-')         // Replace & with 'and'
-					.replace(/[^\w\-]+/g, '')       // Remove all non-word chars
-					.replace(/\-\-+/g, '-')         // Replace multiple - with single -
-					.replace(/^-+/, '')             // Trim - from start of text
-					.replace(/-+$/, '')             // Trim - from end of text
-			}
-
 		}
 	};
 </script>

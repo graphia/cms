@@ -14,7 +14,7 @@ export default function checkResponse(responseCode) {
 	}
 	else if (responseCode < 200 || responseCode >= 300) {
 
-		console.error('Oops, there was a problem', response.status);
+		console.error('Oops, there was a problem', responseCode);
 		return false;
 
 	};
