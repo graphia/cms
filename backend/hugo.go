@@ -1,34 +1,19 @@
 package main
 
 import (
-	"bytes"
 	"os/exec"
 )
 
 func buildStaticSite() ([]byte, error) {
 
-	var stderr, stdout bytes.Buffer
+	command := exec.Command(config.HugoBin, "--config", config.HugoConfigFile)
 
-	//Debug.Println("args", "--config", config.HugoConfigFile)
-
-	//Debug.Println(fmt.Sprintf("Executing %s with %s", config.HugoBin, args))
-
-	hugo := exec.Command(config.HugoBin, "--config", config.HugoConfigFile)
-
-	hugo.Stdout = &stdout
-	hugo.Stderr = &stderr
-
-	//output, err := hugo.Output()
-
-	err := hugo.Run()
-
+	out, err := command.Output()
 	if err != nil {
-		//Debug.Println("output:", output)
-		Debug.Println("err:", stderr.String())
+		Error.Println("Couldn't publish", string(out), err.Error())
 		return nil, err
 	}
 
-	//Debug.Println("hugo build output", output)
+	return out, err
 
-	return []byte("ok"), nil
 }

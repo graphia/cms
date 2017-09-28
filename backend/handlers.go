@@ -1137,16 +1137,7 @@ func apiPublish(w http.ResponseWriter, r *http.Request) {
 		Message: "Published successfully",
 	}
 
-	repsonse, err := json.Marshal(sr)
-	if err != nil {
-		fr = FailureResponse{
-			Message: fmt.Sprintf("Failed to generate response: %s", err.Error()),
-		}
-		JSONResponse(fr, http.StatusBadRequest, w)
-	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Write(repsonse)
+	JSONResponse(sr, http.StatusOK, w)
 
 }
 
