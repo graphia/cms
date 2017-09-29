@@ -132,20 +132,11 @@ func createFiles(nc NewCommit, user User) (oid *git.Oid, err error) {
 	// check none of the files already exist
 	for _, ncf := range nc.Files {
 
-		// if no filename is specified it's likely that
-		// we are simply creating a directory
-		// TODO fix this
-		if ncf.Filename == "" {
-			continue
-		}
-
 		target := filepath.Join(ncf.Path, ncf.Filename)
 
+		//FIXME would it make more sense to switch this
+		//around and check for the error instead?
 		entry, _ := ht.EntryByPath(target)
-		//if err != nil {
-		//return nil, fmt.Errorf("file not found %s", target)
-		//}
-
 		if entry != nil {
 			return nil, fmt.Errorf("file already exists")
 		}

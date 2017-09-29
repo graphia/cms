@@ -48,58 +48,59 @@ type FailureResponse struct {
 //
 func authLoginHandler(w http.ResponseWriter, r *http.Request) {
 	// start session, generate a JWT if the credentials are ok
-
+	var fr FailureResponse
 	var uc UserCredentials
 
 	err := json.NewDecoder(r.Body).Decode(&uc)
-
 	if err != nil {
-		w.WriteHeader(http.StatusForbidden)
-		fmt.Fprint(w, "Error in request")
+		fr = FailureResponse{Message: "Forbidden"}
+		JSONResponse(fr, http.StatusForbidden, w)
 		return
 	}
 
 	user, err := getUserByUsername(uc.Username)
-
 	if err != nil {
-		response := FailureResponse{Message: fmt.Sprintf("User not found: %s", uc.Username)}
-		JSONResponse(response, http.StatusBadRequest, w)
+		fr = FailureResponse{Message: fmt.Sprintf("User not found: %s", uc.Username)}
+		JSONResponse(fr, http.StatusBadRequest, w)
 		return
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(uc.Password))
-
 	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		response := FailureResponse{Message: "Invalid credentials"}
-		json, err := json.Marshal(response)
-		if err != nil {
-			Debug.Println("Failed", err)
-			panic(err)
+		fr = FailureResponse{
+			Message: "Invalid credentials",
 		}
-		w.Write(json)
+		JSONResponse(fr, http.StatusUnauthorized, w)
 		return
 	}
 
 	token, err := newToken(user)
 	if err != nil {
-		panic(err)
+		fr = FailureResponse{
+			Message: fmt.Sprintln("Failed to create new token", err.Error()),
+		}
+		JSONResponse(fr, http.StatusInternalServerError, w)
+		return
 	}
+
 	tokenString, err := newTokenString(token)
 	if err != nil {
-		panic(err)
+		fr = FailureResponse{
+			Message: fmt.Sprintln("Failed to create new token string", err.Error()),
+		}
+		JSONResponse(fr, http.StatusInternalServerError, w)
+		return
 	}
 
 	Debug.Println("Setting user token", tokenString)
+
 	err = setToken(user, tokenString)
 	if err != nil {
-		panic(err)
-	}
-
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintln(w, "Error extracting the key")
-		panic(err)
+		fr = FailureResponse{
+			Message: fmt.Sprintln("Failed to set the user token", err.Error()),
+		}
+		JSONResponse(fr, http.StatusInternalServerError, w)
+		return
 	}
 
 	response := Token{tokenString}
@@ -286,7 +287,7 @@ func setupCreateInitialUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// get details from body and set active
+	// get details from body and ensure active
 	user := User{}
 	json.NewDecoder(r.Body).Decode(&user)
 	user.Active = true
@@ -295,16 +296,9 @@ func setupCreateInitialUserHandler(w http.ResponseWriter, r *http.Request) {
 	err = createUser(user)
 
 	if err != nil {
-
+		Error.Println("Failed to create user", err.Error())
 		errors := validationErrorsToJSON(err)
-
-		output, err := json.Marshal(errors)
-		if err != nil {
-			panic(err)
-		}
-
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write(output)
+		JSONResponse(errors, http.StatusBadRequest, w)
 		return
 	}
 
@@ -312,13 +306,7 @@ func setupCreateInitialUserHandler(w http.ResponseWriter, r *http.Request) {
 		Message: "User created",
 	}
 
-	output, err := json.Marshal(sr)
-	if err != nil {
-		panic(err)
-	}
-
-	w.WriteHeader(http.StatusCreated)
-	w.Write(output)
+	JSONResponse(sr, http.StatusCreated, w)
 
 }
 
@@ -418,14 +406,7 @@ func apiListDirectoriesHandler(w http.ResponseWriter, r *http.Request) {
 
 	}
 
-	output, err := json.Marshal(directories)
-	if err != nil {
-		panic(err)
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(output)
+	JSONResponse(directories, http.StatusOK, w)
 }
 
 // apiListDirectoriesHandler returns a JSON object representing
@@ -500,13 +481,7 @@ func apiCreateDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 		Oid:     oid.String(),
 	}
 
-	output, err := json.Marshal(sr)
-	if err != nil {
-		panic(err)
-	}
-
-	w.WriteHeader(http.StatusCreated)
-	w.Write(output)
+	JSONResponse(sr, http.StatusCreated, w)
 
 }
 
@@ -550,8 +525,8 @@ func apiUpdateDirectoriesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user := getCurrentUser(r.Context())
-	oid, err := updateDirectories(nc, user)
 
+	oid, err := updateDirectories(nc, user)
 	if err != nil {
 		fr = FailureResponse{
 			Message: fmt.Sprintf("Failed to update directories: %s", err.Error()),
@@ -626,28 +601,21 @@ func apiDeleteDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 	oid, err := deleteDirectories(nc, user)
 
 	if err != nil {
-
 		fr = FailureResponse{
-			Message: fmt.Sprintf("Failed to delete directory: %s", err.Error()),
+			Message: fmt.Sprintln("Failed to delete directory", err.Error()),
 		}
-
 		JSONResponse(fr, http.StatusBadRequest, w)
-
 		return
 	}
+
+	Warning.Println("Directory deleted", directory)
 
 	sr = SuccessResponse{
 		Message: "Directory deleted",
 		Oid:     oid.String(),
 	}
 
-	output, err := json.Marshal(sr)
-	if err != nil {
-		panic(err)
-	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Write(output)
+	JSONResponse(sr, http.StatusCreated, w)
 }
 
 // Inside a directory functionality 🗂
@@ -669,32 +637,40 @@ func apiListFilesInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 	directory := vestigo.Param(r, "directory")
 	files, err := getFilesInDir(directory)
 
-	if err != nil && err != ErrDirectoryNotFound {
+	if err == ErrDirectoryNotFound {
 		fr = FailureResponse{
 			Message: fmt.Sprintf("Could not get list of files in directory %s: %s", directory, err.Error()),
+		}
+		JSONResponse(fr, http.StatusNotFound, w)
+		return
+
+	} else if err != nil {
+		fr = FailureResponse{
+			Message: ErrDirectoryNotFound.Error(),
 		}
 		JSONResponse(fr, http.StatusBadRequest, w)
 		return
 	}
 
-	if err == ErrDirectoryNotFound {
+	metadata, err := getMetadataFromDirectory(directory)
+
+	if err == ErrMetadataNotFound {
+		Warning.Println("No metadata file found for", directory)
+	} else if err != nil {
+
 		fr = FailureResponse{
-			Message: ErrDirectoryNotFound.Error(),
+			Message: fmt.Sprintln("Something went wrong while retrieving metadata", err.Error()),
 		}
-		JSONResponse(fr, http.StatusNotFound, w)
+		JSONResponse(fr, http.StatusBadRequest, w)
 		return
 	}
-
-	metadata, err := getMetadataFromDirectory(directory)
 
 	type output struct {
 		Files         []FileItem     `json:"files"`
 		DirectoryInfo *DirectoryInfo `json:"info,omitempty"`
 	}
 
-	var result = output{}
-
-	result = output{Files: files, DirectoryInfo: metadata}
+	result := output{Files: files, DirectoryInfo: metadata}
 
 	JSONResponse(result, http.StatusOK, w)
 }
@@ -718,10 +694,18 @@ func apiGetDirectoryMetadataHandler(w http.ResponseWriter, r *http.Request) {
 
 	di, err = getMetadataFromDirectory(directory)
 
-	if err != nil {
-		// FIXME if the _index.md isn't found, return a 404
+	if err == ErrMetadataNotFound {
+
 		fr = FailureResponse{
-			Message: fmt.Sprintf("Could not get metadata from directory: %s", err.Error()),
+			Message: fmt.Sprintln("Could not find _index.md file in", directory, err.Error()),
+		}
+		JSONResponse(fr, http.StatusNotFound, w)
+		return
+
+	} else if err != nil {
+
+		fr = FailureResponse{
+			Message: fmt.Sprintln("Something went wrong while retrieving metadata", err.Error()),
 		}
 		JSONResponse(fr, http.StatusBadRequest, w)
 		return
@@ -763,22 +747,17 @@ func apiCreateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fr = FailureResponse{Message: fmt.Sprintf("Failed to create files: %s", err.Error())}
 		JSONResponse(fr, http.StatusBadRequest, w)
+		return
 	}
+
+	Debug.Println("File(s) created", oid)
 
 	sr = SuccessResponse{
 		Message: "File(s) created",
 		Oid:     oid.String(),
 	}
 
-	output, err := json.Marshal(sr)
-	if err != nil {
-		panic(err)
-	}
-
-	w.WriteHeader(http.StatusCreated)
-	w.Write(output)
-
-	Debug.Println("File(s) created", oid)
+	JSONResponse(sr, http.StatusCreated, w)
 
 }
 
@@ -831,6 +810,9 @@ func apiUpdateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 
 	oid, err := updateFiles(nc, user)
 	if err != nil {
+
+		Error.Println("Failed to update files", nc.Files, err.Error())
+
 		fr = FailureResponse{
 			Message: fmt.Sprintf("Failed to update files: %s", err.Error()),
 		}
@@ -838,19 +820,14 @@ func apiUpdateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	Warning.Println("File updated", oid)
+
 	sr = SuccessResponse{
 		Message: "File updated",
 		Oid:     oid.String(),
 	}
 
-	output, err := json.Marshal(sr)
-	if err != nil {
-		Error.Println(err.Error())
-	}
-
-	w.Write(output)
-
-	Debug.Println("File updated", oid)
+	JSONResponse(sr, http.StatusCreated, w)
 
 }
 
@@ -891,8 +868,6 @@ func apiDeleteFileFromDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	Debug.Println("nc", nc)
-
 	if len(nc.Files) == 0 {
 		response := FailureResponse{Message: "No files specified for deletion"}
 		JSONResponse(response, http.StatusBadRequest, w)
@@ -904,25 +879,22 @@ func apiDeleteFileFromDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 	oid, err := deleteFiles(nc, user)
 
 	if err != nil {
+		Error.Println("Failed to delete directory", err.Error())
 		fr = FailureResponse{
 			Message: err.Error(),
 		}
 		JSONResponse(fr, http.StatusBadRequest, w)
+		return
 	}
+
+	Warning.Println("File updated with commit", oid)
 
 	sr = SuccessResponse{
 		Message: "File deleted",
 		Oid:     oid.String(),
 	}
 
-	output, err := json.Marshal(sr)
-	if err != nil {
-		Error.Println(err.Error())
-	}
-
-	w.Write(output)
-
-	Debug.Println("File updated", oid)
+	JSONResponse(sr, http.StatusCreated, w)
 
 }
 
@@ -950,6 +922,9 @@ func apiGetFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 
 	file, err := getConvertedFile(directory, filename)
 	if err != nil {
+
+		Error.Println("Could not find converted file", directory, filename, err.Error())
+
 		fr = FailureResponse{
 			Message: fmt.Sprintf("Failed to get converted file: %s", err.Error()),
 		}
@@ -971,23 +946,19 @@ func apiGetFileAttachmentsHandler(w http.ResponseWriter, r *http.Request) {
 
 	files, err := getAttachments(path)
 	if err != nil {
+
+		Warning.Println("No attachments dir found for path", path)
+
 		fr = FailureResponse{
 			Message: "No attachments",
 		}
+
 		JSONResponse(fr, http.StatusNotFound, w)
+
+		return
 	}
 
-	output, err := json.Marshal(files)
-	if err != nil {
-		Error.Println("Failed to convert file to JSON", files)
-		fr = FailureResponse{
-			Message: fmt.Sprintf("Failed to create JSON from file: %s", err.Error()),
-		}
-		JSONResponse(fr, http.StatusBadRequest, w)
-	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Write(output)
+	JSONResponse(files, http.StatusOK, w)
 }
 
 func apiGetFileAttachmentHandler(w http.ResponseWriter, r *http.Request) {
@@ -1015,45 +986,46 @@ func apiGetFileAttachmentHandler(w http.ResponseWriter, r *http.Request) {
 //	 ...
 // }
 func apiEditFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
+	var fr FailureResponse
+
 	directory := vestigo.Param(r, "directory")
 	filename := vestigo.Param(r, "file")
 
 	file, err := getRawFile(directory, filename)
 	if err != nil {
-		Debug.Println("***FAILING***")
-		Debug.Println("directory", directory)
-		Debug.Println("filename", filename)
-		panic(fmt.Errorf("failed to get file %s", err.Error()))
+		Error.Println("Could not update file", err.Error())
+
+		fr = FailureResponse{
+			Message: fmt.Sprintln("Could not update file", file, err.Error()),
+		}
+
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
 	}
 
-	output, err := json.Marshal(file)
-	if err != nil {
-		Error.Println(err.Error())
-	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Write(output)
+	JSONResponse(file, http.StatusOK, w)
 }
 
 // user functionality 👩🏽‍💻
 
 // apiListUsers
 func apiListUsersHandler(w http.ResponseWriter, r *http.Request) {
+	var fr FailureResponse
+
 	users, err := allUsers()
 	if err != nil {
-		Error.Println("Could not get list of users", err.Error())
+
+		Error.Println("Could not retrieve user list", err.Error())
+
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Could not retrieve list of users"),
+		}
+
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
 	}
 
-	output, err := json.Marshal(users)
-	if err != nil {
-		Error.Println("Could not create JSON", err.Error())
-		Error.Println("Users", users)
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-
-	w.WriteHeader(http.StatusOK)
-	w.Write(output)
+	JSONResponse(users, http.StatusOK, w)
 
 }
 
@@ -1066,31 +1038,23 @@ func apiGetUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	user, err := getLimitedUserByUsername(username)
 	if err != nil {
+
+		Error.Println("Could not retrieve user", username, err.Error())
+
 		fr = FailureResponse{
-			Message: fmt.Sprintf("Failed to find restricted user %s: %s", username, err.Error()),
+			Message: fmt.Sprintln("Failed to find restricted user", username, err.Error()),
 		}
 		JSONResponse(fr, http.StatusBadRequest, w)
+		return
 	}
 
-	output, err := json.Marshal(user)
-	if err != nil {
-		fr = FailureResponse{
-			Message: fmt.Sprintf("Failed to find restricted user %s: %s", username, err.Error()),
-		}
-		JSONResponse(fr, http.StatusBadRequest, w)
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-
-	w.WriteHeader(http.StatusOK)
-	w.Write(output)
+	JSONResponse(user, http.StatusOK, w)
 }
 
 // apiCreateUser
 func apiCreateUserHandler(w http.ResponseWriter, r *http.Request) {
 	var user User
 	var sr SuccessResponse
-	var fr FailureResponse
 
 	json.NewDecoder(r.Body).Decode(&user)
 
@@ -1098,36 +1062,18 @@ func apiCreateUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	err := createUser(user)
 	if err != nil {
-
 		errors := validationErrorsToJSON(err)
-
-		output, err := json.Marshal(errors)
-		if err != nil {
-			panic(err)
-		}
-
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write(output)
-
+		JSONResponse(errors, http.StatusBadRequest, w)
 		return
 	}
 
-	Debug.Println("User was created successfully")
+	Debug.Println("User was created successfully", user)
 
 	sr = SuccessResponse{
 		Message: "User created",
 	}
 
-	output, err := json.Marshal(sr)
-	if err != nil {
-		fr = FailureResponse{
-			Message: fmt.Sprintf("Failed to generate JSON %s", err.Error()),
-		}
-		JSONResponse(fr, http.StatusBadRequest, w)
-	}
-
-	w.WriteHeader(http.StatusCreated)
-	w.Write(output)
+	JSONResponse(sr, http.StatusCreated, w)
 
 }
 
@@ -1231,23 +1177,16 @@ func apiGetCommitHandler(w http.ResponseWriter, r *http.Request) {
 
 	cs, err := diffForCommit(hash)
 	if err != nil {
+		Error.Println("Could not find commit", hash, err.Error())
+
 		fr = FailureResponse{
-			Message: fmt.Sprintf("Failed to generate diff for commit %s: %s", hash, err.Error()),
+			Message: fmt.Sprintln("Failed to generate diff for commit", hash, err.Error()),
 		}
 		JSONResponse(fr, http.StatusBadRequest, w)
+		return
 	}
 
-	output, err := json.Marshal(cs)
-	if err != nil {
-		fr = FailureResponse{
-			Message: fmt.Sprintf("Failed to convert diff to JSON: %s", err.Error()),
-		}
-		JSONResponse(fr, http.StatusBadRequest, w)
-	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Write(output)
-
+	JSONResponse(cs, http.StatusOK, w)
 }
 
 // GET /api/directories/:directory/files/:filename/history
@@ -1265,6 +1204,8 @@ func apiGetCommitHandler(w http.ResponseWriter, r *http.Request) {
 //	  },
 // ]
 func apiGetFileHistoryHandler(w http.ResponseWriter, r *http.Request) {
+	var fr FailureResponse
+
 	directory := vestigo.Param(r, "directory")
 	filename := vestigo.Param(r, "file")
 
@@ -1272,16 +1213,15 @@ func apiGetFileHistoryHandler(w http.ResponseWriter, r *http.Request) {
 
 	history, err := getFileHistory(path, 10)
 	if err != nil {
-		panic(err)
+		Error.Println("Could not get file history for file", path)
+
+		fr = FailureResponse{
+			Message: fmt.Sprintln("Could not get file history for file", path),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
 	}
 
-	output, err := json.Marshal(history)
-	if err != nil {
-		panic(err)
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(output)
+	JSONResponse(history, http.StatusOK, w)
 
 }
