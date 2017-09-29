@@ -14,6 +14,25 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// Response is a general response containing arbitrary data
+type Response struct {
+	Data string `json:"data"`
+}
+
+// SuccessResponse contains information about a successful
+// update to the repository
+type SuccessResponse struct {
+	Message string `json:"message"`
+	Oid     string `json:"oid"`
+}
+
+// FailureResponse accompanies the HTTP status code with
+// some more information as to why the update failed
+type FailureResponse struct {
+	Message string `json:"message"`
+	Meta    string `json:"meta,omitempty"`
+}
+
 // Authentication functionality 🔑
 
 // authLoginHandler checks the supplied UserCredentials and, if a user
@@ -160,7 +179,7 @@ func authRenewTokenHandler(w http.ResponseWriter, r *http.Request) {
 // GET /setup/show_initial_setup
 //
 // {"enabled": false}
-func setupAllowCreateInitialUser(w http.ResponseWriter, r *http.Request) {
+func setupAllowCreateInitialUserHandler(w http.ResponseWriter, r *http.Request) {
 	var zeroUsers bool
 
 	count, err := countUsers()
@@ -186,7 +205,7 @@ func setupAllowCreateInitialUser(w http.ResponseWriter, r *http.Request) {
 //
 // {"enabled": false}
 
-func apiSetupAllowInitializeRepository(w http.ResponseWriter, r *http.Request) {
+func apiSetupAllowInitializeRepositoryHandler(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var response SetupOption
 
@@ -209,7 +228,7 @@ func apiSetupAllowInitializeRepository(w http.ResponseWriter, r *http.Request) {
 // POST /setup/create_repository
 //
 // {"oid": "a741330fec...", message: "Repository initialised"}
-func apiSetupInitializeRepository(w http.ResponseWriter, r *http.Request) {
+func apiSetupInitializeRepositoryHandler(w http.ResponseWriter, r *http.Request) {
 	var err error
 
 	path := config.Repository
@@ -240,7 +259,7 @@ func apiSetupInitializeRepository(w http.ResponseWriter, r *http.Request) {
 // If successful, the response should be a token:
 //
 // {token: "xxxxx.yyyyy.zzzzz"}
-func setupCreateInitialUser(w http.ResponseWriter, r *http.Request) {
+func setupCreateInitialUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	var sr SuccessResponse
 	var fr FailureResponse
@@ -689,7 +708,7 @@ func apiListFilesInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 //   title: "Krusty Burger",
 //   description: "Krusty Burger, Ribwich and Breakfast Balls"
 // }
-func apiGetDirectoryMetadata(w http.ResponseWriter, r *http.Request) {
+func apiGetDirectoryMetadataHandler(w http.ResponseWriter, r *http.Request) {
 	var di *DirectoryInfo
 	var fr FailureResponse
 	var err error
@@ -1019,7 +1038,7 @@ func apiEditFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 // user functionality 👩🏽‍💻
 
 // apiListUsers
-func apiListUsers(w http.ResponseWriter, r *http.Request) {
+func apiListUsersHandler(w http.ResponseWriter, r *http.Request) {
 	users, err := allUsers()
 	if err != nil {
 		Error.Println("Could not get list of users", err.Error())
@@ -1039,7 +1058,7 @@ func apiListUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 // apiGetUser
-func apiGetUser(w http.ResponseWriter, r *http.Request) {
+func apiGetUserHandler(w http.ResponseWriter, r *http.Request) {
 	var fr FailureResponse
 
 	username := vestigo.Param(r, "username")
@@ -1068,7 +1087,7 @@ func apiGetUser(w http.ResponseWriter, r *http.Request) {
 }
 
 // apiCreateUser
-func apiCreateUser(w http.ResponseWriter, r *http.Request) {
+func apiCreateUserHandler(w http.ResponseWriter, r *http.Request) {
 	var user User
 	var sr SuccessResponse
 	var fr FailureResponse
@@ -1113,12 +1132,12 @@ func apiCreateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 // apiUpdateUser
-func apiUpdateUser(w http.ResponseWriter, r *http.Request) {}
+func apiUpdateUserHandler(w http.ResponseWriter, r *http.Request) {}
 
 // apiDeleteUser
-func apiDeleteUser(w http.ResponseWriter, r *http.Request) {}
+func apiDeleteUserHandler(w http.ResponseWriter, r *http.Request) {}
 
-func apiPublish(w http.ResponseWriter, r *http.Request) {
+func apiPublishHandler(w http.ResponseWriter, r *http.Request) {
 	var fr FailureResponse
 
 	output, err := buildStaticSite()
@@ -1133,11 +1152,17 @@ func apiPublish(w http.ResponseWriter, r *http.Request) {
 
 	Info.Println("Site published!")
 
-	sr := SuccessResponse{
-		Message: "Published successfully",
+	type publishResponse struct {
+		Message string `json:"message"`
+		Meta    string `json:"meta"`
 	}
 
-	JSONResponse(sr, http.StatusOK, w)
+	pr := publishResponse{
+		Message: "Published successfully",
+		Meta:    string(output),
+	}
+
+	JSONResponse(pr, http.StatusOK, w)
 
 }
 
@@ -1157,7 +1182,7 @@ func apiPublish(w http.ResponseWriter, r *http.Request) {
 //	    "time": "Fri Jul 14 12:34:45 2017 +0100"
 //	  },
 // ]
-func apiGetCommits(w http.ResponseWriter, r *http.Request) {
+func apiGetCommitsHandler(w http.ResponseWriter, r *http.Request) {
 	var fr FailureResponse
 	var commits []Commit
 	var err error
@@ -1198,7 +1223,7 @@ func apiGetCommits(w http.ResponseWriter, r *http.Request) {
 //	  "hash": "e2da99aa078c",
 //	  "timestamp": "Fri Jul 14 12:34:45 2017 +0100"
 //	},
-func apiGetCommit(w http.ResponseWriter, r *http.Request) {
+func apiGetCommitHandler(w http.ResponseWriter, r *http.Request) {
 	var fr FailureResponse
 	var hash string
 
@@ -1239,7 +1264,7 @@ func apiGetCommit(w http.ResponseWriter, r *http.Request) {
 //	    "time": "Fri Jul 14 12:34:45 2017 +0100"
 //	  },
 // ]
-func apiGetFileHistory(w http.ResponseWriter, r *http.Request) {
+func apiGetFileHistoryHandler(w http.ResponseWriter, r *http.Request) {
 	directory := vestigo.Param(r, "directory")
 	filename := vestigo.Param(r, "file")
 
