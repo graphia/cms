@@ -30,8 +30,10 @@ func Test_buildStaticSite(t *testing.T) {
 	thingsThatShouldExist := []string{"index.html", "index.xml", "documents", "appendices", "sitemap.xml"}
 
 	for _, item := range thingsThatShouldExist {
-		_, err = os.Stat(filepath.Join(buildPath, item))
-		assert.False(t, os.IsNotExist(err), fmt.Sprintf("object does not exist: %s", item))
+		t.Run(fmt.Sprintf("publishing creates %s", item), func(t *testing.T) {
+			_, err = os.Stat(filepath.Join(buildPath, item))
+			assert.False(t, os.IsNotExist(err), fmt.Sprintf("object does not exist: %s", item))
+		})
 	}
 
 }
