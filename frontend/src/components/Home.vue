@@ -5,13 +5,11 @@
 
 		<h1>Dashboard</h1>
 
-		<div class="row">
-			<DirectorySummary class="directories"/>
-		</div>
+		<DirectorySummary class="directories"/>
 
 		<div class="row mt-4">
 
-			<div class="col-md-4">
+			<div class="col col-md-4">
 
 				<div class="card bg-light">
 					<div class="card-body">
