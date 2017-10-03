@@ -1,14 +1,14 @@
 <template>
 	<div class="row history">
 
-		<Breadcrumbs :levels="breadcrumbs"/>
-
 		<div class="col-sm-12">
+
+			<Breadcrumbs :levels="breadcrumbs"/>
 
 			<h1>History</h1>
 
 			<ol class="commit-list">
-				<li class="commit-list-item" v-for="item in history">
+				<li class="commit-list-item" v-for="(item, i) in history" :key="i">
 					<div class="card">
 
 						<div class="card-header">

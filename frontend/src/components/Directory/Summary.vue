@@ -1,12 +1,19 @@
 <template>
 	<div>
 
-		<div class="jumbotron" v-if="numberOfDirectories == 0">
-			{{ directories.length }}
-			<p>No directories</p>
+		<div class="col col-md-6" v-if="loading">
+			<div class="alert alert-warning mx-auto">
+				Loading...
+			</div>
+		</div>
 
-			<DirectoryNewButton/>
+		<div class="col col-md-6" v-else-if="numberOfDirectories == 0">
+			<div class="jumbotron">
+				{{ directories.length }}
+				<p>No directories</p>
 
+				<DirectoryNewButton/>
+			</div>
 		</div>
 
 		<!-- listing directories -->
@@ -91,7 +98,8 @@
 		name: "DirectorySummary",
 		data() {
 			return {
-				directories: {}
+				directories: {},
+				loading: true
 			}
 		},
 		created() {
@@ -124,6 +132,8 @@
 					}
 
 					let json = await response.json();
+
+					this.loading = false;
 					console.log("got json", json)
 
 					// TODO map the directories into CMSFile objects

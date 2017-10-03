@@ -519,7 +519,8 @@ func TestApiUpdateFileInDirectory(t *testing.T) {
 
 	resp, err := client.Do(req)
 
-	assert.Equal(t, http.StatusOK, resp.StatusCode)
+	// We've updated a file by creating a commit, so it's a 201
+	assert.Equal(t, http.StatusCreated, resp.StatusCode)
 
 	var receiver SuccessResponse
 
@@ -710,7 +711,9 @@ func TestApiDeleteFileFromDirectory(t *testing.T) {
 
 	resp, err := client.Do(req)
 
-	assert.Equal(t, http.StatusOK, resp.StatusCode)
+	// We've created a commit so return 201, even though the
+	// commit contains a deletion
+	assert.Equal(t, http.StatusCreated, resp.StatusCode)
 
 	var receiver SuccessResponse
 
@@ -851,7 +854,9 @@ func TestApiDeleteDirectory(t *testing.T) {
 
 	resp, err := client.Do(req)
 
-	assert.Equal(t, http.StatusOK, resp.StatusCode)
+	// Created because we're creating a commit (despite deleting
+	// a directory)
+	assert.Equal(t, http.StatusCreated, resp.StatusCode)
 
 	var receiver SuccessResponse
 

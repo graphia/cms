@@ -28,25 +28,6 @@ type NewCommitFile struct {
 	Base64Encoded bool        `json:"base_64_encoded"`
 }
 
-// Response is a general response containing arbitrary data
-type Response struct {
-	Data string `json:"data"`
-}
-
-// SuccessResponse contains information about a successful
-// update to the repository
-type SuccessResponse struct {
-	Message string `json:"message"`
-	Oid     string `json:"oid"`
-}
-
-// FailureResponse accompanies the HTTP status code with
-// some more information as to why the update failed
-type FailureResponse struct {
-	Message string `json:"message"`
-	Meta    string `json:"meta,omitempty"`
-}
-
 // FrontMatter contains the document's metadata
 type FrontMatter struct {
 	Author   string   `json:"author"   yaml:"author"`

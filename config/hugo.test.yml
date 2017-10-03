@@ -1,0 +1,10 @@
+languageCode: "en-gb"
+title: "My New Hugo Site"
+baseURL: "http://localhost:8080"
+buildDrafts: true
+theme: ../../../graphia-minimal-theme
+contentDir: ../tests/tmp/repositories/publish
+relativeURLs: true
+
+# Matches the buildPath in Test_buildStaticSite
+publishDir: ../tests/tmp/builds/test_build_static_site

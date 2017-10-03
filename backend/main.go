@@ -125,8 +125,8 @@ func unprotectedRouter() (r *vestigo.Router) {
 	r.Post("/auth/login", authLoginHandler)
 
 	// setup endpoints
-	r.Get("/setup/create_initial_user", setupAllowCreateInitialUser)
-	r.Post("/setup/create_initial_user", setupCreateInitialUser)
+	r.Get("/setup/create_initial_user", setupAllowCreateInitialUserHandler)
+	r.Post("/setup/create_initial_user", setupCreateInitialUserHandler)
 
 	// rather than above rule, do a check to see if the file exists and serve it
 	// if it doesn't, serve index.html :>
@@ -160,8 +160,8 @@ func protectedRouter() (r *vestigo.Router) {
 	r.Get("/api", apiRootHandler)
 
 	// initial setup endpoints
-	r.Get("/api/setup/initialize_repository", apiSetupAllowInitializeRepository)
-	r.Post("/api/setup/initialize_repository", apiSetupInitializeRepository)
+	r.Get("/api/setup/initialize_repository", apiSetupAllowInitializeRepositoryHandler)
+	r.Post("/api/setup/initialize_repository", apiSetupInitializeRepositoryHandler)
 
 	// auth-related endpoints
 	r.Post("/api/renew", authRenewTokenHandler)
@@ -169,7 +169,7 @@ func protectedRouter() (r *vestigo.Router) {
 	// directory endpoints
 	r.Get("/api/summary", apiDirectorySummary)
 	r.Get("/api/directories", apiListDirectoriesHandler)
-	r.Get("/api/directories/:directory", apiGetDirectoryMetadata)
+	r.Get("/api/directories/:directory", apiGetDirectoryMetadataHandler)
 	r.Patch("/api/directories/:directory", apiUpdateDirectoriesHandler)
 	r.Post("/api/directories", apiCreateDirectoryHandler)
 	r.Delete("/api/directories/:directory", apiDeleteDirectoryHandler)
@@ -182,25 +182,25 @@ func protectedRouter() (r *vestigo.Router) {
 	r.Patch("/api/directories/:directory/files/:file", apiUpdateFileInDirectoryHandler)
 	r.Delete("/api/directories/:directory/files/:file", apiDeleteFileFromDirectoryHandler)
 
-	r.Get("/api/directories/:directory/files/:file/history", apiGetFileHistory)
+	r.Get("/api/directories/:directory/files/:file/history", apiGetFileHistoryHandler)
 
 	// attachment endpoint
 	// note filename used rather than :file because we're not using the extension
 	r.Get("/api/directories/:directory/files/:filename/attachments", apiGetFileAttachmentsHandler)
 	r.Get("/api/directories/:directory/files/:filename/attachments/:file", apiGetFileAttachmentHandler)
 
-	r.Get("/api/users", apiListUsers)
-	r.Post("/api/users", apiCreateUser)
-	r.Get("/api/users/:username", apiGetUser)
-	r.Post("/api/users/:username", apiUpdateUser)
-	r.Delete("/api/users/:username", apiDeleteUser)
+	r.Get("/api/users", apiListUsersHandler)
+	r.Post("/api/users", apiCreateUserHandler)
+	r.Get("/api/users/:username", apiGetUserHandler)
+	r.Post("/api/users/:username", apiUpdateUserHandler)
+	r.Delete("/api/users/:username", apiDeleteUserHandler)
 
 	// repo endpoints
-	r.Get("/api/recent_commits", apiGetCommits)
-	r.Get("/api/commits/:hash", apiGetCommit)
+	r.Get("/api/recent_commits", apiGetCommitsHandler)
+	r.Get("/api/commits/:hash", apiGetCommitHandler)
 
 	// cms endpoints
-	r.Post("/api/publish", apiPublish)
+	r.Post("/api/publish", apiPublishHandler)
 
 	// missing operations:
 	// how should file and directory moves/copies be represented?

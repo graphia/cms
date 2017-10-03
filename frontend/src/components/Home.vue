@@ -5,30 +5,12 @@
 
 		<h1>Dashboard</h1>
 
-		<div class="row">
-			<DirectorySummary class="directories"/>
-		</div>
+		<DirectorySummary class="directories"/>
 
 		<div class="row mt-4">
 
-			<div class="col-md-4">
-
-				<div class="card bg-light">
-					<div class="card-body">
-
-						<p>
-							When you are happy with the content, you can release it
-							to your audience by publishing it.
-						</p>
-
-						<button class="btn btn-lg btn-success" :class="{'disabled': publishing}" @click="publish">
-							<octicon :icon-name="'cloud-upload'"></octicon>
-							{{ publishing ? "Publishing" : "Publish" }}
-						</button>
-
-					</div>
-				</div>
-
+			<div class="col col-md-4">
+				<Publisher/>
 			</div>
 
 			<div class="col-md-5">
@@ -76,12 +58,12 @@
 </template>
 
 <script lang="babel">
-	import Broadcast from '../components/Broadcast';
-	import DirectorySummary from '../components/Directory/Summary';
-	import Breadcrumbs from '../components/Utilities/Breadcrumbs';
-	import CMSBreadcrumb from '../javascripts/models/breadcrumb.js';
+	import Broadcast from './Broadcast';
+	import DirectorySummary from './Directory/Summary';
+	import Breadcrumbs from './Utilities/Breadcrumbs';
+	import Publisher from './Home/Publisher';
 
-	import CMSPublisher from '../javascripts/publish.js';
+	import CMSBreadcrumb from '../javascripts/models/breadcrumb.js';
 	import config from '../javascripts/config.js';
 	import checkResponse from '../javascripts/response.js';
 
@@ -94,14 +76,14 @@
 
 		data() {
 			return {
-				publishing: false,
 				commits: []
 			};
 		},
 
 		components: {
 			DirectorySummary,
-			Breadcrumbs
+			Breadcrumbs,
+			Publisher
 		},
 
 		computed: {
@@ -112,30 +94,6 @@
 
 		methods: {
 
-			async publish(event) {
-
-				this.publishing = true;
-
-				try {
-					console.log("Starting publishing");
-					await CMSPublisher.publish();
-					console.log(this.publishing);
-
-					// TODO it would be nice to include a hyperlink so the
-					// user could immediately see their work in its published
-					// state, this would require some reworking of the
-					// Broadcast compontent and broadcast.js
-					this.$store.state.broadcast.addMessage(
-						"success",
-						"Success!",
-						"Documentation published",
-						3
-					);
-				}
-				finally {
-					this.publishing = false;
-				}
-			},
 
 			async getLatestCommits() {
 				let path = `${config.api}/recent_commits`;

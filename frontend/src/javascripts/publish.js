@@ -21,14 +21,7 @@ export default class CMSPublisher {
 			headers: store.state.auth.authHeader()
 		});
 
-		if (!checkResponse(response.status)) {
-			console.error("Publishing failed", response);
-			return;
-		};
-
-		console.log("Publishing succeeded");
-
-		return;
+		return response;
 
 	};
 
