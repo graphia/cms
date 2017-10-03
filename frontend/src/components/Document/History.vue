@@ -1,9 +1,9 @@
 <template>
 	<div class="row history">
 
-		<Breadcrumbs :levels="breadcrumbs"/>
-
 		<div class="col-sm-12">
+
+			<Breadcrumbs :levels="breadcrumbs"/>
 
 			<h1>History</h1>
 
