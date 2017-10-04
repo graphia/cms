@@ -137,6 +137,12 @@ func setupMultipleFiletypesTestRepo(dest string) (oid *git.Oid, err error) {
 	return
 }
 
+func setupMissingFrontmatterTestRepo(dest string) (oid *git.Oid, err error) {
+	src := "../tests/backend/repositories/missing_frontmatter"
+	oid, err = setupTestRepo(src, dest)
+	return
+}
+
 func setupTestRepo(src, dest string) (oid *git.Oid, err error) {
 
 	// copy the small repo skeleton to specified path
