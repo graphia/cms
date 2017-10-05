@@ -148,6 +148,8 @@ type HistoricCommit struct {
 	ObjectType string         `json:"object_type"`
 	Author     *git.Signature `json:"author"`
 	Time       time.Time      `json:"timestamp"`
+	Old        string         `json:"old"`
+	New        string         `json:"new"`
 }
 
 // Changeset holds data about a previous commit, including the full delta

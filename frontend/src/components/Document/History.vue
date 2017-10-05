@@ -9,7 +9,7 @@
 
 			<ol class="commit-list">
 				<li class="commit-list-item" v-for="(item, i) in history" :key="i">
-					<div class="card">
+					<div class="card" :class="`commit-${item.id}`">
 
 						<div class="card-header">
 							{{ item.author.When | format_date }}
@@ -21,10 +21,27 @@
 								{{ item.message }}
 							</p>
 
-							<a class="card-link" :href="`mailto:${item.author.Email}`">{{ item.author.Name }}</a>
-							<router-link class="card-link" :to="{name: 'commit', params: {hash: item.id}}">View entire commit</router-link>
+							<div class="btn-toolbar">
+								<a class="card-link btn btn-secondary" :href="`mailto:${item.author.Email}`">{{ item.author.Name }}</a>
+
+								<button type="button"
+										class="btn btn-info"
+										data-toggle="collapse"
+										:data-target="`#diff-${item.id}`"
+								>
+									Show changes
+								</button>
+
+								<router-link class="card-link btn btn-info" :to="{name: 'commit', params: {hash: item.id}}">View entire commit</router-link>
+							</div>
+
+
+							<div class="collapse multi-collapse" :id="`diff-${item.id}`">
+								<pre v-html="item.patch.diff()"/>
+							</div>
 
 						</div>
+
 					</div>
 
 				</li>
@@ -40,6 +57,10 @@
 
 	import checkResponse from '../../javascripts/response.js';
 	import CMSBreadcrumb from '../../javascripts/models/breadcrumb.js';
+	import CMSPatch from '../../javascripts/models/patch.js';
+
+
+	import Diff from 'text-diff';
 
 	export default {
 		name: "DocumentHistory",
@@ -104,7 +125,12 @@
 				throw("Could not retrieve history");
 			}
 
-			this.history = await response.json()
+			let json = await response.json();
+
+			this.history = json.map((revision) => {
+				revision.patch = new CMSPatch(revision.id, "", revision.old, revision.new);
+				return revision;
+			});
 
 		},
 		components: {

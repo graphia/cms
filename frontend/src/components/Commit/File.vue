@@ -15,16 +15,16 @@
 
 			<!-- file content display, different content shown depending on the git operation -->
 
-			<div v-if="this.fileUpdated">
-				<pre v-html="this.diff"/>
+			<div v-if="this.patch.fileUpdated()">
+				<pre v-html="this.patch.diff()"/>
 			</div>
 
-			<div v-else-if="this.fileCreated" class="file-created">
-				<pre>{{ this.newFile }}</pre>
+			<div v-else-if="this.patch.fileCreated()" class="file-created">
+				<pre>{{ this.patch.newFile }}</pre>
 			</div>
 
-			<div v-else-if="this.fileDeleted" class="file-deleted">
-				<pre>{{ this.oldFile }}</pre>
+			<div v-else-if="this.patch.fileDeleted()" class="file-deleted">
+				<pre>{{ this.patch.oldFile }}</pre>
 			</div>
 
 			<!-- end of file content display -->
@@ -35,76 +35,32 @@
 </template>
 
 <script lang="babel">
-	import Diff from 'text-diff';
+	import CMSPatch from '../../javascripts/models/patch.js';
+
 	export default {
 		name: "CommitFile",
 		props: ['path', 'files'],
 		data() {
 			return {
-				oldFile: null,
-				oldFilePresent: null,
-				newFile: null,
-				newFilePresent: null,
-				diff: null
-			}
+				patch: null
+			};
 		},
-
 		computed: {
-			fileUpdated() {
-				return (this.oldFilePresent && this.newFilePresent);
-			},
-			fileCreated() {
-				return (!this.oldFilePresent && this.newFilePresent);
-			},
-			fileDeleted() {
-				return (this.oldFilePresent && !this.newFilePresent);
-			},
-			icon() {
-				let text = null;
-
-				switch (true) {
-					case this.fileUpdated:
-						text = "diff-modified";
-						break;
-					case this.fileCreated:
-						text = "diff-added";
-						break;
-					case this.fileDeleted:
-						text = "diff-removed";
-						break;
-				};
-
-				return text;
+			commitHash() {
+				return this.$route.params.hash;
 			}
 		},
-
 		created() {
 			// if this is a creation or deletion, don't display a diff
-
-			this.oldFile = this.files.old;
-			this.newFile = this.files.new;
-			this.oldFilePresent = !!this.oldFile;
-			this.newFilePresent = !!this.newFile;
-
-			if (this.oldFilePresent && this.newFilePresent) {
-				console.log("oldFile and newFile present, creating a diff");
-				this.setupDiff(this.oldFile, this.newFile);
-			};
+			this.patch = new CMSPatch(this.commitHash, this.path, this.files.old, this.files.new)
 
 		},
-
-		methods: {
-			setupDiff(oldFile, newFile) {
-				diff = new Diff();
-				let textDiff = diff.main(oldFile, newFile);
-				diff.cleanupSemantic(textDiff);
-				this.diff = diff.prettyHtml(textDiff);
-			}
-		}
 	};
 </script>
 
 <style lang="scss">
+
+	//FIXME move this somewhere reusable
 
 	// updates/modifications
 	$color-updated: #001f3f;
