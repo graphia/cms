@@ -964,8 +964,6 @@ Scan:
 			fmBoundaryCount++
 		}
 
-		// This can't be a switch statement because 'break' and 'continue'
-		// would apply to *it* instead of the surrounding for loop!
 		switch fmBoundaryCount {
 
 		// look for 'normal' text before we've encountered any
