@@ -523,3 +523,67 @@ func Test_getMetadata(t *testing.T) {
 		}
 	}
 }
+
+func Test_getMetadataFromBlob(t *testing.T) {
+
+	repoPath := "../tests/tmp/repositories/get_metadata"
+	setupMissingFrontmatterTestRepo(repoPath)
+	repo, _ := repository(config)
+	ht, _ := headTree(repo)
+
+	entryFullFM, _ := ht.EntryByPath("documents/full-frontmatter.md")
+	blobFullFM, _ := repo.LookupBlob(entryFullFM.Id)
+
+	entryNoFM, _ := ht.EntryByPath("documents/no-frontmatter.md")
+	blobNoFM, _ := repo.LookupBlob(entryNoFM.Id)
+
+	entryBrokenFM, _ := ht.EntryByPath("documents/broken-frontmatter.md")
+	blobBrokenFM, _ := repo.LookupBlob(entryBrokenFM.Id)
+
+	type args struct {
+		blob *git.Blob
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantFm  FrontMatter
+		wantErr bool
+	}{
+		{
+			name: "documents/full-frontmatter.md",
+			args: args{
+				blob: blobFullFM,
+			},
+			wantFm: FrontMatter{
+				Title:    "Document 1",
+				Author:   "Gil Gunderson",
+				Slug:     "document-1",
+				Synopsis: "I brought that wall from home",
+				Tags:     []string{"ol'", "gil", "ol' gil"},
+			},
+			wantErr: false,
+		},
+		{
+			name: "documents/no-frontmatter.md",
+			args: args{
+				blob: blobNoFM,
+			},
+			wantFm:  FrontMatter{},
+			wantErr: false,
+		},
+		{
+			name: "documents/broken-frontmatter.md",
+			args: args{
+				blob: blobBrokenFM,
+			},
+			wantFm:  FrontMatter{},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotFm, _ := getMetadataFromBlob(tt.args.blob)
+			assert.Equal(t, gotFm, tt.wantFm)
+		})
+	}
+}

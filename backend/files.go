@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/base64"
 	"errors"
@@ -8,17 +9,22 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
 	"github.com/graphia/particle"
 	"gopkg.in/libgit2/git2go.v25"
+	yaml "gopkg.in/yaml.v2"
 )
 
 var (
 	// ErrMetadataNotFound is returned when the _index.md file is missing
 	// this isn't a catestrophic problem, but should be logged
-	ErrMetadataNotFound  = errors.New("_index.md not found")
+	ErrMetadataNotFound = errors.New("_index.md not found")
+
+	// ErrDirectoryNotFound occurs when a directory can't be found in the
+	// git repository
 	ErrDirectoryNotFound = errors.New("directory not found")
 )
 
@@ -60,35 +66,36 @@ func getFilesInDir(directory string) (files []FileItem, err error) {
 	walkIterator := func(_ string, te *git.TreeEntry) int {
 		var fm FrontMatter
 		var blob *git.Blob
-		var reader io.Reader
+
 		var ext string
 
 		if te.Type == git.ObjectBlob {
 
-			// skip unless it's a Markdown file
-
 			ext = filepath.Ext(te.Name)
 
+			// skip unless it's a Markdown file
 			if ext != ".md" {
 				Warning.Println("not a markdown file, skipping:", te.Name)
 				return 0
 			}
 
+			// skip if it's a directory metadata file `_index.md`
 			if te.Name == "_index.md" {
 				Warning.Println("is a metadata file, skipping:", te.Name)
 				return 0
 			}
 
 			blob, err = repo.LookupBlob(te.Id)
-
 			if err != nil {
 				Warning.Println("Failed to find blob", te.Id)
 				return -1
 			}
 
-			reader = bytes.NewReader(blob.Contents())
-
-			_, err := particle.YAMLEncoding.DecodeReader(reader, &fm)
+			fm, err = getMetadataFromBlob(blob)
+			if err != nil {
+				Warning.Println("Failed to read frontmatter", te.Id)
+				return -1
+			}
 
 			if err != nil {
 				Warning.Println("Failed to decode file", string(blob.Contents()))
@@ -923,6 +930,77 @@ func extractContents(ncf NewCommitFile) (contents []byte, err error) {
 		return []byte(ncf.Body), err
 	}
 
+}
+
+// A quicker, more-efficient way of extracting the frontmatter from
+// a markdown file, this only reads the frontmatter from the top and
+// skips the markdown beneath.
+//This exists because particle slows down by reading the entire thing
+func getMetadataFromBlob(blob *git.Blob) (fm FrontMatter, err error) {
+
+	const fmBoundary = "---"
+
+	var reader io.Reader
+	var scanner *bufio.Scanner
+	var fmText *bytes.Buffer
+	var fmBoundaryCount = 0
+	var textPresent bool
+
+	reader = bytes.NewReader(blob.Contents())
+
+	fmText = bytes.NewBuffer(nil)
+	scanner = bufio.NewScanner(reader)
+
+	// Read the blob contents line by line and write the
+	// frontmatter to fmText
+
+Scan:
+	for scanner.Scan() {
+
+		// When we hit the first yaml marker, '---'
+		// increment the fmBoundaryCount, and while it's 1
+		// read any lines into the fmText buffer
+		if scanner.Text() == fmBoundary {
+			fmBoundaryCount++
+		}
+
+		switch fmBoundaryCount {
+
+		// look for 'normal' text before we've encountered any
+		// YAML fm boundaries
+		case 0:
+			textPresent, err = regexp.MatchString("[A-z0-9]", scanner.Text())
+			if err != nil {
+				return fm, err
+			}
+
+			// and if we find any, exit.
+			if textPresent {
+				break Scan
+			}
+
+			continue Scan
+
+		// once we hit the first boundary, write the lines to
+		// the fmText buffer
+		case 1:
+
+			fmText.WriteString(scanner.Text())
+			fmText.WriteString("\n")
+			continue Scan
+
+		// when we reach the second boundary, we're done
+		case 2:
+			break Scan
+
+		default:
+			Warning.Println("fmBoundaryCount exceeded two", fmBoundaryCount)
+		}
+	}
+
+	err = yaml.Unmarshal(fmText.Bytes(), &fm)
+
+	return fm, err
 }
 
 func getMetadataFromDirectory(directory string) (*DirectoryInfo, error) {
