@@ -56,9 +56,9 @@ end
 
 Then %r{^I should see a '(.*)' section with the file's path for a title$} do |context|
   contexts = {
-    "blue" => ["file-updated", "card-outline-info"],
-    "green" => ["file-created", "card-outline-success"],
-    "red" => ["file-deleted", "card-outline-danger"]
+    "blue" => ["file-updated", "border-info"],
+    "green" => ["file-created", "border-success"],
+    "red" => ["file-deleted", "border-danger"]
   }
   expect(page).to have_css("div.card.#{contexts[context].join(".")}")
 end
@@ -111,7 +111,7 @@ Then %r{^it should contain a colourised diff showing changes made$} do
 end
 
 Then %r{^the diff '(.*)' icon should be visible$} do |context|
-  within("div.card.file h2") do
+  within("div.card.commit-file h2") do
     expect(page).to have_css("svg.octicon-diff-#{context}")
   end
 end
@@ -136,6 +136,6 @@ end
 
 Then %r{^I should see two file sections, one for each affected file$} do
   within("ol.files") do
-    expect(page).to have_css("div.card.file", count: 2)
+    expect(page).to have_css("div.card.commit-file", count: 2)
   end
 end

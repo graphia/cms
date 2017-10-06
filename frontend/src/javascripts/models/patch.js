@@ -32,7 +32,7 @@ export default class CMSPatch {
 		return (this.oldFilePresent && !this.newFilePresent);
 	};
 
-	icon() {
+	get icon() {
 		let text = null;
 
 		switch (true) {

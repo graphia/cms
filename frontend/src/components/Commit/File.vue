@@ -1,13 +1,13 @@
 <template>
-	<div class="card file" v-bind:class="{
-			'file-updated card-outline-info': fileUpdated,
-			'file-created card-outline-success': fileCreated,
-			'file-deleted card-outline-danger': fileDeleted
+	<div class="card commit-file" v-bind:class="{
+			'file-updated border-info': this.patch.fileUpdated(),
+			'file-created border-success': this.patch.fileCreated(),
+			'file-deleted border-danger': this.patch.fileDeleted()
 		}"
 	>
 
 		<h2 class="card-header">
-			<octicon :icon-name="this.icon">omg</octicon>
+			<octicon :icon-name="this.patch.icon"/>
 			<code>{{ this.path }}</code>
 		</h2>
 
@@ -15,17 +15,7 @@
 
 			<!-- file content display, different content shown depending on the git operation -->
 
-			<div v-if="this.patch.fileUpdated()">
-				<pre v-html="this.patch.diff()"/>
-			</div>
-
-			<div v-else-if="this.patch.fileCreated()" class="file-created">
-				<pre>{{ this.patch.newFile }}</pre>
-			</div>
-
-			<div v-else-if="this.patch.fileDeleted()" class="file-deleted">
-				<pre>{{ this.patch.oldFile }}</pre>
-			</div>
+			<Diff :patch="this.patch"/>
 
 			<!-- end of file content display -->
 
@@ -36,6 +26,7 @@
 
 <script lang="babel">
 	import CMSPatch from '../../javascripts/models/patch.js';
+	import Diff from '../Utilities/Diff';
 
 	export default {
 		name: "CommitFile",
@@ -50,107 +41,11 @@
 				return this.$route.params.hash;
 			}
 		},
+		components: {
+			Diff
+		},
 		created() {
-			// if this is a creation or deletion, don't display a diff
 			this.patch = new CMSPatch(this.commitHash, this.path, this.files.old, this.files.new)
-
 		},
 	};
 </script>
-
-<style lang="scss">
-
-	//FIXME move this somewhere reusable
-
-	// updates/modifications
-	$color-updated: #001f3f;
-	$color-updated-bg: lighten($color-updated, 85%);
-
-	// deletions
-	$color-deleted: #FF4136;
-	$color-deleted-bg: lighten($color-deleted, 35%);
-	$color-deleted-diff-bg: lighten($color-deleted, 35%);
-
-	// creation
-	$color-created: #3D9970;
-	$color-created-bg: lighten($color-created, 50%);
-	$color-created-diff-bg: lighten($color-created, 40%);
-
-	div.file {
-
-		h2 > code {
-			font-size: 70%;
-			color: inherit !important;
-		}
-
-		pre {
-			white-space: pre-wrap !important;
-		}
-	}
-
-	div {
-
-		&.file-updated {
-
-			h2 {
-				background-color: $color-updated-bg;
-				color: $color-updated;
-
-				code {
-					background-color: $color-updated-bg;
-				}
-			}
-
-			pre {
-
-				color: $color-updated;
-
-				ins {
-					background-color: $color-created-diff-bg;
-					text-decoration: none;
-				}
-
-				del {
-					background-color: $color-deleted-diff-bg;
-					text-decoration: line-through;
-				}
-			}
-
-		}
-
-		&.file-created {
-
-			h2 {
-				background-color: $color-created-bg;
-				color: $color-created;
-
-				code {
-					background-color: $color-created-bg;
-
-				}
-			}
-
-			pre {
-				color: $color-created;
-			}
-		}
-
-		&.file-deleted {
-
-			h2 {
-
-				background-color: $color-deleted-bg;
-				color: $color-deleted;
-
-				code {
-					background-color: $color-deleted-bg;
-
-				}
-			}
-
-			pre {
-				color: $color-deleted;
-			}
-		}
-	}
-</style>

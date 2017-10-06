@@ -1,0 +1,69 @@
+
+$color-updated: #001f3f
+$color-updated-bg: lighten($color-updated, 85%)
+
+// deletions
+$color-deleted: #FF4136
+$color-deleted-bg: lighten($color-deleted, 35%)
+$color-deleted-diff-bg: lighten($color-deleted, 35%)
+
+// creation
+$color-created: #3D9970
+$color-created-bg: lighten($color-created, 50%)
+$color-created-diff-bg: lighten($color-created, 40%)
+
+div.raw
+
+	h2 > code
+		font-size: 70%
+		color: inherit !important
+
+	pre
+		white-space: pre-wrap
+		word-wrap: break-word
+
+	&.file-updated
+
+		h2
+			background-color: $color-updated-bg
+			color: $color-updated
+
+			code
+				background-color: $color-updated-bg
+
+		pre.diff
+
+			color: $color-updated
+
+			ins
+				background-color: $color-created-diff-bg
+				text-decoration: none
+
+			del
+				background-color: $color-deleted-diff-bg
+				text-decoration: line-through
+
+
+	&.file-created
+
+		h2
+			background-color: $color-created-bg
+			color: $color-created
+
+			code
+				background-color: $color-created-bg
+
+		pre.diff
+			color: $color-created
+
+	&.file-deleted
+
+		h2
+			background-color: $color-deleted-bg
+			color: $color-deleted
+
+			code
+				background-color: $color-deleted-bg
+
+		pre.diff
+			color: $color-deleted
