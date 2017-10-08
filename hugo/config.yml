@@ -5,3 +5,7 @@ buildDrafts: true
 theme: ../../../graphia-minimal-theme
 relativeURLs: true
 publishDir: ../dist
+fencedCode: true
+
+pygmentsCodeFences: true
+pygmentsUseClasses: true

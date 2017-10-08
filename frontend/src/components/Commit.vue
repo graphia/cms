@@ -1,8 +1,10 @@
 <template>
-	<div class="row">
-		<Breadcrumbs :levels="breadcrumbs"/>
 
-		<div class="col-md-12 commit">
+	<div class="row">
+
+		<Breadcrumbs class="col-lg-12 commit" :levels="breadcrumbs"/>
+
+		<div class="col-lg-12 commit">
 			<h1>Commit</h1>
 
 			<dl class="row">
@@ -22,7 +24,7 @@
 			</dl>
 
 			<ol class="files">
-				<li v-for="(item, key, index) in files">
+				<li v-for="(item, key, index) in files" :key="key">
 					<CommitFile :path='key' :files='item'/>
 				</li>
 			</ol>
