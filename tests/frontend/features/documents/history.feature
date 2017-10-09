@@ -24,6 +24,7 @@ Feature: Commits
 		And I am on the document's history page
 		When I click the 'Show changes' button for a particular revision
 		Then that revision's diff should be visible beneath the revision entry
+		And the diff should have correctly marked insertions and deletions
 
 	Scenario: Breadcrumbs without metadata
 		Given I am on the appendix history page for "appendix_1.md"

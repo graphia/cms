@@ -84,7 +84,7 @@ Then %r{^that revision's diff should be visible beneath the revision entry$} do
   end
 end
 
-Then %r{^the diff should have correclty marked insertions and deletions$} do
+Then %r{^the diff should have correctly marked insertions and deletions$} do
   within(".card.history.commit-#{@commit[:hash]}") do
     expect(page).to have_css("pre.diff del", text: 1)
     expect(page).to have_css("pre.diff ins", text: 2)
