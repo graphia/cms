@@ -311,12 +311,20 @@ func lookupFileHistory(repo *git.Repository, path string, size int) ([]HistoricC
 				fh = fh[:len(fh)-1]
 			}
 
+			changeset, err := diffForCommit(commit.Id().String())
+			if err != nil {
+				Warning.Println("couldn't get diff for commmit", commit.Id().String())
+				return false
+			}
+
 			hc = HistoricCommit{
 				ID:      commit.Id().String(),
 				EntryID: entry.Id.String(),
 				Message: commit.Message(),
 				Author:  commit.Author(),
 				Time:    commit.Author().When,
+				Old:     changeset.Files[path].Old,
+				New:     changeset.Files[path].New,
 			}
 
 			fh = append(fh, hc)

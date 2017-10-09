@@ -9,7 +9,7 @@
 
 			<ol class="commit-list">
 				<li class="commit-list-item" v-for="(item, i) in history" :key="i">
-					<div class="card">
+					<div class="card history" :class="`commit-${item.id}`">
 
 						<div class="card-header">
 							{{ item.author.When | format_date }}
@@ -21,10 +21,28 @@
 								{{ item.message }}
 							</p>
 
-							<a class="card-link" :href="`mailto:${item.author.Email}`">{{ item.author.Name }}</a>
-							<router-link class="card-link" :to="{name: 'commit', params: {hash: item.id}}">View entire commit</router-link>
+							<div class="btn-toolbar">
+
+								<a class="card-link btn btn-secondary" :href="`mailto:${item.author.Email}`">{{ item.author.Name }}</a>
+
+								<router-link class="card-link btn btn-info ml-1" :to="{name: 'commit', params: {hash: item.id}}">View entire commit</router-link>
+
+								<button type="button"
+										class="btn btn-info ml-1"
+										data-toggle="collapse"
+										:data-target="`#diff-${item.id}`"
+								>
+									Show changes
+
+									<octicon :icon-name="'chevron-down'"/>
+								</button>
+
+							</div>
+
+							<Diff :patch="item.patch" :collapsible="true" :hash="item.id"/>
 
 						</div>
+
 					</div>
 
 				</li>
@@ -37,9 +55,11 @@
 <script lang="babel">
 
 	import Breadcrumbs from '../Utilities/Breadcrumbs';
+	import Diff from '../Utilities/Diff';
 
 	import checkResponse from '../../javascripts/response.js';
 	import CMSBreadcrumb from '../../javascripts/models/breadcrumb.js';
+	import CMSPatch from '../../javascripts/models/patch.js';
 
 	export default {
 		name: "DocumentHistory",
@@ -94,21 +114,34 @@
 			var directory = this.directory;
 			var filename = this.filename;
 
-			if (!this.$store.state.activeDocument.populated()) {
-				await this.$store.dispatch("getDocument", {directory, filename});
+			try {
+
+				if (!this.$store.state.activeDocument.populated()) {
+					await this.$store.dispatch("getDocument", {directory, filename});
+				};
+
+				let response = await this.$store.state.activeDocument.log();
+
+				if (!checkResponse(response.status)) {
+					throw(`request failed ${response}`);
+				};
+
+				let json = await response.json();
+
+				// create a CMSPatch (which performs the actual diff) and add it to the object
+				this.history = json.map((revision) => {
+					revision.patch = new CMSPatch(revision.id, "", revision.old, revision.new);
+					return revision;
+				});
+
+			} catch(err) {
+				error.log("Failed to get file history", err)
 			};
-
-			let response = await this.$store.state.activeDocument.log();
-
-			if (!checkResponse(response.status)) {
-				throw("Could not retrieve history");
-			}
-
-			this.history = await response.json()
 
 		},
 		components: {
-			Breadcrumbs
+			Breadcrumbs,
+			Diff
 		}
 	};
 </script>
