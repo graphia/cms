@@ -22,17 +22,21 @@
 							</p>
 
 							<div class="btn-toolbar">
+
 								<a class="card-link btn btn-secondary" :href="`mailto:${item.author.Email}`">{{ item.author.Name }}</a>
 
+								<router-link class="card-link btn btn-info ml-1" :to="{name: 'commit', params: {hash: item.id}}">View entire commit</router-link>
+
 								<button type="button"
-										class="btn btn-info"
+										class="btn btn-info ml-1"
 										data-toggle="collapse"
 										:data-target="`#diff-${item.id}`"
 								>
 									Show changes
+
+									<octicon :icon-name="'chevron-down'"/>
 								</button>
 
-								<router-link class="card-link btn btn-info" :to="{name: 'commit', params: {hash: item.id}}">View entire commit</router-link>
 							</div>
 
 							<Diff :patch="item.patch" :collapsible="true" :hash="item.id"/>

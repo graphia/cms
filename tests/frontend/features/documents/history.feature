@@ -8,6 +8,23 @@ Feature: Commits
 		And my user account exists
 		And I have logged in
 
+	Scenario: Viewing a document's history
+		Given there is a document with '3' revisions
+		When I am on the document's history page
+		Then I should see each revision listed
+
+	Scenario: Viewing a revision's commit
+		Given there is a document with some revisions
+		And I am on the document's history page
+		When I click the 'View entire commit' button for a particular revision
+		Then I should be on that commit's page
+
+	Scenario: Viewing a revision in-line
+		Given there is a document with some revisions
+		And I am on the document's history page
+		When I click the 'Show changes' button for a particular revision
+		Then that revision's diff should be visible beneath the revision entry
+
 	Scenario: Breadcrumbs without metadata
 		Given I am on the appendix history page for "appendix_1.md"
 		Then I should see the following breadcrumbs:
