@@ -655,13 +655,21 @@ func getFile(directory string, filename string, includeMd, includeHTML bool) (fi
 		return file, err
 	}
 
+	hc, err := headCommit(repo)
+	if err != nil && err != ErrMetadataNotFound {
+		return file, err
+	}
+
+	ri := RepositoryInfo{LatestRevision: hc.Id().String()}
+
 	file = &File{
-		Filename:      filename,
-		Path:          directory,
-		HTML:          html,
-		Markdown:      markdown,
-		FrontMatter:   fm,
-		DirectoryInfo: di,
+		Filename:       filename,
+		Path:           directory,
+		HTML:           html,
+		Markdown:       markdown,
+		FrontMatter:    fm,
+		DirectoryInfo:  di,
+		RepositoryInfo: &ri,
 	}
 
 	return file, nil

@@ -681,3 +681,25 @@ func Test_initializeGitRepository(t *testing.T) {
 
 	}
 }
+
+func Test_getRepositoryInfo(t *testing.T) {
+
+	gitRepoPath := "../tests/tmp/repositories/repo_info"
+	_, _ = setupSmallTestRepo(gitRepoPath)
+	repo, _ := repository(config)
+	lr, _ := getLatestRevision(repo)
+	expected := RepositoryInfo{LatestRevision: lr.String()}
+	actual, _ := getRepositoryInfo()
+
+	assert.Equal(t, expected, actual)
+}
+
+func Test_getLatestRevision(t *testing.T) {
+
+	gitRepoPath := "../tests/tmp/repositories/repo_info"
+	expected, _ := setupSmallTestRepo(gitRepoPath)
+	repo, _ := repository(config)
+	actual, _ := getLatestRevision(repo)
+
+	assert.Equal(t, expected, actual)
+}

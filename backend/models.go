@@ -42,8 +42,9 @@ type FrontMatter struct {
 // FIXME eventually it will, currently just the name, need to
 // work out how best to store it
 type Directory struct {
-	Path          string `json:"path" yaml:"path"`
-	DirectoryInfo `json:"info"`
+	Path           string `json:"path" yaml:"path"`
+	DirectoryInfo  `json:"info"`
+	RepositoryInfo `json:"repository_info,omitempty"`
 }
 
 // DirectorySummary contains the directory's metadata plus
@@ -62,6 +63,12 @@ type DirectoryInfo struct {
 	Body        string `json:"body" yaml:"-"`
 }
 
+// RepositoryInfo provides some data about the repo, such as
+// the latest revision
+type RepositoryInfo struct {
+	LatestRevision string `json:"latest_revision"`
+}
+
 // FileItem contains enough file information for listing
 // HTML and raw Markdown content is omitted
 type FileItem struct {
@@ -75,13 +82,14 @@ type FileItem struct {
 // File represents a Markdown file and can be returned with
 // HTML or Markdown contents (or both if required)
 type File struct {
-	AbsoluteFilename string         `json:"absolute_filename"`
-	Filename         string         `json:"filename"`
-	Path             string         `json:"path"`
-	HTML             *string        `json:"html"`
-	Markdown         *string        `json:"markdown"`
-	FrontMatter      FrontMatter    `json:"frontmatter"`
-	DirectoryInfo    *DirectoryInfo `json:"directory_info,omitempty"`
+	AbsoluteFilename string          `json:"absolute_filename"`
+	Filename         string          `json:"filename"`
+	Path             string          `json:"path"`
+	HTML             *string         `json:"html"`
+	Markdown         *string         `json:"markdown"`
+	FrontMatter      FrontMatter     `json:"frontmatter"`
+	DirectoryInfo    *DirectoryInfo  `json:"directory_info,omitempty"`
+	RepositoryInfo   *RepositoryInfo `json:"repository_info,omitempty"`
 }
 
 // Attachment belongs to a File, usually an image

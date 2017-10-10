@@ -1377,3 +1377,28 @@ func Test_setupInitializeRepository_Failure(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 	assert.Equal(t, fr.Message, "Cannot initialize repository, see log")
 }
+
+func Test_apiGetRepositoryInformationHandler(t *testing.T) {
+	server = createTestServerWithContext()
+
+	gitRepoPath := "../tests/tmp/repositories/repo_info"
+	oid, _ := setupSmallTestRepo(gitRepoPath)
+
+	target := fmt.Sprintf("%s/%s", server.URL, "api/repository_info")
+
+	client := &http.Client{}
+
+	req, _ := http.NewRequest("GET", target, nil)
+
+	resp, _ := client.Do(req)
+
+	var actual RepositoryInfo
+
+	json.NewDecoder(resp.Body).Decode(&actual)
+
+	expected := RepositoryInfo{LatestRevision: oid.String()}
+
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+	assert.Equal(t, expected, actual)
+
+}

@@ -1148,6 +1148,24 @@ func apiGetCommitsHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func apiGetRepositoryInformationHandler(w http.ResponseWriter, r *http.Request) {
+	var fr FailureResponse
+	var ri RepositoryInfo
+	var err error
+
+	ri, err = getRepositoryInfo()
+	if err != nil {
+		fr = FailureResponse{
+			Message: fmt.Sprintln("Failed to retrieve repository info", err.Error()),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	JSONResponse(ri, http.StatusOK, w)
+
+}
+
 // GET /api/commits/:commit_hash
 //
 // returns a single commit containing relevant info plus the list of files
