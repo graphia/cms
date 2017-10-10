@@ -8,6 +8,7 @@ import CMSDirectory from '../javascripts/models/directory.js';
 
 import CMSAuth from '../javascripts/auth.js';
 import CMSBroadcast from '../javascripts/broadcast.js';
+import CMSRepo from '../javascripts/models/repo.js';
 
 Vue.use(Vuex);
 
@@ -17,7 +18,8 @@ const state = {
 	activeDirectory: new CMSDirectory,
 	commit: null,
 	auth: new CMSAuth,
-	broadcast: new CMSBroadcast
+	broadcast: new CMSBroadcast,
+	latestRevision: null,
 };
 
 const mutations = {
@@ -37,6 +39,10 @@ const mutations = {
 	setActiveDirectory(context, directory) {
 		console.debug("setting active directory", directory);
 		state.activeDirectory = directory;
+	},
+	async setLatestRevision(context, hash) {
+		console.debug("setting latest revision", hash);
+		state.latestRevision = hash;
 	}
 };
 const getters = {};
@@ -59,6 +65,9 @@ const actions = {
 	getDirectory(context, name) {
 		// get and set activeDirectory by name
 		return CMSDirectory.get(name);
+	},
+	getLatestRevision(context) {
+		return CMSRepo.getLatestRevision();
 	}
 };
 

@@ -16,7 +16,7 @@
 
 					<router-link :to="{name: 'home'}" class="nav-link home-link">Home</router-link>
 
-					<router-link v-for="directory in directories" :to="{name: 'document_index', params: {directory: directory.path}}" class="nav-link directory-link">
+					<router-link v-for="(directory, i) in directories" :key="i" :to="{name: 'document_index', params: {directory: directory.path}}" class="nav-link directory-link">
 						{{ directory.path | capitalize }}
 					</router-link>
 
@@ -67,6 +67,7 @@
 
 
 				this.fetchDirectories();
+				this.getRepoMetadata();
 
 			}
 			catch(err) {
@@ -85,6 +86,9 @@
 
 			redirectToInitializeRepo() {
 				this.$router.push({name: 'initialize_repo'});
+			},
+			async getRepoMetadata() {
+				this.$store.dispatch("getLatestRevision");
 			},
 			async fetchDirectories() {
 				let path = `${config.api}/directories`

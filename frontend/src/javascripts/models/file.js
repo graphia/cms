@@ -170,6 +170,7 @@ export default class CMSFile {
 		let file = await response.json()
 		let doc = new CMSFile(file);
 		store.state.activeDocument = doc;
+		store.state.latestRevision = file.repository_info.latest_revision;
 
 		doc.fetchAttachments();
 		return doc;
