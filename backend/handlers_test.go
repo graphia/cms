@@ -314,7 +314,7 @@ func TestApiCreateFileInDirectory(t *testing.T) {
 	server = createTestServerWithContext()
 
 	repoPath := "../tests/tmp/repositories/create_file"
-	setupSmallTestRepo(repoPath)
+	lr, _ := setupSmallTestRepo(repoPath)
 
 	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files")
 
@@ -329,8 +329,9 @@ func TestApiCreateFileInDirectory(t *testing.T) {
 	}
 
 	nc := &NewCommit{
-		Message: "Forty whacks with a wet noodle",
-		Files:   []NewCommitFile{ncf},
+		Message:        "Forty whacks with a wet noodle",
+		Files:          []NewCommitFile{ncf},
+		RepositoryInfo: RepositoryInfo{LatestRevision: lr.String()},
 	}
 
 	payload, err := json.Marshal(nc)
@@ -423,7 +424,7 @@ func TestApiCreateImageFileInDirectory(t *testing.T) {
 	server = createTestServerWithContext()
 
 	repoPath := "../tests/tmp/repositories/create_image_file"
-	setupMultipleFiletypesTestRepo(repoPath)
+	lr, _ := setupMultipleFiletypesTestRepo(repoPath)
 
 	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files")
 
@@ -437,8 +438,9 @@ func TestApiCreateImageFileInDirectory(t *testing.T) {
 	}
 
 	nc := &NewCommit{
-		Message: "Forty whacks with a wet noodle",
-		Files:   []NewCommitFile{ncf},
+		Message:        "Forty whacks with a wet noodle",
+		Files:          []NewCommitFile{ncf},
+		RepositoryInfo: RepositoryInfo{LatestRevision: lr.String()},
 	}
 
 	payload, err := json.Marshal(nc)
@@ -487,7 +489,7 @@ func TestApiUpdateFileInDirectory(t *testing.T) {
 	server = createTestServerWithContext()
 
 	repoPath := "../tests/tmp/repositories/update_file"
-	setupSmallTestRepo(repoPath)
+	lr, _ := setupSmallTestRepo(repoPath)
 
 	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files/document_3.md")
 
@@ -502,8 +504,9 @@ func TestApiUpdateFileInDirectory(t *testing.T) {
 	}
 
 	nc := &NewCommit{
-		Message: "Forty whacks with a wet noodle",
-		Files:   []NewCommitFile{ncf},
+		Message:        "Forty whacks with a wet noodle",
+		Files:          []NewCommitFile{ncf},
+		RepositoryInfo: RepositoryInfo{LatestRevision: lr.String()},
 	}
 
 	payload, err := json.Marshal(nc)
@@ -598,7 +601,7 @@ func TestApiUpdateOtherFileInDirectory(t *testing.T) {
 	server = createTestServerWithContext()
 
 	repoPath := "../tests/tmp/repositories/update_file"
-	setupSmallTestRepo(repoPath)
+	lr, _ := setupSmallTestRepo(repoPath)
 
 	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files/document_3.md")
 
@@ -613,8 +616,9 @@ func TestApiUpdateOtherFileInDirectory(t *testing.T) {
 	}
 
 	nc := &NewCommit{
-		Message: "Forty whacks with a wet noodle",
-		Files:   []NewCommitFile{ncf},
+		Message:        "Forty whacks with a wet noodle",
+		Files:          []NewCommitFile{ncf},
+		RepositoryInfo: RepositoryInfo{LatestRevision: lr.String()},
 	}
 
 	payload, err := json.Marshal(nc)
@@ -644,13 +648,14 @@ func TestApiUpdateNoFilesInDirectory(t *testing.T) {
 	server = createTestServerWithContext()
 
 	repoPath := "../tests/tmp/repositories/update_file"
-	setupSmallTestRepo(repoPath)
+	lr, _ := setupSmallTestRepo(repoPath)
 
 	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files/document_3.md")
 
 	nc := &NewCommit{
-		Message: "Forty whacks with a wet noodle",
-		Files:   []NewCommitFile{},
+		Message:        "Forty whacks with a wet noodle",
+		Files:          []NewCommitFile{},
+		RepositoryInfo: RepositoryInfo{LatestRevision: lr.String()},
 	}
 
 	payload, err := json.Marshal(nc)

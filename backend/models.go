@@ -8,9 +8,10 @@ import (
 
 // NewCommit will replace RepoWrite and allow multiple files
 type NewCommit struct {
-	Message     string               `json:"message" validate:"required,min=5"`
-	Files       []NewCommitFile      `json:"files"`
-	Directories []NewCommitDirectory `json:"directories"`
+	Message        string               `json:"message" validate:"required,min=5"`
+	Files          []NewCommitFile      `json:"files"`
+	Directories    []NewCommitDirectory `json:"directories"`
+	RepositoryInfo `json:"repository_info" validate:"required"`
 }
 
 // NewCommitDirectory holds directory info for creating new dirs
@@ -65,8 +66,10 @@ type DirectoryInfo struct {
 
 // RepositoryInfo provides some data about the repo, such as
 // the latest revision
+// validated as required because when sent with a NewCommit
+// we need to ensure that we're working from an up-to-date tree
 type RepositoryInfo struct {
-	LatestRevision string `json:"latest_revision"`
+	LatestRevision string `json:"latest_revision" validate:"required"`
 }
 
 // FileItem contains enough file information for listing
