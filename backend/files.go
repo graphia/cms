@@ -26,6 +26,10 @@ var (
 	// ErrDirectoryNotFound occurs when a directory can't be found in the
 	// git repository
 	ErrDirectoryNotFound = errors.New("directory not found")
+
+	// ErrRepoOutOfSync occurs when changes are made to the repository
+	// between starting to edit and submitting the changes
+	ErrRepoOutOfSync = errors.New("repository out of sync")
 )
 
 // getFilesInDir returns a list of FileItems for listing
@@ -155,7 +159,6 @@ func createFiles(nc NewCommit, user User) (oid *git.Oid, err error) {
 	return oid, err
 }
 
-// Replaces updateFile
 func updateFiles(nc NewCommit, user User) (oid *git.Oid, err error) {
 
 	repo, err := repository(config)
@@ -173,9 +176,21 @@ func writeFiles(repo *git.Repository, nc NewCommit, user User) (oid *git.Oid, er
 
 	index, err := repo.Index()
 	if err != nil {
+		Error.Println("Failed to get repo index", err.Error())
 		return nil, err
 	}
 	defer index.Free()
+
+	// Latest Revision?
+	var current bool
+
+	current, err = checkLatestRevision(repo, nc.RepositoryInfo.LatestRevision)
+	if err != nil {
+		return oid, err
+	}
+	if !current {
+		return oid, ErrRepoOutOfSync
+	}
 
 	var contents []byte
 
@@ -186,11 +201,13 @@ func writeFiles(repo *git.Repository, nc NewCommit, user User) (oid *git.Oid, er
 		// get the file contents in the correct format
 		contents, err = extractContents(ncf)
 		if err != nil {
+			Error.Println("Failed to extract contents", err.Error())
 			return nil, err
 		}
 
 		oid, err = repo.CreateBlobFromBuffer(contents)
 		if err != nil {
+			Error.Println("Failed to create blob from buffer", err.Error())
 			return nil, err
 		}
 

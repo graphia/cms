@@ -87,6 +87,18 @@ func getLatestRevision(repo *git.Repository) (oid *git.Oid, err error) {
 
 }
 
+func checkLatestRevision(repo *git.Repository, hash string) (bool, error) {
+	var lr *git.Oid
+	var err error
+
+	lr, err = getLatestRevision(repo)
+	if err != nil {
+		return false, err
+	}
+
+	return (lr.String() == hash), nil
+}
+
 func getCommits(qty int) (commits []Commit, err error) {
 	repo, err := repository(config)
 	if err != nil {

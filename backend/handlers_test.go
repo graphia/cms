@@ -375,6 +375,55 @@ func TestApiCreateFileInDirectory(t *testing.T) {
 
 }
 
+func TestApiCreateFileInDirectoryNoRepoInfo(t *testing.T) {
+	server = createTestServerWithContext()
+
+	repoPath := "../tests/tmp/repositories/create_file"
+	_, _ = setupSmallTestRepo(repoPath)
+
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files")
+
+	ncf := NewCommitFile{
+		Path:     "documents",
+		Filename: "document_6.md",
+		Body:     "# The quick brown fox",
+		FrontMatter: FrontMatter{
+			Title:  "Document Six",
+			Author: "Kent Brockman & Troy McClure",
+		},
+	}
+
+	nc := &NewCommit{
+		Message: "Forty whacks with a wet noodle",
+		Files:   []NewCommitFile{ncf},
+	}
+
+	payload, err := json.Marshal(nc)
+	if err != nil {
+		panic(err)
+	}
+
+	b := bytes.NewBuffer(payload)
+
+	client := &http.Client{}
+
+	req, _ := http.NewRequest("POST", target, b)
+
+	resp, err := client.Do(req)
+
+	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+
+	actual := make(map[string]string)
+
+	json.NewDecoder(resp.Body).Decode(&actual)
+
+	expected := make(map[string]string)
+	expected["LatestRevision"] = "is a required field"
+
+	assert.Equal(t, expected, actual)
+
+}
+
 func TestApiCreateFileInDirectoryWithErrors(t *testing.T) {
 	server = createTestServerWithContext()
 

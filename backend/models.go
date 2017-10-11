@@ -11,7 +11,7 @@ type NewCommit struct {
 	Message        string               `json:"message" validate:"required,min=5"`
 	Files          []NewCommitFile      `json:"files"`
 	Directories    []NewCommitDirectory `json:"directories"`
-	RepositoryInfo `json:"repository_info" validate:"required"`
+	RepositoryInfo `json:"repository_info"`
 }
 
 // NewCommitDirectory holds directory info for creating new dirs

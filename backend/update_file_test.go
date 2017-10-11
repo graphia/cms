@@ -3,72 +3,11 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
-
-func TestUpdateFile(t *testing.T) {
-
-	// copy the small repo tmp/repositories/update_file
-	repoPath := "../tests/tmp/repositories/update_file"
-
-	oid, _ := setupSmallTestRepo(repoPath)
-
-	// initialise a config obj so updateFile looks in the right place
-	config = Config{
-		Repository: filepath.Join(repoPath),
-	}
-
-	user := User{
-		Name:  "Milhouse van Houten",
-		Email: "milhouse@springfield.gov",
-	}
-
-	ncf := NewCommitFile{
-		Body:     "# The quick brown fox\n\njumped over the lazy dog",
-		Filename: "document_2.md",
-		Path:     "documents",
-		FrontMatter: FrontMatter{
-			Title:  "Document Two",
-			Author: "Hans Moleman",
-		},
-	}
-
-	nc := NewCommit{
-		Message: "Update document 2",
-		Files:   []NewCommitFile{ncf},
-	}
-
-	oid, err := updateFiles(nc, user)
-
-	if err != nil {
-		panic(err)
-	}
-	repo, _ := repository(config)
-	hc, _ := headCommit(repo)
-
-	// our commit hash should now equal the repo's head
-	assert.Equal(t, oid, hc.Id())
-
-	// ensure the file exists and has the right content
-	contents, _ := ioutil.ReadFile(filepath.Join(repoPath, ncf.Path, ncf.Filename))
-	assert.Contains(t, string(contents), ncf.Body)
-	assert.Contains(t, string(contents), ncf.FrontMatter.Author)
-	assert.Contains(t, string(contents), ncf.FrontMatter.Title)
-
-	// ensure the most recent commit has the right name and email
-	lastCommit, _ := repo.LookupCommit(oid)
-	assert.Equal(t, lastCommit.Committer().Name, user.Name)
-	assert.Equal(t, lastCommit.Committer().Email, user.Email)
-	assert.Equal(t, lastCommit.Message(), nc.Message)
-
-	// finally clean up by removing the tmp repo
-	_ = os.RemoveAll(repoPath)
-
-}
 
 func TestUpdateFiles(t *testing.T) {
 
@@ -108,8 +47,9 @@ func TestUpdateFiles(t *testing.T) {
 	}
 
 	nc := NewCommit{
-		Message: "Update document 1 and 2",
-		Files:   []NewCommitFile{ncf1, ncf2},
+		Message:        "Update document 1 and 2",
+		Files:          []NewCommitFile{ncf1, ncf2},
+		RepositoryInfo: RepositoryInfo{LatestRevision: oid.String()},
 	}
 
 	oid, err := updateFiles(nc, user)

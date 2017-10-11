@@ -43,6 +43,9 @@ export default class CMSCommit {
 			path: file.path,
 			filename: file.filename,
 			body: file.markdown,
+			repository_info: {
+				latest_commit: store.state.latestCommit
+			},
 
 			// and the frontmatter
 			frontmatter: {

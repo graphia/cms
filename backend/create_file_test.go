@@ -13,7 +13,7 @@ func TestCreateFiles(t *testing.T) {
 
 	repoPath := "../tests/tmp/repositories/create_file"
 
-	setupSmallTestRepo(repoPath)
+	lr, _ := setupSmallTestRepo(repoPath)
 
 	user := User{
 		Name:  "Milhouse van Houten",
@@ -41,8 +41,9 @@ func TestCreateFiles(t *testing.T) {
 	}
 
 	nc := NewCommit{
-		Message: "Update document 2",
-		Files:   []NewCommitFile{ncf1, ncf2},
+		Message:        "Update document 2",
+		Files:          []NewCommitFile{ncf1, ncf2},
+		RepositoryInfo: RepositoryInfo{LatestRevision: lr.String()},
 	}
 
 	oid, err := createFiles(nc, user)
