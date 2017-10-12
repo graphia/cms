@@ -91,6 +91,10 @@ func checkLatestRevision(repo *git.Repository, hash string) (bool, error) {
 	var lr *git.Oid
 	var err error
 
+	if hash == "" {
+		return false, fmt.Errorf("No hash provided")
+	}
+
 	lr, err = getLatestRevision(repo)
 	if err != nil {
 		return false, err

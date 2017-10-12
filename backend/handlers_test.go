@@ -243,7 +243,7 @@ func Test_apiGetDirectoryMetadata(t *testing.T) {
 	)
 }
 
-func TestApiCreateDirectory(t *testing.T) {
+func TestApiCreateDirectoryHandler(t *testing.T) {
 	server = createTestServerWithContext()
 
 	repoPath := "../tests/tmp/repositories/create_directory"
@@ -310,7 +310,7 @@ func TestApiCreateDirectory(t *testing.T) {
 
 }
 
-func TestApiCreateFileInDirectory(t *testing.T) {
+func TestApiCreateFileInDirectoryHandler(t *testing.T) {
 	server = createTestServerWithContext()
 
 	repoPath := "../tests/tmp/repositories/create_file"
@@ -466,6 +466,56 @@ func TestApiCreateFileInDirectoryWithErrors(t *testing.T) {
 
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 	assert.Contains(t, "is a required field", errors["message"])
+
+}
+
+func TestApiCreateFileInDirectoryRepoOutOfDate(t *testing.T) {
+	server = createTestServerWithContext()
+
+	repoPath := "../tests/tmp/repositories/create_file"
+	firstCommit, _ := setupSmallTestRepo(repoPath)
+	repo, _ := repository(config)
+
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files")
+
+	ncf := NewCommitFile{
+		Path:     "documents",
+		Filename: "document_9.md",
+		Body:     "# The quick brown fox",
+		FrontMatter: FrontMatter{
+			Title:  "Document Six",
+			Author: "Kent Brockman & Troy McClure",
+		},
+	}
+
+	nc := &NewCommit{
+		Message:        "First Commit",
+		Files:          []NewCommitFile{ncf},
+		RepositoryInfo: RepositoryInfo{LatestRevision: firstCommit.String()},
+	}
+
+	// Insert another commit so firstCommit is no longer current
+	_, _ = createRandomFile(repo, "document_5.md", "whoosh")
+
+	payload, err := json.Marshal(nc)
+	if err != nil {
+		panic(err)
+	}
+
+	b := bytes.NewBuffer(payload)
+
+	client := &http.Client{}
+
+	req, _ := http.NewRequest("POST", target, b)
+
+	resp, err := client.Do(req)
+
+	var fr FailureResponse
+
+	json.NewDecoder(resp.Body).Decode(&fr)
+
+	assert.Equal(t, http.StatusConflict, resp.StatusCode)
+	assert.Contains(t, fr.Message, "Repository out of sync with commit")
 
 }
 
@@ -642,6 +692,53 @@ func TestApiUpdateFileInDirectoryWithErrors(t *testing.T) {
 
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 	assert.Contains(t, "is a required field", errors["message"])
+
+}
+
+func TestApiUpdateFileInDirectoryRepoOutOfDate(t *testing.T) {
+	server = createTestServerWithContext()
+	repo, _ := repository(config)
+
+	repoPath := "../tests/tmp/repositories/update_file"
+	firstCommit, _ := setupSmallTestRepo(repoPath)
+
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files/document_3.md")
+
+	ncf := NewCommitFile{
+		Path:     "documents",
+		Filename: "document_3.md",
+		Body:     "# The quick brown fox",
+		FrontMatter: FrontMatter{
+			Title:  "Document Three",
+			Author: "Timothy Lovejoy",
+		},
+	}
+
+	nc := &NewCommit{
+		Message:        "First Commit",
+		Files:          []NewCommitFile{ncf},
+		RepositoryInfo: RepositoryInfo{LatestRevision: firstCommit.String()},
+	}
+
+	// Insert another commit so firstCommit is no longer current
+	_, _ = createRandomFile(repo, "document_5.md", "whoosh")
+
+	payload, _ := json.Marshal(nc)
+
+	buff := bytes.NewBuffer(payload)
+
+	client := &http.Client{}
+
+	req, _ := http.NewRequest("PATCH", target, buff)
+
+	resp, _ := client.Do(req)
+
+	var fr FailureResponse
+
+	json.NewDecoder(resp.Body).Decode(&fr)
+
+	assert.Equal(t, http.StatusConflict, resp.StatusCode)
+	assert.Contains(t, fr.Message, "Repository out of sync with commit")
 
 }
 
@@ -883,11 +980,12 @@ func TestApiDeleteDirectory(t *testing.T) {
 	var err error
 
 	repoPath := "../tests/tmp/repositories/delete_dir"
-	setupSmallTestRepo(repoPath)
+	lr, _ := setupSmallTestRepo(repoPath)
 
 	ncd := NewCommitDirectory{Path: "appendices"}
 	nc := &NewCommit{
-		Directories: []NewCommitDirectory{ncd},
+		Directories:    []NewCommitDirectory{ncd},
+		RepositoryInfo: RepositoryInfo{LatestRevision: lr.String()},
 	}
 
 	target := fmt.Sprintf("%s/%s/%s", server.URL, "api/directories", ncd.Path)
@@ -937,20 +1035,106 @@ func TestApiDeleteDirectory(t *testing.T) {
 
 }
 
-// make sure error is returned when trying to delete a non-existant directory
-func TestApiDeleteDirectoryNotExists(t *testing.T) {
+func TestApiDeleteDirectoryRepoOutOfDate(t *testing.T) {
 	server = createTestServerWithContext()
 
 	var err error
 
 	repoPath := "../tests/tmp/repositories/delete_dir"
+	firstCommit, _ := setupSmallTestRepo(repoPath)
+	repo, _ := repository(config)
+
+	ncd := NewCommitDirectory{Path: "appendices"}
+	nc := &NewCommit{
+		Directories:    []NewCommitDirectory{ncd},
+		RepositoryInfo: RepositoryInfo{LatestRevision: firstCommit.String()},
+	}
+
+	_, _ = createRandomFile(repo, "document_5.md", "whoosh")
+
+	target := fmt.Sprintf("%s/%s/%s", server.URL, "api/directories", ncd.Path)
+
+	// before deleting, make sure appendix files are present
+	_, err = os.Stat(filepath.Join(repoPath, ncd.Path, "appendix_1.md"))
+	assert.False(t, os.IsNotExist(err))
+	_, err = os.Stat(filepath.Join(repoPath, ncd.Path, "appendix_2.md"))
+	assert.False(t, os.IsNotExist(err))
+
+	payload, _ := json.Marshal(nc)
+
+	client := &http.Client{}
+
+	buff := bytes.NewBuffer(payload)
+
+	req, _ := http.NewRequest("DELETE", target, buff)
+
+	resp, err := client.Do(req)
+
+	// Created because we're creating a commit (despite deleting
+	// a directory)
+	assert.Equal(t, http.StatusConflict, resp.StatusCode)
+
+	var fr FailureResponse
+
+	json.NewDecoder(resp.Body).Decode(&fr)
+	assert.Contains(t, fr.Message, "Repository out of sync with commit")
+
+	// make sure dirs haven't actually been deleted
+	_, err = os.Stat(filepath.Join(repoPath, ncd.Path, "appendix_1.md"))
+	assert.False(t, os.IsNotExist(err))
+	_, err = os.Stat(filepath.Join(repoPath, ncd.Path, "appendix_2.md"))
+	assert.False(t, os.IsNotExist(err))
+
+}
+
+func TestApiDeleteDirectoryNoRepoInfo(t *testing.T) {
+	server = createTestServerWithContext()
+
+	repoPath := "../tests/tmp/repositories/delete_dir"
 	setupSmallTestRepo(repoPath)
+
+	ncd := NewCommitDirectory{Path: "appendices"}
+	nc := &NewCommit{
+		Directories: []NewCommitDirectory{ncd},
+	}
+
+	target := fmt.Sprintf("%s/%s/%s", server.URL, "api/directories", ncd.Path)
+
+	payload, _ := json.Marshal(nc)
+
+	client := &http.Client{}
+
+	buff := bytes.NewBuffer(payload)
+
+	req, _ := http.NewRequest("DELETE", target, buff)
+
+	resp, _ := client.Do(req)
+
+	// Created because we're creating a commit (despite deleting
+	// a directory)
+	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+
+	var fr FailureResponse
+	json.NewDecoder(resp.Body).Decode(&fr)
+
+	assert.Contains(t, fr.Message, "No hash provided")
+
+}
+
+// make sure error is returned when trying to delete a non-existant directory
+func TestApiDeleteDirectoryNotExists(t *testing.T) {
+	server = createTestServerWithContext()
+	var err error
+
+	repoPath := "../tests/tmp/repositories/delete_dir"
+	lr, _ := setupSmallTestRepo(repoPath)
 
 	target := fmt.Sprintf("%s/%s/%s", server.URL, "api/directories", "favourites")
 
 	ncd := NewCommitDirectory{Path: "favourites"}
 	nc := &NewCommit{
-		Directories: []NewCommitDirectory{ncd},
+		Directories:    []NewCommitDirectory{ncd},
+		RepositoryInfo: RepositoryInfo{LatestRevision: lr.String()},
 	}
 
 	payload, err := json.Marshal(nc)
