@@ -18,7 +18,7 @@ build:
 build-dev:
 	rm -rf dist
 	mkdir dist
-	cd frontend && NODE_ENV=production brunch build
+	cd frontend && brunch build
 	cp -R frontend/public/cms dist/cms
 	go build -o graphia-cms ${ALL}
 
