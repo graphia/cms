@@ -3,6 +3,8 @@
 
 		<Breadcrumbs :levels="breadcrumbs"/>
 
+		<Conflict/>
+
 		<h1>{{ heading }}</h1>
 
 		<form id="new-document-form" @submit="create">
@@ -22,8 +24,9 @@
 	import checkResponse from "../../javascripts/response.js";
 	import CMSBreadcrumb from '../../javascripts/models/breadcrumb.js';
 
-	import Editor from "../../components/Editor";
 	import Breadcrumbs from '../Utilities/Breadcrumbs';
+	import Editor from "../Editor";
+	import Conflict from "./Conflict";
 
 	export default {
 		name: "DocumentNew",
@@ -97,12 +100,24 @@
 				let response = await this.document.create(this.commit);
 
 				if (!checkResponse(response.status)) {
-					throw("could not create document");
+
+					if (response.status == 409) {
+						this.showConflictModal();
+						return;
+					};
+
+					// any other error
+					throw("could not create document", response);
+					return;
 				};
 
 				console.debug("Document saved, redirecting to 'document_show'");
 				this.redirectToShowDocument(this.document.path, this.document.filename);
 
+			},
+
+			showConflictModal() {
+				$("#conflict-warning.modal").modal()
 			},
 
 			redirectToShowDocument(directory, filename) {
@@ -115,7 +130,8 @@
 		},
 		components: {
 			Editor,
-			Breadcrumbs
+			Breadcrumbs,
+			Conflict
 		}
 	}
 </script>

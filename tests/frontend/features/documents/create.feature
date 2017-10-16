@@ -79,6 +79,12 @@ Feature: Creating documents
 		When I haven't interacted with the form
 		Then the submit button should be disabled
 
+	Scenario: Correctly dealing with conflicts
+		Given I am on the new document page
+		And a repository update has taken place in the background
+		When I add my document's details and submit the form
+		Then I should see the conflict modal box
+
 	Scenario: Breadcrumbs without metadata
 		Given I am on the new appendix page
 		Then I should see the following breadcrumbs:

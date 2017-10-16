@@ -202,10 +202,6 @@ export default class CMSFile {
 				body: commit.filesJSON(this)
 			});
 
-			if (!checkResponse(response.status)) {
-				return
-			}
-
 			return response;
 		}
 		catch(err) {
@@ -231,10 +227,6 @@ export default class CMSFile {
 				body: commit.filesJSON(this)
 			});
 
-			if (!checkResponse(response.status)) {
-				return
-			}
-
 			return response;
 		}
 		catch(err) {
@@ -256,13 +248,7 @@ export default class CMSFile {
 				body: commit.filesJSON(this)
 			});
 
-			if (!checkResponse(response.status)) {
-				console.warn("could not destroy file", response);
-				return;
-			};
-
-			// if delete was successful
-			return;
+			return response;
 		}
 		catch(err) {
 			console.error(`There was a problem deleting document ${this.filename} from ${this.path}, ${err}`);
@@ -280,10 +266,6 @@ export default class CMSFile {
 				method: "GET",
 				headers: store.state.auth.authHeader()
 			});
-
-			if (!checkResponse(response.status)) {
-				return
-			}
 
 			return response;
 		}
@@ -315,10 +297,6 @@ export default class CMSFile {
 				console.debug("No attachments found");
 				return;
 			}
-
-			if (!checkResponse(response.status)) {
-				return;
-			};
 
 			let data = await response.json();
 
