@@ -1,6 +1,35 @@
 <script lang="babel">
 	export default {
 		name: "DocumentConflict",
+		computed: {
+			document() {
+				return this.$store.state.activeDocument;
+			},
+			directory() {
+				return this.$route.params.directory;
+			}
+		},
+		methods: {
+			downloadFile() {
+
+				let a = document.createElement("a");
+
+				document.body.appendChild(a);
+				a.style = "display: none";
+
+				let blob = new Blob(
+						[this.document.markdown],
+						{type: "octet/stream"}
+					),
+					url = window.URL.createObjectURL(blob);
+
+				a.href = url;
+				a.download = this.document.filename;
+				a.click();
+				window.URL.revokeObjectURL(url);
+
+			}
+		}
 	};
 </script>
 
@@ -21,8 +50,10 @@
 					</p>
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-primary">Download your copy</button>
-					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+					<button @click="downloadFile" type="button" class="btn btn-success">Download your copy</button>
+					<router-link class="btn btn-danger" data-dismiss="modal" :to="{name: 'document_index', params: {directory: this.directory}}">
+						Close
+					</router-link>
 				</div>
 			</div>
 		</div>
