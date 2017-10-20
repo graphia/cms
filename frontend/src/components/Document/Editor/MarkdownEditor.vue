@@ -16,7 +16,7 @@
 <script lang="babel">
 
 	import SimpleMDE from 'simplemde';
-	import CMSFileAttachment from '../../javascripts/models/attachment.js';
+	import CMSFileAttachment from '../../../javascripts/models/attachment.js';
 
 	export default {
 		name: "MarkdownEditor",

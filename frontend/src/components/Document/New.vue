@@ -25,7 +25,7 @@
 	import CMSBreadcrumb from '../../javascripts/models/breadcrumb.js';
 
 	import Breadcrumbs from '../Utilities/Breadcrumbs';
-	import Editor from "../Editor";
+	import Editor from "./Editor";
 	import Conflict from "./Conflict";
 
 	export default {

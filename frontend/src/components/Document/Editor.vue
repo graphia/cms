@@ -63,11 +63,11 @@
 
 <script lang="babel">
 
-	import MarkdownEditor from "../components/Editor/MarkdownEditor";
-	import FrontMatter from "../components/Editor/FrontMatter";
-	import FilenameField from "../components/Editor/FilenameField";
-	import Gallery from "../components/Editor/Gallery";
-	import CommitMessageField from "../components/Editor/CommitMessageField";
+	import MarkdownEditor from "./Editor/MarkdownEditor";
+	import FrontMatter from "./Editor/FrontMatter";
+	import FilenameField from "./Editor/FilenameField";
+	import Gallery from "./Editor/Gallery";
+	import CommitMessageField from "./Editor/CommitMessageField";
 
 	export default {
 		name: "Editor",

@@ -202,13 +202,13 @@ func writeFiles(repo *git.Repository, nc NewCommit, user User) (oid *git.Oid, er
 		contents, err = extractContents(ncf)
 		if err != nil {
 			Error.Println("Failed to extract contents", err.Error())
-			return nil, err
+			return oid, err
 		}
 
 		oid, err = repo.CreateBlobFromBuffer(contents)
 		if err != nil {
 			Error.Println("Failed to create blob from buffer", err.Error())
-			return nil, err
+			return oid, err
 		}
 
 		// build the git index entry and add it to the index
@@ -216,15 +216,12 @@ func writeFiles(repo *git.Repository, nc NewCommit, user User) (oid *git.Oid, er
 
 		err = index.Add(&ie)
 		if err != nil {
-			return nil, err
+			return oid, err
 		}
 
 	}
 
 	oid, err = writeTreeAndCommit(repo, index, nc, user)
-	if err != nil {
-		return oid, err
-	}
 
 	return oid, err
 

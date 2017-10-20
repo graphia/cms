@@ -22,7 +22,7 @@
 
 <script lang="babel">
 	import Breadcrumbs from '../Utilities/Breadcrumbs';
-	import Editor from "../Editor";
+	import Editor from "./Editor";
 	import Conflict from "./Conflict";
 
 	import checkResponse from "../../javascripts/response.js";

@@ -28,7 +28,7 @@
 </template>
 
 <script lang="babel">
-	import slugify from '../../javascripts/utilities/slugify.js';
+	import slugify from '../../../javascripts/utilities/slugify.js';
 	export default {
 		name: "Filename",
 		data() {
