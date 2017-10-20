@@ -567,6 +567,7 @@ func deleteFiles(nc NewCommit, user User) (oid *git.Oid, err error) {
 	if err != nil {
 		return oid, err
 	}
+	defer index.Free()
 
 	for _, ncf := range nc.Files {
 
@@ -589,6 +590,11 @@ func deleteFiles(nc NewCommit, user User) (oid *git.Oid, err error) {
 			return oid, err
 		}
 
+	}
+
+	// final check, if no commit message supplied use a generic one
+	if nc.Message == "" {
+		nc.Message = "File deleted"
 	}
 
 	oid, err = writeTreeAndCommit(repo, index, nc, user)

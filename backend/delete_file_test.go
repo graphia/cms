@@ -87,3 +87,48 @@ func TestDeleteFileNotExists(t *testing.T) {
 	assert.Contains(t, err.Error(), "file does not exist")
 
 }
+
+func TestDeleteFilesNoMessage(t *testing.T) {
+
+	repoPath := "../tests/tmp/repositories/delete_file_no_message"
+
+	setupSmallTestRepo(repoPath)
+
+	user := User{
+		Name:  "Milhouse van Houten",
+		Email: "milhouse@springfield.gov",
+	}
+
+	ncf := NewCommitFile{
+		Filename: "document_1.md",
+		Path:     "documents",
+	}
+
+	nc := NewCommit{
+		//Message: "Delete something..",
+		Files: []NewCommitFile{ncf},
+	}
+
+	repo, _ := repository(config)
+
+	oid, err := deleteFiles(nc, user)
+	if err != nil {
+		panic(err)
+	}
+
+	hc, _ := headCommit(repo)
+
+	// our commit hash should now equal the repo's head
+	assert.Equal(t, oid, hc.Id())
+
+	// ensure the file isn't present on the filesystem
+	_, err = os.Stat(filepath.Join(repoPath, ncf.Path, ncf.Filename))
+	assert.True(t, os.IsNotExist(err))
+
+	// ensure the most recent commit has the right name and email
+	lastCommit, _ := repo.LookupCommit(oid)
+
+	// and finally, check that a suitable message has been added
+	assert.Equal(t, "File deleted", lastCommit.Message())
+
+}

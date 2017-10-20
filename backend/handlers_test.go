@@ -845,8 +845,7 @@ func TestApiDeleteFileFromDirectory(t *testing.T) {
 	}
 
 	nc := &NewCommit{
-		Message: "Suspect is hatless. Repeat, hatless.",
-		Files:   []NewCommitFile{ncf1, ncf2},
+		Files: []NewCommitFile{ncf1, ncf2},
 	}
 
 	payload, err := json.Marshal(nc)
@@ -889,6 +888,9 @@ func TestApiDeleteFileFromDirectory(t *testing.T) {
 	assert.True(t, os.IsNotExist(err))
 	_, err = os.Stat(filepath.Join(repoPath, ncf2.Path, ncf2.Filename))
 	assert.True(t, os.IsNotExist(err))
+
+	// ensure a suitable commit message has been generated
+	assert.Equal(t, "File deleted documents/document_2.md", lastCommit.Message())
 
 }
 

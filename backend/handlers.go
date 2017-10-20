@@ -903,10 +903,12 @@ func apiDeleteFileFromDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(nc.Files) == 0 {
-		response := FailureResponse{Message: "No files specified for deletion"}
-		JSONResponse(response, http.StatusBadRequest, w)
-		return
+	// if there's no commit message, add one
+	// FIXME perhaps if more than one file is deleted we could list them
+	// in the message rather than just the one specified by the URL
+	// UI only offers one at a time so far so not vital.
+	if nc.Message == "" {
+		nc.Message = fmt.Sprintf("File deleted %s/%s", directory, filename)
 	}
 
 	user := getCurrentUser(r.Context())
