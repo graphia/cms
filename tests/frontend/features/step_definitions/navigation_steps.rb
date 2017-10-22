@@ -1,4 +1,4 @@
-When %r{^I click the "(.*?)" button$} do |button_text|
+When %r{^I click the "(.*?)" button(?: again)?$} do |button_text|
   button = page.find("a,button", text: button_text)
   scroll_into_view(button)
   button.click

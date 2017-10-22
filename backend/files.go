@@ -551,11 +551,21 @@ func deleteDirectories(nc NewCommit, user User) (oid *git.Oid, err error) {
 
 func deleteFiles(nc NewCommit, user User) (oid *git.Oid, err error) {
 
+	var current bool
+
 	repo, err := repository(config)
 	if err != nil {
 		return oid, err
 	}
 	defer repo.Free()
+
+	current, err = checkLatestRevision(repo, nc.RepositoryInfo.LatestRevision)
+	if err != nil {
+		return oid, err
+	}
+	if !current {
+		return oid, ErrRepoOutOfSync
+	}
 
 	ht, err := headTree(repo)
 	if err != nil {

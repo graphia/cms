@@ -830,7 +830,7 @@ func TestApiDeleteFileFromDirectory(t *testing.T) {
 	server = createTestServerWithContext()
 
 	repoPath := "../tests/tmp/repositories/delete_file"
-	setupSmallTestRepo(repoPath)
+	oid, _ := setupSmallTestRepo(repoPath)
 
 	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files/document_2.md")
 
@@ -845,7 +845,8 @@ func TestApiDeleteFileFromDirectory(t *testing.T) {
 	}
 
 	nc := &NewCommit{
-		Files: []NewCommitFile{ncf1, ncf2},
+		Files:          []NewCommitFile{ncf1, ncf2},
+		RepositoryInfo: RepositoryInfo{LatestRevision: oid.String()},
 	}
 
 	payload, err := json.Marshal(nc)
@@ -876,7 +877,7 @@ func TestApiDeleteFileFromDirectory(t *testing.T) {
 	assert.Equal(t, receiver.Oid, hc.Id().String())
 
 	// ensure the most recent nc has the right name and email
-	oid, _ := git.NewOid(receiver.Oid)
+	oid, _ = git.NewOid(receiver.Oid)
 	lastCommit, _ := repo.LookupCommit(oid)
 
 	user := apiTestUser()

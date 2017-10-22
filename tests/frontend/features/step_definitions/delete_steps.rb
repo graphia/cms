@@ -19,3 +19,12 @@ Then %r{^the last commit message should contain the file's name$} do
   g = Git.open(REPO_PATH)
   expect(g.log.first.message.to_s).to eql("File deleted appendices/appendix_1.md")
 end
+
+Given %r{^I have tried to delete a file after a repo update$} do
+  steps %{
+		Given I am on the document's show page
+		And a repository update has taken place in the background
+		When I click the "Delete" button
+		Then there should be an alert with the message "The repository is out of sync"
+  }
+end

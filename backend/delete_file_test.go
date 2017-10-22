@@ -12,7 +12,7 @@ func TestDeleteFiles(t *testing.T) {
 
 	repoPath := "../tests/tmp/repositories/delete_file"
 
-	setupSmallTestRepo(repoPath)
+	oid, _ := setupSmallTestRepo(repoPath)
 
 	user := User{
 		Name:  "Milhouse van Houten",
@@ -30,8 +30,9 @@ func TestDeleteFiles(t *testing.T) {
 	}
 
 	nc := NewCommit{
-		Message: "Delete documents 1 and 2",
-		Files:   []NewCommitFile{ncf1, ncf2},
+		Message:        "Delete documents 1 and 2",
+		Files:          []NewCommitFile{ncf1, ncf2},
+		RepositoryInfo: RepositoryInfo{LatestRevision: oid.String()},
 	}
 
 	repo, _ := repository(config)
@@ -65,7 +66,7 @@ func TestDeleteFileNotExists(t *testing.T) {
 
 	repoPath := "../tests/tmp/repositories/delete_file"
 
-	setupSmallTestRepo(repoPath)
+	oid, _ := setupSmallTestRepo(repoPath)
 
 	user := User{
 		Name:  "Milhouse van Houten",
@@ -78,8 +79,9 @@ func TestDeleteFileNotExists(t *testing.T) {
 	}
 
 	nc := NewCommit{
-		Message: "Delete document 5",
-		Files:   []NewCommitFile{ncf},
+		Message:        "Delete document 5",
+		Files:          []NewCommitFile{ncf},
+		RepositoryInfo: RepositoryInfo{LatestRevision: oid.String()},
 	}
 
 	_, err := deleteFiles(nc, user)
@@ -92,7 +94,7 @@ func TestDeleteFilesNoMessage(t *testing.T) {
 
 	repoPath := "../tests/tmp/repositories/delete_file_no_message"
 
-	setupSmallTestRepo(repoPath)
+	oid, _ := setupSmallTestRepo(repoPath)
 
 	user := User{
 		Name:  "Milhouse van Houten",
@@ -106,7 +108,8 @@ func TestDeleteFilesNoMessage(t *testing.T) {
 
 	nc := NewCommit{
 		//Message: "Delete something..",
-		Files: []NewCommitFile{ncf},
+		Files:          []NewCommitFile{ncf},
+		RepositoryInfo: RepositoryInfo{LatestRevision: oid.String()},
 	}
 
 	repo, _ := repository(config)
@@ -130,5 +133,42 @@ func TestDeleteFilesNoMessage(t *testing.T) {
 
 	// and finally, check that a suitable message has been added
 	assert.Equal(t, "File deleted", lastCommit.Message())
+
+}
+
+func TestDeleteFilesRepoOutOfDate(t *testing.T) {
+
+	repoPath := "../tests/tmp/repositories/delete_file_no_message"
+
+	oid, _ := setupSmallTestRepo(repoPath)
+
+	user := User{
+		Name:  "Milhouse van Houten",
+		Email: "milhouse@springfield.gov",
+	}
+
+	ncf := NewCommitFile{
+		Filename: "document_1.md",
+		Path:     "documents",
+	}
+
+	nc := NewCommit{
+		//Message: "Delete something..",
+		Files:          []NewCommitFile{ncf},
+		RepositoryInfo: RepositoryInfo{LatestRevision: oid.String()},
+	}
+
+	repo, _ := repository(config)
+
+	// importantly, add another file to outdate the repo
+	_, _ = createRandomFile(repo, "document_5.md", "whoosh")
+
+	_, err := deleteFiles(nc, user)
+
+	assert.Equal(t, err, ErrRepoOutOfSync)
+
+	// ensure the file hasn't been deleted
+	_, err = os.Stat(filepath.Join(repoPath, ncf.Path, ncf.Filename))
+	assert.False(t, os.IsNotExist(err))
 
 }

@@ -82,3 +82,49 @@ func TestUpdateFiles(t *testing.T) {
 	assert.Equal(t, lastCommit.Message(), nc.Message)
 
 }
+
+func TestUpdateFilesRepoOutOfDate(t *testing.T) {
+
+	// copy the small repo tmp/repositories/update_file
+	repoPath := "../tests/tmp/repositories/update_files"
+
+	oid, _ := setupSmallTestRepo(repoPath)
+
+	// initialise a config obj so updateFile looks in the right place
+	config = Config{
+		Repository: filepath.Join(repoPath),
+	}
+
+	user := User{
+		Name:  "Milhouse van Houten",
+		Email: "milhouse@springfield.gov",
+	}
+
+	nfc := NewCommitFile{
+		Filename: "document_1.md",
+		Path:     "documents",
+		Body:     "Cows don't look like cows on film. You gotta use horses.",
+		FrontMatter: FrontMatter{
+			Author: "Lindsay Naegle",
+			Title:  "I'm an alcoholic",
+		},
+	}
+
+	nc := NewCommit{
+		Message:        "Update document 1",
+		Files:          []NewCommitFile{nfc},
+		RepositoryInfo: RepositoryInfo{LatestRevision: oid.String()},
+	}
+
+	repo, _ := repository(config)
+	_, _ = createRandomFile(repo, "document_5.md", "whoosh")
+
+	oid, err := updateFiles(nc, user)
+
+	assert.Equal(t, err, ErrRepoOutOfSync)
+
+	// make sure the file hasn't been updated
+	contents, _ := ioutil.ReadFile(filepath.Join(repoPath, nfc.Path, nfc.Filename))
+	assert.Contains(t, string(contents), "Lorem ipsum dolor sit amet")
+
+}
