@@ -68,6 +68,7 @@
 	import FilenameField from "./Editor/FilenameField";
 	import Gallery from "./Editor/Gallery";
 	import CommitMessageField from "./Editor/CommitMessageField";
+	import Accessors from '../Mixins/accessors';
 
 	export default {
 		name: "Editor",
@@ -84,12 +85,7 @@
 				valid: false
 			};
 		},
-		computed: {
-			// quick access to things in the store
-			document() {
-				return this.$store.state.activeDocument;
-			}
-		},
+		mixins: [Accessors],
 		watch: {
 			// FIXME use bus instead of cascading
 			"$parent.markdownLoaded": function() {

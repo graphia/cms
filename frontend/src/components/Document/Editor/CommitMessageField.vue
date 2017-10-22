@@ -26,6 +26,8 @@
 </template>
 
 <script lang="babel">
+	import Accessors from '../../Mixins/accessors';
+
 	export default {
 		name: "CommitMessageField",
 		data() {
@@ -35,12 +37,6 @@
 				validationMessage: null
 			};
 		},
-		computed: {
-			commit() {
-				return this.$store.state.commit;
-			}
-		},
-
 		methods: {
 			validate() {
 				// make the parent validate the whole form to control
@@ -54,7 +50,8 @@
 				this.valid = this.element.checkValidity();
 				this.validationMessage = this.element.validationMessage;
 			}
-		}
+		},
+		mixins: [Accessors]
 
 	}
 </script>

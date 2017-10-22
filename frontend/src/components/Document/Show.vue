@@ -71,6 +71,7 @@
 
 	import Breadcrumbs from '../Utilities/Breadcrumbs';
 	import CMSBreadcrumb from '../../javascripts/models/breadcrumb.js';
+	import Accessors from '../Mixins/accessors';
 
 	export default {
 		name: "DocumentShow",
@@ -89,18 +90,7 @@
 
 		},
 		computed: {
-			directory() {
-				return this.$route.params.directory;
-			},
-			filename() {
-				return this.$route.params.filename;
-			},
-			document() {
-				return this.$store.state.activeDocument;
-			},
-			commit() {
-				return this.$store.state.commit;
-			},
+
 			// Amend any relative links or images to point at the
 			// correct resource
 			relativeHTML() {
@@ -170,6 +160,7 @@
 				});
 			}
 		},
+		mixins: [Accessors],
 		components: {
 			Breadcrumbs
 		}

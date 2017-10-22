@@ -6,7 +6,7 @@
 					name="body"
 					class="form-control"
 					rows="40"
-					v-model="directory.body"
+					v-model="activeDirectory.body"
 					aria-describedby="display-text-explanation"
 		/>
 		<p id="display-text-explanation" class="form-text text-muted">
@@ -22,11 +22,12 @@
 
 	import SimpleMDE from 'simplemde';
 	import CMSFileAttachment from '../../javascripts/models/attachment.js';
+	import Accessors from '../Mixins/accessors';
 
 	export default {
 		name: "MinmalMarkdownEditor", // no attachments (yet!)
 		computed: {
-			directory() {
+			activeDirectory() {
 				return this.$store.state.activeDirectory;
 			}
 		},
@@ -54,10 +55,11 @@
 				return simpleMDE;
 			}
 		},
+		mixins: [Accessors],
 		watch: {
 			"$parent.markdownLoaded": function() {
 				console.debug("syncing content");
-				this.simpleMDE.value(this.directory.body);
+				this.simpleMDE.value(this.activeDirectory.body);
 			}
 		}
 	}

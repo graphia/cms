@@ -12,14 +12,11 @@
 <script lang="babel">
 
 	import TagsInput from "tags-input";
+	import Accessors from '../../../Mixins/accessors';
 
 	export default {
 		name: "TagField",
-		computed: {
-			document() {
-				return this.$store.state.activeDocument;
-			}
-		},
+		mixins: [Accessors],
 		mounted() {
 			TagsInput(document.querySelector('input[type="tags"]'));
 		}

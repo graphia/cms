@@ -24,6 +24,7 @@
 	import Breadcrumbs from '../Utilities/Breadcrumbs';
 	import Editor from "./Editor";
 	import Conflict from "./Conflict";
+	import Accessors from '../Mixins/accessors';
 
 	import checkResponse from "../../javascripts/response.js";
 	import CMSBreadcrumb from '../../javascripts/models/breadcrumb.js';
@@ -48,23 +49,8 @@
 			this.markdownLoaded = true;
 
 		},
+		mixins: [Accessors],
 		computed: {
-
-			// quick access to things in the store
-			document() {
-				return this.$store.state.activeDocument;
-			},
-			commit() {
-				return this.$store.state.commit;
-			},
-
-			// quick access to route params
-			directory() {
-				return this.$route.params.directory;
-			},
-			filename() {
-				return this.$route.params.filename;
-			},
 
 			heading() {
 				let title = this.document.title;

@@ -1,14 +1,10 @@
 <script lang="babel">
+
+	import Accessors from '../Mixins/accessors';
+
 	export default {
 		name: "DocumentConflict",
-		computed: {
-			document() {
-				return this.$store.state.activeDocument;
-			},
-			directory() {
-				return this.$route.params.directory;
-			}
-		},
+		mixins: [Accessors],
 		methods: {
 			downloadFile() {
 

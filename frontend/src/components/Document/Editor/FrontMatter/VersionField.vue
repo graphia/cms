@@ -14,12 +14,12 @@
 </template>
 
 <script lang="babel">
+
+	import Accessors from '../../../Mixins/accessors';
+
+
 	export default {
 		name: "VersionField",
-		computed: {
-			document() {
-				return this.$store.state.activeDocument;
-			}
-		}
+		mixins: [Accessors]
 	}
 </script>

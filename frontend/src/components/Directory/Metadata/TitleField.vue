@@ -8,7 +8,7 @@
 			type="text"
 			class="form-control"
 			placeholder="Operating Procedures"
-			v-model="directory.title"
+			v-model="activeDirectory.title"
 			required="true"
 			minlength=2
 			autocomplete="off"
@@ -23,6 +23,9 @@
 </template>
 
 <script lang="babel">
+
+	import Accessors from '../../Mixins/accessors';
+
 	export default {
 		name: "TitleField",
 		data() {
@@ -33,11 +36,7 @@
 				elementID: "directory-title"
 			};
 		},
-		computed: {
-			directory() {
-				return this.$store.state.activeDirectory;
-			}
-		},
+		mixins: [Accessors],
 		methods: {
 			validate() {
 				this.$bus.$emit("checkMetadata");

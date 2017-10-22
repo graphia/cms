@@ -21,6 +21,9 @@
 </template>
 
 <script lang="babel">
+
+	import Accessors from '../../../Mixins/accessors';
+
 	export default {
 		name: "TitleField",
 		data() {
@@ -30,11 +33,7 @@
 				validationMessage: null
 			};
 		},
-		computed: {
-			document() {
-				return this.$store.state.activeDocument;
-			}
-		},
+		mixins: [Accessors],
 		methods: {
 			validate() {
 				// make the parent validate the whole form to control

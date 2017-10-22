@@ -27,6 +27,7 @@
 	import Breadcrumbs from '../Utilities/Breadcrumbs';
 	import Editor from "./Editor";
 	import Conflict from "./Conflict";
+	import Accessors from '../Mixins/accessors';
 
 	export default {
 		name: "DocumentNew",
@@ -48,19 +49,6 @@
 
 		},
 		computed: {
-
-			// quick access to things in the store
-			document() {
-				return this.$store.state.activeDocument;
-			},
-			commit() {
-				return this.$store.state.commit;
-			},
-
-			// quick access to route params
-			directory() {
-				return this.$route.params.directory;
-			},
 
 			heading() {
 				let title = this.document.title;
@@ -128,6 +116,7 @@
 			}
 
 		},
+		mixins: [Accessors],
 		components: {
 			Editor,
 			Breadcrumbs,

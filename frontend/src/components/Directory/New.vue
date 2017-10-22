@@ -17,7 +17,7 @@
 					name="path"
 					class="form-control"
 					placeholder="operating-procedures"
-					v-model="directory.path"
+					v-model="activeDirectory.path"
 					required="true"
 					readonly="true"
 				/>
@@ -28,7 +28,7 @@
 				<textarea
 					name="description"
 					class="form-control"
-					v-model="directory.description"
+					v-model="activeDirectory.description"
 					placeholder="A set of detailed step-by-step instructions compiled to help workers carry out complex routine operations"
 				/>
 				<p id="display-text-explanation" class="form-text text-muted">
@@ -62,8 +62,10 @@
 	import config from '../../javascripts/config.js';
 	import CMSDirectory from '../../javascripts/models/directory.js';
 	import slugify from '../../javascripts/utilities/slugify.js';
+
 	import MinimalMarkdownEditor from './Editor';
 	import TitleField from './Metadata/TitleField';
+	import Accessors from '../Mixins/accessors';
 
 	export default {
 		name: "DirectoryNew",
@@ -82,19 +84,11 @@
 				this.validate()
 			});
 		},
-		computed: {
-			directory() {
-				return this.$store.state.activeDirectory;
-			},
-			commit() {
-				return this.$store.state.commit;
-			}
-		},
 		methods: {
 			async createDirectory(event) {
 				event.preventDefault();
 
-				let response = await this.directory.create(this.commit);
+				let response = await this.activeDirectory.create(this.commit);
 
 				if (!checkResponse(response.status)) {
 					console.error(response.status);
@@ -105,12 +99,12 @@
 				this.$store.state.broadcast.addMessage(
 					"success",
 					"Directory Created",
-					`You have created the directory ${this.directory.title}, it has the path ${this.directory.path}`,
+					`You have created the directory ${this.activeDirectory.title}, it has the path ${this.activeDirectory.path}`,
 					3
 				);
 
 				// redirect to the new directory's index page
-				this.redirectToIndex(this.directory.path);
+				this.redirectToIndex(this.activeDirectory.path);
 				return;
 			},
 			redirectToIndex(directory) {
@@ -124,13 +118,14 @@
 			}
 		},
 		watch: {
-			"directory.title": function title() {
-				this.directory.path = slugify(this.directory.title);
+			"activeDirectory.title": function title() {
+				this.activeDirectory.path = slugify(this.activeDirectory.title);
 			}
 		},
 		components: {
 			MinimalMarkdownEditor,
 			TitleField
-		}
+		},
+		mixins: [Accessors]
 	};
 </script>

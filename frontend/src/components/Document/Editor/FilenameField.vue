@@ -28,7 +28,9 @@
 </template>
 
 <script lang="babel">
+	import Accessors from '../../Mixins/accessors';
 	import slugify from '../../../javascripts/utilities/slugify.js';
+
 	export default {
 		name: "Filename",
 		data() {
@@ -37,10 +39,8 @@
 				filename: "", // filename *without* extension
 			};
 		},
+		mixins: [Accessors],
 		computed: {
-			document() {
-				return this.$store.state.activeDocument;
-			},
 
 			/*
 			 * Deal with updates to the form's filename field depending on whether the
