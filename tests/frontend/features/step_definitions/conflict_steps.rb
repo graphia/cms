@@ -19,7 +19,6 @@ When %r{^I add my document's details and submit the form$} do
 end
 
 Given %r{^my downloads directory is empty$} do
-  FileUtils.rm_rf(Dir.glob("#{DOWNLOAD_DIR}/*"))
   expect(Dir.entries(DOWNLOAD_DIR)).to eql(%w{. ..})
 end
 

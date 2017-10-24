@@ -98,6 +98,14 @@ Before do
     ].join(" ")
   )
 
+  # Create a download directory if one doesn't already exist
+  # if it does exist, make sure it's empty
+  if Dir.exist?(DOWNLOAD_DIR)
+    FileUtils.rm_rf(Dir.glob("#{DOWNLOAD_DIR}/*"))
+  else
+    FileUtils.mkdir(DOWNLOAD_DIR)
+  end
+
     #command = "../../graphia-cms -config=../../config/cucumber.yml -log-to-file=true "
 
     #Open3.popen3(command) do |stdin, stdout, stderr, wait_thr|
