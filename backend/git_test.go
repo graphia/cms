@@ -729,26 +729,25 @@ func Test_checkLatestRevision(t *testing.T) {
 		hash string
 	}
 	tests := []struct {
-		name    string
-		args    args
-		want    bool
-		wantErr bool
+		name string
+		args args
+		want error
 	}{
 		{
 			name: "Old Commit",
 			args: args{repo: repo, hash: firstOid.String()},
-			want: false,
+			want: ErrRepoOutOfSync,
 		},
 		{
 			name: "Most recent Commit",
 			args: args{repo: repo, hash: secondOid.String()},
-			want: true,
+			want: nil,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			current, _ := checkLatestRevision(repo, tt.args.hash)
-			assert.Equal(t, tt.want, current)
+			err := checkLatestRevision(repo, tt.args.hash)
+			assert.Equal(t, tt.want, err)
 		})
 	}
 }

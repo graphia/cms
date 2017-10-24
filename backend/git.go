@@ -87,20 +87,24 @@ func getLatestRevision(repo *git.Repository) (oid *git.Oid, err error) {
 
 }
 
-func checkLatestRevision(repo *git.Repository, hash string) (bool, error) {
+func checkLatestRevision(repo *git.Repository, hash string) error {
 	var lr *git.Oid
 	var err error
 
 	if hash == "" {
-		return false, fmt.Errorf("No hash provided")
+		return fmt.Errorf("No hash provided")
 	}
 
 	lr, err = getLatestRevision(repo)
 	if err != nil {
-		return false, err
+		return err
 	}
 
-	return (lr.String() == hash), nil
+	if lr.String() != hash {
+		return ErrRepoOutOfSync
+	}
+
+	return nil
 }
 
 func getCommits(qty int) (commits []Commit, err error) {

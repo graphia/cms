@@ -181,15 +181,9 @@ func writeFiles(repo *git.Repository, nc NewCommit, user User) (oid *git.Oid, er
 	}
 	defer index.Free()
 
-	// Latest Revision?
-	var current bool
-
-	current, err = checkLatestRevision(repo, nc.RepositoryInfo.LatestRevision)
+	err = checkLatestRevision(repo, nc.RepositoryInfo.LatestRevision)
 	if err != nil {
 		return oid, err
-	}
-	if !current {
-		return oid, ErrRepoOutOfSync
 	}
 
 	var contents []byte
@@ -496,7 +490,6 @@ func writeDirectories(repo *git.Repository, nc NewCommit, user User) (oid *git.O
 }
 
 func deleteDirectories(nc NewCommit, user User) (oid *git.Oid, err error) {
-	var current bool
 
 	repo, err := repository(config)
 	if err != nil {
@@ -515,12 +508,9 @@ func deleteDirectories(nc NewCommit, user User) (oid *git.Oid, err error) {
 		return nil, err
 	}
 
-	current, err = checkLatestRevision(repo, nc.RepositoryInfo.LatestRevision)
+	err = checkLatestRevision(repo, nc.RepositoryInfo.LatestRevision)
 	if err != nil {
 		return oid, err
-	}
-	if !current {
-		return oid, ErrRepoOutOfSync
 	}
 
 	for _, ncd := range nc.Directories {
@@ -551,20 +541,15 @@ func deleteDirectories(nc NewCommit, user User) (oid *git.Oid, err error) {
 
 func deleteFiles(nc NewCommit, user User) (oid *git.Oid, err error) {
 
-	var current bool
-
 	repo, err := repository(config)
 	if err != nil {
 		return oid, err
 	}
 	defer repo.Free()
 
-	current, err = checkLatestRevision(repo, nc.RepositoryInfo.LatestRevision)
+	err = checkLatestRevision(repo, nc.RepositoryInfo.LatestRevision)
 	if err != nil {
 		return oid, err
-	}
-	if !current {
-		return oid, ErrRepoOutOfSync
 	}
 
 	ht, err := headTree(repo)
