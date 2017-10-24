@@ -1,4 +1,4 @@
 <%
-standard_options = "--snippet-type percent --tags ~@wip"
+standard_options = "--snippet-type percent --tags ~@wip --tags ~@chrome"
 %>
 default: <%= standard_options %>

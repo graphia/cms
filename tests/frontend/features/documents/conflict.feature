@@ -8,6 +8,7 @@ Feature: Creating documents
 		And my user account exists
 		And I have logged in
 
+	@chrome
 	Scenario: Saving my work
 		Given my downloads directory is empty
 		And I have tried to save a file but the repository has been updated
