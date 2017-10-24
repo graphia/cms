@@ -6,3 +6,6 @@ theme: ../../graphia-minimal-theme
 contentDir: hugo/content
 relativeURLs: true
 publishDir: frontend/public
+
+pygmentsCodeFences: true
+pygmentsUseClasses: true

@@ -60,6 +60,53 @@ func headTree(repo *git.Repository) (tree *git.Tree, err error) {
 	return
 }
 
+func getRepositoryInfo() (ri RepositoryInfo, err error) {
+
+	var lr *git.Oid
+
+	repo, err := repository(config)
+	if err != nil {
+		return ri, err
+	}
+
+	lr, err = getLatestRevision(repo)
+
+	return RepositoryInfo{LatestRevision: lr.String()}, err
+}
+
+func getLatestRevision(repo *git.Repository) (oid *git.Oid, err error) {
+
+	hc, err := headCommit(repo)
+
+	if err != nil && err != ErrMetadataNotFound {
+		Error.Println("Could not retrieve headCommit", err.Error())
+		return nil, err
+	}
+
+	return hc.Id(), err
+
+}
+
+func checkLatestRevision(repo *git.Repository, hash string) error {
+	var lr *git.Oid
+	var err error
+
+	if hash == "" {
+		return fmt.Errorf("No hash provided")
+	}
+
+	lr, err = getLatestRevision(repo)
+	if err != nil {
+		return err
+	}
+
+	if lr.String() != hash {
+		return ErrRepoOutOfSync
+	}
+
+	return nil
+}
+
 func getCommits(qty int) (commits []Commit, err error) {
 	repo, err := repository(config)
 	if err != nil {

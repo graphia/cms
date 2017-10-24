@@ -16,15 +16,12 @@
 <script lang="babel">
 
 	import SimpleMDE from 'simplemde';
-	import CMSFileAttachment from '../../javascripts/models/attachment.js';
+	import CMSFileAttachment from '../../../javascripts/models/attachment.js';
+	import Accessors from '../../Mixins/accessors';
 
 	export default {
 		name: "MarkdownEditor",
-		computed: {
-			document() {
-				return this.$store.state.activeDocument;
-			}
-		},
+		mixins: [Accessors],
 		mounted() {
 				console.log("MarkdownEditor Created");
 				this.simpleMDE = this.initializeSimpleMDE();

@@ -64,7 +64,3 @@ exports.npm = {
 		Bootstrap: 'bootstrap'
 	}
 };
-
-exports.server = {
-	indexPath: '/cms/index.html'
-};

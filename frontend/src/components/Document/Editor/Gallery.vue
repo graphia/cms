@@ -18,13 +18,11 @@
 </template>
 
 <script lang="babel">
+	import Accessors from '../../Mixins/accessors';
+
 	export default {
 		name: "Gallery",
-		computed: {
-			document() {
-				return this.$store.state.activeDocument;
-			}
-		},
+		mixins: [Accessors],
 		methods: {
 			dragImage(event) {
 				console.log("dragging initiated!");

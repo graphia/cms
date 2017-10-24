@@ -34,7 +34,6 @@ Given %r{^I have added a new file$} do
 
   g.add(all: true)
 
-
   g.commit("Added Bart's Friend Falls in Love")
 
   # get the hash of the latest commit (the one right above!)

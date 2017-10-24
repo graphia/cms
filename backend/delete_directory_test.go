@@ -12,7 +12,7 @@ func TestDeleteDirectories(t *testing.T) {
 
 	repoPath := "../tests/tmp/repositories/delete_dir"
 
-	setupSmallTestRepo(repoPath)
+	ri, _ := setupSmallTestRepo(repoPath)
 
 	user := User{
 		Name:  "Moe Szyslak",
@@ -22,8 +22,9 @@ func TestDeleteDirectories(t *testing.T) {
 	ncd := NewCommitDirectory{Path: "appendices"}
 
 	nc := NewCommit{
-		Message:     "Deleted directories",
-		Directories: []NewCommitDirectory{ncd},
+		Message:        "Deleted directories",
+		Directories:    []NewCommitDirectory{ncd},
+		RepositoryInfo: RepositoryInfo{LatestRevision: ri.String()},
 	}
 
 	repo, _ := repository(config)
@@ -54,7 +55,7 @@ func TestDeleteDirectoriesNotExists(t *testing.T) {
 
 	repoPath := "../tests/tmp/repositories/delete_file"
 
-	setupSmallTestRepo(repoPath)
+	ri, _ := setupSmallTestRepo(repoPath)
 
 	user := User{
 		Name:  "Barney Gumble",
@@ -64,8 +65,8 @@ func TestDeleteDirectoriesNotExists(t *testing.T) {
 	ncd := NewCommitDirectory{Path: "menu"}
 
 	nc := NewCommit{
-
-		Directories: []NewCommitDirectory{ncd},
+		RepositoryInfo: RepositoryInfo{LatestRevision: ri.String()},
+		Directories:    []NewCommitDirectory{ncd},
 	}
 
 	_, err := deleteDirectories(nc, user)

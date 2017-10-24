@@ -12,8 +12,12 @@ export default class CMSCommit {
 	};
 
 	filesJSON(file) {
+
 		return JSON.stringify({
 			message: this.message,
+			repository_info: {
+				latest_revision: store.state.latestRevision
+			},
 			files: this._buildFilesArray(file)
 		});
 	};
@@ -21,6 +25,9 @@ export default class CMSCommit {
 	directoriesJSON(directory) {
 		return JSON.stringify({
 			//message: "creating dir",
+			repository_info: {
+				latest_revision: store.state.latestRevision
+			},
 			directories: this._buildDirectoriesArray(directory)
 		})
 	};

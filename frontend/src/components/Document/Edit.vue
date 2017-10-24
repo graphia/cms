@@ -2,6 +2,8 @@
 	<div>
 		<Breadcrumbs :levels="breadcrumbs"/>
 
+		<Conflict/>
+
 		<section>
 
 			<form id="edit-document-form" @submit="update">
@@ -14,12 +16,15 @@
 			</form>
 
 		</section>
+
 	</div>
 </template>
 
 <script lang="babel">
-	import Editor from "../../components/Editor";
 	import Breadcrumbs from '../Utilities/Breadcrumbs';
+	import Editor from "./Editor";
+	import Conflict from "./Conflict";
+	import Accessors from '../Mixins/accessors';
 
 	import checkResponse from "../../javascripts/response.js";
 	import CMSBreadcrumb from '../../javascripts/models/breadcrumb.js';
@@ -44,23 +49,8 @@
 			this.markdownLoaded = true;
 
 		},
+		mixins: [Accessors],
 		computed: {
-
-			// quick access to things in the store
-			document() {
-				return this.$store.state.activeDocument;
-			},
-			commit() {
-				return this.$store.state.commit;
-			},
-
-			// quick access to route params
-			directory() {
-				return this.$route.params.directory;
-			},
-			filename() {
-				return this.$route.params.filename;
-			},
 
 			heading() {
 				let title = this.document.title;
@@ -118,13 +108,24 @@
 				let response = await this.document.update(this.commit);
 
 				if (!checkResponse(response.status)) {
-					throw("could not create document");
+
+					if (response.status == 409) {
+						this.showConflictModal();
+						return;
+					};
+
+					// any other error
+					throw("could not update document", response);
 					return;
 				};
 
 				console.debug("Document saved, redirecting to 'document_show'");
 				this.redirectToShowDocument(this.document.path, this.document.filename);
 
+			},
+
+			showConflictModal() {
+				$("#conflict-warning.modal").modal()
 			},
 
 			redirectToShowDocument(directory, filename) {
@@ -136,7 +137,8 @@
 		},
 		components: {
 			Editor,
-			Breadcrumbs
+			Breadcrumbs,
+			Conflict
 		}
 	}
 </script>

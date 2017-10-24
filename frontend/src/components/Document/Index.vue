@@ -86,6 +86,8 @@
 	import Breadcrumbs from '../Utilities/Breadcrumbs';
 	import Error from '../Errors/Error';
 	import CMSBreadcrumb from '../../javascripts/models/breadcrumb.js';
+	import Accessors from '../Mixins/accessors';
+
 
 	export default {
 		name: "DocumentIndex",
@@ -115,15 +117,6 @@
 			title() {
 				return this.$store.activeDirectory.title;
 			},
-			documents() {
-				return this.$store.state.documents;
-			},
-			directory() {
-				return this.$route.params.directory;
-			},
-			activeDirectory() {
-				return this.$store.state.activeDirectory;
-			},
 			breadcrumbs() {
 				return [
 					new CMSBreadcrumb(
@@ -134,6 +127,7 @@
 				];
 			}
 		},
+		mixins: [Accessors],
 		components: {
 			Breadcrumbs,
 			Error

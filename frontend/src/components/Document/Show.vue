@@ -71,36 +71,23 @@
 
 	import Breadcrumbs from '../Utilities/Breadcrumbs';
 	import CMSBreadcrumb from '../../javascripts/models/breadcrumb.js';
+	import Accessors from '../Mixins/accessors';
+
+	import checkResponse from "../../javascripts/response.js";
 
 	export default {
 		name: "DocumentShow",
 		created() {
 			// populate $store.state.documents with docs from api
 
-			let directory = this.directory;
-			let filename = this.filename;
-
-			console.debug(`retrieving document ${filename} from ${directory}`);
-
-			this.$store.dispatch("getDocument", {directory, filename});
+			this.getDocument();
 
 			// create a commit to be populated/used if delete is clicked
 			this.$store.dispatch("initializeCommit")
 
 		},
 		computed: {
-			directory() {
-				return this.$route.params.directory;
-			},
-			filename() {
-				return this.$route.params.filename;
-			},
-			document() {
-				return this.$store.state.activeDocument;
-			},
-			commit() {
-				return this.$store.state.commit;
-			},
+
 			// Amend any relative links or images to point at the
 			// correct resource
 			relativeHTML() {
@@ -151,6 +138,15 @@
 			}
 		},
 		methods: {
+			async getDocument() {
+
+				let filename = this.filename;
+				let directory = this.directory;
+
+				console.debug(`retrieving document ${filename} from ${directory}`);
+
+				this.$store.dispatch("getDocument", {directory, filename});
+			},
 			async destroy(event) {
 				event.preventDefault();
 				console.debug("delete clicked!");
@@ -158,6 +154,27 @@
 				let file = this.document;
 
 				let response = await this.document.destroy(this.commit);
+
+				if (!checkResponse(response.status)) {
+
+					if (response.status == 409) {
+
+						this.$store.state.broadcast.addMessage(
+							"danger",
+							"Failed",
+							"The repository is out of sync",
+							3
+						);
+
+						this.getDocument();
+
+						return;
+					};
+
+					// any other error
+					throw("could not update document", response);
+					return;
+				};
 
 				console.debug("File deleted, redirecting to document index");
 				this.redirectToDirectoryIndex(this.directory);
@@ -170,6 +187,7 @@
 				});
 			}
 		},
+		mixins: [Accessors],
 		components: {
 			Breadcrumbs
 		}

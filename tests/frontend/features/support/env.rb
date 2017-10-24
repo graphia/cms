@@ -15,6 +15,15 @@ PID_PATH = '../tmp/cucumber-browser.pid'
 DB_PATH = '../../db/cucumber.db'
 SAMPLES_PATH = '../backend/samples'
 WEB_SERVER_START_ATTEMPTS = 10 # number of 0.1 second delays to wait for server
+DOWNLOAD_DIR = "/tmp/downloads" # needs to be in /tmp because permissions 🚨
+
+DRIVER_PREFS = {
+  download: {
+    prompt_for_download: false,
+    directory_upgrade: true,
+    default_directory: DOWNLOAD_DIR
+  }
+}
 
 Capybara.register_driver(:headless_chrome) do |app|
 
@@ -24,7 +33,8 @@ Capybara.register_driver(:headless_chrome) do |app|
     desired_capabilities: Selenium::WebDriver::Remote::Capabilities.chrome(
       chromeOptions: {
         binary: "/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome",
-        args: %w{--headless --no-sandbox --disable-gpu}
+        args: %w{--headless --no-sandbox --disable-gpu},
+        prefs: DRIVER_PREFS
       }
     )
   )
@@ -37,7 +47,8 @@ Capybara.register_driver(:chrome) do |app|
     desired_capabilities: Selenium::WebDriver::Remote::Capabilities.chrome(
       chromeOptions: {
         binary: "/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome",
-        args: %w{--no-sandbox --disable-gpu}
+        args: %w{--no-sandbox --disable-gpu},
+        prefs: DRIVER_PREFS
       }
     )
   )
@@ -86,6 +97,14 @@ Before do
       "-log-to-file true"
     ].join(" ")
   )
+
+  # Create a download directory if one doesn't already exist
+  # if it does exist, make sure it's empty
+  if Dir.exist?(DOWNLOAD_DIR)
+    FileUtils.rm_rf(Dir.glob("#{DOWNLOAD_DIR}/*"))
+  else
+    FileUtils.mkdir(DOWNLOAD_DIR)
+  end
 
     #command = "../../graphia-cms -config=../../config/cucumber.yml -log-to-file=true "
 

@@ -61,7 +61,7 @@ func authLoginHandler(w http.ResponseWriter, r *http.Request) {
 	user, err := getUserByUsername(uc.Username)
 	if err != nil {
 		fr = FailureResponse{Message: fmt.Sprintf("User not found: %s", uc.Username)}
-		JSONResponse(fr, http.StatusBadRequest, w)
+		JSONResponse(fr, http.StatusNotFound, w)
 		return
 	}
 
@@ -468,6 +468,12 @@ func apiCreateDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 
 	oid, err := createDirectories(nc, user)
 
+	if err == ErrRepoOutOfSync {
+		fr = FailureResponse{Message: "Repository out of sync with commit"}
+		JSONResponse(fr, http.StatusConflict, w)
+		return
+	}
+
 	if err != nil {
 		fr = FailureResponse{
 			Message: fmt.Sprintf("Failed to create directory: %s", err.Error()),
@@ -527,6 +533,13 @@ func apiUpdateDirectoriesHandler(w http.ResponseWriter, r *http.Request) {
 	user := getCurrentUser(r.Context())
 
 	oid, err := updateDirectories(nc, user)
+
+	if err == ErrRepoOutOfSync {
+		fr = FailureResponse{Message: "Repository out of sync with commit"}
+		JSONResponse(fr, http.StatusConflict, w)
+		return
+	}
+
 	if err != nil {
 		fr = FailureResponse{
 			Message: fmt.Sprintf("Failed to update directories: %s", err.Error()),
@@ -600,9 +613,15 @@ func apiDeleteDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 
 	oid, err := deleteDirectories(nc, user)
 
+	if err == ErrRepoOutOfSync {
+		fr = FailureResponse{Message: "Repository out of sync with commit"}
+		JSONResponse(fr, http.StatusConflict, w)
+		return
+	}
+
 	if err != nil {
 		fr = FailureResponse{
-			Message: fmt.Sprintln("Failed to delete directory", err.Error()),
+			Message: fmt.Sprintln("Failed to delete directory:", err.Error()),
 		}
 		JSONResponse(fr, http.StatusBadRequest, w)
 		return
@@ -744,9 +763,17 @@ func apiCreateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 	user := getCurrentUser(r.Context())
 
 	oid, err := createFiles(nc, user)
+
+	// If err is a ErrRepoOutOfSync, return a 409 (Edit Conflict) and appropriate message
+	if err == ErrRepoOutOfSync {
+		fr = FailureResponse{Message: "Repository out of sync with commit"}
+		JSONResponse(fr, http.StatusConflict, w)
+		return
+	}
+
 	if err != nil {
 		fr = FailureResponse{Message: fmt.Sprintf("Failed to create files: %s", err.Error())}
-		JSONResponse(fr, http.StatusBadRequest, w)
+		JSONResponse(fr, http.StatusOK, w)
 		return
 	}
 
@@ -809,6 +836,14 @@ func apiUpdateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 	user := getCurrentUser(r.Context())
 
 	oid, err := updateFiles(nc, user)
+
+	// If err is a ErrRepoOutOfSync, return a 409 (Edit Conflict) and appropriate message
+	if err == ErrRepoOutOfSync {
+		fr = FailureResponse{Message: "Repository out of sync with commit"}
+		JSONResponse(fr, http.StatusConflict, w)
+		return
+	}
+
 	if err != nil {
 
 		Error.Println("Failed to update files", nc.Files, err.Error())
@@ -868,18 +903,27 @@ func apiDeleteFileFromDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(nc.Files) == 0 {
-		response := FailureResponse{Message: "No files specified for deletion"}
-		JSONResponse(response, http.StatusBadRequest, w)
-		return
+	// if there's no commit message, add one
+	// FIXME perhaps if more than one file is deleted we could list them
+	// in the message rather than just the one specified by the URL
+	// UI only offers one at a time so far so not vital.
+	if nc.Message == "" {
+		nc.Message = fmt.Sprintf("File deleted %s/%s", directory, filename)
 	}
 
 	user := getCurrentUser(r.Context())
 
 	oid, err := deleteFiles(nc, user)
 
+	// If err is a ErrRepoOutOfSync, return a 409 (Edit Conflict) and appropriate message
+	if err == ErrRepoOutOfSync {
+		fr = FailureResponse{Message: "Repository out of sync with commit"}
+		JSONResponse(fr, http.StatusConflict, w)
+		return
+	}
+
 	if err != nil {
-		Error.Println("Failed to delete directory", err.Error())
+		Error.Println("Failed to delete directory:", err.Error())
 		fr = FailureResponse{
 			Message: err.Error(),
 		}
@@ -1145,6 +1189,24 @@ func apiGetCommitsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	JSONResponse(commits, http.StatusOK, w)
+
+}
+
+func apiGetRepositoryInformationHandler(w http.ResponseWriter, r *http.Request) {
+	var fr FailureResponse
+	var ri RepositoryInfo
+	var err error
+
+	ri, err = getRepositoryInfo()
+	if err != nil {
+		fr = FailureResponse{
+			Message: fmt.Sprintln("Failed to retrieve repository info", err.Error()),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	JSONResponse(ri, http.StatusOK, w)
 
 }
 

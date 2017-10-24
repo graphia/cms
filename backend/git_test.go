@@ -77,15 +77,18 @@ func TestHeadCommit(t *testing.T) {
 	assert.Equal(t, hc.Id(), oid)
 }
 
-func createRandomFile(repo *git.Repository, filename, msg string) error {
+func createRandomFile(repo *git.Repository, filename, msg string) (*git.Oid, error) {
 
 	user := User{
 		Name:  "Barney Gumble",
 		Email: "barney.gumble@hotmail.com",
 	}
 
+	ri, _ := getRepositoryInfo()
+
 	nc := NewCommit{
-		Message: msg,
+		Message:        msg,
+		RepositoryInfo: ri,
 
 		Files: []NewCommitFile{
 			NewCommitFile{
@@ -99,8 +102,8 @@ func createRandomFile(repo *git.Repository, filename, msg string) error {
 			},
 		},
 	}
-	_, err := createFiles(nc, user)
-	return err
+	oid, err := createFiles(nc, user)
+	return oid, err
 }
 
 func TestAllCommits(t *testing.T) {
@@ -111,7 +114,7 @@ func TestAllCommits(t *testing.T) {
 
 	msg := "Well well, if it isn't Mr Plow"
 
-	err := createRandomFile(repo, "document_12.md", msg)
+	_, err := createRandomFile(repo, "document_12.md", msg)
 	if err != nil {
 		panic(err)
 	}
@@ -136,7 +139,7 @@ func TestAllCommitsWithLimitOf3(t *testing.T) {
 	repo, _ := repository(config)
 
 	for i := 12; i <= 16; i++ {
-		err := createRandomFile(
+		_, err := createRandomFile(
 			repo,
 			fmt.Sprintf("document_%d.md", i),
 			fmt.Sprintf("Commit Message %d", i),
@@ -234,6 +237,7 @@ func TestLookupFileHistory(t *testing.T) {
 	r1 = template
 	r1.Files[0].Body = "# r1"
 	r1.Message = "r1"
+	r1.RepositoryInfo = RepositoryInfo{LatestRevision: oid.String()}
 	oid, _ = createFiles(r1, user)
 	assert.NotNil(t, oid)
 
@@ -241,6 +245,7 @@ func TestLookupFileHistory(t *testing.T) {
 	r2 = template
 	r2.Files[0].Body = "# r2"
 	r2.Message = "r2"
+	r2.RepositoryInfo = RepositoryInfo{LatestRevision: oid.String()}
 	oid, _ = updateFiles(r2, user)
 	assert.NotNil(t, oid)
 
@@ -248,6 +253,7 @@ func TestLookupFileHistory(t *testing.T) {
 	r3 = template
 	r3.Files[0].Body = "# r3"
 	r3.Message = "r3"
+	r3.RepositoryInfo = RepositoryInfo{LatestRevision: oid.String()}
 	oid, _ = updateFiles(r3, user)
 	assert.NotNil(t, oid)
 
@@ -309,6 +315,7 @@ func TestLookupFileHistorySortsByTime(t *testing.T) {
 	r2 = template
 	r2.Files[0].Body = "# r2"
 	r2.Message = "r2"
+	r2.RepositoryInfo = RepositoryInfo{LatestRevision: oid.String()}
 	oid, _ = writeHistoricFiles(repo, r2, user, time.Date(2016, 1, 1, 14, 0, 0, 0, time.UTC))
 	assert.NotNil(t, oid)
 
@@ -316,6 +323,7 @@ func TestLookupFileHistorySortsByTime(t *testing.T) {
 	r3 = template
 	r3.Files[0].Body = "# r3"
 	r3.Message = "r3"
+	r3.RepositoryInfo = RepositoryInfo{LatestRevision: oid.String()}
 	oid, _ = writeHistoricFiles(repo, r3, user, time.Date(2016, 1, 1, 15, 0, 0, 0, time.UTC))
 	assert.NotNil(t, oid)
 
@@ -323,6 +331,7 @@ func TestLookupFileHistorySortsByTime(t *testing.T) {
 	r1 = template
 	r1.Files[0].Body = "# r1"
 	r1.Message = "r1"
+	r1.RepositoryInfo = RepositoryInfo{LatestRevision: oid.String()}
 	oid, _ = writeHistoricFiles(repo, r1, user, time.Date(2016, 1, 1, 13, 0, 0, 0, time.UTC))
 	assert.NotNil(t, oid)
 
@@ -399,6 +408,7 @@ func TestLookupFileHistoryOnlyReturnsRelevantCommits(t *testing.T) {
 	r1.Files[0].Filename = "document_11.md"
 	r1.Files[0].Body = "# r1"
 	r1.Message = "r1"
+	r1.RepositoryInfo = RepositoryInfo{LatestRevision: oid.String()}
 	oid, _ = createFiles(r1, user)
 	assert.NotNil(t, oid)
 
@@ -407,6 +417,7 @@ func TestLookupFileHistoryOnlyReturnsRelevantCommits(t *testing.T) {
 	r2.Files[0].Filename = "document_12.md"
 	r2.Files[0].Body = "# r2"
 	r2.Message = "r2"
+	r2.RepositoryInfo = RepositoryInfo{LatestRevision: oid.String()}
 	oid, _ = createFiles(r2, user)
 	assert.NotNil(t, oid)
 
@@ -415,6 +426,7 @@ func TestLookupFileHistoryOnlyReturnsRelevantCommits(t *testing.T) {
 	r3.Files[0].Filename = "document_11.md"
 	r3.Files[0].Body = "# r3"
 	r3.Message = "r3"
+	r3.RepositoryInfo = RepositoryInfo{LatestRevision: oid.String()}
 	oid, _ = updateFiles(r3, user)
 	assert.NotNil(t, oid)
 
@@ -679,5 +691,63 @@ func Test_initializeGitRepository(t *testing.T) {
 			assert.Equal(t, tt.want.message, err.Error())
 		}
 
+	}
+}
+
+func Test_getRepositoryInfo(t *testing.T) {
+
+	gitRepoPath := "../tests/tmp/repositories/repo_info"
+	_, _ = setupSmallTestRepo(gitRepoPath)
+	repo, _ := repository(config)
+	lr, _ := getLatestRevision(repo)
+	expected := RepositoryInfo{LatestRevision: lr.String()}
+	actual, _ := getRepositoryInfo()
+
+	assert.Equal(t, expected, actual)
+}
+
+func Test_getLatestRevision(t *testing.T) {
+
+	gitRepoPath := "../tests/tmp/repositories/repo_info"
+	expected, _ := setupSmallTestRepo(gitRepoPath)
+	repo, _ := repository(config)
+	actual, _ := getLatestRevision(repo)
+
+	assert.Equal(t, expected, actual)
+}
+
+func Test_checkLatestRevision(t *testing.T) {
+
+	gitRepoPath := "../tests/tmp/repositories/repo_info"
+	firstOid, _ := setupSmallTestRepo(gitRepoPath)
+	repo, _ := repository(config)
+
+	secondOid, _ := createRandomFile(repo, "document_6.md", "Second commit!")
+
+	type args struct {
+		repo *git.Repository
+		hash string
+	}
+	tests := []struct {
+		name string
+		args args
+		want error
+	}{
+		{
+			name: "Old Commit",
+			args: args{repo: repo, hash: firstOid.String()},
+			want: ErrRepoOutOfSync,
+		},
+		{
+			name: "Most recent Commit",
+			args: args{repo: repo, hash: secondOid.String()},
+			want: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := checkLatestRevision(repo, tt.args.hash)
+			assert.Equal(t, tt.want, err)
+		})
 	}
 }

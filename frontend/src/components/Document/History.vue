@@ -56,6 +56,7 @@
 
 	import Breadcrumbs from '../Utilities/Breadcrumbs';
 	import Diff from '../Utilities/Diff';
+	import Accessors from '../Mixins/accessors';
 
 	import checkResponse from '../../javascripts/response.js';
 	import CMSBreadcrumb from '../../javascripts/models/breadcrumb.js';
@@ -71,15 +72,6 @@
 		},
 
 		computed: {
-			directory() {
-				return this.$route.params.directory;
-			},
-			filename() {
-				return this.$route.params.filename;
-			},
-			document() {
-				return this.$store.state.activeDocument;
-			},
 			breadcrumbs() {
 				let directory_title, filename;
 
@@ -139,6 +131,7 @@
 			};
 
 		},
+		mixins: [Accessors],
 		components: {
 			Breadcrumbs,
 			Diff

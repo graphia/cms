@@ -1,39 +1,41 @@
 <template>
-	<div class="document-title form-group">
 
-		<label for="title" class="form-control-label">Title</label>
+	<div class="commit-message form-group">
 
-		<input
-			id="document-title"
-			name="title"
+		<label class="form-control-label" for="commit-message">
+			Commit Message
+		</label>
+
+		<textarea
+			id="document-commit-message"
+			name="commit-message"
 			class="form-control"
-			v-model="document.title"
-			minlength="2"
+			v-model="commit.message"
+			minlength="5"
 			required="true"
 			v-on:keyup="validate"
-			:class="{'is-invalid': !valid}"
+			v-bind:class="{'is-invalid': !valid}"
 		/>
 
 		<div class="form-control-feedback invalid-feedback" v-if="validationMessage">
 			{{ this.validationMessage }}
 		</div>
+
 	</div>
+
 </template>
 
 <script lang="babel">
+	import Accessors from '../../Mixins/accessors';
+
 	export default {
-		name: "TitleField",
+		name: "CommitMessageField",
 		data() {
 			return {
 				element: null,
 				valid: true,
 				validationMessage: null
 			};
-		},
-		computed: {
-			document() {
-				return this.$store.state.activeDocument;
-			}
 		},
 		methods: {
 			validate() {
@@ -42,12 +44,14 @@
 				this.$bus.$emit("checkMetadata");
 
 				if (!this.element) {
-					this.element = document.getElementById("document-title");
+					this.element = document.getElementById("document-commit-message");
 				};
 
 				this.valid = this.element.checkValidity();
 				this.validationMessage = this.element.validationMessage;
 			}
-		}
-	};
+		},
+		mixins: [Accessors]
+
+	}
 </script>

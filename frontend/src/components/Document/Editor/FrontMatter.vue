@@ -25,14 +25,12 @@
 	import TitleField from "../Editor/FrontMatter/TitleField";
 	import TagsField from "../Editor/FrontMatter/TagsField";
 	import VersionField from "../Editor/FrontMatter/VersionField";
+	import Accessors from '../../Mixins/accessors';
+
 
 	export default {
 		name: "FrontMatter",
-		computed: {
-			document() {
-				return this.$store.state.activeDocument;
-			}
-		},
+		mixins: [Accessors],
 		components: {
 			TitleField,
 			TagsField,

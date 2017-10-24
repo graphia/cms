@@ -143,10 +143,15 @@ func TestGetFileBothMarkdownAndHTML(t *testing.T) {
 
 	contents, err := particle.YAMLEncoding.DecodeString(string(raw), &FrontMatter{})
 
+	repo, _ := repository(config)
+	hc, _ := headCommit(repo)
+	repoInfo := RepositoryInfo{LatestRevision: hc.Id().String()}
+
 	assert.Equal(t, file.Filename, "document_2.md")
 	assert.Equal(t, file.Path, "documents")
 	assert.Equal(t, *file.Markdown, string(contents))
 	assert.Contains(t, *file.HTML, "<h1>Document 2</h1")
+	assert.Equal(t, *file.RepositoryInfo, repoInfo)
 
 }
 
@@ -160,10 +165,15 @@ func TestGetFileNeitherMarkdownOrHTML(t *testing.T) {
 		t.Error("error", err)
 	}
 
+	repo, _ := repository(config)
+	hc, _ := headCommit(repo)
+	repoInfo := RepositoryInfo{LatestRevision: hc.Id().String()}
+
 	assert.Equal(t, file.Filename, "document_2.md")
 	assert.Equal(t, file.Path, "documents")
 	assert.Nil(t, file.HTML)
 	assert.Nil(t, file.Markdown)
+	assert.Equal(t, *file.RepositoryInfo, repoInfo)
 
 }
 
@@ -174,10 +184,15 @@ func TestGetFileNoRepoMetadata(t *testing.T) {
 
 	file, err := getFile("appendices", "appendix_1.md", false, false)
 
+	repo, _ := repository(config)
+	hc, _ := headCommit(repo)
+	repoInfo := RepositoryInfo{LatestRevision: hc.Id().String()}
+
 	assert.Nil(t, err) // make sure getFile doesn't return an error
 	assert.Equal(t, file.Filename, "appendix_1.md")
 	assert.Equal(t, file.Path, "appendices")
 	assert.Nil(t, file.DirectoryInfo)
+	assert.Equal(t, *file.RepositoryInfo, repoInfo)
 
 }
 

@@ -26,6 +26,10 @@ var (
 	// ErrDirectoryNotFound occurs when a directory can't be found in the
 	// git repository
 	ErrDirectoryNotFound = errors.New("directory not found")
+
+	// ErrRepoOutOfSync occurs when changes are made to the repository
+	// between starting to edit and submitting the changes
+	ErrRepoOutOfSync = errors.New("repository out of sync")
 )
 
 // getFilesInDir returns a list of FileItems for listing
@@ -155,7 +159,6 @@ func createFiles(nc NewCommit, user User) (oid *git.Oid, err error) {
 	return oid, err
 }
 
-// Replaces updateFile
 func updateFiles(nc NewCommit, user User) (oid *git.Oid, err error) {
 
 	repo, err := repository(config)
@@ -173,9 +176,15 @@ func writeFiles(repo *git.Repository, nc NewCommit, user User) (oid *git.Oid, er
 
 	index, err := repo.Index()
 	if err != nil {
+		Error.Println("Failed to get repo index", err.Error())
 		return nil, err
 	}
 	defer index.Free()
+
+	err = checkLatestRevision(repo, nc.RepositoryInfo.LatestRevision)
+	if err != nil {
+		return oid, err
+	}
 
 	var contents []byte
 
@@ -186,12 +195,14 @@ func writeFiles(repo *git.Repository, nc NewCommit, user User) (oid *git.Oid, er
 		// get the file contents in the correct format
 		contents, err = extractContents(ncf)
 		if err != nil {
-			return nil, err
+			Error.Println("Failed to extract contents", err.Error())
+			return oid, err
 		}
 
 		oid, err = repo.CreateBlobFromBuffer(contents)
 		if err != nil {
-			return nil, err
+			Error.Println("Failed to create blob from buffer", err.Error())
+			return oid, err
 		}
 
 		// build the git index entry and add it to the index
@@ -199,15 +210,12 @@ func writeFiles(repo *git.Repository, nc NewCommit, user User) (oid *git.Oid, er
 
 		err = index.Add(&ie)
 		if err != nil {
-			return nil, err
+			return oid, err
 		}
 
 	}
 
 	oid, err = writeTreeAndCommit(repo, index, nc, user)
-	if err != nil {
-		return oid, err
-	}
 
 	return oid, err
 
@@ -500,6 +508,11 @@ func deleteDirectories(nc NewCommit, user User) (oid *git.Oid, err error) {
 		return nil, err
 	}
 
+	err = checkLatestRevision(repo, nc.RepositoryInfo.LatestRevision)
+	if err != nil {
+		return oid, err
+	}
+
 	for _, ncd := range nc.Directories {
 
 		// ensure that the directory exists before we try to delete it
@@ -534,6 +547,11 @@ func deleteFiles(nc NewCommit, user User) (oid *git.Oid, err error) {
 	}
 	defer repo.Free()
 
+	err = checkLatestRevision(repo, nc.RepositoryInfo.LatestRevision)
+	if err != nil {
+		return oid, err
+	}
+
 	ht, err := headTree(repo)
 	if err != nil {
 		return oid, err
@@ -544,6 +562,7 @@ func deleteFiles(nc NewCommit, user User) (oid *git.Oid, err error) {
 	if err != nil {
 		return oid, err
 	}
+	defer index.Free()
 
 	for _, ncf := range nc.Files {
 
@@ -566,6 +585,11 @@ func deleteFiles(nc NewCommit, user User) (oid *git.Oid, err error) {
 			return oid, err
 		}
 
+	}
+
+	// final check, if no commit message supplied use a generic one
+	if nc.Message == "" {
+		nc.Message = "File deleted"
 	}
 
 	oid, err = writeTreeAndCommit(repo, index, nc, user)
@@ -655,13 +679,21 @@ func getFile(directory string, filename string, includeMd, includeHTML bool) (fi
 		return file, err
 	}
 
+	hc, err := headCommit(repo)
+	if err != nil && err != ErrMetadataNotFound {
+		return file, err
+	}
+
+	ri := RepositoryInfo{LatestRevision: hc.Id().String()}
+
 	file = &File{
-		Filename:      filename,
-		Path:          directory,
-		HTML:          html,
-		Markdown:      markdown,
-		FrontMatter:   fm,
-		DirectoryInfo: di,
+		Filename:       filename,
+		Path:           directory,
+		HTML:           html,
+		Markdown:       markdown,
+		FrontMatter:    fm,
+		DirectoryInfo:  di,
+		RepositoryInfo: &ri,
 	}
 
 	return file, nil
