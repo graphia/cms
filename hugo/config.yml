@@ -1,5 +1,5 @@
 languageCode: "en-gb"
-title: "My New Hugo Site"
+
 baseURL: "http://localhost:1313"
 buildDrafts: true
 theme: ../../../graphia-minimal-theme
@@ -9,3 +9,19 @@ fencedCode: true
 
 pygmentsCodeFences: true
 pygmentsUseClasses: true
+
+defaultContentLanguage: "en"
+defaultContentLanguageInSubdir: false
+
+Languages:
+  en:
+    title: "English"
+    weight: 0
+
+  fr:
+    title: "French"
+    weight: 1
+
+  de:
+    title: "German"
+    weight: 1

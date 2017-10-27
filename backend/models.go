@@ -88,6 +88,7 @@ type File struct {
 	AbsoluteFilename string          `json:"absolute_filename"`
 	Filename         string          `json:"filename"`
 	Path             string          `json:"path"`
+	Language         string          `json:"language"`
 	HTML             *string         `json:"html"`
 	Markdown         *string         `json:"markdown"`
 	FrontMatter      FrontMatter     `json:"frontmatter"`

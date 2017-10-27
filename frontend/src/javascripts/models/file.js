@@ -30,6 +30,7 @@ export default class CMSFile {
 			this.history         = [];
 			this.attachments     = [];
 			this.initialMarkdown = "";
+			this.language        = "en"; // default to English
 
 		} else if (file) {
 
@@ -38,6 +39,7 @@ export default class CMSFile {
 			this.filename              = file.filename;
 			this.html                  = file.html;
 			this.markdown              = file.markdown;
+			this.language              = file.language;
 
 			// frontmatter fields
 			this.title                 = file.frontmatter.title;

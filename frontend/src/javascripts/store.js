@@ -20,6 +20,7 @@ const state = {
 	auth: new CMSAuth,
 	broadcast: new CMSBroadcast,
 	latestRevision: null,
+	defaultLanguage: "en"
 };
 
 const mutations = {

@@ -19,7 +19,12 @@
 					v-model="customFilename"
 			/>
 
-			<span class="input-group-addon">
+			<!-- only display if language isn't default, currently hardcoded to 'en' -->
+			<span class="input-group-addon language-indicator" v-if="document.language != 'en'">
+				.{{ document.language }}
+			</span>
+
+			<span class="input-group-addon extension-indicator">
 				.md
 			</span>
 
@@ -67,6 +72,15 @@
 						this.filenameBase = slugify(name);
 					}
 				}
+			},
+
+			filenameWithExtension() {
+				let translation = (this.document.language != "en");
+
+				return [this.filenameBase, (translation && this.document.language), "md"]
+					.filter(Boolean)
+					.join(".");
+
 			}
 		},
 		watch: {
@@ -77,8 +91,16 @@
 			 * make sure the slug matches it
 			 */
 			filenameBase() {
-				this.document.filename = `${this.filenameBase}.md`;
+				this.document.filename = this.filenameWithExtension;
 				this.document.slug = this.filenameBase;
+			},
+
+			/*
+			 * if the language is changed after the title we need to trigger the updating
+			 * of the filename, so the language code in the extension is present
+			 */
+			"this.document.language": () => {
+				this.document.filename = this.filenameWithExtension;
 			}
 		}
 	};
