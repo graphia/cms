@@ -1,0 +1,12 @@
+translation_enabled: true
+default_language: de   # Missing from all_languages
+enabled_languages:
+  - en
+
+all_languages:
+  en:
+    name: English
+    flag: 🇬🇧
+  es:
+    name: Spanish
+    flag: 🇪🇸

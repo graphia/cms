@@ -72,6 +72,18 @@ type RepositoryInfo struct {
 	LatestRevision string `json:"latest_revision" validate:"required"`
 }
 
+// Language contains a language's name and code for localisation
+type Language struct {
+	Code string `json:"code"`
+	Name string `json:"name"`
+}
+
+// LanguageInfo provides general information about the system
+type LanguageInfo struct {
+	DefaultLanguage Language   `json:"default_language"`
+	OtherLanguages  []Language `json:"other_languages"`
+}
+
 // FileItem contains enough file information for listing
 // HTML and raw Markdown content is omitted
 type FileItem struct {
