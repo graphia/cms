@@ -28,7 +28,7 @@
 
 							<dt>Tags</dt>
 							<dd>
-								<span v-for="tag in document.tags" class="tag badge badge-primary">
+								<span v-for="(tag, i) in document.tags" class="tag badge badge-primary" :key="i">
 									{{ tag }}
 								</span>
 							</dd>
@@ -48,6 +48,10 @@
 							</button>
 
 						</div>
+					</div>
+
+					<div class="card-body">
+						<h4>Translations</h4>
 					</div>
 				</div>
 			</aside>
