@@ -9,3 +9,19 @@ publishDir: frontend/public
 
 pygmentsCodeFences: true
 pygmentsUseClasses: true
+
+defaultContentLanguage: "en"
+defaultContentLanguageInSubdir: false
+
+Languages:
+  en:
+    title: "English"
+    weight: 0
+
+  fr:
+    title: "French"
+    weight: 1
+
+  de:
+    title: "German"
+    weight: 1
