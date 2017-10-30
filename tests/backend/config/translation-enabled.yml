@@ -1,0 +1,16 @@
+translation_enabled: true
+default_language: en
+enabled_languages:
+  - en
+  - es
+
+all_languages:
+  en:
+    name: English
+    flag: 🇬🇧
+  es:
+    name: Spanish
+    flag: 🇪🇸
+  fr:
+    name: FR
+    flag: 🇫🇷

@@ -53,9 +53,7 @@ func init() {
 
 	config, err = loadConfig(&p)
 	if err != nil {
-		if err != nil {
-			panic(err)
-		}
+		panic(err)
 	}
 
 	validate = validator.New()
@@ -202,6 +200,7 @@ func protectedRouter() (r *vestigo.Router) {
 
 	// cms endpoints
 	r.Post("/api/publish", apiPublishHandler)
+	r.Get("/api/translation_info", apiGetLanguageInformationHandler)
 
 	// missing operations:
 	// how should file and directory moves/copies be represented?

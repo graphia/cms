@@ -1210,56 +1210,6 @@ func apiGetRepositoryInformationHandler(w http.ResponseWriter, r *http.Request) 
 
 }
 
-func apiGetLanguageInformationHandler(w http.ResponseWriter, r *http.Request) {
-
-	// return enabled false if translation disabled in config
-	if !config.TranslationEnabled {
-		response := struct {
-			TranslationEnabled bool `json:"translation_enabled,omitempty"`
-		}{
-			false,
-		}
-		JSONResponse(response, http.StatusOK, w)
-		return
-	}
-
-	type language struct {
-		Code string `json:"code"`
-		Name string `json:"name"`
-		Flag string `json:"flag"`
-	}
-
-	type languageInfo struct {
-		TranslationEnabled bool       `json:"translation_enabled,omitempty"`
-		DefaultLanguage    string     `json:"default_language,omitempty"`
-		Languages          []language `json:"languages,omitempty"`
-	}
-
-	var languages []language
-
-	// build a list of just the enabled languages
-	for _, lc := range config.EnabledLanguages {
-
-		li := config.AllLanguages[lc]
-
-		languages = append(languages, language{
-			Code: lc,
-			Name: li.Name,
-			Flag: li.Flag,
-		})
-
-	}
-
-	var li = languageInfo{
-		TranslationEnabled: config.TranslationEnabled,
-		DefaultLanguage:    config.DefaultLanguage,
-		Languages:          languages,
-	}
-
-	JSONResponse(li, http.StatusOK, w)
-
-}
-
 // GET /api/commits/:commit_hash
 //
 // returns a single commit containing relevant info plus the list of files
@@ -1335,5 +1285,57 @@ func apiGetFileHistoryHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	JSONResponse(history, http.StatusOK, w)
+
+}
+
+// Translation data 🖍
+
+func apiGetLanguageInformationHandler(w http.ResponseWriter, r *http.Request) {
+
+	// return enabled false if translation disabled in config
+	if !config.TranslationEnabled {
+		response := struct {
+			TranslationEnabled bool `json:"translation_enabled,omitempty"`
+		}{
+			false,
+		}
+		JSONResponse(response, http.StatusOK, w)
+		return
+	}
+
+	type language struct {
+		Code string `json:"code"`
+		Name string `json:"name"`
+		Flag string `json:"flag"`
+	}
+
+	type languageInfo struct {
+		TranslationEnabled bool       `json:"translation_enabled,omitempty"`
+		DefaultLanguage    string     `json:"default_language"`
+		Languages          []language `json:"languages,omitempty"`
+	}
+
+	var languages []language
+
+	// build a list of just the enabled languages
+	for _, lc := range config.EnabledLanguages {
+
+		li := config.AllLanguages[lc]
+
+		languages = append(languages, language{
+			Code: lc,
+			Name: li.Name,
+			Flag: li.Flag,
+		})
+
+	}
+
+	var li = languageInfo{
+		TranslationEnabled: config.TranslationEnabled,
+		DefaultLanguage:    config.DefaultLanguage,
+		Languages:          languages,
+	}
+
+	JSONResponse(li, http.StatusOK, w)
 
 }

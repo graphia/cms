@@ -1643,3 +1643,64 @@ func Test_apiGetRepositoryInformationHandler(t *testing.T) {
 	assert.Equal(t, expected, actual)
 
 }
+
+func Test_apiGetLanguageInformationHandlerTranslationDisabled(t *testing.T) {
+
+	var translationDisabled = "../tests/backend/config/translation-disabled.yml"
+
+	server = createTestServerWithConfig(translationDisabled)
+	target := fmt.Sprintf("%s/%s", server.URL, "api/translation_info")
+
+	resp, _ := http.Get(target)
+
+	type translationResponse struct {
+		TranslationEnabled bool
+	}
+
+	var expected = translationResponse{TranslationEnabled: false}
+	var actual translationResponse
+
+	json.NewDecoder(resp.Body).Decode(&actual)
+
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+	assert.Equal(t, expected, actual)
+
+}
+
+func Test_apiGetLanguageInformationHandlerTranslationEnabled(t *testing.T) {
+
+	var translationEnabled = "../tests/backend/config/translation-enabled.yml"
+
+	server = createTestServerWithConfig(translationEnabled)
+	target := fmt.Sprintf("%s/%s", server.URL, "api/translation_info")
+
+	resp, _ := http.Get(target)
+
+	type language struct {
+		Code string
+		Name string
+		Flag string
+	}
+
+	type translationResponse struct {
+		TranslationEnabled bool       `json:"translation_enabled,omitempty"`
+		DefaultLanguage    string     `json:"default_language"`
+		Languages          []language `json:"languages,omitempty"`
+	}
+
+	var expected = translationResponse{
+		TranslationEnabled: true,
+		DefaultLanguage:    "en",
+		Languages: []language{
+			language{Code: "en", Name: "English", Flag: "🇬🇧"},
+			language{Code: "es", Name: "Spanish", Flag: "🇪🇸"},
+		},
+	}
+	var actual translationResponse
+
+	json.NewDecoder(resp.Body).Decode(&actual)
+
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+	assert.Equal(t, expected, actual)
+
+}

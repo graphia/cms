@@ -271,6 +271,12 @@ func createTestServerWithContext() (server *httptest.Server) {
 
 }
 
+func createTestServerWithConfig(path string) (server *httptest.Server) {
+	Debug.Println("Loading config from", path)
+	config, _ = loadConfig(&path)
+	return createTestServerWithContext()
+}
+
 func apiTestUser() (user User) {
 	return User{Name: "Selma Bouvier", Email: "selma.b@aol.com"}
 }
