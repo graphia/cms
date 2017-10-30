@@ -8,7 +8,7 @@ import CMSDirectory from '../javascripts/models/directory.js';
 
 import CMSAuth from '../javascripts/auth.js';
 import CMSBroadcast from '../javascripts/broadcast.js';
-import CMSRepo from '../javascripts/models/repo.js';
+import CMSServer from '../javascripts/models/server.js';
 
 Vue.use(Vuex);
 
@@ -20,7 +20,9 @@ const state = {
 	auth: new CMSAuth,
 	broadcast: new CMSBroadcast,
 	latestRevision: null,
-	defaultLanguage: "en"
+	defaultLanguage: "en",
+	languages: [],
+	translationEnabled: false
 };
 
 const mutations = {
@@ -68,7 +70,10 @@ const actions = {
 		return CMSDirectory.get(name);
 	},
 	getLatestRevision(context) {
-		return CMSRepo.getLatestRevision();
+		return CMSServer.getLatestRevision();
+	},
+	getTranslationInfo(context) {
+		return CMSServer.getTranslationInfo();
 	}
 };
 
