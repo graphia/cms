@@ -1192,6 +1192,16 @@ func apiGetCommitsHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// GET /api/repository_info
+//
+// returns the repositorys head commit's hash, used to ensure subsequent commits
+// aren't applied to an out-of-sync repo
+//
+// [
+//	  {
+//	    "latest_revision": "abcde12345"
+//	  },
+// ]
 func apiGetRepositoryInformationHandler(w http.ResponseWriter, r *http.Request) {
 	var fr FailureResponse
 	var ri RepositoryInfo
@@ -1290,6 +1300,20 @@ func apiGetFileHistoryHandler(w http.ResponseWriter, r *http.Request) {
 
 // Translation data 🖍
 
+// GET /api/translation_info
+//
+// returns the CMS's translation/language settings
+//
+// [
+//	  {
+//	    translation_enabled: true,
+//	    default_language: "en",
+//	    languages: [
+//	      {code: "en", name: "English", flag: "🇬🇧"},
+//	      {code: "es", name: "Spanish", flag: "🇪🇸"}
+//	    ]
+//	  },
+// ]
 func apiGetLanguageInformationHandler(w http.ResponseWriter, r *http.Request) {
 
 	// return enabled false if translation disabled in config
