@@ -5,6 +5,7 @@ Feature: Authentication
 
 	Background:
 		Given a repository has been initialised
+		And the CMS is running with the "default" config
 		And my user account exists
 
 	Scenario: Navigating to the homepage with no session

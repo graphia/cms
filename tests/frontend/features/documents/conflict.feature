@@ -5,6 +5,7 @@ Feature: Creating documents
 
 	Background:
 		Given a repository has been initialised
+		And the CMS is running with the "default" config
 		And my user account exists
 		And I have logged in
 
