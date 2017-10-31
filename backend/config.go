@@ -70,18 +70,26 @@ func loadConfig(path *string) (Config, error) {
 	// are valid
 	if c.TranslationEnabled {
 
-		// check languages have been set up correctly, first get a list
-		// of valid codes
+		// check languages have been set up correctly
+
+		// first get a list of valid codes
 		for l := range c.AllLanguages {
 			codes = append(codes, l)
 		}
 
+		// make sure a default is set
 		if c.DefaultLanguage == "" {
 			return *c, fmt.Errorf("Translation enabled but no default language specified")
 		}
 
+		// throw an error if there are no enabled languages
 		if len(c.EnabledLanguages) == 0 {
-			return *c, fmt.Errorf("Translation enabled no languages enabled")
+			return *c, fmt.Errorf("Translation enabled but no languages enabled")
+		}
+
+		// only a warning if there's just one - things will (kind of) work 🙄
+		if len(c.EnabledLanguages) == 1 {
+			Warning.Println("Translation is turned on but only one language is enabled")
 		}
 
 		// make sure the default language code exists

@@ -45,6 +45,8 @@ translation_enabled: true
 default_language: en
 enabled_languages:
   - en
+  - es
+  - de
 
 all_languages:
   en:

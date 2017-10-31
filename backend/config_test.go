@@ -51,7 +51,7 @@ func Test_loadConfig(t *testing.T) {
 				path: &translationNoEnabled,
 			},
 			wantErr: true,
-			errMsg:  "Translation enabled no languages enabled",
+			errMsg:  "Translation enabled but no languages enabled",
 		},
 		{
 			name: "Default Language Not Defined",

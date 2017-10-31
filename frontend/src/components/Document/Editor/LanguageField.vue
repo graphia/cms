@@ -8,9 +8,9 @@
 			class="form-control"
 			v-model="document.language"
 		>
-			<option value="en">English 🇬🇧</option>
-			<option value="de">German 🇩🇪</option>
-			<option value="fr">French 🇫🇷</option>
+			<option v-for="(language, i) in languages" :key="i" :value="language.code">
+				{{ language.flag }} {{ language.name }}
+			</option>
 
 		</select>
 
@@ -28,7 +28,12 @@
 
 	export default {
 		name: "LanguageField",
-		mixins: [Accessors]
+		mixins: [Accessors],
+		computed: {
+			languages() {
+				return this.$store.state.languages;
+			}
+		}
 	};
 
 </script>
