@@ -40,13 +40,14 @@ media_types:
     xml: text/xml
     csv: text/csv
 
-translation_enabled: true
+translation_enabled: false
 
 default_language: en
 enabled_languages:
   - en
   - es
   - de
+  - fr
 
 all_languages:
   en:
@@ -61,3 +62,6 @@ all_languages:
   de:
     name: German
     flag: 🇩🇪
+  it:
+    name: Italian
+    flag: 🇮🇹

@@ -1,0 +1,54 @@
+port: 9095
+repository: ../../tests/tmp/repositories/cucumber
+logfile: ../../logs/cucumber-server.log
+corsenabled: false
+corsorigin: null
+database: ../../db/cucumber.db
+static: ../../dist
+hugo_config_file: ../../config/hugo.development.yml
+hugo_bin: /usr/local/bin/hugo
+private_key_path: ../../tests/backend/keys/app.test.rsa
+public_key_path: ../../tests/backend/keys/app.test.rsa.pub
+file_categories:
+  documents:
+    - .md
+  images:
+    - .png
+    - .jpg
+    - .gif
+  structured data:
+    - .xml
+    - .json
+  tabular data:
+    - .csv
+media_types:
+
+    # image types
+    gif: image/gif
+    jpeg: image/jpeg
+    jpg: image/jpeg
+    png: image/png
+    tiff: image/tiff
+
+    # structured data types
+    xml: text/xml
+    csv: text/csv
+    json: text/json
+
+translation_enabled: true
+default_language: en
+enabled_languages:
+  - en
+  - fi
+  - sv
+
+all_languages:
+  en:
+    name: English
+    flag: 🇬🇧
+  fi:
+    name: Finnish
+    flag: 🇫🇮
+  sv:
+    name: Swedish
+    flag: 🇸🇪

@@ -39,9 +39,9 @@
 							<p class="card-text">{{ primary(d).synopsis || description_placeholder }}</p>
 						</div>
 
-						<div class="card-footer" v-if="translationEnabled">
+						<div class="card-footer" v-if="translationEnabled && d.length > 1">
 							<ul class="list-inline">
-								<li class="list-inline-item" v-for="(t, k) in translations(d)" :key="k">
+								<li class="list-inline-item" v-for="(t, k) in translations(d)" :key="k" :data-lang="t.language.name">
 									<router-link :to="{name: 'document_show', params: {filename: t.filename}}">
 										{{ (t.language && t.language.flag) || "missing" }}
 									</router-link>

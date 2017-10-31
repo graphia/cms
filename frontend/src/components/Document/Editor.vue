@@ -31,7 +31,7 @@
 
 						<FrontMatter/>
 
-						<LanguageField v-if="newFile"/>
+						<LanguageField v-if="newFile && translationEnabled"/>
 
 						<FilenameField v-if="newFile"/>
 
@@ -93,6 +93,11 @@
 			// FIXME use bus instead of cascading
 			"$parent.markdownLoaded": function() {
 				this.markdownLoaded = true;
+			}
+		},
+		computed: {
+			translationEnabled() {
+				return this.$store.state.translationEnabled;
 			}
 		},
 		props: [

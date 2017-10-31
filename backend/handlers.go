@@ -1323,6 +1323,8 @@ func apiGetLanguageInformationHandler(w http.ResponseWriter, r *http.Request) {
 		}{
 			false,
 		}
+
+		Debug.Println("Translation is disabled")
 		JSONResponse(response, http.StatusOK, w)
 		return
 	}
@@ -1360,6 +1362,7 @@ func apiGetLanguageInformationHandler(w http.ResponseWriter, r *http.Request) {
 		Languages:          languages,
 	}
 
+	Debug.Println("Translation is enabled", li)
 	JSONResponse(li, http.StatusOK, w)
 
 }

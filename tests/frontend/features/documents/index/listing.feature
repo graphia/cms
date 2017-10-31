@@ -1,5 +1,5 @@
 Feature: Listing documents
-	So I can see files
+	So I can see files of a certain category
 	As an author
 	I want to view listings for a directory
 

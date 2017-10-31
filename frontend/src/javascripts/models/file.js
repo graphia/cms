@@ -20,6 +20,8 @@ export default class CMSFile {
 
 		if (file && file.initialzing) {
 
+			this.initializing    = file.initializing;
+
 			this.path            = file.path;
 			this.filename        = "";
 			this.slug            = "";
@@ -35,6 +37,8 @@ export default class CMSFile {
 			this.initialMarkdown = "";
 
 		} else if (file) {
+
+			this.initializing          = false;
 
 			// TODO this is a bit long and ugly; can it be neatened up?
 			this.path                  = file.path;
@@ -71,6 +75,7 @@ export default class CMSFile {
 
 		} else {
 			// do the minimum setup needed
+			this.initializing   = true;
 			this.directory_info = new CMSDirectory;
 		}
 
@@ -96,14 +101,13 @@ export default class CMSFile {
 	}
 
 	get language() {
-		let code = this.translationRegex.exec(this.filename)[1]
-		//let l = store.state.languages[0].find(function(language) { language.code == code })
+		let code = this.translationRegex.exec(this.filename)
 
-		console.debug("langs = ", store.state.languages)
-		console.debug("code = ", code)
-		let l = store.state.languages.find(x => x.code === code)
-		console.debug(l)
-		return l;
+		if (!code) {
+			return store.state.defaultLanguage;
+		};
+
+		return store.state.languages.find(x => x.code === code[1]);
 	}
 
 	// class methods
