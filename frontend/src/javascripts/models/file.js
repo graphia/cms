@@ -6,6 +6,7 @@ import CMSDirectory from './directory.js';
 
 export default class CMSFile {
 
+
 	static initialize(directory) {
 		console.debug("Initialising file in", directory);
 		let file = new CMSFile({initialzing: true, path: directory});
@@ -14,6 +15,8 @@ export default class CMSFile {
 	}
 
 	constructor(file) {
+
+		this.translationRegex = /\.([A-z]{2})\.md$/
 
 		if (file && file.initialzing) {
 
@@ -30,7 +33,6 @@ export default class CMSFile {
 			this.history         = [];
 			this.attachments     = [];
 			this.initialMarkdown = "";
-			this.language        = "en"; // default to English
 
 		} else if (file) {
 
@@ -39,7 +41,6 @@ export default class CMSFile {
 			this.filename              = file.filename;
 			this.html                  = file.html;
 			this.markdown              = file.markdown;
-			this.language              = file.language;
 
 			// frontmatter fields
 			this.title                 = file.frontmatter.title;
@@ -88,6 +89,22 @@ export default class CMSFile {
 	get tags() {
 		return this._tags;
 	};
+
+	get translation() {
+
+		return this.translationRegex.test(this.filename)
+	}
+
+	get language() {
+		let code = this.translationRegex.exec(this.filename)[1]
+		//let l = store.state.languages[0].find(function(language) { language.code == code })
+
+		console.debug("langs = ", store.state.languages)
+		console.debug("code = ", code)
+		let l = store.state.languages.find(x => x.code === code)
+		console.debug(l)
+		return l;
+	}
 
 	// class methods
 
