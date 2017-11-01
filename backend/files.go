@@ -215,7 +215,7 @@ func writeFiles(repo *git.Repository, nc NewCommit, user User) (oid *git.Oid, er
 
 	}
 
-	oid, err = writeTreeAndCommit(repo, index, nc, user)
+	oid, err = writeTreeAndCommit(repo, index, nc.Message, user)
 
 	return oid, err
 
@@ -257,7 +257,7 @@ func writeMetadataFiles(repo *git.Repository, nc NewCommit, user User) (oid *git
 
 	}
 
-	oid, err = writeTreeAndCommit(repo, index, nc, user)
+	oid, err = writeTreeAndCommit(repo, index, nc.Message, user)
 	if err != nil {
 		return oid, err
 	}
@@ -375,6 +375,63 @@ func listRootDirectorySummary() (summary []DirectorySummary, err error) {
 	return summary, err
 }
 
+func createTranslation(nt NewTranslation, user User) (oid *git.Oid, err error) {
+
+	repo, err := repository(config)
+
+	err = checkLatestRevision(repo, nt.RepositoryInfo.LatestRevision)
+	if err != nil {
+		return oid, err
+	}
+
+	language, err := getLanguage(nt.LanguageCode)
+	if err != nil {
+		return nil, err
+	}
+
+	tree, err := headTree(repo)
+	if err != nil {
+		return nil, err
+	}
+	target := filepath.Join(nt.Path, nt.SourceFilename)
+
+	entry, err := tree.EntryByPath(target)
+	if err != nil {
+		return nil, err
+	}
+
+	blob, err := repo.LookupBlob(entry.Id)
+	if err != nil {
+		return nil, err
+	}
+	defer blob.Free()
+
+	index, err := repo.Index()
+	if err != nil {
+		Error.Println("Failed to get repo index", err.Error())
+		return nil, err
+	}
+	defer index.Free()
+
+	boid, err := repo.CreateBlobFromBuffer(blob.Contents())
+	if err != nil {
+		return oid, err
+	}
+
+	ie := buildIndexEntryTranslation(boid, nt, len(blob.Contents()))
+
+	err = index.Add(&ie)
+	if err != nil {
+		return oid, err
+	}
+
+	msg := fmt.Sprintf("%s translation initiated", language.Name)
+
+	oid, err = writeTreeAndCommit(repo, index, msg, user)
+
+	return oid, err
+}
+
 func createDirectories(nc NewCommit, user User) (oid *git.Oid, err error) {
 
 	repo, err := repository(config)
@@ -479,7 +536,7 @@ func writeDirectories(repo *git.Repository, nc NewCommit, user User) (oid *git.O
 
 	}
 
-	oid, err = writeTreeAndCommit(repo, index, nc, user)
+	oid, err = writeTreeAndCommit(repo, index, nc.Message, user)
 
 	if err != nil {
 		return oid, err
@@ -530,7 +587,7 @@ func deleteDirectories(nc NewCommit, user User) (oid *git.Oid, err error) {
 
 	}
 
-	oid, err = writeTreeAndCommit(repo, index, nc, user)
+	oid, err = writeTreeAndCommit(repo, index, nc.Message, user)
 	if err != nil {
 		return oid, err
 	}
@@ -592,7 +649,7 @@ func deleteFiles(nc NewCommit, user User) (oid *git.Oid, err error) {
 		nc.Message = "File deleted"
 	}
 
-	oid, err = writeTreeAndCommit(repo, index, nc, user)
+	oid, err = writeTreeAndCommit(repo, index, nc.Message, user)
 	if err != nil {
 		return oid, err
 	}
@@ -628,6 +685,20 @@ func buildIndexEntryDirectory(oid *git.Oid, ncd NewCommitDirectory) git.IndexEnt
 		Id:   oid,
 		Path: filepath.Join(ncd.Path, "_index.md"),
 		Size: uint32(0),
+
+		Ctime: git.IndexTime{},
+		Gid:   uint32(os.Getgid()),
+		Uid:   uint32(os.Getuid()),
+		Mode:  git.FilemodeBlob,
+		Mtime: git.IndexTime{},
+	}
+}
+
+func buildIndexEntryTranslation(oid *git.Oid, nt NewTranslation, size int) git.IndexEntry {
+	return git.IndexEntry{
+		Id:   oid,
+		Path: filepath.Join(nt.Path, nt.TargetFilename()),
+		Size: uint32(size),
 
 		Ctime: git.IndexTime{},
 		Gid:   uint32(os.Getgid()),
@@ -845,7 +916,7 @@ func countFiles() (counter map[string]int, err error) {
 	return counter, err
 }
 
-func writeTreeAndCommit(repo *git.Repository, index *git.Index, nc NewCommit, user User) (oid *git.Oid, err error) {
+func writeTreeAndCommit(repo *git.Repository, index *git.Index, message string, user User) (oid *git.Oid, err error) {
 
 	// write the tree, persisting our addition to the git repo
 	treeID, err := index.WriteTree()
@@ -870,7 +941,7 @@ func writeTreeAndCommit(repo *git.Repository, index *git.Index, nc NewCommit, us
 	committer := sign(user)
 
 	// now commit our updated tree to the tip (parent)
-	oid, err = repo.CreateCommit("HEAD", author, committer, nc.Message, tree, tip)
+	oid, err = repo.CreateCommit("HEAD", author, committer, message, tree, tip)
 	if err != nil {
 		return oid, err
 	}

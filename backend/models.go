@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"gopkg.in/libgit2/git2go.v25"
@@ -27,6 +30,24 @@ type NewCommitFile struct {
 	Body          string      `json:"body"`
 	FrontMatter   FrontMatter `json:"frontmatter"`
 	Base64Encoded bool        `json:"base_64_encoded"`
+}
+
+// NewTranslation creates a new copy of a file ready for translation
+type NewTranslation struct {
+	SourceFilename string `json:"filename" validate:"required"`
+	Path           string `json:"path" validate:"required"`
+	LanguageCode   string `json:"language_code" validate:"required"`
+	RepositoryInfo `json:"repository_info"`
+}
+
+// TargetFilename provides the new filename with the
+// language code inserted
+func (nt NewTranslation) TargetFilename() string {
+	ext := filepath.Ext(nt.SourceFilename)
+	base := strings.TrimSuffix(nt.SourceFilename, ext)
+	// return in the format "filename.langcode.md"
+	// note, ext retains the dot
+	return fmt.Sprintf("%s.%s%s", base, nt.LanguageCode, ext)
 }
 
 // FrontMatter contains the document's metadata
@@ -76,12 +97,7 @@ type RepositoryInfo struct {
 type Language struct {
 	Code string `json:"code"`
 	Name string `json:"name"`
-}
-
-// LanguageInfo provides general information about the system
-type LanguageInfo struct {
-	DefaultLanguage Language   `json:"default_language"`
-	OtherLanguages  []Language `json:"other_languages"`
+	Flag string `json:"flag"`
 }
 
 // FileItem contains enough file information for listing

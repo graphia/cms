@@ -54,16 +54,6 @@ func loadConfig(path *string) (Config, error) {
 	c := &Config{}
 	yaml.Unmarshal(configFile, c)
 
-	// simply check the supplied slice for the presence of string
-	contains := func(s []string, e string) bool {
-		for _, a := range s {
-			if a == e {
-				return true
-			}
-		}
-		return false
-	}
-
 	codes := make([]string, len(c.AllLanguages))
 
 	// if translation is enabled, ensure that our language settings
@@ -108,4 +98,30 @@ func loadConfig(path *string) (Config, error) {
 
 	return *c, err
 
+}
+
+func getLanguage(code string) (language Language, err error) {
+
+	if !contains(config.EnabledLanguages, code) {
+		return language, fmt.Errorf("Language '%s' not enabled", code)
+	}
+
+	ld := config.AllLanguages[code]
+
+	// map the config data to a Language obj
+	language.Name = ld.Name
+	language.Code = code
+	language.Flag = ld.Flag
+
+	return language, err
+}
+
+// simply check the supplied slice for the presence of string
+func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
 }
