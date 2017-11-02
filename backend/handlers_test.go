@@ -1704,3 +1704,135 @@ func Test_apiGetLanguageInformationHandlerTranslationEnabled(t *testing.T) {
 	assert.Equal(t, expected, actual)
 
 }
+
+func Test_apiTranslateFileHandler(t *testing.T) {
+
+	type args struct {
+		nt NewTranslation
+	}
+
+	tests := []struct {
+		name          string
+		args          args
+		wantErr       bool
+		errMsg        string
+		statusCode    int
+		doPriorUpdate bool
+	}{
+		{
+			name: "Creating a translation",
+			args: args{
+				nt: NewTranslation{
+					SourceFilename: "document_1.md",
+					Path:           "documents",
+					LanguageCode:   "es",
+				},
+			},
+			statusCode: http.StatusCreated,
+		},
+		{
+			name: "Non-matching filename",
+			args: args{
+				nt: NewTranslation{
+					SourceFilename: "document_2.md",
+					Path:           "documents",
+					LanguageCode:   "es",
+				},
+			},
+			wantErr:    true,
+			errMsg:     "Filename does not match payload",
+			statusCode: http.StatusBadRequest,
+		},
+		{
+			name: "Non-matching directory",
+			args: args{
+				nt: NewTranslation{
+					SourceFilename: "document_1.md",
+					Path:           "appendices",
+					LanguageCode:   "es",
+				},
+			},
+			wantErr:    true,
+			errMsg:     "Directory does not match payload",
+			statusCode: http.StatusBadRequest,
+		},
+		{
+			name: "Non-matching directory",
+			args: args{
+				nt: NewTranslation{
+					SourceFilename: "document_1.md",
+					Path:           "documents",
+					LanguageCode:   "fi",
+				},
+			},
+			wantErr:    true,
+			errMsg:     "Language 'fi' not enabled",
+			statusCode: http.StatusBadRequest,
+		},
+		{
+			name: "Out of sync repo",
+			args: args{
+				nt: NewTranslation{
+					SourceFilename: "document_1.md",
+					Path:           "documents",
+					LanguageCode:   "es",
+				},
+			},
+			statusCode:    http.StatusConflict,
+			wantErr:       true,
+			errMsg:        "Repository out of sync with commit",
+			doPriorUpdate: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var translationEnabled = "../tests/backend/config/translation-enabled.yml"
+
+			repoPath := "../tests/tmp/repositories/translation_handler"
+			lr, _ := setupSmallTestRepo(repoPath)
+
+			server = createTestServerWithConfig(translationEnabled)
+			config.Repository = filepath.Join(repoPath)
+
+			tt.args.nt.RepositoryInfo = RepositoryInfo{LatestRevision: lr.String()}
+
+			target := fmt.Sprintf(
+				"%s/%s",
+				server.URL,
+				"api/directories/documents/files/document_1.md/translate",
+			)
+
+			payload, _ := json.Marshal(tt.args.nt)
+
+			b := bytes.NewBuffer(payload)
+
+			client := &http.Client{}
+
+			req, _ := http.NewRequest("POST", target, b)
+
+			if tt.doPriorUpdate {
+				fmt.Println("doing a sneaky update")
+				repo, _ := repository(config)
+				zoid, _ := createRandomFile(repo, "document_12.md", "whoosh")
+				fmt.Println("zoid", zoid)
+			}
+
+			resp, _ := client.Do(req)
+
+			if tt.wantErr {
+				var fr FailureResponse
+				json.NewDecoder(resp.Body).Decode(&fr)
+				assert.Equal(t, resp.StatusCode, tt.statusCode)
+				assert.Equal(t, tt.errMsg, fr.Message)
+				return
+			}
+
+			var sr SuccessResponse
+			json.NewDecoder(resp.Body).Decode(&sr)
+
+			assert.Equal(t, "Translation created", sr.Message)
+			assert.Equal(t, resp.StatusCode, tt.statusCode)
+
+		})
+	}
+}

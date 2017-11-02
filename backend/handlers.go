@@ -866,6 +866,62 @@ func apiUpdateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func apiTranslateFileHandler(w http.ResponseWriter, r *http.Request) {
+	var filename, directory string
+	var nt NewTranslation
+	var fr FailureResponse
+	var sr SuccessResponse
+	var err error
+
+	filename = vestigo.Param(r, "file")
+	directory = vestigo.Param(r, "directory")
+	user := getCurrentUser(r.Context())
+
+	json.NewDecoder(r.Body).Decode(&nt)
+
+	if directory != nt.Path {
+		fr = FailureResponse{Message: "Directory does not match payload"}
+		Warning.Printf(
+			"Directory does not match contents, param: %s, payload: %s",
+			directory,
+			nt.Path,
+		)
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	if filename != nt.SourceFilename {
+		fr = FailureResponse{Message: "Filename does not match payload"}
+		Warning.Printf(
+			"Filename does not match contents, param: %s, payload: %s",
+			filename,
+			nt.SourceFilename,
+		)
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	oid, err := createTranslation(nt, user)
+
+	if err == ErrRepoOutOfSync {
+		fr = FailureResponse{Message: "Repository out of sync with commit"}
+		JSONResponse(fr, http.StatusConflict, w)
+		return
+	}
+
+	if err != nil {
+		Error.Println("Could not create translation:", err.Error())
+		fr = FailureResponse{Message: err.Error()}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	sr = SuccessResponse{Message: "Translation created", Oid: oid.String()}
+
+	JSONResponse(sr, http.StatusCreated, w)
+
+}
+
 // apiDeleteFileFromDirectoryHandler deletes a file from the specified
 // directory
 //
