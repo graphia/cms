@@ -46,7 +46,66 @@ Then %r{^I should be on the document's 'Finnish' translation$} do
   expect(page.current_path).to eql("/cms/documents/#{@document}.fi.md")
 end
 
-def write_translated_file(name, email, contents, code, message)
+Given %r{^I navigate to my document's 'show' page$} do
+  @document = "document_1.md"
+  path = "/cms/documents/#{@document}"
+  visit(path)
+  expect(page.current_path).to eql(path)
+end
+
+
+Given %r{^my document is untranslated$} do
+  # do nothing
+end
+
+When %r{^I click the 'Translate' dropdown button$} do
+  within(".document-metadata") do
+    click_button("Translate")
+  end
+end
+
+Then %r{^I should see a list of available languages:$} do |table|
+  within(".document-metadata .translation-options") do
+    table.transpose.raw.flatten.each do |language|
+      expect(page).to have_css("button", text: language)
+    end
+  end
+end
+
+Then %r{^the existing language '(.*?)' should not be included$} do |language|
+  within(".document-metadata .translation-options") do
+    expect(page).not_to have_css("button", text: language)
+  end
+end
+
+Then %r{^the existing languages '(.*?)' and '(.*?)' should not be included$} do |language1, language2|
+  within(".document-metadata .translation-options") do
+    [language1, language2].each do |language|
+        expect(page).not_to have_css("button", text: language)
+    end
+  end
+end
+
+Given %r{^there is already a 'Swedish' translation of my document$} do
+  write_swedish_file("document_1")
+end
+
+When %r{^I click the '(.*?)' translation option$} do |language|
+  within(".document-metadata .translation-options") do
+    click_button(language)
+  end
+end
+
+Then %r{^I should be on the new 'Swedish' document$} do
+  expect(page).to have_css(".alert.alert-success")
+  expect(page.current_path).to eql("/cms/documents/document_1.sv.md")
+end
+
+Then %r{^there should be a banner "([^"]*)"$} do |arg1|
+  pending # Write code here that turns the phrase above into concrete actions
+end
+
+def write_translated_file(name, email, contents, code, message, filename="translated_doc")
   Git.open(REPO_PATH).tap do |g|
     g.config('user.name', name)
     g.config('user.email', email)
@@ -54,7 +113,7 @@ def write_translated_file(name, email, contents, code, message)
       File.join(
         REPO_PATH,
         "documents",
-        ["translated_doc", code, "md"].compact.join(".")
+        [filename, code, "md"].compact.join(".")
       ),
       contents
     )
@@ -63,7 +122,7 @@ def write_translated_file(name, email, contents, code, message)
   end
 end
 
-def write_english_file
+def write_english_file(filename="translated_doc")
   contents = <<~CONTENTS
     ---
     title: A noble spirit embiggens the smallest man.
@@ -76,15 +135,16 @@ def write_english_file
   CONTENTS
 
   write_translated_file(
-    'B. A. Bäckström',
-    'ba.bs@moomin.fi',
+    'Melvin van Horne',
+    'mvh@hbowtime.com',
     contents,
     nil,
-    "Finnish file added"
+    "English file added",
+    filename
   )
 end
 
-def write_finnish_file
+def write_finnish_file(filename="translated_doc")
   contents = <<~CONTENTS
     ---
     title: Finland's Culture (Model U.N. Club)
@@ -99,11 +159,12 @@ def write_finnish_file
     'ba.bs@moomin.fi',
     contents,
     "fi",
-    "Finnish file added"
+    "Finnish file added",
+    filename
   )
 end
 
-def write_swedish_file
+def write_swedish_file(filename="translated_doc")
   contents = <<~CONTENTS
     ---
     title: Du gamla, Du fria, Du fjällhöga nord
@@ -118,6 +179,7 @@ def write_swedish_file
     'sven.simpson@ikea.se',
     contents,
     "sv",
-    "Swedish file added"
+    "Swedish file added",
+    filename
   )
 end

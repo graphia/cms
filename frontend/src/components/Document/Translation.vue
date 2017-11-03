@@ -1,5 +1,5 @@
 <template>
-	<div class="dropdown">
+	<div class="dropdown" v-if="anyAvailableLanguages">
 
 		<button
 			class="btn btn-info dropdown-toggle"
@@ -12,9 +12,9 @@
 			Translate
 		</button>
 
-		<div class="dropdown-menu" aria-labelledby="translationMenu">
+		<div class="translation-options dropdown-menu" aria-labelledby="translationMenu">
 
-			<button @click="initiateTranslation" class="dropdown-item" v-for="(language, i) in languages" :key="i" :value="language.code">
+			<button @click="initiateTranslation" class="dropdown-item" v-for="(language, i) in availableLanguages" :key="i" :value="language.code">
 				<span class="flag">{{ language.flag }}</span>{{ language.name }}
 			</button>
 
@@ -35,6 +35,26 @@
 		computed: {
 			languages() {
 				return this.$store.state.languages;
+			},
+			availableLanguages() {
+
+				return this
+					.languages
+					.filter((language) => {
+						return !this
+							.existingTranslations
+							.includes(language.code);
+					});
+
+			},
+			anyAvailableLanguages() {
+				return this.availableLanguages.length > 0;
+			},
+			existingTranslations() {
+				if (this.document && this.document.translations) {
+					return this.document.translations;
+				}
+				return [];
 			}
 		},
 		methods: {

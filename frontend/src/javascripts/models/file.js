@@ -34,6 +34,7 @@ export default class CMSFile {
 			this.version         = "";
 			this.history         = [];
 			this.attachments     = [];
+			this.translations    = [];
 			this.initialMarkdown = "";
 
 		} else if (file) {
@@ -45,6 +46,8 @@ export default class CMSFile {
 			this.filename              = file.filename;
 			this.html                  = file.html;
 			this.markdown              = file.markdown;
+			this.translations          = file.translations;
+
 
 			// frontmatter fields
 			this.title                 = file.frontmatter.title;
@@ -77,6 +80,7 @@ export default class CMSFile {
 			// do the minimum setup needed
 			this.initializing   = true;
 			this.directory_info = new CMSDirectory;
+			this.translations   = [];
 		}
 
 	};

@@ -757,6 +757,11 @@ func getFile(directory string, filename string, includeMd, includeHTML bool) (fi
 	}
 
 	ri := RepositoryInfo{LatestRevision: hc.Id().String()}
+	if err != nil {
+		return nil, err
+	}
+
+	translations, err := getTranslations(repo, directory, filename)
 
 	file = &File{
 		Filename:       filename,
@@ -766,6 +771,7 @@ func getFile(directory string, filename string, includeMd, includeHTML bool) (fi
 		FrontMatter:    fm,
 		DirectoryInfo:  di,
 		RepositoryInfo: &ri,
+		Translations:   translations,
 	}
 
 	return file, nil
