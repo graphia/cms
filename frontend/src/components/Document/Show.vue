@@ -47,12 +47,12 @@
 								Delete
 							</button>
 
+							<Translation/>
+
 						</div>
 					</div>
 
-					<div class="card-body">
-						<h4>Translations</h4>
-					</div>
+
 				</div>
 			</aside>
 		</section>
@@ -74,6 +74,7 @@
 <script lang="babel">
 
 	import Breadcrumbs from '../Utilities/Breadcrumbs';
+	import Translation from './Translation';
 	import CMSBreadcrumb from '../../javascripts/models/breadcrumb.js';
 	import Accessors from '../Mixins/accessors';
 
@@ -193,7 +194,8 @@
 		},
 		mixins: [Accessors],
 		components: {
-			Breadcrumbs
+			Breadcrumbs,
+			Translation
 		}
 	}
 </script>

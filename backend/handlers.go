@@ -14,16 +14,12 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// Response is a general response containing arbitrary data
-type Response struct {
-	Data string `json:"data"`
-}
-
 // SuccessResponse contains information about a successful
 // update to the repository
 type SuccessResponse struct {
 	Message string `json:"message"`
 	Oid     string `json:"oid"`
+	Meta    string `json:"meta,omitempty"`
 }
 
 // FailureResponse accompanies the HTTP status code with
@@ -901,7 +897,7 @@ func apiTranslateFileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	oid, err := createTranslation(nt, user)
+	oid, fn, err := createTranslation(nt, user)
 
 	if err == ErrRepoOutOfSync {
 		fr = FailureResponse{Message: "Repository out of sync with commit"}
@@ -916,7 +912,7 @@ func apiTranslateFileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sr = SuccessResponse{Message: "Translation created", Oid: oid.String()}
+	sr = SuccessResponse{Message: "Translation created", Oid: oid.String(), Meta: fn}
 
 	JSONResponse(sr, http.StatusCreated, w)
 

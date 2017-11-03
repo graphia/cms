@@ -34,7 +34,7 @@ type NewCommitFile struct {
 
 // NewTranslation creates a new copy of a file ready for translation
 type NewTranslation struct {
-	SourceFilename string `json:"filename" validate:"required"`
+	SourceFilename string `json:"source_filename" validate:"required"`
 	Path           string `json:"path" validate:"required"`
 	LanguageCode   string `json:"language_code" validate:"required"`
 	RepositoryInfo `json:"repository_info"`
@@ -42,6 +42,7 @@ type NewTranslation struct {
 
 // TargetFilename provides the new filename with the
 // language code inserted
+// FIXME this should be strengthened so it will work with already-translated files too
 func (nt NewTranslation) TargetFilename() string {
 	ext := filepath.Ext(nt.SourceFilename)
 	base := strings.TrimSuffix(nt.SourceFilename, ext)

@@ -66,7 +66,7 @@ func Test_createTranslation(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			oid, err := createTranslation(tt.args.nt, tt.args.user)
+			oid, fn, err := createTranslation(tt.args.nt, tt.args.user)
 
 			if tt.wantErr {
 				assert.Equal(t, tt.errMsg, err.Error())
@@ -76,6 +76,7 @@ func Test_createTranslation(t *testing.T) {
 			// check target filename contains language code immediately prior to ".md"
 			tfn := tt.args.nt.TargetFilename()
 			assert.Contains(t, tfn, fmt.Sprintf("%s.md", tt.args.nt.LanguageCode))
+			assert.Equal(t, fn, tfn)
 
 			// check target file exists
 			_, err = os.Stat(filepath.Join(repoPath, tt.args.nt.Path, tfn))

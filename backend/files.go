@@ -375,61 +375,62 @@ func listRootDirectorySummary() (summary []DirectorySummary, err error) {
 	return summary, err
 }
 
-func createTranslation(nt NewTranslation, user User) (oid *git.Oid, err error) {
+func createTranslation(nt NewTranslation, user User) (oid *git.Oid, target string, err error) {
 
 	repo, err := repository(config)
+	target = nt.TargetFilename()
 
 	err = checkLatestRevision(repo, nt.RepositoryInfo.LatestRevision)
 	if err != nil {
-		return oid, err
+		return oid, target, err
 	}
 
 	language, err := getLanguage(nt.LanguageCode)
 	if err != nil {
-		return nil, err
+		return oid, target, err
 	}
 
 	tree, err := headTree(repo)
 	if err != nil {
-		return nil, err
+		return oid, target, err
 	}
-	target := filepath.Join(nt.Path, nt.SourceFilename)
+	source := filepath.Join(nt.Path, nt.SourceFilename)
 
-	entry, err := tree.EntryByPath(target)
+	entry, err := tree.EntryByPath(source)
 	if err != nil {
-		return nil, err
+		return oid, target, err
 	}
 
 	blob, err := repo.LookupBlob(entry.Id)
 	if err != nil {
-		return nil, err
+		return oid, target, err
 	}
 	defer blob.Free()
 
 	index, err := repo.Index()
 	if err != nil {
 		Error.Println("Failed to get repo index", err.Error())
-		return nil, err
+		return oid, target, err
 	}
 	defer index.Free()
 
 	boid, err := repo.CreateBlobFromBuffer(blob.Contents())
 	if err != nil {
-		return oid, err
+		return oid, target, err
 	}
 
 	ie := buildIndexEntryTranslation(boid, nt, len(blob.Contents()))
 
 	err = index.Add(&ie)
 	if err != nil {
-		return oid, err
+		return oid, target, err
 	}
 
 	msg := fmt.Sprintf("%s translation initiated", language.Name)
 
 	oid, err = writeTreeAndCommit(repo, index, msg, user)
 
-	return oid, err
+	return oid, target, err
 }
 
 func createDirectories(nc NewCommit, user User) (oid *git.Oid, err error) {
