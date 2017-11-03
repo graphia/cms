@@ -602,3 +602,39 @@ func Test_getMetadataFromBlob(t *testing.T) {
 		})
 	}
 }
+
+func Test_translationFilename(t *testing.T) {
+	type args struct {
+		fn   string
+		code string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantTfn string
+		wantErr bool
+	}{
+		{
+			name:    "test.md",
+			args:    args{fn: "test.md", code: "sv"},
+			wantTfn: "test.sv.md",
+		},
+		{
+			name:    "test.fi.md",
+			args:    args{fn: "test.fi.md", code: "sv"},
+			wantTfn: "test.sv.md",
+		},
+		{
+			name:    "test",
+			args:    args{fn: "test.fi.md", code: "sv"},
+			wantTfn: "test.sv.md",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotTfn := translationFilename(tt.args.fn, tt.args.code)
+
+			assert.Equal(t, tt.wantTfn, gotTfn)
+		})
+	}
+}

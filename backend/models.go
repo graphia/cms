@@ -44,11 +44,7 @@ type NewTranslation struct {
 // language code inserted
 // FIXME this should be strengthened so it will work with already-translated files too
 func (nt NewTranslation) TargetFilename() string {
-	ext := filepath.Ext(nt.SourceFilename)
-	base := strings.TrimSuffix(nt.SourceFilename, ext)
-	// return in the format "filename.langcode.md"
-	// note, ext retains the dot
-	return fmt.Sprintf("%s.%s%s", base, nt.LanguageCode, ext)
+	return translationFilename(nt.SourceFilename, nt.LanguageCode)
 }
 
 // FrontMatter contains the document's metadata

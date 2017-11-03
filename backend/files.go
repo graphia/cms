@@ -1162,3 +1162,14 @@ func getMetadata(repo *git.Repository, tree *git.Tree) (di DirectoryInfo, err er
 
 	return di, err
 }
+
+func translationFilename(fn, code string) (tfn string) {
+	const ext = "md" // assuming we'll always be using .md for markdown
+	const delim = "."
+	var base string
+
+	base = strings.Split(fn, delim)[0]
+
+	return strings.Join([]string{base, code, ext}, delim)
+
+}
