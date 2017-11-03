@@ -1,9 +1,6 @@
 package main
 
 import (
-	"fmt"
-	"path/filepath"
-	"strings"
 	"time"
 
 	"gopkg.in/libgit2/git2go.v25"
@@ -119,6 +116,7 @@ type File struct {
 	FrontMatter      FrontMatter     `json:"frontmatter"`
 	DirectoryInfo    *DirectoryInfo  `json:"directory_info,omitempty"`
 	RepositoryInfo   *RepositoryInfo `json:"repository_info,omitempty"`
+	Translations     []string        `json:"translations"`
 }
 
 // Attachment belongs to a File, usually an image

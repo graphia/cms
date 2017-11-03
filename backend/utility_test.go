@@ -143,6 +143,12 @@ func setupMissingFrontmatterTestRepo(dest string) (oid *git.Oid, err error) {
 	return
 }
 
+func setupTranslationsTestRepo(dest string) (oid *git.Oid, err error) {
+	src := "../tests/backend/repositories/translations"
+	oid, err = setupTestRepo(src, dest)
+	return
+}
+
 func setupTestRepo(src, dest string) (oid *git.Oid, err error) {
 
 	// copy the small repo skeleton to specified path

@@ -771,6 +771,37 @@ func getFile(directory string, filename string, includeMd, includeHTML bool) (fi
 	return file, nil
 }
 
+func getTranslations(repo *git.Repository, directory, filename string) (langs []string, err error) {
+
+	langs = []string{}
+	tree, err := headTree(repo)
+
+	if !config.TranslationEnabled {
+		return langs, fmt.Errorf("translation is not enabled")
+	}
+
+	for _, lc := range config.EnabledLanguages {
+
+		target := filepath.Join(directory, translationFilename(filename, lc))
+
+		Debug.Println("checking for translation", target)
+
+		// ignore not found error and add to output if present
+		entry, _ := tree.EntryByPath(target)
+
+		if entry != nil {
+			Debug.Println("found translation", target)
+			langs = append(langs, lc)
+		}
+	}
+
+	if len(langs) == 0 {
+		return langs, fmt.Errorf("No translations found")
+	}
+
+	return langs, err
+}
+
 func getAttachments(directory string) (files []Attachment, err error) {
 
 	repo, err := repository(config)
@@ -1169,6 +1200,10 @@ func translationFilename(fn, code string) (tfn string) {
 	var base string
 
 	base = strings.Split(fn, delim)[0]
+
+	if code == config.DefaultLanguage {
+		return strings.Join([]string{base, ext}, delim)
+	}
 
 	return strings.Join([]string{base, code, ext}, delim)
 
