@@ -26,7 +26,7 @@ Feature: Creating documents
 
 	Scenario: Toolbar
 		Given I am on the document's show page
-		Then I should see a toolbr with the following buttons:
+		Then I should see a toolbar with the following buttons:
 			| Edit    |
 			| History |
 			| Delete  |
