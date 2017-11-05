@@ -29,12 +29,13 @@ func Test_createTranslation(t *testing.T) {
 		user User
 	}
 	tests := []struct {
-		name      string
-		args      args
-		wantOid   *git.Oid
-		wantErr   bool
-		errMsg    string
-		commitMsg string
+		name            string
+		args            args
+		wantOid         *git.Oid
+		wantErr         bool
+		errMsg          string
+		commitMsg       string
+		createDuplicate bool
 	}{
 		{
 			name: "Non-enabled language code",
@@ -63,9 +64,30 @@ func Test_createTranslation(t *testing.T) {
 			},
 			commitMsg: "Finnish translation initiated",
 		},
+		{
+			name: "Translation already exists",
+			args: args{
+				nt: NewTranslation{
+					Path:           "documents",
+					SourceFilename: "document_1.md",
+					LanguageCode:   "fi",
+					RepositoryInfo: RepositoryInfo{LatestRevision: lr.String()},
+				},
+				user: mh,
+			},
+			createDuplicate: true,
+			wantErr:         true,
+			errMsg:          "file already exists",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+
+			if tt.createDuplicate {
+				repo, _ := repository(config)
+				_, _ = createRandomFile(repo, "document_1.fi.md", "Whoosh")
+			}
+
 			oid, fn, err := createTranslation(tt.args.nt, tt.args.user)
 
 			if tt.wantErr {

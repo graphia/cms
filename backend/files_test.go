@@ -718,3 +718,47 @@ func Test_getTranslations(t *testing.T) {
 		})
 	}
 }
+
+func Test_fileExists(t *testing.T) {
+
+	repoPath := "../tests/tmp/repositories/get_translations"
+	setupTranslationsTestRepo(repoPath)
+	repo, _ := repository(config)
+
+	type args struct {
+		repo     *git.Repository
+		path     string
+		filename string
+	}
+	tests := []struct {
+		name       string
+		args       args
+		wantExists bool
+		wantErr    bool
+		errMsg     string
+	}{
+		{
+			name:       "Existing file",
+			args:       args{repo: repo, path: "documents", filename: "document_1.md"},
+			wantExists: true,
+		},
+		{
+			name:       "Non-existing file",
+			args:       args{repo: repo, path: "documents", filename: "document_1.de.md"},
+			wantExists: false,
+			wantErr:    true,
+			errMsg:     "the path 'document_1.de.md' does not exist in the given tree",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotExists, err := fileExists(tt.args.repo, tt.args.path, tt.args.filename)
+
+			assert.Equal(t, tt.wantExists, gotExists)
+
+			if tt.wantErr {
+				assert.Equal(t, tt.errMsg, err.Error())
+			}
+		})
+	}
+}

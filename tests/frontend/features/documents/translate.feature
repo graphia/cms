@@ -26,7 +26,6 @@ Feature: Translating documents
 			| Finnish |
 		And the existing languages 'English' and 'Swedish' should not be included
 
-
 	Scenario: Initiating a translation
 		Given I navigate to my document's 'show' page
 		When I click the 'Translate' dropdown button

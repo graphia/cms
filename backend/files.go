@@ -30,6 +30,10 @@ var (
 	// ErrRepoOutOfSync occurs when changes are made to the repository
 	// between starting to edit and submitting the changes
 	ErrRepoOutOfSync = errors.New("repository out of sync")
+
+	// ErrFileAlreadyExists prevents the accidental overwriting
+	// of files
+	ErrFileAlreadyExists = errors.New("file already exists")
 )
 
 // getFilesInDir returns a list of FileItems for listing
@@ -379,6 +383,11 @@ func createTranslation(nt NewTranslation, user User) (oid *git.Oid, target strin
 
 	repo, err := repository(config)
 	target = nt.TargetFilename()
+
+	exists, err := fileExists(repo, nt.Path, target)
+	if exists {
+		return oid, target, ErrFileAlreadyExists
+	}
 
 	err = checkLatestRevision(repo, nt.RepositoryInfo.LatestRevision)
 	if err != nil {
@@ -1213,4 +1222,19 @@ func translationFilename(fn, code string) (tfn string) {
 
 	return strings.Join([]string{base, code, ext}, delim)
 
+}
+
+func fileExists(repo *git.Repository, path, filename string) (exists bool, err error) {
+
+	tree, err := headTree(repo)
+	if err != nil {
+		return false, err
+	}
+
+	_, err = tree.EntryByPath(filepath.Join(path, filename))
+	if err != nil {
+		return false, err
+	}
+
+	return true, err
 }
