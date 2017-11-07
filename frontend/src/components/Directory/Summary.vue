@@ -19,9 +19,9 @@
 		<!-- listing directories -->
 		<div class="row" v-else-if="numberOfDirectories > 0">
 
-			<div class="col-lg-4 mt-4" v-for="(directory, i) in directories" :key="i">
+			<div class="col-lg-4 mt-4" v-for="(directory, i) in directoriesWithGroupedTranslations" :key="i">
 
-				<div class="card" :class="directory.path" >
+				<div class="card" :class="directory.path" :data-directory="directory.path">
 
 					<h4 class="card-header">
 						<router-link :to="{name: 'document_index', params: {directory: directory.path}}">
@@ -34,19 +34,31 @@
 					</div>
 
 					<!-- listing documents inside a directory -->
-					<div class="list-group list-group-flush" v-if="directory.contents.length > 0">
+					<div class="list-group list-group-flush" v-if="Object.keys(directory.contents).length > 0">
 
 						<router-link
-							v-for="(document, j) in directory.contents"
+							v-for="(documents, base, j) in directory.contents"
 							:key="j"
-							:to="{name: 'document_show', params: {directory: directory.path, filename: document.filename}}"
-							:data-filename="document.filename"
+							:to="{name: 'document_show', params: {directory: directory.path, filename: primary(documents).filename}}"
+							:data-filename="base"
 							class="list-group-item list-group-item-action"
 						>
 
-							<h5>{{ document.frontmatter.title || document.filename }}</h5>
+							<h5>{{ primary(documents).title || primary(documents).filename }}</h5>
 
-							<p class="text-muted">{{ document.frontmatter.synopsis || "No synopsis has been added" }}</p>
+							<p class="text-muted">{{ primary(documents).synopsis || "No synopsis has been added" }}</p>
+
+							<div class="translations" v-if="translationEnabled">
+
+								<ul class="translations-list list-inline">
+									<li class="list-inline-item" v-for="(t, k) in translations(documents)" :key="k" :data-lang="t.language.name">
+										<router-link :to="{name: 'document_show', params: {directory: directory.path, filename: t.filename}}">
+											{{ (t.language && t.language.flag) || "missing" }}
+										</router-link>
+									</li>
+								</ul>
+
+							</div>
 
 						</router-link>
 
@@ -60,7 +72,7 @@
 					</div>
 					<!-- /listing documents inside a directory -->
 
-					<div class="card-body" v-else-if="directory.contents.length == 0">
+					<div class="card-body" v-else>
 
 						<div class="alert alert-info">
 							There's nothing here yet
@@ -91,7 +103,9 @@
 
 	import checkResponse from '../../javascripts/response.js';
 	import config from '../../javascripts/config.js';
+	import CMSFile from '../../javascripts/models/file.js';
 	import CMSDirectory from '../../javascripts/models/directory.js';
+
 	import DirectoryNewButton from './NewButton';
 
 	export default {
@@ -110,6 +124,40 @@
 				let count = Object.keys(this.directories).length;
 				console.debug("directory count", count);
 				return count;
+			},
+			translationEnabled() {
+				return this.$store.state.translationEnabled;
+			},
+			directoriesWithGroupedTranslations() {
+
+				return this.directories
+					.map((dir) => {
+
+						let groupedTranslations = dir
+							.contents
+							.sort((a,b) => {
+								// default language files first
+								return (a.filename.split(".").length - b.filename.split(".").length)
+							})
+							.reduce((summary, doc) => {
+
+								// use the file's basename to group translations
+								let base = doc.filename.split(".")[0]
+								let parsedDoc = new CMSFile(doc);
+
+								summary[base] ? summary[base].push(parsedDoc) : summary[base] = [parsedDoc];
+
+								return summary;
+							}, {});
+
+						return {
+							path: dir.path,
+							info: dir.info,
+							contents: groupedTranslations
+						};
+
+					});
+
 			}
 		},
 		methods: {
@@ -138,12 +186,21 @@
 
 					// TODO map the directories into CMSFile objects
 					this.directories = json;
+
 					console.log("directories", json);
 
 				}
 				catch(error) {
 					console.error(error);
 				}
+			},
+			primary(files) {
+				return files[0];
+			},
+
+			translations(files) {
+				return files
+					.filter((file) => { return file.translation })
 			}
 		},
 		components: {
@@ -151,3 +208,9 @@
 		}
 	}
 </script>
+
+<style lang="scss">
+	.translations > .translations-list {
+		margin-bottom: 0px;
+	}
+</style>

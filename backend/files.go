@@ -153,7 +153,7 @@ func createFiles(nc NewCommit, user User) (oid *git.Oid, err error) {
 		//around and check for the error instead?
 		entry, _ := ht.EntryByPath(target)
 		if entry != nil {
-			return nil, fmt.Errorf("file already exists")
+			return nil, ErrFileAlreadyExists
 		}
 
 	}
@@ -1085,7 +1085,7 @@ func extractContents(ncf NewCommitFile) (contents []byte, err error) {
 // A quicker, more-efficient way of extracting the frontmatter from
 // a markdown file, this only reads the frontmatter from the top and
 // skips the markdown beneath.
-//This exists because particle slows down by reading the entire thing
+// This exists because particle slows down by reading the entire thing
 func getMetadataFromBlob(blob *git.Blob) (fm FrontMatter, err error) {
 
 	const fmBoundary = "---"

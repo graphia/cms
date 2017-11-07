@@ -38,12 +38,13 @@ export default class CMSServer {
 	static async getTranslationInfo() {
 		let path = `${config.api}/translation_info`;
 
+		let response = await fetch(path, {
+			mode: "cors",
+			method: "GET",
+			headers: store.state.auth.authHeader()
+		});
+
 		try {
-			let response = await fetch(path, {
-				mode: "cors",
-				method: "GET",
-				headers: store.state.auth.authHeader()
-			});
 
 			if (!checkResponse(response.status)) {
 				console.error(response);
@@ -61,7 +62,7 @@ export default class CMSServer {
 			return response;
 		}
 		catch(err) {
-			console.error("Could not retreive language information", response);
+			console.error("Could not retreive language information", err);
 		};
 
 		return response;

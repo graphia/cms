@@ -11,6 +11,12 @@ Given %r{^my document has been translated into 'Finnish'$} do
   @document = "translated_doc"
 end
 
+Given %r{^my document has been translated into 'Swedish'$} do
+  write_english_file
+  write_swedish_file
+  @document = "translated_doc"
+end
+
 When %r{^I visit the documents index page$} do
   path = "/cms/documents"
   visit(path)
@@ -34,6 +40,7 @@ Then %r{^my document shouldn't have any alternative languages section$} do
   end
 end
 
+# Used on the document index feature
 When %r{^I click the 'Finnish' link$} do
   within(".card[data-filename='#{@document}'] li[data-lang='Finnish']") do
     link = page.find("a")
@@ -42,8 +49,23 @@ When %r{^I click the 'Finnish' link$} do
   end
 end
 
-Then %r{^I should be on the document's 'Finnish' translation$} do
-  expect(page.current_path).to eql("/cms/documents/#{@document}.fi.md")
+# Used on the document index feature
+Then %r{^I should be on the document's '(.*?)' translation$} do |lang|
+  codes = {
+    "Finnish" => "fi",
+    "Swedish" => "sv"
+  }
+  expect(page.current_path).to eql("/cms/documents/#{@document}.#{codes[lang]}.md")
+end
+
+# Used on the document summary feature
+When %r{^I click the 'Swedish' link$} do
+
+  within("a[data-filename='#{@document}'] li[data-lang='Swedish']") do
+    link = page.find("a")
+    scroll_into_view(link)
+    link.click
+  end
 end
 
 Given %r{^I navigate to my document's 'show' page$} do
@@ -101,8 +123,17 @@ Then %r{^I should be on the new 'Swedish' document$} do
   expect(page.current_path).to eql("/cms/documents/document_1.sv.md")
 end
 
-Then %r{^there should be a banner "([^"]*)"$} do |arg1|
-  pending # Write code here that turns the phrase above into concrete actions
+Then %r{^I should see my document listed under '(.*?)'$} do |dir|
+  within("div[data-directory='#{dir.downcase}']") do
+    expect(page).to have_content("A noble spirit embiggens the smallest man.")
+  end
+end
+
+Then %r{^it should have 'Finnish' and 'Swedish' flags$} do
+  within("a[data-filename='#{@document}']") do
+    expect(page).to have_css("li[data-lang='Finnish']", text: "🇫🇮")
+    expect(page).to have_css("li[data-lang='Swedish']", text: "🇸🇪")
+  end
 end
 
 def write_translated_file(name, email, contents, code, message, filename="translated_doc")
@@ -123,9 +154,10 @@ def write_translated_file(name, email, contents, code, message, filename="transl
 end
 
 def write_english_file(filename="translated_doc")
+  @english_title = "A noble spirit embiggens the smallest man."
   contents = <<~CONTENTS
     ---
-    title: A noble spirit embiggens the smallest man.
+    title: #{@english_title}
     ---
 
     We paid a short guy to write it,

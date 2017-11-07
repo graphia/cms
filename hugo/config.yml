@@ -25,3 +25,6 @@ Languages:
   de:
     title: "German"
     weight: 1
+  es:
+    title: "Spanish"
+    weight: 1

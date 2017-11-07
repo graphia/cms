@@ -104,7 +104,7 @@ func TestCreateFileWhenExists(t *testing.T) {
 	_, err := createFiles(nc, user)
 
 	// check error message is correct
-	assert.Contains(t, err.Error(), "file already exists")
+	assert.Equal(t, ErrFileAlreadyExists, err)
 
 	hcAfter, _ := headCommit(repo)
 
