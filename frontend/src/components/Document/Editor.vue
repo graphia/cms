@@ -31,6 +31,8 @@
 
 						<FrontMatter/>
 
+						<LanguageField v-if="newFile && translationEnabled"/>
+
 						<FilenameField v-if="newFile"/>
 
 						<CommitMessageField/>
@@ -66,6 +68,7 @@
 	import MarkdownEditor from "./Editor/MarkdownEditor";
 	import FrontMatter from "./Editor/FrontMatter";
 	import FilenameField from "./Editor/FilenameField";
+	import LanguageField from "./Editor/LanguageField";
 	import Gallery from "./Editor/Gallery";
 	import CommitMessageField from "./Editor/CommitMessageField";
 	import Accessors from '../Mixins/accessors';
@@ -92,6 +95,11 @@
 				this.markdownLoaded = true;
 			}
 		},
+		computed: {
+			translationEnabled() {
+				return this.$store.state.translationEnabled;
+			}
+		},
 		props: [
 			'formID',
 			'submitButtonText',
@@ -103,6 +111,7 @@
 			FrontMatter,
 			FilenameField,
 			CommitMessageField,
+			LanguageField,
 			Gallery
 		},
 		methods: {

@@ -4,10 +4,12 @@ Feature: Setting up an initial user
 	As an customer
 	I want to create the first user account
 
-	Scenario: Creating an initial user
-		Given a repository has been initialised
+	Background:
+		Given the CMS is running with the "default" config
 		And there are no users
-		When I navigate to the login page
+
+	Scenario: Creating an initial user
+		Given I navigate to the login page
 		Then I should be redirected to the initial setup page
 
 	Scenario: The initial setup form contents

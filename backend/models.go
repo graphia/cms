@@ -29,6 +29,21 @@ type NewCommitFile struct {
 	Base64Encoded bool        `json:"base_64_encoded"`
 }
 
+// NewTranslation creates a new copy of a file ready for translation
+type NewTranslation struct {
+	SourceFilename string `json:"source_filename" validate:"required"`
+	Path           string `json:"path" validate:"required"`
+	LanguageCode   string `json:"language_code" validate:"required"`
+	RepositoryInfo `json:"repository_info"`
+}
+
+// TargetFilename provides the new filename with the
+// language code inserted
+// FIXME this should be strengthened so it will work with already-translated files too
+func (nt NewTranslation) TargetFilename() string {
+	return translationFilename(nt.SourceFilename, nt.LanguageCode)
+}
+
 // FrontMatter contains the document's metadata
 type FrontMatter struct {
 	Author   string   `json:"author"   yaml:"author"`
@@ -72,6 +87,13 @@ type RepositoryInfo struct {
 	LatestRevision string `json:"latest_revision" validate:"required"`
 }
 
+// Language contains a language's name and code for localisation
+type Language struct {
+	Code string `json:"code"`
+	Name string `json:"name"`
+	Flag string `json:"flag"`
+}
+
 // FileItem contains enough file information for listing
 // HTML and raw Markdown content is omitted
 type FileItem struct {
@@ -88,11 +110,13 @@ type File struct {
 	AbsoluteFilename string          `json:"absolute_filename"`
 	Filename         string          `json:"filename"`
 	Path             string          `json:"path"`
+	Language         string          `json:"language"`
 	HTML             *string         `json:"html"`
 	Markdown         *string         `json:"markdown"`
 	FrontMatter      FrontMatter     `json:"frontmatter"`
 	DirectoryInfo    *DirectoryInfo  `json:"directory_info,omitempty"`
 	RepositoryInfo   *RepositoryInfo `json:"repository_info,omitempty"`
+	Translations     []string        `json:"translations"`
 }
 
 // Attachment belongs to a File, usually an image

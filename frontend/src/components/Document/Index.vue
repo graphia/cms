@@ -25,18 +25,28 @@
 
 			<div class="row document-list">
 
-				<div class="col-md-4" v-for="(document, i) in documents" :key="i">
+				<div class="col-md-4" v-for="(d, base, i) in groupedTranslations" :key="i">
 
-					<div class="card m-4" :data-filename="document.filename">
+					<div class="card document-entry m-4" :data-filename="base">
 
 						<h3 class="card-header">
-							<router-link :to="{name: 'document_show', params: {filename: document.filename}}">
-								{{ document.title || document.filename }}
+							<router-link :to="{name: 'document_show', params: {filename: primary(d).filename}}">
+								{{ primary(d).title || primary(d).filename }}
 							</router-link>
 						</h3>
 
 						<div class="card-body">
-							<p class="card-text">{{ document.synopsis || description_placeholder }}</p>
+							<p class="card-text">{{ primary(d).synopsis || description_placeholder }}</p>
+						</div>
+
+						<div class="card-footer" v-if="translationEnabled && d.length > 1">
+							<ul class="list-inline">
+								<li class="list-inline-item" v-for="(t, k) in translations(d)" :key="k" :data-lang="t.language.name">
+									<router-link :to="{name: 'document_show', params: {filename: t.filename}}">
+										{{ (t.language && t.language.flag) || "missing" }}
+									</router-link>
+								</li>
+							</ul>
 						</div>
 
 					</div>
@@ -111,7 +121,20 @@
 			async setup(directory) {
 				console.debug("retrieving all files from", directory);
 				this.$store.dispatch("getDocumentsInDirectory", directory);
+			},
+
+			// return the 'primary' (first) copy of a file,
+			// usually in the default language
+			primary(files) {
+				return files[0];
+			},
+
+			translations(files) {
+				return files
+					.filter((file) => { return file.translation })
 			}
+
+
 		},
 		computed: {
 			title() {
@@ -125,6 +148,29 @@
 						{directory: this.directory}
 					)
 				];
+			},
+			translationEnabled() {
+				return this.$store.state.translationEnabled;
+			},
+			groupedTranslations() {
+
+				// FIXME finding translations using the number of dots is potentially
+				// a bit fragile, should use a regexp to check for filenames ending
+				// in ".xx.md"
+				return this
+					.documents
+					.sort((a,b) => {
+						// default language files first
+						return (a.filename.split(".").length - b.filename.split(".").length)
+					})
+					.reduce((summary, doc) => {
+						// use the file's basename to group translations
+						let base = doc.filename.split(".")[0]
+
+						summary[base] ? summary[base].push(doc) : summary[base] = [doc];
+
+						return summary;
+					}, {});
 			}
 		},
 		mixins: [Accessors],
@@ -136,4 +182,10 @@
 </script>
 
 <style lang="scss">
+	.card.document-entry .card-footer {
+		padding: 0.2rem 1.25rem;
+		ul {
+			margin-bottom: 0;
+		}
+	}
 </style>

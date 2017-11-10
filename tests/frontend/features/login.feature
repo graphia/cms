@@ -5,7 +5,8 @@ Feature: Logging in
 	I want to log into the CMS
 
 	Background:
-		Given a user account has been created
+		Given the CMS is running with the "default" config
+		And a user account has been created
 
 	Scenario: Login screen contents
 		Given I am on the login screen

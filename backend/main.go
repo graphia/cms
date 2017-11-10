@@ -53,9 +53,7 @@ func init() {
 
 	config, err = loadConfig(&p)
 	if err != nil {
-		if err != nil {
-			panic(err)
-		}
+		panic(err)
 	}
 
 	validate = validator.New()
@@ -181,6 +179,7 @@ func protectedRouter() (r *vestigo.Router) {
 	r.Get("/api/directories/:directory/files/:file/edit", apiEditFileInDirectoryHandler)
 	r.Patch("/api/directories/:directory/files/:file", apiUpdateFileInDirectoryHandler)
 	r.Delete("/api/directories/:directory/files/:file", apiDeleteFileFromDirectoryHandler)
+	r.Post("/api/directories/:directory/files/:file/translate", apiTranslateFileHandler)
 
 	r.Get("/api/directories/:directory/files/:file/history", apiGetFileHistoryHandler)
 
@@ -202,6 +201,7 @@ func protectedRouter() (r *vestigo.Router) {
 
 	// cms endpoints
 	r.Post("/api/publish", apiPublishHandler)
+	r.Get("/api/translation_info", apiGetLanguageInformationHandler)
 
 	// missing operations:
 	// how should file and directory moves/copies be represented?

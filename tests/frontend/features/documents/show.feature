@@ -5,6 +5,7 @@ Feature: Creating documents
 
 	Background:
 		Given a repository has been initialised
+		And the CMS is running with the "default" config
 		And my user account exists
 		And a document called 'appendix_1.md' exists
 		And I have logged in
@@ -25,7 +26,7 @@ Feature: Creating documents
 
 	Scenario: Toolbar
 		Given I am on the document's show page
-		Then I should see a toolbr with the following buttons:
+		Then I should see a toolbar with the following buttons:
 			| Edit    |
 			| History |
 			| Delete  |

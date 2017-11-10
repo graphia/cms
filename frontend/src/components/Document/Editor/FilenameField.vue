@@ -19,7 +19,12 @@
 					v-model="customFilename"
 			/>
 
-			<span class="input-group-addon">
+			<!-- only display if language isn't default, currently hardcoded to 'en' -->
+			<span class="input-group-addon language-indicator" v-if="document.language != 'en'">
+				.{{ document.language }}
+			</span>
+
+			<span class="input-group-addon extension-indicator">
 				.md
 			</span>
 
@@ -36,7 +41,7 @@
 		data() {
 			return {
 				enableCustomFilename: false,
-				filename: "", // filename *without* extension
+				filenameBase: "", // filename *without* extension
 			};
 		},
 		mixins: [Accessors],
@@ -51,22 +56,31 @@
 				get() {
 
 					if (this.enableCustomFilename) {
-						return this.filename;
+						return this.filenameBase;
 					}
 
 					let fn = "";
 					if (this.document.title) {
 						fn = slugify(this.document.title);
 					}
-					this.filename = fn;
+					this.filenameBase = fn;
 
-					return this.filename;
+					return this.filenameBase;
 				},
 				set(name) {
 					if (this.enableCustomFilename) {
-						this.filename = slugify(name);
+						this.filenameBase = slugify(name);
 					}
 				}
+			},
+
+			filenameWithExtension() {
+				let translation = (this.document.language != "en");
+
+				return [this.filenameBase, (translation && this.document.language), "md"]
+					.filter(Boolean)
+					.join(".");
+
 			}
 		},
 		watch: {
@@ -76,9 +90,17 @@
 			 * update the document's filename attribute by adding the markdown extension, and
 			 * make sure the slug matches it
 			 */
-			filename() {
-				this.document.filename = `${this.filename}.md`;
-				this.document.slug = this.filename;
+			filenameBase() {
+				this.document.filename = this.filenameWithExtension;
+				this.document.slug = this.filenameBase;
+			},
+
+			/*
+			 * if the language is changed after the title we need to trigger the updating
+			 * of the filename, so the language code in the extension is present
+			 */
+			"this.document.language": () => {
+				this.document.filename = this.filenameWithExtension;
 			}
 		}
 	};

@@ -56,7 +56,7 @@ Then %r{^I should see the following frontmatter items with correct values:$} do 
   end
 end
 
-Then %r{^I should see a toolbr with the following buttons:$} do |table|
+Then %r{^I should see a toolbar with the following buttons:$} do |table|
   table.transpose.raw.flatten do |button_text|
     within(".document-metadata .btn-toolbar") do
       expect(page).to have_css(".btn", text: button_text)

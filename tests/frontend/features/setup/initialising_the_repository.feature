@@ -5,7 +5,8 @@ Feature: Setting up an initial user
 	I want to set up a workspace
 
 	Background:
-		Given a user account has been created
+		Given the CMS is running with the "default" config
+		And a user account has been created
 		And I have logged in
 		And there is an empty directory in place of a repository
 

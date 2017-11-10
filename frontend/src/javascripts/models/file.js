@@ -6,6 +6,7 @@ import CMSDirectory from './directory.js';
 
 export default class CMSFile {
 
+
 	static initialize(directory) {
 		console.debug("Initialising file in", directory);
 		let file = new CMSFile({initialzing: true, path: directory});
@@ -15,7 +16,11 @@ export default class CMSFile {
 
 	constructor(file) {
 
+		this.translationRegex = /\.([A-z]{2})\.md$/
+
 		if (file && file.initialzing) {
+
+			this.initializing    = file.initializing;
 
 			this.path            = file.path;
 			this.filename        = "";
@@ -29,15 +34,20 @@ export default class CMSFile {
 			this.version         = "";
 			this.history         = [];
 			this.attachments     = [];
+			this.translations    = [];
 			this.initialMarkdown = "";
 
 		} else if (file) {
+
+			this.initializing          = false;
 
 			// TODO this is a bit long and ugly; can it be neatened up?
 			this.path                  = file.path;
 			this.filename              = file.filename;
 			this.html                  = file.html;
 			this.markdown              = file.markdown;
+			this.translations          = file.translations;
+
 
 			// frontmatter fields
 			this.title                 = file.frontmatter.title;
@@ -68,7 +78,9 @@ export default class CMSFile {
 
 		} else {
 			// do the minimum setup needed
+			this.initializing   = true;
 			this.directory_info = new CMSDirectory;
+			this.translations   = [];
 		}
 
 	};
@@ -86,6 +98,21 @@ export default class CMSFile {
 	get tags() {
 		return this._tags;
 	};
+
+	get translation() {
+
+		return this.translationRegex.test(this.filename)
+	}
+
+	get language() {
+		let code = this.translationRegex.exec(this.filename)
+
+		if (!code) {
+			return store.state.defaultLanguage;
+		};
+
+		return store.state.languages.find(x => x.code === code[1]);
+	}
 
 	// class methods
 

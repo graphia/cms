@@ -602,3 +602,163 @@ func Test_getMetadataFromBlob(t *testing.T) {
 		})
 	}
 }
+
+func Test_translationFilename(t *testing.T) {
+	config.DefaultLanguage = "en"
+
+	type args struct {
+		fn   string
+		code string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantTfn string
+		wantErr bool
+	}{
+		{
+			name:    "No language code",
+			args:    args{fn: "test.md", code: "sv"},
+			wantTfn: "test.sv.md",
+		},
+		{
+			name:    "Enabled language code",
+			args:    args{fn: "test.fi.md", code: "sv"},
+			wantTfn: "test.sv.md",
+		},
+		{
+			name:    "Enabled language code",
+			args:    args{fn: "test.fi.md", code: "sv"},
+			wantTfn: "test.sv.md",
+		},
+		{
+			name:    "Default language code",
+			args:    args{fn: "test.fi.md", code: "en"},
+			wantTfn: "test.md",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotTfn := translationFilename(tt.args.fn, tt.args.code)
+
+			assert.Equal(t, tt.wantTfn, gotTfn)
+		})
+	}
+}
+
+func Test_getTranslations(t *testing.T) {
+
+	multilingualConfig := "../config/test/multilingual.yml"
+
+	repoPath := "../tests/tmp/repositories/get_translations"
+	setupTranslationsTestRepo(repoPath)
+
+	config, _ = loadConfig(&multilingualConfig)
+	config.Repository = repoPath
+	repo, _ := repository(config)
+
+	type args struct {
+		repo      *git.Repository
+		directory string
+		filename  string
+	}
+	tests := []struct {
+		name      string
+		args      args
+		wantLangs []string
+		wantErr   bool
+		errMsg    string
+	}{
+		{
+			name: "document_1",
+			args: args{
+				repo:      repo,
+				directory: "documents",
+				filename:  "document_1.md",
+			},
+			wantLangs: []string{"en", "sv"},
+		},
+		{
+			name: "document_2",
+			args: args{
+				repo:      repo,
+				directory: "documents",
+				filename:  "document_2.md",
+			},
+			wantLangs: []string{"en", "fi", "sv"},
+		},
+		{
+			name: "document_3",
+			args: args{
+				repo:      repo,
+				directory: "documents",
+				filename:  "document_3.md",
+			},
+			wantLangs: []string{"en", "fi"},
+		},
+		{
+			name: "missing document",
+			args: args{
+				repo:      repo,
+				directory: "documents",
+				filename:  "missing_document.md",
+			},
+			wantErr: true,
+			errMsg:  "No translations found",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotLangs, err := getTranslations(tt.args.repo, tt.args.directory, tt.args.filename)
+			if tt.wantErr {
+				assert.Equal(t, tt.errMsg, err.Error())
+				return
+			}
+			assert.Equal(t, tt.wantLangs, gotLangs)
+		})
+	}
+}
+
+func Test_fileExists(t *testing.T) {
+
+	repoPath := "../tests/tmp/repositories/get_translations"
+	setupTranslationsTestRepo(repoPath)
+	repo, _ := repository(config)
+
+	type args struct {
+		repo     *git.Repository
+		path     string
+		filename string
+	}
+	tests := []struct {
+		name       string
+		args       args
+		wantExists bool
+		wantErr    bool
+		errMsg     string
+	}{
+		{
+			name:       "Existing file",
+			args:       args{repo: repo, path: "documents", filename: "document_1.md"},
+			wantExists: true,
+		},
+		{
+			name:       "Non-existing file",
+			args:       args{repo: repo, path: "documents", filename: "document_1.de.md"},
+			wantExists: false,
+			wantErr:    true,
+			errMsg:     "the path 'document_1.de.md' does not exist in the given tree",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotExists, err := fileExists(tt.args.repo, tt.args.path, tt.args.filename)
+
+			assert.Equal(t, tt.wantExists, gotExists)
+
+			if tt.wantErr {
+				assert.Equal(t, tt.errMsg, err.Error())
+			}
+		})
+	}
+}

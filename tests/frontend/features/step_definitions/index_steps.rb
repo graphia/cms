@@ -24,7 +24,8 @@ Then %r{^I should see a list containing the contents of the "(.*?)" directory$} 
     .reject {|filename| filename == "_index.md"}
 
   files.each do |filename|
-    expect(page).to have_css(".card[data-filename='#{filename}']")
+    filename_without_ext = filename.gsub(".md", "")
+    expect(page).to have_css(".card[data-filename='#{filename_without_ext}']")
   end
 end
 

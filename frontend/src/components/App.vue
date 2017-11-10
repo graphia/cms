@@ -68,6 +68,7 @@
 
 				this.fetchDirectories();
 				this.getRepoMetadata();
+				this.getTranslationInfo();
 
 			}
 			catch(err) {
@@ -89,6 +90,9 @@
 			},
 			async getRepoMetadata() {
 				this.$store.dispatch("getLatestRevision");
+			},
+			async getTranslationInfo() {
+				this.$store.dispatch("getTranslationInfo");
 			},
 			async fetchDirectories() {
 				let path = `${config.api}/directories`

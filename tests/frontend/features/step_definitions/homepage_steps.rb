@@ -4,6 +4,10 @@ Given %r{^I am on the homepage$} do
   expect(page.current_path).to eql(path)
 end
 
+When %r{^I visit the homepage$} do
+  step "I am on the homepage"
+end
+
 Then %r{^I should see a summary of recent changes$} do
   expect(page).to have_css("h4", text: "Recent Updates")
 end
@@ -64,12 +68,8 @@ end
 
 Then %r{^I should see all three documents listed$} do
   within(".card.documents") do
-    {
-      "document_1.md" => "document 1",
-      "document_2.md" => "document 2",
-      "document_3.md" => "document 3"
-    }.each do |filename, title|
-      expect(page).to have_css("a[data-filename='#{filename}']", text: title)
+    ["document 1", "document 2", "document 3"].each do |title|
+      expect(page).to have_css("a[data-filename='#{title.gsub(' ', '_')}']", text: title)
     end
   end
 end

@@ -30,6 +30,10 @@ var (
 	// ErrRepoOutOfSync occurs when changes are made to the repository
 	// between starting to edit and submitting the changes
 	ErrRepoOutOfSync = errors.New("repository out of sync")
+
+	// ErrFileAlreadyExists prevents the accidental overwriting
+	// of files
+	ErrFileAlreadyExists = errors.New("file already exists")
 )
 
 // getFilesInDir returns a list of FileItems for listing
@@ -149,7 +153,7 @@ func createFiles(nc NewCommit, user User) (oid *git.Oid, err error) {
 		//around and check for the error instead?
 		entry, _ := ht.EntryByPath(target)
 		if entry != nil {
-			return nil, fmt.Errorf("file already exists")
+			return nil, ErrFileAlreadyExists
 		}
 
 	}
@@ -215,7 +219,7 @@ func writeFiles(repo *git.Repository, nc NewCommit, user User) (oid *git.Oid, er
 
 	}
 
-	oid, err = writeTreeAndCommit(repo, index, nc, user)
+	oid, err = writeTreeAndCommit(repo, index, nc.Message, user)
 
 	return oid, err
 
@@ -257,7 +261,7 @@ func writeMetadataFiles(repo *git.Repository, nc NewCommit, user User) (oid *git
 
 	}
 
-	oid, err = writeTreeAndCommit(repo, index, nc, user)
+	oid, err = writeTreeAndCommit(repo, index, nc.Message, user)
 	if err != nil {
 		return oid, err
 	}
@@ -375,6 +379,69 @@ func listRootDirectorySummary() (summary []DirectorySummary, err error) {
 	return summary, err
 }
 
+func createTranslation(nt NewTranslation, user User) (oid *git.Oid, target string, err error) {
+
+	repo, err := repository(config)
+	target = nt.TargetFilename()
+
+	exists, err := fileExists(repo, nt.Path, target)
+	if exists {
+		return oid, target, ErrFileAlreadyExists
+	}
+
+	err = checkLatestRevision(repo, nt.RepositoryInfo.LatestRevision)
+	if err != nil {
+		return oid, target, err
+	}
+
+	language, err := getLanguage(nt.LanguageCode)
+	if err != nil {
+		return oid, target, err
+	}
+
+	tree, err := headTree(repo)
+	if err != nil {
+		return oid, target, err
+	}
+	source := filepath.Join(nt.Path, nt.SourceFilename)
+
+	entry, err := tree.EntryByPath(source)
+	if err != nil {
+		return oid, target, err
+	}
+
+	blob, err := repo.LookupBlob(entry.Id)
+	if err != nil {
+		return oid, target, err
+	}
+	defer blob.Free()
+
+	index, err := repo.Index()
+	if err != nil {
+		Error.Println("Failed to get repo index", err.Error())
+		return oid, target, err
+	}
+	defer index.Free()
+
+	boid, err := repo.CreateBlobFromBuffer(blob.Contents())
+	if err != nil {
+		return oid, target, err
+	}
+
+	ie := buildIndexEntryTranslation(boid, nt, len(blob.Contents()))
+
+	err = index.Add(&ie)
+	if err != nil {
+		return oid, target, err
+	}
+
+	msg := fmt.Sprintf("%s translation initiated", language.Name)
+
+	oid, err = writeTreeAndCommit(repo, index, msg, user)
+
+	return oid, target, err
+}
+
 func createDirectories(nc NewCommit, user User) (oid *git.Oid, err error) {
 
 	repo, err := repository(config)
@@ -479,7 +546,7 @@ func writeDirectories(repo *git.Repository, nc NewCommit, user User) (oid *git.O
 
 	}
 
-	oid, err = writeTreeAndCommit(repo, index, nc, user)
+	oid, err = writeTreeAndCommit(repo, index, nc.Message, user)
 
 	if err != nil {
 		return oid, err
@@ -530,7 +597,7 @@ func deleteDirectories(nc NewCommit, user User) (oid *git.Oid, err error) {
 
 	}
 
-	oid, err = writeTreeAndCommit(repo, index, nc, user)
+	oid, err = writeTreeAndCommit(repo, index, nc.Message, user)
 	if err != nil {
 		return oid, err
 	}
@@ -592,7 +659,7 @@ func deleteFiles(nc NewCommit, user User) (oid *git.Oid, err error) {
 		nc.Message = "File deleted"
 	}
 
-	oid, err = writeTreeAndCommit(repo, index, nc, user)
+	oid, err = writeTreeAndCommit(repo, index, nc.Message, user)
 	if err != nil {
 		return oid, err
 	}
@@ -628,6 +695,20 @@ func buildIndexEntryDirectory(oid *git.Oid, ncd NewCommitDirectory) git.IndexEnt
 		Id:   oid,
 		Path: filepath.Join(ncd.Path, "_index.md"),
 		Size: uint32(0),
+
+		Ctime: git.IndexTime{},
+		Gid:   uint32(os.Getgid()),
+		Uid:   uint32(os.Getuid()),
+		Mode:  git.FilemodeBlob,
+		Mtime: git.IndexTime{},
+	}
+}
+
+func buildIndexEntryTranslation(oid *git.Oid, nt NewTranslation, size int) git.IndexEntry {
+	return git.IndexEntry{
+		Id:   oid,
+		Path: filepath.Join(nt.Path, nt.TargetFilename()),
+		Size: uint32(size),
 
 		Ctime: git.IndexTime{},
 		Gid:   uint32(os.Getgid()),
@@ -685,6 +766,11 @@ func getFile(directory string, filename string, includeMd, includeHTML bool) (fi
 	}
 
 	ri := RepositoryInfo{LatestRevision: hc.Id().String()}
+	if err != nil {
+		return nil, err
+	}
+
+	translations, err := getTranslations(repo, directory, filename)
 
 	file = &File{
 		Filename:       filename,
@@ -694,9 +780,41 @@ func getFile(directory string, filename string, includeMd, includeHTML bool) (fi
 		FrontMatter:    fm,
 		DirectoryInfo:  di,
 		RepositoryInfo: &ri,
+		Translations:   translations,
 	}
 
 	return file, nil
+}
+
+func getTranslations(repo *git.Repository, directory, filename string) (langs []string, err error) {
+
+	langs = []string{}
+	tree, err := headTree(repo)
+
+	if !config.TranslationEnabled {
+		return langs, fmt.Errorf("translation is not enabled")
+	}
+
+	for _, lc := range config.EnabledLanguages {
+
+		target := filepath.Join(directory, translationFilename(filename, lc))
+
+		Debug.Println("checking for translation", target)
+
+		// ignore not found error and add to output if present
+		entry, _ := tree.EntryByPath(target)
+
+		if entry != nil {
+			Debug.Println("found translation", target)
+			langs = append(langs, lc)
+		}
+	}
+
+	if len(langs) == 0 {
+		return langs, fmt.Errorf("No translations found")
+	}
+
+	return langs, err
 }
 
 func getAttachments(directory string) (files []Attachment, err error) {
@@ -845,7 +963,7 @@ func countFiles() (counter map[string]int, err error) {
 	return counter, err
 }
 
-func writeTreeAndCommit(repo *git.Repository, index *git.Index, nc NewCommit, user User) (oid *git.Oid, err error) {
+func writeTreeAndCommit(repo *git.Repository, index *git.Index, message string, user User) (oid *git.Oid, err error) {
 
 	// write the tree, persisting our addition to the git repo
 	treeID, err := index.WriteTree()
@@ -870,7 +988,7 @@ func writeTreeAndCommit(repo *git.Repository, index *git.Index, nc NewCommit, us
 	committer := sign(user)
 
 	// now commit our updated tree to the tip (parent)
-	oid, err = repo.CreateCommit("HEAD", author, committer, nc.Message, tree, tip)
+	oid, err = repo.CreateCommit("HEAD", author, committer, message, tree, tip)
 	if err != nil {
 		return oid, err
 	}
@@ -967,7 +1085,7 @@ func extractContents(ncf NewCommitFile) (contents []byte, err error) {
 // A quicker, more-efficient way of extracting the frontmatter from
 // a markdown file, this only reads the frontmatter from the top and
 // skips the markdown beneath.
-//This exists because particle slows down by reading the entire thing
+// This exists because particle slows down by reading the entire thing
 func getMetadataFromBlob(blob *git.Blob) (fm FrontMatter, err error) {
 
 	const fmBoundary = "---"
@@ -1089,4 +1207,34 @@ func getMetadata(repo *git.Repository, tree *git.Tree) (di DirectoryInfo, err er
 	}
 
 	return di, err
+}
+
+func translationFilename(fn, code string) (tfn string) {
+	const ext = "md" // assuming we'll always be using .md for markdown
+	const delim = "."
+	var base string
+
+	base = strings.Split(fn, delim)[0]
+
+	if code == config.DefaultLanguage {
+		return strings.Join([]string{base, ext}, delim)
+	}
+
+	return strings.Join([]string{base, code, ext}, delim)
+
+}
+
+func fileExists(repo *git.Repository, path, filename string) (exists bool, err error) {
+
+	tree, err := headTree(repo)
+	if err != nil {
+		return false, err
+	}
+
+	_, err = tree.EntryByPath(filepath.Join(path, filename))
+	if err != nil {
+		return false, err
+	}
+
+	return true, err
 }

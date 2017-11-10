@@ -1,7 +1,7 @@
 <template>
 
 	<div class="card-body image-list row">
-		<div class="col-xs-6" v-for="(attachment, _) in document.attachments">
+		<div class="col-xs-6" v-for="(attachment, i) in document.attachments" :key="i">
 
 			<img
 				:src="attachment.dataURI()"

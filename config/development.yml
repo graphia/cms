@@ -39,3 +39,29 @@ media_types:
     # structured data types
     xml: text/xml
     csv: text/csv
+
+translation_enabled: true
+
+default_language: en
+enabled_languages:
+  - en
+  - es
+  - de
+  - fr
+
+all_languages:
+  en:
+    name: English
+    flag: 🇬🇧
+  es:
+    name: Spanish
+    flag: 🇪🇸
+  fr:
+    name: French
+    flag: 🇫🇷
+  de:
+    name: German
+    flag: 🇩🇪
+  it:
+    name: Italian
+    flag: 🇮🇹

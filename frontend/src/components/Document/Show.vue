@@ -28,7 +28,7 @@
 
 							<dt>Tags</dt>
 							<dd>
-								<span v-for="tag in document.tags" class="tag badge badge-primary">
+								<span v-for="(tag, i) in document.tags" class="tag badge badge-primary" :key="i">
 									{{ tag }}
 								</span>
 							</dd>
@@ -47,8 +47,12 @@
 								Delete
 							</button>
 
+							<Translation/>
+
 						</div>
 					</div>
+
+
 				</div>
 			</aside>
 		</section>
@@ -70,6 +74,7 @@
 <script lang="babel">
 
 	import Breadcrumbs from '../Utilities/Breadcrumbs';
+	import Translation from './Translation';
 	import CMSBreadcrumb from '../../javascripts/models/breadcrumb.js';
 	import Accessors from '../Mixins/accessors';
 
@@ -189,7 +194,8 @@
 		},
 		mixins: [Accessors],
 		components: {
-			Breadcrumbs
+			Breadcrumbs,
+			Translation
 		}
 	}
 </script>

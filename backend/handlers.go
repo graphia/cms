@@ -14,16 +14,12 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// Response is a general response containing arbitrary data
-type Response struct {
-	Data string `json:"data"`
-}
-
 // SuccessResponse contains information about a successful
 // update to the repository
 type SuccessResponse struct {
 	Message string `json:"message"`
 	Oid     string `json:"oid"`
+	Meta    string `json:"meta,omitempty"`
 }
 
 // FailureResponse accompanies the HTTP status code with
@@ -866,6 +862,62 @@ func apiUpdateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func apiTranslateFileHandler(w http.ResponseWriter, r *http.Request) {
+	var filename, directory string
+	var nt NewTranslation
+	var fr FailureResponse
+	var sr SuccessResponse
+	var err error
+
+	filename = vestigo.Param(r, "file")
+	directory = vestigo.Param(r, "directory")
+	user := getCurrentUser(r.Context())
+
+	json.NewDecoder(r.Body).Decode(&nt)
+
+	if directory != nt.Path {
+		fr = FailureResponse{Message: "Directory does not match payload"}
+		Warning.Printf(
+			"Directory does not match contents, param: %s, payload: %s",
+			directory,
+			nt.Path,
+		)
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	if filename != nt.SourceFilename {
+		fr = FailureResponse{Message: "Filename does not match payload"}
+		Warning.Printf(
+			"Filename does not match contents, param: %s, payload: %s",
+			filename,
+			nt.SourceFilename,
+		)
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	oid, fn, err := createTranslation(nt, user)
+
+	if err == ErrRepoOutOfSync {
+		fr = FailureResponse{Message: "Repository out of sync with commit"}
+		JSONResponse(fr, http.StatusConflict, w)
+		return
+	}
+
+	if err != nil {
+		Error.Println("Could not create translation:", err.Error())
+		fr = FailureResponse{Message: err.Error()}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	sr = SuccessResponse{Message: "Translation created", Oid: oid.String(), Meta: fn}
+
+	JSONResponse(sr, http.StatusCreated, w)
+
+}
+
 // apiDeleteFileFromDirectoryHandler deletes a file from the specified
 // directory
 //
@@ -1192,6 +1244,16 @@ func apiGetCommitsHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// GET /api/repository_info
+//
+// returns the repositorys head commit's hash, used to ensure subsequent commits
+// aren't applied to an out-of-sync repo
+//
+// [
+//	  {
+//	    "latest_revision": "abcde12345"
+//	  },
+// ]
 func apiGetRepositoryInformationHandler(w http.ResponseWriter, r *http.Request) {
 	var fr FailureResponse
 	var ri RepositoryInfo
@@ -1285,5 +1347,74 @@ func apiGetFileHistoryHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	JSONResponse(history, http.StatusOK, w)
+
+}
+
+// Translation data 🖍
+
+// GET /api/translation_info
+//
+// returns the CMS's translation/language settings
+//
+// [
+//	  {
+//	    translation_enabled: true,
+//	    default_language: "en",
+//	    languages: [
+//	      {code: "en", name: "English", flag: "🇬🇧"},
+//	      {code: "es", name: "Spanish", flag: "🇪🇸"}
+//	    ]
+//	  },
+// ]
+func apiGetLanguageInformationHandler(w http.ResponseWriter, r *http.Request) {
+
+	// return enabled false if translation disabled in config
+	if !config.TranslationEnabled {
+		response := struct {
+			TranslationEnabled bool `json:"translation_enabled,omitempty"`
+		}{
+			false,
+		}
+
+		Debug.Println("Translation is disabled")
+		JSONResponse(response, http.StatusOK, w)
+		return
+	}
+
+	type language struct {
+		Code string `json:"code"`
+		Name string `json:"name"`
+		Flag string `json:"flag"`
+	}
+
+	type languageInfo struct {
+		TranslationEnabled bool       `json:"translation_enabled,omitempty"`
+		DefaultLanguage    string     `json:"default_language"`
+		Languages          []language `json:"languages,omitempty"`
+	}
+
+	var languages []language
+
+	// build a list of just the enabled languages
+	for _, lc := range config.EnabledLanguages {
+
+		li := config.AllLanguages[lc]
+
+		languages = append(languages, language{
+			Code: lc,
+			Name: li.Name,
+			Flag: li.Flag,
+		})
+
+	}
+
+	var li = languageInfo{
+		TranslationEnabled: config.TranslationEnabled,
+		DefaultLanguage:    config.DefaultLanguage,
+		Languages:          languages,
+	}
+
+	Debug.Println("Translation is enabled", li)
+	JSONResponse(li, http.StatusOK, w)
 
 }

@@ -1,10 +1,11 @@
 Feature: Listing documents
-	So I can see files
+	So I can see files of a certain category
 	As an author
 	I want to view listings for a directory
 
 	Background:
 		Given a repository has been initialised
+		And the CMS is running with the "default" config
 		And my user account exists
 		And I have logged in
 

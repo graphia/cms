@@ -30,3 +30,5 @@ media_types:
     xml: text/xml
     csv: text/csv
     json: text/json
+
+translation_enabled: false
