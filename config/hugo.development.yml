@@ -17,14 +17,19 @@ Languages:
   en:
     title: "English"
     weight: 0
+    flag: 🇬🇧
 
   fr:
     title: "French"
     weight: 1
+    flag: 🇫🇷
 
   de:
     title: "German"
     weight: 1
+    flag: 🇩🇪
+
   es:
     title: "Spanish"
     weight: 1
+    flag: 🇪🇸
