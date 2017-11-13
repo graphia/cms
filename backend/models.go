@@ -129,32 +129,6 @@ type Attachment struct {
 	Data             string `json:"data"`
 }
 
-// UserCredentials is the subset of User required for auth
-type UserCredentials struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
-
-// User holds all information specific to a user
-type User struct {
-	ID          int    `json:"id" storm:"id,increment"`
-	Name        string `json:"name" validate:"required,min=3,max=64"`
-	Username    string `json:"username" storm:"unique" validate:"required,min=3,max=32"`
-	Password    string `json:"password" validate:"required,min=6"`
-	Email       string `json:"email" storm:"unique" validate:"email,required"`
-	Active      bool   `json:"active"`
-	TokenString string `json:"token_string" storm:"unique"`
-}
-
-// LimitedUser is a 'safe' subset of user data that we can
-// send out via the API. Password is omitted
-type LimitedUser struct {
-	ID       int    `json:"id"`
-	Name     string `json:"name"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
-}
-
 // Token holds a JSON Web Token
 type Token struct {
 	Token string `json:"token"`
