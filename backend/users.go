@@ -32,6 +32,15 @@ type User struct {
 	TokenString string `json:"token_string" storm:"unique"`
 }
 
+func (u User) limitedUser() LimitedUser {
+	return LimitedUser{
+		ID:       u.ID,
+		Username: u.Username,
+		Email:    u.Email,
+		Name:     u.Name,
+	}
+}
+
 func getUserByID(id int) (user User, err error) {
 	err = db.One("ID", id, &user)
 
@@ -45,11 +54,9 @@ func getUserByID(id int) (user User, err error) {
 
 func getUserByUsername(username string) (user User, err error) {
 	err = db.One("Username", username, &user)
-	Debug.Println("Finding user by username", username)
 
 	if user.ID == 0 {
-		Debug.Println("Cannot find user with Username", username)
-
+		Warning.Println("Cannot find user with Username", username)
 		return user, fmt.Errorf("not found: %s", username)
 	}
 
@@ -61,18 +68,13 @@ func getUserByUsername(username string) (user User, err error) {
 func getLimitedUserByUsername(username string) (limitedUser LimitedUser, err error) {
 	var user User
 	err = db.One("Username", username, &user)
-	Debug.Println("Finding user by username", username)
 
 	if user.ID == 0 {
-		Debug.Println("Cannot find user with Username", username)
-
+		Warning.Println("Cannot find user with Username", username)
 		return limitedUser, fmt.Errorf("not found: %s", username)
 	}
 
-	Debug.Println("Found user", username)
-	limitedUser = convertToLimitedUser(user)
-
-	return limitedUser, err
+	return user.limitedUser(), err
 }
 
 func createUser(user User) (err error) {
@@ -101,7 +103,7 @@ func allUsers() (limitedUsers []LimitedUser, err error) {
 	err = db.All(&users)
 
 	for _, user := range users {
-		limitedUsers = append(limitedUsers, convertToLimitedUser(user))
+		limitedUsers = append(limitedUsers, user.limitedUser())
 	}
 
 	if err != nil {
@@ -116,15 +118,6 @@ func countUsers() (qty int, err error) {
 		return -1, err
 	}
 	return qty, err
-}
-
-func convertToLimitedUser(user User) LimitedUser {
-	return LimitedUser{
-		ID:       user.ID,
-		Username: user.Username,
-		Email:    user.Email,
-		Name:     user.Name,
-	}
 }
 
 // Actually do a 'hard' delete

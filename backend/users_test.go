@@ -145,8 +145,8 @@ func TestAllUsers(t *testing.T) {
 }
 
 func TestConvertToLimitedUser(t *testing.T) {
-	var lu LimitedUser
-	lu = convertToLimitedUser(ds)
+
+	lu := ds.limitedUser()
 
 	assert.IsType(t, LimitedUser{}, lu)
 	assert.Equal(t, ds.ID, lu.ID)
