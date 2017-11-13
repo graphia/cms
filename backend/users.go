@@ -2,9 +2,18 @@ package main
 
 import (
 	"fmt"
+	"strings"
+
+	"github.com/gliderlabs/ssh"
 
 	"golang.org/x/crypto/bcrypt"
 )
+
+type publicKey struct {
+	Type    string
+	Raw     []byte
+	Comment string
+}
 
 // UserCredentials is the subset of User required for auth
 type UserCredentials struct {
@@ -30,6 +39,7 @@ type User struct {
 	Email       string `json:"email" storm:"unique" validate:"email,required"`
 	Active      bool   `json:"active"`
 	TokenString string `json:"token_string" storm:"unique"`
+	PublicKey   publicKey
 }
 
 func (u User) limitedUser() LimitedUser {
@@ -57,10 +67,23 @@ func getUserByUsername(username string) (user User, err error) {
 
 	if user.ID == 0 {
 		Warning.Println("Cannot find user with Username", username)
-		return user, fmt.Errorf("not found: %s", username)
+		return user, fmt.Errorf("not found username: %s", username)
 	}
 
 	Debug.Println("Found user", username)
+
+	return user, err
+}
+
+func getUserByEmail(email string) (user User, err error) {
+	err = db.One("Username", email, &user)
+
+	if user.ID == 0 {
+		Warning.Println("Cannot find user with email address", email)
+		return user, fmt.Errorf("not found email: %s", email)
+	}
+
+	Debug.Println("Found user", email)
 
 	return user, err
 }
@@ -87,11 +110,11 @@ func createUser(user User) (err error) {
 		return err
 	}
 
-	Debug.Println("Validation passed, saving")
+	Debug.Println("Validation passed, saving", user)
 
 	err = db.Save(&user)
 	if err != nil {
-		return fmt.Errorf("User not created, %s", err.Error())
+		return fmt.Errorf("User not created, %v", err)
 	}
 	return nil
 }
@@ -140,17 +163,30 @@ func deactivateUser(user User) error {
 }
 
 func reactivateUser(user User) error {
-	err := db.UpdateField(&user, "Active", true)
-	if err != nil {
-		return err
-	}
-	return nil
+	return db.UpdateField(&user, "Active", true)
+
 }
 
 func setToken(user User, tokenString string) error {
-	err := db.UpdateField(&user, "TokenString", tokenString)
+	return db.UpdateField(&user, "TokenString", tokenString)
+}
+
+func setPublicKey(user User, key string) error {
+
+	var pk publicKey
+
+	// make sure the key is valid
+	_, _, _, _, err := ssh.ParseAuthorizedKey([]byte(key))
 	if err != nil {
-		return err
+		return fmt.Errorf("invalid key")
 	}
-	return nil
+
+	fields := strings.Fields(key)
+	pk = publicKey{
+		Type:    fields[0],
+		Raw:     []byte(fields[1]),
+		Comment: fields[2],
+	}
+
+	return db.UpdateField(&user, "PublicKey", pk)
 }

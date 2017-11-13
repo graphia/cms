@@ -1,11 +1,13 @@
 package main
 
 import (
+	"io/ioutil"
+	"path/filepath"
+	"strings"
 	"testing"
 
-	"golang.org/x/crypto/bcrypt"
-
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var (
@@ -211,4 +213,79 @@ func TestReactivateUser(t *testing.T) {
 
 	assert.True(t, user.Active)
 
+}
+
+func Test_setPublicKey(t *testing.T) {
+
+	_ = createUser(ds)
+	certsPath := "../tests/backend/certificates"
+
+	validPub, _ := ioutil.ReadFile(filepath.Join(certsPath, "valid.pub"))
+	validPubFields := strings.Fields(string(validPub))
+
+	tooShortPub, _ := ioutil.ReadFile(filepath.Join(certsPath, "too_short.pub"))
+	invalidPub, _ := ioutil.ReadFile(filepath.Join(certsPath, "invalid.pub"))
+
+	type args struct {
+		user User
+		key  string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    publicKey
+		wantErr bool
+		errMsg  string
+	}{
+		{
+			name: "Set valid public key",
+			args: args{
+				user: ds,
+				key:  string(validPub),
+			},
+			want: publicKey{
+				Type:    validPubFields[0],
+				Raw:     []byte(validPubFields[1]),
+				Comment: validPubFields[2],
+			},
+		},
+		{
+			name: "Too short public key",
+			args: args{
+				user: ds,
+				key:  string(tooShortPub),
+			},
+			wantErr: true,
+			errMsg:  "invalid key",
+		},
+		{
+			name: "Invalid key",
+			args: args{
+				user: ds,
+				key:  string(invalidPub),
+			},
+			wantErr: true,
+			errMsg:  "invalid key",
+		},
+	}
+	for _, tt := range tests {
+		err := setPublicKey(tt.args.user, tt.args.key)
+
+		if tt.wantErr && (err == nil) {
+			t.Fatal("Error expected, none found")
+		}
+
+		if tt.wantErr {
+			assert.Contains(t, err.Error(), tt.errMsg)
+			continue
+		}
+
+		// should be no errors
+		assert.Nil(t, err)
+
+		// Make sure record saved correctly
+		user, err := getUserByUsername("dolph.starbeam")
+		assert.NotNil(t, user.PublicKey)
+		assert.Equal(t, tt.want, user.PublicKey)
+	}
 }

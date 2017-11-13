@@ -4,6 +4,7 @@ import (
 	"crypto/rsa"
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -11,8 +12,10 @@ import (
 
 	"github.com/asdine/storm"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/gliderlabs/ssh"
 	"github.com/husobee/vestigo"
 	"github.com/urfave/negroni"
+	gossh "golang.org/x/crypto/ssh"
 	"gopkg.in/go-playground/validator.v9"
 )
 
@@ -75,6 +78,10 @@ func main() {
 	db = setupDB(config.Database)
 
 	Debug.Println("Router and Middleware set up")
+
+	if config.SSHEnabled {
+		setupSSH()
+	}
 
 	n.Run(fmt.Sprintf(":%s", config.Port))
 }
@@ -216,4 +223,20 @@ func setupDB(path string) storm.DB {
 		panic(fmt.Sprintf("Database cannot be openend %s", err.Error()))
 	}
 	return *stormDB
+}
+
+func setupSSH() {
+
+	ssh.Handle(func(s ssh.Session) {
+		authorizedKey := gossh.MarshalAuthorizedKey(s.PublicKey())
+		io.WriteString(s, fmt.Sprintf("public key used by %s:\n", s.User()))
+		s.Write(authorizedKey)
+	})
+
+	publicKeyOption := ssh.PublicKeyAuth(func(ctx ssh.Context, key ssh.PublicKey) bool {
+		return false
+	})
+
+	Debug.Println("starting ssh server on port 2222...")
+	ssh.ListenAndServe(":2222", nil, publicKeyOption)
 }

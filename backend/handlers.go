@@ -1176,6 +1176,46 @@ func apiCreateUserHandler(w http.ResponseWriter, r *http.Request) {
 // apiUpdateUser
 func apiUpdateUserHandler(w http.ResponseWriter, r *http.Request) {}
 
+func apiUpdateUserPublicKeyHandler(w http.ResponseWriter, r *http.Request) {
+	type payload struct {
+		email string
+		key   string
+	}
+
+	var user User
+	var pl payload
+	var err error
+	var sr SuccessResponse
+	var fr FailureResponse
+
+	json.NewDecoder(r.Body).Decode(&pl)
+
+	user, err = getUserByEmail(pl.email)
+	if err != nil {
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Cannot find user with email '%s'", pl.email),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	err = setPublicKey(user, pl.key)
+	if err != nil {
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Cannot set public key for %s", user.Name),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	sr = SuccessResponse{
+		Message: fmt.Sprintf("Public key created for %s", pl.email),
+	}
+
+	JSONResponse(sr, http.StatusCreated, w)
+
+}
+
 // apiDeleteUser
 func apiDeleteUserHandler(w http.ResponseWriter, r *http.Request) {}
 
