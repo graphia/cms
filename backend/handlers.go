@@ -1178,8 +1178,7 @@ func apiUpdateUserHandler(w http.ResponseWriter, r *http.Request) {}
 
 func apiUpdateUserPublicKeyHandler(w http.ResponseWriter, r *http.Request) {
 	type payload struct {
-		email string
-		key   string
+		Key string `json:"key"`
 	}
 
 	var user User
@@ -1190,29 +1189,30 @@ func apiUpdateUserPublicKeyHandler(w http.ResponseWriter, r *http.Request) {
 
 	json.NewDecoder(r.Body).Decode(&pl)
 
-	user, err = getUserByEmail(pl.email)
-	if err != nil {
+	user = getCurrentUser(r.Context())
+
+	username := vestigo.Param(r, "username")
+	if username != user.Username {
 		fr = FailureResponse{
-			Message: fmt.Sprintf("Cannot find user with email '%s'", pl.email),
+			Message: fmt.Sprintf("Logged in user doesn't match URI: %s", user.Username),
 		}
 		JSONResponse(fr, http.StatusBadRequest, w)
 		return
 	}
-
-	err = setPublicKey(user, pl.key)
+	err = setPublicKey(user, pl.Key)
 	if err != nil {
 		fr = FailureResponse{
-			Message: fmt.Sprintf("Cannot set public key for %s", user.Name),
+			Message: fmt.Sprintf("Cannot set public key for %s", user.Username),
 		}
 		JSONResponse(fr, http.StatusBadRequest, w)
 		return
 	}
 
 	sr = SuccessResponse{
-		Message: fmt.Sprintf("Public key created for %s", pl.email),
+		Message: fmt.Sprintf("Public key created for %s", user.Username),
 	}
 
-	JSONResponse(sr, http.StatusCreated, w)
+	JSONResponse(sr, http.StatusOK, w)
 
 }
 

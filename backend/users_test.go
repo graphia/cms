@@ -37,6 +37,15 @@ var (
 		Password: "mightypig",
 		Active:   false,
 	}
+
+	sb = User{
+		ID:       4,
+		Username: "selma.bouvier",
+		Email:    "selma.bouvier@macguyver-fans.org",
+		Name:     "Selma Bouvier",
+		Password: "ilubjubjub",
+		Active:   false,
+	}
 )
 
 func init() {

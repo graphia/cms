@@ -284,7 +284,7 @@ func createTestServerWithConfig(path string) (server *httptest.Server) {
 }
 
 func apiTestUser() (user User) {
-	return User{Name: "Selma Bouvier", Email: "selma.b@aol.com"}
+	return sb
 }
 
 func apiTestMiddleware(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {

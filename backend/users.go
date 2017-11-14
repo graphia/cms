@@ -110,7 +110,7 @@ func createUser(user User) (err error) {
 		return err
 	}
 
-	Debug.Println("Validation passed, saving", user)
+	Info.Println("Validation passed, saving", user)
 
 	err = db.Save(&user)
 	if err != nil {

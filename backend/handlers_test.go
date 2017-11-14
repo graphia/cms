@@ -1836,3 +1836,107 @@ func Test_apiTranslateFileHandler(t *testing.T) {
 		})
 	}
 }
+
+func Test_apiUpdateUserPublicKeyHandler(t *testing.T) {
+
+	server = createTestServerWithContext()
+	certsPath := "../tests/backend/certificates"
+	validPub, _ := ioutil.ReadFile(filepath.Join(certsPath, "valid.pub"))
+	invalidPub, _ := ioutil.ReadFile(filepath.Join(certsPath, "invalid.pub"))
+
+	config.SSHEnabled = true
+
+	type payload struct {
+		Key string `json:"key"`
+	}
+
+	type args struct {
+		payload  payload
+		username string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+		errMsg  string
+	}{
+		{
+			name: "Successful update",
+			args: args{
+				payload: payload{
+					Key: string(validPub),
+				},
+				username: "selma.bouvier",
+			},
+			wantErr: false,
+		},
+		{
+			name: "Successful update",
+			args: args{
+				payload: payload{
+					Key: string(validPub),
+				},
+				username: "jacqueline.bouvier", // note selma is logged in
+			},
+			wantErr: true,
+			errMsg:  "Logged in user doesn't match URI",
+		},
+		{
+			name: "Unsuccessful update",
+			args: args{
+				payload: payload{
+					Key: string(invalidPub),
+				},
+				username: "selma.bouvier",
+			},
+			wantErr: true,
+			errMsg:  "Cannot set public key",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			db.Drop("User")
+			_ = createUser(sb)
+
+			target := fmt.Sprintf(
+				"%s/%s",
+				server.URL,
+				fmt.Sprintf("api/users/%s/ssh", tt.args.username),
+			)
+
+			payload, err := json.Marshal(tt.args.payload)
+			if err != nil {
+				panic(err)
+			}
+
+			b := bytes.NewBuffer(payload)
+			client := &http.Client{}
+			req, _ := http.NewRequest("PATCH", target, b)
+			resp, _ := client.Do(req)
+
+			if tt.wantErr {
+				var fr FailureResponse
+				json.NewDecoder(resp.Body).Decode(&fr)
+				assert.Contains(t, fr.Message, tt.errMsg)
+				return
+			}
+
+			// should be a 200
+			assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+			// with the correct message
+			var sr SuccessResponse
+			json.NewDecoder(resp.Body).Decode(&sr)
+			assert.Contains(t, sr.Message, "Public key created")
+
+			// and the key should have actually updated!
+			user, _ := getUserByUsername("selma.bouvier")
+
+			assert.Equal(t, user.PublicKey.Type, "ssh-rsa")
+			assert.Equal(t, user.PublicKey.Comment, "test@test.org")
+			assert.Contains(t, string(user.PublicKey.Raw), "AAAAB3NzaC1yc2E")
+
+		})
+	}
+}
