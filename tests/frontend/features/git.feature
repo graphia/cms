@@ -8,7 +8,12 @@ Feature: Commits
 		And the CMS is running with the "ssh_enabled" config
 		And my user account with public key exists
 
-	Scenario: Connecting to the server
+	Scenario: Connecting to the server with a valid key
 		Given my private key is valid
 		When I initiate a SSH connection to the server
 		Then I should see the response "Graphia: Connection successful"
+
+	Scenario: Connecting to the server with an invalid key
+		Given my private key is invalid
+		When I initiate a SSH connection to the server
+		Then I should receive an AuthenticationFailed error

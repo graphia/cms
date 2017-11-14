@@ -1199,7 +1199,8 @@ func apiUpdateUserPublicKeyHandler(w http.ResponseWriter, r *http.Request) {
 		JSONResponse(fr, http.StatusBadRequest, w)
 		return
 	}
-	err = setPublicKey(user, pl.Key)
+
+	err = user.addPublicKey(pl.Key)
 	if err != nil {
 		fr = FailureResponse{
 			Message: fmt.Sprintf("Cannot set public key for %s", user.Username),

@@ -3,11 +3,12 @@ package main
 import (
 	"io/ioutil"
 	"path/filepath"
-	"strings"
 	"testing"
 
+	"github.com/gliderlabs/ssh"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/crypto/bcrypt"
+	gossh "golang.org/x/crypto/ssh"
 )
 
 var (
@@ -224,45 +225,103 @@ func TestReactivateUser(t *testing.T) {
 
 }
 
-func Test_setPublicKey(t *testing.T) {
+func TestPublicKey_User(t *testing.T) {
+
+	db.Drop("User")
+	db.Drop("PublicKey")
+
+	_ = createUser(ds)
+	expected, _ := getUserByUsername(ds.Username)
+
+	pkWithUser := PublicKey{UserID: expected.ID}
+	pkWithoutUser := PublicKey{UserID: 999}
+
+	_ = db.Save(&pkWithUser)
+	db.One("UserID", expected.ID, &pkWithUser)
+
+	type args struct {
+		pk PublicKey
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+		errMsg  string
+		want    User
+	}{
+		{
+			name: "Existing User",
+			args: args{
+				pk: pkWithUser,
+			},
+			want: expected,
+		},
+		{
+			name: "Missing User",
+			args: args{
+				pk: pkWithoutUser,
+			},
+			wantErr: true,
+			errMsg:  "Could not find user 999",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			actual, err := tt.args.pk.User()
+
+			if tt.wantErr && err == nil {
+				t.Fatal("Error expected, none found")
+			}
+
+			if tt.wantErr {
+				assert.Equal(t, tt.errMsg, err.Error())
+				return
+			}
+
+			assert.Equal(t, tt.want, actual)
+
+		})
+	}
+}
+
+func TestUser_addPublicKey(t *testing.T) {
+
+	db.Drop("User")
+	db.Drop("PublicKey")
 
 	_ = createUser(ds)
 	certsPath := "../tests/backend/certificates"
 
 	validPub, _ := ioutil.ReadFile(filepath.Join(certsPath, "valid.pub"))
-	validPubFields := strings.Fields(string(validPub))
-
+	validPubParsed, _, _, _, _ := ssh.ParseAuthorizedKey(validPub)
 	tooShortPub, _ := ioutil.ReadFile(filepath.Join(certsPath, "too_short.pub"))
 	invalidPub, _ := ioutil.ReadFile(filepath.Join(certsPath, "invalid.pub"))
 
 	type args struct {
-		user User
-		key  string
+		raw string
 	}
 	tests := []struct {
 		name    string
 		args    args
-		want    publicKey
 		wantErr bool
 		errMsg  string
+		want    PublicKey
 	}{
 		{
 			name: "Set valid public key",
 			args: args{
-				user: ds,
-				key:  string(validPub),
+				raw: string(validPub),
 			},
-			want: publicKey{
-				Type:    validPubFields[0],
-				Raw:     []byte(validPubFields[1]),
-				Comment: validPubFields[2],
+			want: PublicKey{
+				Raw:         validPubParsed.Marshal(),
+				Fingerprint: gossh.FingerprintSHA256(validPubParsed),
 			},
 		},
 		{
 			name: "Too short public key",
 			args: args{
-				user: ds,
-				key:  string(tooShortPub),
+				raw: string(tooShortPub),
 			},
 			wantErr: true,
 			errMsg:  "invalid key",
@@ -270,31 +329,41 @@ func Test_setPublicKey(t *testing.T) {
 		{
 			name: "Invalid key",
 			args: args{
-				user: ds,
-				key:  string(invalidPub),
+				raw: string(invalidPub),
 			},
 			wantErr: true,
 			errMsg:  "invalid key",
 		},
 	}
 	for _, tt := range tests {
-		err := setPublicKey(tt.args.user, tt.args.key)
+		t.Run(tt.name, func(t *testing.T) {
 
-		if tt.wantErr && (err == nil) {
-			t.Fatal("Error expected, none found")
-		}
+			user, _ := getUserByUsername(ds.Username)
+			err := user.addPublicKey(tt.args.raw)
 
-		if tt.wantErr {
-			assert.Contains(t, err.Error(), tt.errMsg)
-			continue
-		}
+			if tt.wantErr && (err == nil) {
+				t.Fatal("Error expected, none found")
+			}
 
-		// should be no errors
-		assert.Nil(t, err)
+			if tt.wantErr {
+				assert.Contains(t, err.Error(), tt.errMsg)
+				return
+			}
 
-		// Make sure record saved correctly
-		user, err := getUserByUsername("dolph.starbeam")
-		assert.NotNil(t, user.PublicKey)
-		assert.Equal(t, tt.want, user.PublicKey)
+			// should be no errors
+			assert.Nil(t, err)
+
+			// one public key should have been created for this user
+			var matchingKeys []PublicKey
+			db.Find("UserID", user.ID, &matchingKeys)
+			assert.Equal(t, 1, len(matchingKeys))
+
+			// and the public key should have the right attributes
+			var pk PublicKey
+			db.One("UserID", user.ID, &pk)
+			assert.Equal(t, tt.want.Fingerprint, pk.Fingerprint)
+			assert.Equal(t, tt.want.Raw, pk.Raw)
+
+		})
 	}
 }

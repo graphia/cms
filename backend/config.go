@@ -25,7 +25,7 @@ type Config struct {
 	FileCategories     map[string][]string `yaml:"file_categories"`
 	MediaTypes         map[string]string   `yaml:"media_types"`
 	SSHEnabled         bool                `yaml:"ssh_enabled"`
-	SSHListenPort      int                 `yaml:"ssh_listen_port"`
+	SSHListenPort      string              `yaml:"ssh_listen_port"`
 	TranslationEnabled bool                `yaml:"translation_enabled"`
 	DefaultLanguage    string              `yaml:"default_language"`
 	EnabledLanguages   []string            `yaml:"enabled_languages"`

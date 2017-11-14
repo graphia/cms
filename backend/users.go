@@ -2,17 +2,27 @@ package main
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/gliderlabs/ssh"
-
 	"golang.org/x/crypto/bcrypt"
+	gossh "golang.org/x/crypto/ssh"
 )
 
-type publicKey struct {
-	Type    string
-	Raw     []byte
-	Comment string
+// PublicKey holds a User's Public Key
+type PublicKey struct {
+	ID          int `storm:"id,increment"`
+	UserID      int
+	Raw         []byte
+	Fingerprint string
+}
+
+// User returns the Public Key's assoicated User
+func (pk PublicKey) User() (user User, err error) {
+	err = db.One("ID", pk.UserID, &user)
+	if err != nil {
+		return user, fmt.Errorf("Could not find user %d", pk.UserID)
+	}
+	return user, err
 }
 
 // UserCredentials is the subset of User required for auth
@@ -39,7 +49,27 @@ type User struct {
 	Email       string `json:"email" storm:"unique" validate:"email,required"`
 	Active      bool   `json:"active"`
 	TokenString string `json:"token_string" storm:"unique"`
-	PublicKey   publicKey
+}
+
+func (u User) addPublicKey(raw string) error {
+	//fields := strings.Fields(raw)
+
+	// make sure the key is valid and populate fingerprint
+	parsed, _, _, _, err := ssh.ParseAuthorizedKey([]byte(raw))
+	if err != nil {
+		return fmt.Errorf("invalid key")
+	}
+
+	fp := gossh.FingerprintSHA256(parsed)
+
+	pk := PublicKey{
+		UserID:      u.ID,
+		Raw:         parsed.Marshal(),
+		Fingerprint: fp,
+	}
+
+	return db.Save(&pk)
+
 }
 
 func (u User) limitedUser() LimitedUser {
@@ -100,6 +130,22 @@ func getLimitedUserByUsername(username string) (limitedUser LimitedUser, err err
 	return user.limitedUser(), err
 }
 
+func getUserByFingerprint(pk gossh.PublicKey) (user User, err error) {
+
+	fp := gossh.FingerprintSHA256(pk)
+	Debug.Println("searching with fingerprint", fp)
+	err = db.One("Fingerprint", fp, &user)
+
+	if user.ID == 0 {
+		Warning.Println("Cannot find user with ssh public key fingerprint", fp)
+		return user, fmt.Errorf("not found ssh public key fingerprint: %s", fp)
+	}
+
+	Debug.Println("Found user by fingerprint", fp)
+
+	return user, err
+}
+
 func createUser(user User) (err error) {
 
 	bcryptedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
@@ -114,7 +160,7 @@ func createUser(user User) (err error) {
 
 	err = db.Save(&user)
 	if err != nil {
-		return fmt.Errorf("User not created, %v", err)
+		return fmt.Errorf("User cannot be created, %v", err)
 	}
 	return nil
 }
@@ -169,24 +215,4 @@ func reactivateUser(user User) error {
 
 func setToken(user User, tokenString string) error {
 	return db.UpdateField(&user, "TokenString", tokenString)
-}
-
-func setPublicKey(user User, key string) error {
-
-	var pk publicKey
-
-	// make sure the key is valid
-	_, _, _, _, err := ssh.ParseAuthorizedKey([]byte(key))
-	if err != nil {
-		return fmt.Errorf("invalid key")
-	}
-
-	fields := strings.Fields(key)
-	pk = publicKey{
-		Type:    fields[0],
-		Raw:     []byte(fields[1]),
-		Comment: fields[2],
-	}
-
-	return db.UpdateField(&user, "PublicKey", pk)
 }

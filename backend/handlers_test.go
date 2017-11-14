@@ -14,6 +14,7 @@ import (
 
 	"github.com/graphia/particle"
 	"github.com/stretchr/testify/assert"
+	gossh "golang.org/x/crypto/ssh"
 	"gopkg.in/libgit2/git2go.v25"
 )
 
@@ -1839,9 +1840,14 @@ func Test_apiTranslateFileHandler(t *testing.T) {
 
 func Test_apiUpdateUserPublicKeyHandler(t *testing.T) {
 
+	db.Drop("User")
+	db.Drop("PublicKey")
+
 	server = createTestServerWithContext()
 	certsPath := "../tests/backend/certificates"
 	validPub, _ := ioutil.ReadFile(filepath.Join(certsPath, "valid.pub"))
+	//validPubParsed, _, _, _, _ := ssh.ParseAuthorizedKey(validPub)
+
 	invalidPub, _ := ioutil.ReadFile(filepath.Join(certsPath, "invalid.pub"))
 
 	config.SSHEnabled = true
@@ -1853,6 +1859,7 @@ func Test_apiUpdateUserPublicKeyHandler(t *testing.T) {
 	type args struct {
 		payload  payload
 		username string
+		key      []byte
 	}
 	tests := []struct {
 		name    string
@@ -1861,33 +1868,36 @@ func Test_apiUpdateUserPublicKeyHandler(t *testing.T) {
 		errMsg  string
 	}{
 		{
-			name: "Successful update",
+			name: "Correct URI and Key",
 			args: args{
 				payload: payload{
 					Key: string(validPub),
 				},
 				username: "selma.bouvier",
+				key:      validPub,
 			},
 			wantErr: false,
 		},
 		{
-			name: "Successful update",
+			name: "Incorrect URI, correct key",
 			args: args{
 				payload: payload{
 					Key: string(validPub),
 				},
 				username: "jacqueline.bouvier", // note selma is logged in
+				key:      validPub,
 			},
 			wantErr: true,
 			errMsg:  "Logged in user doesn't match URI",
 		},
 		{
-			name: "Unsuccessful update",
+			name: "Correct URI, incorrect key",
 			args: args{
 				payload: payload{
 					Key: string(invalidPub),
 				},
 				username: "selma.bouvier",
+				key:      invalidPub,
 			},
 			wantErr: true,
 			errMsg:  "Cannot set public key",
@@ -1931,11 +1941,25 @@ func Test_apiUpdateUserPublicKeyHandler(t *testing.T) {
 			assert.Contains(t, sr.Message, "Public key created")
 
 			// and the key should have actually updated!
-			user, _ := getUserByUsername("selma.bouvier")
+			// user, _ := getUserByUsername("selma.bouvier")
 
-			assert.Equal(t, user.PublicKey.Type, "ssh-rsa")
-			assert.Equal(t, user.PublicKey.Comment, "test@test.org")
-			assert.Contains(t, string(user.PublicKey.Raw), "AAAAB3NzaC1yc2E")
+			// assert.Equal(t, user.SSHKeyFingerprint, gossh.FingerprintSHA256(validPubParsed))
+			// assert.Contains(t, string(user.SSHKeyRaw), "AAAAB3NzaC1yc2E")
+
+			user, _ := getUserByUsername(tt.args.username)
+			// one public key should have been created for this user
+			var matchingKeys []PublicKey
+			db.Find("UserID", user.ID, &matchingKeys)
+			assert.Equal(t, 1, len(matchingKeys))
+
+			// and the saved public key should exist and have the right attributes
+			var actual PublicKey
+			db.One("UserID", user.ID, &actual)
+
+			expected, _, _, _, _ := gossh.ParseAuthorizedKey(validPub)
+
+			assert.Equal(t, gossh.FingerprintSHA256(expected), actual.Fingerprint)
+			assert.Equal(t, expected.Marshal(), actual.Raw)
 
 		})
 	}

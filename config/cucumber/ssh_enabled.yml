@@ -1,6 +1,6 @@
 port: 9095
 repository: ../../tests/tmp/repositories/cucumber
-logfile: ../../logs/cucumber-server.log
+logfile: ../../logs/cucumber-server-ssh.log
 corsenabled: false
 corsorigin: null
 database: ../../db/cucumber.db
