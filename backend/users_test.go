@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"path/filepath"
 	"testing"
@@ -363,6 +364,112 @@ func TestUser_addPublicKey(t *testing.T) {
 			db.One("UserID", user.ID, &pk)
 			assert.Equal(t, tt.want.Fingerprint, pk.Fingerprint)
 			assert.Equal(t, tt.want.Raw, pk.Raw)
+
+		})
+	}
+}
+
+func Test_getUserByFingerprint(t *testing.T) {
+
+	db.Drop("User")
+	db.Drop("PublicKey")
+
+	certsPath := "../tests/backend/certificates"
+
+	validPub, _ := ioutil.ReadFile(filepath.Join(certsPath, "valid.pub"))
+	parsedValidPub, _, _, _, _ := gossh.ParseAuthorizedKey(validPub)
+
+	type args struct {
+		raw         string
+		user        User
+		fingerprint string
+		key         gossh.PublicKey
+	}
+	tests := []struct {
+		name         string
+		args         args
+		wantUsername string
+		wantErr      bool
+		errMsg       string
+		generateCert bool
+		generateUser bool
+	}{
+		{
+			name: "Successful match",
+			args: args{
+				raw:         string(validPub),
+				user:        mh,
+				fingerprint: gossh.FingerprintSHA256(parsedValidPub),
+				key:         parsedValidPub,
+			},
+			wantUsername: mh.Username,
+			wantErr:      false,
+			generateCert: true,
+			generateUser: true,
+		},
+		{
+			name: "Key not found by fingerprint",
+			args: args{
+				raw:         string(validPub),
+				user:        mh,
+				fingerprint: gossh.FingerprintSHA256(parsedValidPub),
+				key:         parsedValidPub,
+			},
+			wantUsername: ds.Username,
+			wantErr:      true,
+			errMsg: fmt.Sprintf(
+				"not found, fingerprint: %s",
+				gossh.FingerprintSHA256(parsedValidPub),
+			),
+			generateCert: false,
+			generateUser: true,
+		},
+		{
+			name: "Key found but no matching user",
+			args: args{
+				raw:         string(validPub),
+				user:        mh,
+				fingerprint: gossh.FingerprintSHA256(parsedValidPub),
+				key:         parsedValidPub,
+			},
+			wantUsername: ds.Username,
+			wantErr:      true,
+			errMsg:       "no user found for public key 1", // it *should* be the only one
+			generateCert: true,
+			generateUser: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			db.Drop("User")
+			db.Drop("PublicKey")
+
+			_ = createUser(mh)
+
+			var user User
+			if tt.generateUser {
+				user, _ = getUserByUsername(tt.wantUsername)
+			}
+
+			if tt.generateCert {
+				pk := PublicKey{
+					UserID:      user.ID,
+					Raw:         tt.args.key.Marshal(),
+					Fingerprint: tt.args.fingerprint,
+				}
+
+				db.Save(&pk)
+			}
+
+			gotUser, err := getUserByFingerprint(tt.args.key)
+
+			if tt.wantErr {
+				assert.Equal(t, err.Error(), tt.errMsg)
+				return
+			}
+
+			assert.Equal(t, tt.wantUsername, gotUser.Username)
 
 		})
 	}

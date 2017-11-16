@@ -19,7 +19,7 @@ type PublicKey struct {
 // User returns the Public Key's assoicated User
 func (pk PublicKey) User() (user User, err error) {
 	err = db.One("ID", pk.UserID, &user)
-	if err != nil {
+	if err != nil && pk.UserID != 0 {
 		return user, fmt.Errorf("Could not find user %d", pk.UserID)
 	}
 	return user, err
@@ -132,17 +132,21 @@ func getLimitedUserByUsername(username string) (limitedUser LimitedUser, err err
 
 func getUserByFingerprint(pk gossh.PublicKey) (user User, err error) {
 
+	var pub PublicKey
+
 	fp := gossh.FingerprintSHA256(pk)
 	Debug.Println("searching with fingerprint", fp)
-	err = db.One("Fingerprint", fp, &user)
 
-	if user.ID == 0 {
-		Warning.Println("Cannot find user with ssh public key fingerprint", fp)
-		return user, fmt.Errorf("not found ssh public key fingerprint: %s", fp)
+	err = db.One("Fingerprint", fp, &pub)
+	if err != nil {
+		return user, fmt.Errorf("not found, fingerprint: %s", fp)
 	}
 
-	Debug.Println("Found user by fingerprint", fp)
+	user, err = pub.User()
 
+	if err != nil {
+		return user, fmt.Errorf("no user found for public key %d", pub.ID)
+	}
 	return user, err
 }
 
