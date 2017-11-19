@@ -1,20 +1,17 @@
-def user_with_key
-  return {
-    username: "rod.flanders",
-    name: "Rod Flanders",
-    email: "rod.flanders@springfield-elementary.k12.us",
-    password: "okily-dokily!"
-  }
-end
-
 Given %r{^my user account with public key exists$} do
-  uri = URI('http://127.0.0.1:9095/setup/create_initial_user')
-  req = Net::HTTP::Post.new(uri, "Content-Type" => "application/json")
-  req.body = user_with_key.to_json
-  res = Net::HTTP.start(uri.hostname, uri.port) do |http|
+
+
+  # create the user
+  user_uri = URI('http://127.0.0.1:9095/setup/create_initial_user')
+  req = Net::HTTP::Post.new(user_uri, "Content-Type" => "application/json")
+  req.body = user.to_json
+  res = Net::HTTP.start(user_uri.hostname, user_uri.port) do |http|
     http.request(req)
   end
   expect(res.code_type).to eql(Net::HTTPCreated)
+
+  # FIXME add steps for setting public key once complete
+  step "I have logged in"
 end
 
 Given %r{^my private key is valid$} do
@@ -30,7 +27,7 @@ When %r{^I initiate a SSH connection to the server$} do
 end
 
 Then %r{^I should see the response "(.*?)"$} do |text|
-  expect(@response).to include(text.strip)
+  expect(@response).to include(text)
 end
 
 Then %r{^I should receive an AuthenticationFailed error$} do
@@ -50,12 +47,12 @@ def connect_via_ssh(host, port, key, cmd="")
     keys: [key]
   ) do |session|
 
-    session.open_channel do |channel|
-      channel.on_data do |ch, data|
-        response << "#{data}"
-      end
-      channel.exec ""
-    end
+    # session.open_channel do |channel|
+    #   channel.on_data do |ch, data|
+    #     response << "#{data}"
+    #   end
+    #   channel.exec ""
+    # end
 
     session.loop
   end

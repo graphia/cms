@@ -8,23 +8,6 @@ import (
 	gossh "golang.org/x/crypto/ssh"
 )
 
-// PublicKey holds a User's Public Key
-type PublicKey struct {
-	ID          int `storm:"id,increment"`
-	UserID      int
-	Raw         []byte
-	Fingerprint string
-}
-
-// User returns the Public Key's assoicated User
-func (pk PublicKey) User() (user User, err error) {
-	err = db.One("ID", pk.UserID, &user)
-	if err != nil && pk.UserID != 0 {
-		return user, fmt.Errorf("Could not find user %d", pk.UserID)
-	}
-	return user, err
-}
-
 // UserCredentials is the subset of User required for auth
 type UserCredentials struct {
 	Username string `json:"username"`
