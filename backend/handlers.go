@@ -1176,7 +1176,45 @@ func apiCreateUserHandler(w http.ResponseWriter, r *http.Request) {
 // apiUpdateUser
 func apiUpdateUserHandler(w http.ResponseWriter, r *http.Request) {}
 
-func apiUpdateUserPublicKeyHandler(w http.ResponseWriter, r *http.Request) {
+func apiUserListPublicKeysHandler(w http.ResponseWriter, r *http.Request) {
+	var user User
+	var fr FailureResponse
+
+	user = getCurrentUser(r.Context())
+
+	type rk struct {
+		Fingerprint string `json:"fingerprint"`
+		Raw         string `json:"raw"`
+	}
+	var keys []rk
+
+	upks, err := user.keys()
+	if err != nil {
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Cannot retrieve keys belonging to: %s", user.Username),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+	}
+
+	for _, upk := range upks {
+
+		file, err := upk.File()
+		if err != nil {
+			Error.Println("Could not decode key", upk.Fingerprint)
+			continue
+		}
+
+		keys = append(keys, rk{
+			Fingerprint: upk.Fingerprint,
+			Raw:         file,
+		})
+	}
+
+	JSONResponse(keys, http.StatusOK, w)
+
+}
+
+func apiUserAddPublicKeyHandler(w http.ResponseWriter, r *http.Request) {
 	type payload struct {
 		Key string `json:"key"`
 	}
@@ -1190,15 +1228,6 @@ func apiUpdateUserPublicKeyHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewDecoder(r.Body).Decode(&pl)
 
 	user = getCurrentUser(r.Context())
-
-	username := vestigo.Param(r, "username")
-	if username != user.Username {
-		fr = FailureResponse{
-			Message: fmt.Sprintf("Logged in user doesn't match URI: %s", user.Username),
-		}
-		JSONResponse(fr, http.StatusBadRequest, w)
-		return
-	}
 
 	err = user.addPublicKey(pl.Key)
 	if err != nil {
@@ -1216,6 +1245,8 @@ func apiUpdateUserPublicKeyHandler(w http.ResponseWriter, r *http.Request) {
 	JSONResponse(sr, http.StatusOK, w)
 
 }
+
+func apiUserDeletePublicKeyHandler(w http.ResponseWriter, r *http.Request) {}
 
 // apiDeleteUser
 func apiDeleteUserHandler(w http.ResponseWriter, r *http.Request) {}

@@ -1,10 +1,29 @@
 package main
 
 import (
+	"io/ioutil"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
+
+func TestPublicKey_File(t *testing.T) {
+	db.Drop("PublicKey")
+
+	_ = createUser(ds)
+	user, _ := getUserByUsername(ds.Username)
+	pkRaw, _ := ioutil.ReadFile(filepath.Join(certsPath, "valid.pub"))
+
+	user.addPublicKey(string(pkRaw))
+
+	keys, _ := user.keys()
+	pk := keys[0]
+
+	keyFile, _ := pk.File()
+
+	assert.Contains(t, keyFile, "ssh-rsa AAAAB3NzaC1yc2")
+}
 
 func TestPublicKey_User(t *testing.T) {
 

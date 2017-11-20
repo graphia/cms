@@ -17,6 +17,8 @@ import (
 	"gopkg.in/libgit2/git2go.v25"
 )
 
+const certsPath = "../tests/backend/certificates"
+
 // CopyFile copies the contents of the file named src to the file named
 // by dst. The file will be created if it does not already exist. If the
 // destination file exists, all it's contents will be replaced by the contents

@@ -414,3 +414,57 @@ func Test_getUserByFingerprint(t *testing.T) {
 		})
 	}
 }
+
+func TestUser_keys(t *testing.T) {
+
+	db.Drop("User")
+	db.Drop("PublicKey")
+
+	_ = createUser(ds)
+	_ = createUser(mh)
+
+	pk, _ := ioutil.ReadFile(filepath.Join(certsPath, "valid.pub"))
+
+	dolph, _ := getUserByUsername("dolph.starbeam")
+	elizabeth, _ := getUserByUsername("miss.hoover")
+
+	dolph.addPublicKey(string(pk))
+
+	// FIXME could be enhanced to cofirm key is set correctly
+	type expectations struct {
+		keyCount    int
+		fingerPrint string
+	}
+	tests := []struct {
+		name         string
+		wantErr      bool
+		expectations expectations
+		user         User
+	}{
+		{
+			name: "User with a key",
+			user: dolph,
+			expectations: expectations{
+				keyCount:    1,
+				fingerPrint: "SHA256:YwVZ0Zs7a3n6MiAK9jH6vrX8jbFDT0UwqWP76JQvlK4",
+			},
+		},
+		{
+			name: "User with a key",
+			user: elizabeth,
+			expectations: expectations{
+				keyCount: 0,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			keys, _ := tt.user.keys()
+			assert.Equal(t, tt.expectations.keyCount, len(keys))
+
+			if tt.expectations.fingerPrint != "" {
+				assert.Equal(t, tt.expectations.fingerPrint, keys[0].Fingerprint)
+			}
+		})
+	}
+}

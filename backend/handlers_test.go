@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/gliderlabs/ssh"
 	"github.com/graphia/particle"
 	"github.com/stretchr/testify/assert"
 	gossh "golang.org/x/crypto/ssh"
@@ -1838,15 +1839,15 @@ func Test_apiTranslateFileHandler(t *testing.T) {
 	}
 }
 
-func Test_apiUpdateUserPublicKeyHandler(t *testing.T) {
+func Test_apiAddPublicKeyHandler(t *testing.T) {
 
 	db.Drop("User")
 	db.Drop("PublicKey")
 
 	server = createTestServerWithContext()
-	certsPath := "../tests/backend/certificates"
+
 	validPub, _ := ioutil.ReadFile(filepath.Join(certsPath, "valid.pub"))
-	//validPubParsed, _, _, _, _ := ssh.ParseAuthorizedKey(validPub)
+	validPubParsed, _, _, _, _ := ssh.ParseAuthorizedKey(validPub)
 
 	invalidPub, _ := ioutil.ReadFile(filepath.Join(certsPath, "invalid.pub"))
 
@@ -1862,13 +1863,14 @@ func Test_apiUpdateUserPublicKeyHandler(t *testing.T) {
 		key      []byte
 	}
 	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
-		errMsg  string
+		name     string
+		args     args
+		wantErr  bool
+		errMsg   string
+		wantCode int
 	}{
 		{
-			name: "Correct URI and Key",
+			name: "Valid key",
 			args: args{
 				payload: payload{
 					Key: string(validPub),
@@ -1876,22 +1878,11 @@ func Test_apiUpdateUserPublicKeyHandler(t *testing.T) {
 				username: "selma.bouvier",
 				key:      validPub,
 			},
-			wantErr: false,
+			wantErr:  false,
+			wantCode: http.StatusOK,
 		},
 		{
-			name: "Incorrect URI, correct key",
-			args: args{
-				payload: payload{
-					Key: string(validPub),
-				},
-				username: "jacqueline.bouvier", // note selma is logged in
-				key:      validPub,
-			},
-			wantErr: true,
-			errMsg:  "Logged in user doesn't match URI",
-		},
-		{
-			name: "Correct URI, incorrect key",
+			name: "Invalid key",
 			args: args{
 				payload: payload{
 					Key: string(invalidPub),
@@ -1899,8 +1890,9 @@ func Test_apiUpdateUserPublicKeyHandler(t *testing.T) {
 				username: "selma.bouvier",
 				key:      invalidPub,
 			},
-			wantErr: true,
-			errMsg:  "Cannot set public key",
+			wantErr:  true,
+			errMsg:   "Cannot set public key",
+			wantCode: http.StatusBadRequest,
 		},
 	}
 	for _, tt := range tests {
@@ -1912,7 +1904,7 @@ func Test_apiUpdateUserPublicKeyHandler(t *testing.T) {
 			target := fmt.Sprintf(
 				"%s/%s",
 				server.URL,
-				fmt.Sprintf("api/users/%s/ssh", tt.args.username),
+				"api/settings/ssh",
 			)
 
 			payload, err := json.Marshal(tt.args.payload)
@@ -1922,8 +1914,10 @@ func Test_apiUpdateUserPublicKeyHandler(t *testing.T) {
 
 			b := bytes.NewBuffer(payload)
 			client := &http.Client{}
-			req, _ := http.NewRequest("PATCH", target, b)
+			req, _ := http.NewRequest("POST", target, b)
 			resp, _ := client.Do(req)
+
+			assert.Equal(t, tt.wantCode, resp.StatusCode)
 
 			if tt.wantErr {
 				var fr FailureResponse
@@ -1932,21 +1926,21 @@ func Test_apiUpdateUserPublicKeyHandler(t *testing.T) {
 				return
 			}
 
-			// should be a 200
-			assert.Equal(t, http.StatusOK, resp.StatusCode)
-
 			// with the correct message
 			var sr SuccessResponse
 			json.NewDecoder(resp.Body).Decode(&sr)
 			assert.Contains(t, sr.Message, "Public key created")
 
-			// and the key should have actually updated!
-			// user, _ := getUserByUsername("selma.bouvier")
-
-			// assert.Equal(t, user.SSHKeyFingerprint, gossh.FingerprintSHA256(validPubParsed))
-			// assert.Contains(t, string(user.SSHKeyRaw), "AAAAB3NzaC1yc2E")
-
 			user, _ := getUserByUsername(tt.args.username)
+
+			// and the key should have actually updated!
+			keys, _ := user.keys()
+			key := keys[0]
+			keyFile, _ := key.File()
+
+			assert.Equal(t, key.Fingerprint, gossh.FingerprintSHA256(validPubParsed))
+			assert.Contains(t, keyFile, "ssh-rsa AAAAB3NzaC1yc2E")
+
 			// one public key should have been created for this user
 			var matchingKeys []PublicKey
 			db.Find("UserID", user.ID, &matchingKeys)
@@ -1963,4 +1957,38 @@ func Test_apiUpdateUserPublicKeyHandler(t *testing.T) {
 
 		})
 	}
+}
+
+func Test_apiUserListPublicKeysHandler(t *testing.T) {
+	db.Drop("User")
+	db.Drop("PublicKey")
+
+	server = createTestServerWithContext()
+
+	_ = createUser(sb)
+	user, _ := getUserByUsername(sb.Username) // set up by createTestServerWithContext
+	pkRaw, _ := ioutil.ReadFile(filepath.Join(certsPath, "valid.pub"))
+
+	user.addPublicKey(string(pkRaw))
+
+	target := fmt.Sprintf("%s/%s/%s", server.URL, "api/settings", "ssh")
+
+	resp, _ := http.Get(target)
+
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+	type rk struct {
+		Fingerprint string `json:"fingerprint"`
+		Raw         string `json:"raw"`
+	}
+	var keys []rk
+
+	json.NewDecoder(resp.Body).Decode(&keys)
+
+	assert.Equal(t, 1, len(keys))
+
+	key := keys[0]
+
+	assert.Equal(t, "SHA256:YwVZ0Zs7a3n6MiAK9jH6vrX8jbFDT0UwqWP76JQvlK4", key.Fingerprint)
+	assert.Contains(t, key.Raw, "ssh-rsa AAAAB3NzaC1yc2")
 }

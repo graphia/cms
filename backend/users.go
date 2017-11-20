@@ -55,6 +55,14 @@ func (u User) addPublicKey(raw string) error {
 
 }
 
+func (u User) keys() (pks []PublicKey, err error) {
+	err = db.Find("UserID", u.ID, &pks)
+	if err != nil {
+		return pks, fmt.Errorf("Could not find public keys for %s", u.Username)
+	}
+	return pks, err
+}
+
 func (u User) limitedUser() LimitedUser {
 	return LimitedUser{
 		ID:       u.ID,
