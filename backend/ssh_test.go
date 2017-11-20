@@ -15,7 +15,7 @@ func TestPublicKey_File(t *testing.T) {
 	user, _ := getUserByUsername(ds.Username)
 	pkRaw, _ := ioutil.ReadFile(filepath.Join(certsPath, "valid.pub"))
 
-	user.addPublicKey(string(pkRaw))
+	user.addPublicKey("laptop", string(pkRaw))
 
 	keys, _ := user.keys()
 	pk := keys[0]

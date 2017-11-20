@@ -1969,7 +1969,7 @@ func Test_apiUserListPublicKeysHandler(t *testing.T) {
 	user, _ := getUserByUsername(sb.Username) // set up by createTestServerWithContext
 	pkRaw, _ := ioutil.ReadFile(filepath.Join(certsPath, "valid.pub"))
 
-	user.addPublicKey(string(pkRaw))
+	user.addPublicKey("laptop", string(pkRaw))
 
 	target := fmt.Sprintf("%s/%s/%s", server.URL, "api/settings", "ssh")
 
@@ -1980,6 +1980,7 @@ func Test_apiUserListPublicKeysHandler(t *testing.T) {
 	type rk struct {
 		Fingerprint string `json:"fingerprint"`
 		Raw         string `json:"raw"`
+		Name        string `json:"name"`
 	}
 	var keys []rk
 
@@ -1990,5 +1991,94 @@ func Test_apiUserListPublicKeysHandler(t *testing.T) {
 	key := keys[0]
 
 	assert.Equal(t, "SHA256:YwVZ0Zs7a3n6MiAK9jH6vrX8jbFDT0UwqWP76JQvlK4", key.Fingerprint)
+	assert.Equal(t, "laptop", key.Name)
 	assert.Contains(t, key.Raw, "ssh-rsa AAAAB3NzaC1yc2")
+}
+
+func Test_apiDeletePublicKeyHandler(t *testing.T) {
+
+	db.Drop("User")
+
+	_ = createUser(sb)
+	_ = createUser(ds)
+	selma, _ := getUserByUsername("selma.bouvier")
+	dolph, _ := getUserByUsername("dolph.starbeam")
+
+	server = createTestServerWithContext()
+
+	validPub, _ := ioutil.ReadFile(filepath.Join(certsPath, "valid.pub"))
+	anotherPub, _ := ioutil.ReadFile(filepath.Join(certsPath, "another.pub"))
+
+	config.SSHEnabled = true
+
+	type payload struct {
+		Key string `json:"key"`
+	}
+
+	type args struct {
+		id int
+	}
+	tests := []struct {
+		name     string
+		args     args
+		wantErr  bool
+		wantCode int
+		wantMsg  string
+	}{
+		{
+			name:     "Successful Deletion",
+			args:     args{id: 1},
+			wantCode: http.StatusOK,
+			wantMsg:  "Key 1 deleted",
+			wantErr:  false,
+		},
+		{
+			name:     "No key found",
+			args:     args{id: 6},
+			wantCode: http.StatusBadRequest,
+			wantMsg:  "Cannot find public key 6",
+			wantErr:  true,
+		},
+		{
+			name:     "Key belongs to another user",
+			args:     args{id: 2},
+			wantCode: http.StatusForbidden,
+			wantMsg:  "Key 2 does not belong to you",
+			wantErr:  true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			db.Drop("PublicKey")
+
+			selma.addPublicKey("laptop", string(validPub))    // 1
+			dolph.addPublicKey("desktop", string(anotherPub)) // 2
+
+			target := fmt.Sprintf(
+				"%s/%s",
+				server.URL,
+				fmt.Sprintf("api/settings/ssh/%d", tt.args.id),
+			)
+
+			client := &http.Client{}
+			req, _ := http.NewRequest("DELETE", target, nil)
+			resp, _ := client.Do(req)
+
+			if tt.wantErr {
+				var fr FailureResponse
+				json.NewDecoder(resp.Body).Decode(&fr)
+
+				assert.Equal(t, tt.wantCode, resp.StatusCode)
+				assert.Equal(t, tt.wantMsg, fr.Message)
+				return
+			}
+
+			var sr SuccessResponse
+			json.NewDecoder(resp.Body).Decode(&sr)
+			assert.Equal(t, tt.wantCode, resp.StatusCode)
+			assert.Equal(t, tt.wantMsg, sr.Message)
+
+		})
+	}
 }

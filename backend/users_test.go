@@ -240,7 +240,8 @@ func TestUser_addPublicKey(t *testing.T) {
 	invalidPub, _ := ioutil.ReadFile(filepath.Join(certsPath, "invalid.pub"))
 
 	type args struct {
-		raw string
+		raw  string
+		name string
 	}
 	tests := []struct {
 		name    string
@@ -252,11 +253,13 @@ func TestUser_addPublicKey(t *testing.T) {
 		{
 			name: "Set valid public key",
 			args: args{
-				raw: string(validPub),
+				raw:  string(validPub),
+				name: "Laptop",
 			},
 			want: PublicKey{
 				Raw:         validPubParsed.Marshal(),
 				Fingerprint: gossh.FingerprintSHA256(validPubParsed),
+				Name:        "Laptop",
 			},
 		},
 		{
@@ -280,7 +283,7 @@ func TestUser_addPublicKey(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			user, _ := getUserByUsername(ds.Username)
-			err := user.addPublicKey(tt.args.raw)
+			err := user.addPublicKey(tt.args.name, tt.args.raw)
 
 			if tt.wantErr && (err == nil) {
 				t.Fatal("Error expected, none found")
@@ -302,6 +305,7 @@ func TestUser_addPublicKey(t *testing.T) {
 			// and the public key should have the right attributes
 			var pk PublicKey
 			db.One("UserID", user.ID, &pk)
+			assert.Equal(t, tt.want.Name, pk.Name)
 			assert.Equal(t, tt.want.Fingerprint, pk.Fingerprint)
 			assert.Equal(t, tt.want.Raw, pk.Raw)
 
@@ -428,7 +432,7 @@ func TestUser_keys(t *testing.T) {
 	dolph, _ := getUserByUsername("dolph.starbeam")
 	elizabeth, _ := getUserByUsername("miss.hoover")
 
-	dolph.addPublicKey(string(pk))
+	dolph.addPublicKey("laptop", string(pk))
 
 	// FIXME could be enhanced to cofirm key is set correctly
 	type expectations struct {

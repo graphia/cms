@@ -12,8 +12,9 @@ import (
 type PublicKey struct {
 	ID          int `storm:"id,increment"`
 	UserID      int
+	Name        string
 	Raw         []byte
-	Fingerprint string
+	Fingerprint string `storm:"unique"`
 }
 
 // User returns the Public Key's assoicated User

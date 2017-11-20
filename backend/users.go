@@ -34,8 +34,7 @@ type User struct {
 	TokenString string `json:"token_string" storm:"unique"`
 }
 
-func (u User) addPublicKey(raw string) error {
-	//fields := strings.Fields(raw)
+func (u User) addPublicKey(name, raw string) error {
 
 	// make sure the key is valid and populate fingerprint
 	parsed, _, _, _, err := ssh.ParseAuthorizedKey([]byte(raw))
@@ -47,6 +46,7 @@ func (u User) addPublicKey(raw string) error {
 
 	pk := PublicKey{
 		UserID:      u.ID,
+		Name:        name,
 		Raw:         parsed.Marshal(),
 		Fingerprint: fp,
 	}

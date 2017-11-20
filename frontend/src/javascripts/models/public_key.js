@@ -1,14 +1,42 @@
 import store from '../store.js';
 import config from '../config.js';
 
-export class CMSNewPublicKey {
+export default class CMSPublicKey {
 
-	constructor(raw) {
-		if (raw) {
-			this.raw = raw;
+	constructor(key) {
+
+		if (key) {
+			this.id = key.id;
+			this.raw = key.id;
+			this.name = key.name;
+			this.fingerprint = key.fingerprint;
 		} else {
+			this.id = -1;
 			this.raw = "";
+			this.name = "";
+			this.fingerprint = "";
+		};
+
+
+		console.log(this);
+
+	};
+
+	static async all() {
+		let path = `${config.api}/settings/ssh`;
+
+		try {
+			let response = await fetch(path, {
+				method: "GET",
+				headers: store.state.auth.authHeader()
+			});
+
+			return response;
 		}
+		catch(err) {
+			console.error("There was a problem creating a new public key", err);
+		};
+
 	};
 
 	async create() {
@@ -19,7 +47,8 @@ export class CMSNewPublicKey {
 				method: "POST",
 				headers: store.state.auth.authHeader(),
 				body: JSON.stringify({
-					key: this.raw
+					key: this.raw,
+					name: this.name
 				})
 			});
 
@@ -31,19 +60,18 @@ export class CMSNewPublicKey {
 
 	};
 
-};
-
-export class CMSPublicKey {
-
-	constructor(fingerprint, raw) {
-		this.fingerprint = fingerprint;
-		this.raw = raw;
+	async delete() {
+		let path = `${config.api}/settings/ssh/${this.id}`;
+		try {
+			let response = await fetch(path, {
+				method: "DELETE",
+				headers: store.state.auth.authHeader()
+			});
+			return response;
+		}
+		catch(err) {
+			console.error("There was a problem deleting public key", this.id, err);
+		};
 	};
-
-	static async all() {
-
-	};
-
-	async delete() {};
 
 };

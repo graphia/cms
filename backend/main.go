@@ -204,7 +204,7 @@ func protectedRouter() (r *vestigo.Router) {
 	// user ssh key management
 	r.Get("/api/settings/ssh", apiUserListPublicKeysHandler)
 	r.Post("/api/settings/ssh", apiUserAddPublicKeyHandler)
-	r.Delete("/api/settings/ssh/:fingerprint", apiUserDeletePublicKeyHandler)
+	r.Delete("/api/settings/ssh/:id", apiUserDeletePublicKeyHandler)
 
 	// repo endpoints
 	r.Get("/api/repository_info", apiGetRepositoryInformationHandler)

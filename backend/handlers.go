@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/dgrijalva/jwt-go"
@@ -1183,8 +1184,10 @@ func apiUserListPublicKeysHandler(w http.ResponseWriter, r *http.Request) {
 	user = getCurrentUser(r.Context())
 
 	type rk struct {
+		ID          int    `json:"id"`
 		Fingerprint string `json:"fingerprint"`
 		Raw         string `json:"raw"`
+		Name        string `json:"name"`
 	}
 	var keys []rk
 
@@ -1205,6 +1208,8 @@ func apiUserListPublicKeysHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		keys = append(keys, rk{
+			ID:          upk.ID,
+			Name:        upk.Name,
 			Fingerprint: upk.Fingerprint,
 			Raw:         file,
 		})
@@ -1216,7 +1221,8 @@ func apiUserListPublicKeysHandler(w http.ResponseWriter, r *http.Request) {
 
 func apiUserAddPublicKeyHandler(w http.ResponseWriter, r *http.Request) {
 	type payload struct {
-		Key string `json:"key"`
+		Name string `json:"name"`
+		Key  string `json:"key"`
 	}
 
 	var user User
@@ -1229,7 +1235,8 @@ func apiUserAddPublicKeyHandler(w http.ResponseWriter, r *http.Request) {
 
 	user = getCurrentUser(r.Context())
 
-	err = user.addPublicKey(pl.Key)
+	err = user.addPublicKey(pl.Name, pl.Key)
+
 	if err != nil {
 		fr = FailureResponse{
 			Message: fmt.Sprintf("Cannot set public key for %s", user.Username),
@@ -1246,7 +1253,61 @@ func apiUserAddPublicKeyHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func apiUserDeletePublicKeyHandler(w http.ResponseWriter, r *http.Request) {}
+func apiUserDeletePublicKeyHandler(w http.ResponseWriter, r *http.Request) {
+	var err error
+	var pkr PublicKey
+	var sr SuccessResponse
+	var fr FailureResponse
+	var user User
+
+	sid := vestigo.Param(r, "id")
+	id, err := strconv.Atoi(sid)
+	if err != nil {
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Invalid id %d", id),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	user = getCurrentUser(r.Context())
+
+	err = db.One("ID", id, &pkr)
+	if err != nil {
+		Warning.Println("Cannot find public key", id)
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Cannot find public key %d", id),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+	if user.ID != pkr.UserID {
+		Warning.Println("Key does not belong to user", id, user)
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Key %d does not belong to you", id),
+		}
+		JSONResponse(fr, http.StatusForbidden, w)
+		return
+	}
+
+	err = db.DeleteStruct(&pkr)
+	if user.ID != pkr.UserID {
+		Error.Println("Could not delete public key", err.Error())
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Could not delete key %d", id),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	// no errors, success!
+	sr = SuccessResponse{
+		Message: fmt.Sprintf("Key %d deleted", id),
+	}
+
+	JSONResponse(sr, http.StatusOK, w)
+
+}
 
 // apiDeleteUser
 func apiDeleteUserHandler(w http.ResponseWriter, r *http.Request) {}
