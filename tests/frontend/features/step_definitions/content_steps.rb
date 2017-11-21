@@ -7,9 +7,7 @@ Then %r{^I should see text '(.*?)'$} do |text|
 end
 
 Then %r{^there should be an alert with the message "(.*)"$} do |message|
-  within(".alert") do
-    expect(page).to have_content(message)
-  end
+  expect(page).to have_css(".alert", text: message)
 end
 
 Then %r{^the main heading should be "(.*?)"$} do |heading|

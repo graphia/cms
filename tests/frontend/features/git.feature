@@ -1,4 +1,4 @@
-Feature: Commits
+Feature: Git via SSH
 	So I can work on content offline
 	As a power user
 	I want to be able to clone the repository via SSH

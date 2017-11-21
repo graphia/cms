@@ -2,11 +2,7 @@
 	<div class="col-md-12">
 		<h1>User Settings</h1>
 
-
-
-
-
-		<div id="existing-keys">
+		<div class="existing-keys" v-if="keys.length > 0">
 			<h4>Existing keys</h4>
 			<ul class="list-group">
 
@@ -24,6 +20,18 @@
 				</li>
 			</ul>
 		</div>
+		<div v-else class="alert alert-warning no-keys">
+			<h4 class="alert-heading">You have no keys</h4>
+
+			<p>
+				In order to copy the entire repository to your own machine, so you
+				can work in your preferred editor or make sweeping changes to multiple
+				documents at once, we need to ensure you're connecting securely. The safest
+				and most commonly-used method is to generate a
+				<acronym title="Secure Shell">SSH</acronym> key.
+			</p>
+
+		</div>
 
 
 		<div id="new-ssh-key" class="mt-4">
@@ -35,6 +43,7 @@
 					<label for="name">Name</label>
 					<input
 						type="text"
+						name="name"
 						v-model="newKey.name"
 						class="form-control"
 						placeholder="laptop"
@@ -169,6 +178,10 @@
 	#existing-keys {
 
 		li {
+
+			h3 {
+				margin: 0;
+			};
 
 			pre {
 				white-space: pre;

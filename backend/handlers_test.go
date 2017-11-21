@@ -1935,6 +1935,7 @@ func Test_apiAddPublicKeyHandler(t *testing.T) {
 
 			// and the key should have actually updated!
 			keys, _ := user.keys()
+			assert.Equal(t, 1, len(keys))
 			key := keys[0]
 			keyFile, _ := key.File()
 

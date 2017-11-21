@@ -56,10 +56,21 @@ func (u User) addPublicKey(name, raw string) error {
 }
 
 func (u User) keys() (pks []PublicKey, err error) {
+
 	err = db.Find("UserID", u.ID, &pks)
-	if err != nil {
-		return pks, fmt.Errorf("Could not find public keys for %s", u.Username)
+
+	// if no matching records are found, that's ok, just
+	// return the empty slice and ignore the error
+	if err != nil && err.Error() == "not found" {
+		Warning.Println("No SSH keys found for", u.Username)
+		return pks, nil
 	}
+
+	if err != nil {
+		Warning.Println("User key query failed for", u.Username)
+		return pks, err
+	}
+
 	return pks, err
 }
 

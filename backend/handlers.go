@@ -1189,15 +1189,21 @@ func apiUserListPublicKeysHandler(w http.ResponseWriter, r *http.Request) {
 		Raw         string `json:"raw"`
 		Name        string `json:"name"`
 	}
-	var keys []rk
+
+	// properly initialise the slice so if empty,
+	// marshalled JSON is a empty array instead of null
 
 	upks, err := user.keys()
 	if err != nil {
+		Debug.Println("error", err.Error())
 		fr = FailureResponse{
 			Message: fmt.Sprintf("Cannot retrieve keys belonging to: %s", user.Username),
 		}
 		JSONResponse(fr, http.StatusBadRequest, w)
 	}
+
+	var keys []rk
+	keys = make([]rk, 0)
 
 	for _, upk := range upks {
 
@@ -1235,9 +1241,14 @@ func apiUserAddPublicKeyHandler(w http.ResponseWriter, r *http.Request) {
 
 	user = getCurrentUser(r.Context())
 
+	Debug.Println("supplied key:", pl.Key)
+
 	err = user.addPublicKey(pl.Name, pl.Key)
 
+	// FIXME check for error caused by PK uniqueness
+
 	if err != nil {
+		Error.Println("Failed to create public key", user.Username, err.Error())
 		fr = FailureResponse{
 			Message: fmt.Sprintf("Cannot set public key for %s", user.Username),
 		}
