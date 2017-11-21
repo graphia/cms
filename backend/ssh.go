@@ -46,7 +46,7 @@ func setupSSH() {
 		// Debug.Println("authorizedKey", authorizedKey)
 		//io.WriteString(s, fmt.Sprintf("public key used by %s:\n", s.User()))
 
-		io.WriteString(s, "Graphia: Connection successful")
+		io.WriteString(s, "Graphia: Connection successful\n")
 	})
 
 	publicKeyOption := ssh.PublicKeyAuth(func(ctx ssh.Context, providedKey ssh.PublicKey) bool {

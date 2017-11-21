@@ -15,6 +15,7 @@ Given %r{^my user account with public key exists$} do
 end
 
 Given %r{^my private key is valid$} do
+  step "I have an SSH key"
   @ssh_key = "../backend/certificates/valid"
 end
 
@@ -47,12 +48,12 @@ def connect_via_ssh(host, port, key, cmd="")
     keys: [key]
   ) do |session|
 
-    # session.open_channel do |channel|
-    #   channel.on_data do |ch, data|
-    #     response << "#{data}"
-    #   end
-    #   channel.exec ""
-    # end
+    session.open_channel do |channel|
+      channel.on_data do |ch, data|
+        response << "#{data}"
+      end
+      channel.exec ""
+    end
 
     session.loop
   end
