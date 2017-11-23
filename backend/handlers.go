@@ -1245,7 +1245,14 @@ func apiUserAddPublicKeyHandler(w http.ResponseWriter, r *http.Request) {
 
 	err = user.addPublicKey(pl.Name, pl.Key)
 
-	// FIXME check for error caused by PK uniqueness
+	if err != nil && err.Error() == "already exists" {
+		Error.Println("Key already exists", user.Username, err.Error(), pl.Key)
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Key already exists\n%s", pl.Key),
+		}
+		JSONResponse(fr, http.StatusConflict, w)
+		return
+	}
 
 	if err != nil {
 		Error.Println("Failed to create public key", user.Username, err.Error())

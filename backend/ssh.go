@@ -40,12 +40,6 @@ func (pk PublicKey) File() (str string, err error) {
 func setupSSH() {
 
 	ssh.Handle(func(s ssh.Session) {
-
-		// authorizedKey := gossh.MarshalAuthorizedKey(s.PublicKey())
-
-		// Debug.Println("authorizedKey", authorizedKey)
-		//io.WriteString(s, fmt.Sprintf("public key used by %s:\n", s.User()))
-
 		io.WriteString(s, "Graphia: Connection successful\n")
 	})
 

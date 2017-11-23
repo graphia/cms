@@ -1841,9 +1841,6 @@ func Test_apiTranslateFileHandler(t *testing.T) {
 
 func Test_apiAddPublicKeyHandler(t *testing.T) {
 
-	db.Drop("User")
-	db.Drop("PublicKey")
-
 	server = createTestServerWithContext()
 
 	validPub, _ := ioutil.ReadFile(filepath.Join(certsPath, "valid.pub"))
@@ -1863,11 +1860,12 @@ func Test_apiAddPublicKeyHandler(t *testing.T) {
 		key      []byte
 	}
 	tests := []struct {
-		name     string
-		args     args
-		wantErr  bool
-		errMsg   string
-		wantCode int
+		name            string
+		args            args
+		wantErr         bool
+		errMsg          string
+		wantCode        int
+		createDuplicate bool
 	}{
 		{
 			name: "Valid key",
@@ -1894,11 +1892,27 @@ func Test_apiAddPublicKeyHandler(t *testing.T) {
 			errMsg:   "Cannot set public key",
 			wantCode: http.StatusBadRequest,
 		},
+		{
+			name: "Duplicate key",
+			args: args{
+				payload: payload{
+					Key: string(validPub),
+				},
+				username: "selma.bouvier",
+				key:      validPub,
+			},
+			wantErr:         true,
+			errMsg:          "Key already exists",
+			wantCode:        http.StatusConflict,
+			createDuplicate: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
 			db.Drop("User")
+			db.Drop("PublicKey")
+
 			_ = createUser(sb)
 
 			target := fmt.Sprintf(
@@ -1906,6 +1920,12 @@ func Test_apiAddPublicKeyHandler(t *testing.T) {
 				server.URL,
 				"api/settings/ssh",
 			)
+
+			if tt.createDuplicate {
+				_ = createUser(sb)
+				sbr, _ := getUserByUsername("selma.bouvier")
+				sbr.addPublicKey("laptop", string(validPub))
+			}
 
 			payload, err := json.Marshal(tt.args.payload)
 			if err != nil {
