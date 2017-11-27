@@ -16,31 +16,55 @@ end
 
 Given %r{^my private key is valid$} do
   step "I have an SSH key"
-  @ssh_key = "../backend/certificates/valid"
+  @ssh_key = valid_key
 end
 
 Given %r{^my private key is invalid$} do
-  @ssh_key = "../backend/certificates/invalid"
+  @ssh_key = invalid_key
 end
 
 When %r{^I initiate a SSH connection to the server$} do
-  @response = connect_via_ssh("127.0.0.1", 2223, @ssh_key)
+  @response = connect_via_ssh(key: @ssh_key)
 end
 
 Then %r{^I should see the response "(.*?)"$} do |text|
   expect(@response).to include(text)
 end
 
+Then %r{^I should receive the error message "(.*?)"$} do |message|
+  step %{I should see the response "#{message}"}
+end
+
 Then %r{^I should receive an AuthenticationFailed error$} do
   expect(@response).to be_a(Net::SSH::AuthenticationFailed)
 end
 
-def connect_via_ssh(host, port, key, cmd="")
+When %r{^I try to run one of the following commands:$} do |table|
+  @commands = table.transpose.raw.flatten
+end
+
+Then %r{^I should receive an error$} do
+  @commands.each do |command|
+    connect_via_ssh(cmd: command).tap do |response|
+      expect(response).to include("Only Git operations are permitted")
+    end
+  end
+end
+
+When %r{^I try to clone the repository "([^"]*)"$} do |arg1|
+  pending # Write code here that turns the phrase above into concrete actions
+end
+
+Given %r{^I try to establish a connection with user "(.*?)"$} do |username|
+  @response = connect_via_ssh(user: username)
+end
+
+def connect_via_ssh(host: "127.0.0.1", port: 2223, key: valid_key, cmd: "", user: "git")
 
   response = StringIO.new
 
   Net::SSH.start(
-    '127.0.0.1', 'git',
+    host, user,
     port: port,
     host_key: "ssh-rsa",
     #encryption: "aes128-cbc",
@@ -52,7 +76,7 @@ def connect_via_ssh(host, port, key, cmd="")
       channel.on_data do |ch, data|
         response << "#{data}"
       end
-      channel.exec ""
+      channel.exec(cmd)
     end
 
     session.loop
@@ -62,4 +86,13 @@ def connect_via_ssh(host, port, key, cmd="")
 
 rescue Net::SSH::AuthenticationFailed => e
   return e
+end
+
+
+def valid_key
+  "../backend/certificates/valid"
+end
+
+def invalid_key
+  "../backend/certificates/invalid"
 end

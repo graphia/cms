@@ -17,3 +17,27 @@ Feature: Git via SSH
 		Given my private key is invalid
 		When I initiate a SSH connection to the server
 		Then I should receive an AuthenticationFailed error
+
+	Scenario: Triyng to connect with a user other than git
+		Given my private key is valid
+		When I try to establish a connection with user "krusty"
+		Then I should receive the error message "Access denied"
+
+	Scenario: Trying to run an illegal command
+		Given my private key is valid
+		When I try to run one of the following commands:
+			| ls -la |
+			| cd /   |
+			| bash   |
+		Then I should receive an error
+
+	Scenario: Cloning the content repository
+		Given I have an SSH key
+		#And my private key is valid
+		When I try to clone the repository "content"
+		Then the directory should be present in my working directory
+
+	Scenario: Attempting to clone a non-existant repository
+		Given my private key is valid
+		When I try to clone the repository "does_not_exist"
+		Then I should see output

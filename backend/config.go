@@ -26,6 +26,9 @@ type Config struct {
 	MediaTypes         map[string]string   `yaml:"media_types"`
 	SSHEnabled         bool                `yaml:"ssh_enabled"`
 	SSHListenPort      string              `yaml:"ssh_listen_port"`
+	GitBinPath         string              `yaml:"git_bin_path"`
+	GitRepoPath        string              `yaml:"git_repo_path"`
+	GitUser            string              `yaml:"git_user"`
 	TranslationEnabled bool                `yaml:"translation_enabled"`
 	DefaultLanguage    string              `yaml:"default_language"`
 	EnabledLanguages   []string            `yaml:"enabled_languages"`
