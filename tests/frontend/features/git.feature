@@ -33,11 +33,11 @@ Feature: Git via SSH
 
 	Scenario: Cloning the content repository
 		Given I have an SSH key
-		#And my private key is valid
-		When I try to clone the repository "content"
+		When I try to clone the repository "cucumber"
 		Then the directory should be present in my working directory
+		And I should see output detailing my clone operation
 
 	Scenario: Attempting to clone a non-existant repository
 		Given my private key is valid
 		When I try to clone the repository "does_not_exist"
-		Then I should see output
+		Then I should see output with an error

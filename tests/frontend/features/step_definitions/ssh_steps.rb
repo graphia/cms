@@ -51,12 +51,41 @@ Then %r{^I should receive an error$} do
   end
 end
 
-When %r{^I try to clone the repository "([^"]*)"$} do |arg1|
-  pending # Write code here that turns the phrase above into concrete actions
+When %r{^I try to clone the repository "(.*?)"$} do |name|
+
+  # First make sure the target dir doesn't exist
+  @clone_dir = "content"
+  @clone_location = "../tmp/ssh/#{@clone_dir}"
+  FileUtils.rm_rf(@clone_location)
+  expect(Dir.exists?(@clone_location)).to be false
+
+  Dir.chdir("../tmp/ssh") do
+    cert_path = "../../backend/certificates/valid"
+    config_path = "../../backend/ssh/config"
+    command = "git clone git@127.0.0.1:#{name}"
+    full_command = %{GIT_SSH_COMMAND='ssh -F #{config_path} -i #{cert_path}' #{command} #{@clone_dir}}
+
+    # FXIME, this outputs text, should really surpress within Cucumber (or send it straight
+    # to the log)
+    @blah, @output, @status = Open3.capture3(full_command)
+  end
+
+end
+
+Then %r{^I should see output detailing my clone operation$} do
+  expect(@output).to include("Cloning into '#{@clone_dir}'")
+end
+
+Then %r{^the directory should be present in my working directory$} do
+  expect(Dir.exists?(@clone_location)).to be true
 end
 
 Given %r{^I try to establish a connection with user "(.*?)"$} do |username|
   @response = connect_via_ssh(user: username)
+end
+
+Then %r{^I should see output with an error$} do
+  expect(@output).to include("fatal: protocol error")
 end
 
 def connect_via_ssh(host: "127.0.0.1", port: 2223, key: valid_key, cmd: "", user: "git")

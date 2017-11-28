@@ -9,6 +9,7 @@ require 'net/ssh'
 require 'pry'
 require 'pry-byebug'
 require 'selenium-webdriver'
+require 'open3'
 
 REPO_PATH = '../tmp/repositories/cucumber'
 REPO_TEMPLATE_PATH = '../backend/repositories/multiple_filetypes'
