@@ -76,7 +76,7 @@
 	import CMSPublicKey from "../../javascripts/models/public_key.js";
 
 	export default {
-		name: "UserSettings",
+		name: "SSHKeySettings",
 		data() {
 			return {
 				newKey: new CMSPublicKey,
@@ -89,7 +89,6 @@
 		methods: {
 			async create(event) {
 
-				console.debug("clicked");
 				event.preventDefault();
 
 				let response = await this.newKey.create();

@@ -100,7 +100,16 @@ func authLoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := Token{tokenString}
+	type output struct {
+		Token       `json:"jwt"`
+		LimitedUser `json:"user"`
+	}
+
+	response := output{
+		Token:       Token{tokenString},
+		LimitedUser: user.limitedUser(),
+	}
+
 	JSONResponse(response, http.StatusOK, w)
 
 }
@@ -1501,7 +1510,17 @@ func apiGetFileHistoryHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// Translation data 🖍
+// User data 👩🏽‍💻
+
+// GET /api/user_info
+//
+// returns the currently logged in User info
+func apiGetUserInfoHandler(w http.ResponseWriter, r *http.Request) {
+	user := getCurrentUser(r.Context())
+	JSONResponse(user.limitedUser(), http.StatusOK, w)
+}
+
+// Translation data 💬
 
 // GET /api/translation_info
 //

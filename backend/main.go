@@ -117,7 +117,7 @@ func setupMiddleware(r, pr *vestigo.Router) (n *negroni.Negroni) {
 		negroni.Wrap(pr),
 	))
 
-	n.Use(negroni.NewLogger())
+	//n.Use(negroni.NewLogger())
 	n.Use(negroni.NewRecovery())
 	return
 }
@@ -200,6 +200,9 @@ func protectedRouter() (r *vestigo.Router) {
 	r.Get("/api/users/:username", apiGetUserHandler)
 	r.Post("/api/users/:username", apiUpdateUserHandler)
 	r.Delete("/api/users/:username", apiDeleteUserHandler)
+
+	// user endpoints
+	r.Get("/api/user_info", apiGetUserInfoHandler)
 
 	// user ssh key management
 	r.Get("/api/settings/ssh", apiUserListPublicKeysHandler)

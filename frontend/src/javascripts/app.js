@@ -12,7 +12,7 @@ import Login from '../components/Login.vue';
 import Commit from '../components/Commit.vue';
 import Home from '../components/Home.vue';
 import Settings from '../components/Settings.vue';
-import UserSettings from '../components/Settings/User.vue';
+import SSHKeySettings from '../components/Settings/SSHKeySettings.vue';
 
 // Document Paths
 import DocumentIndex from '../components/Document/Index.vue';
@@ -51,7 +51,7 @@ const routes = [
 	// Protected pages
 	{path: '/cms/setup/initialize_repo', component: SetupInitializeRepo, name: 'initialize_repo'},
 	{path: '/cms/settings', component: Settings, name: 'settings'},
-	{path: '/cms/settings/user', component: UserSettings, name: 'user_settings'},
+	{path: '/cms/settings/keys', component: SSHKeySettings, name: 'ssh_key_settings'},
 
 	// Directory pages
 	{path: '/cms/new', component: DirectoryNew, name: 'directory_new'},

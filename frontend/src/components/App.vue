@@ -2,12 +2,12 @@
 	<div id="application">
 
 		<!-- Primary Navigation Start -->
-		<nav class="navbar navbar-dark bg-dark">
+		<nav class="navbar navbar-expand-md navbar-dark bg-dark">
 
 			<router-link class="navbar-brand" :to="{name: 'home'}">Graphia CMS</router-link>
 
 
-			<button class="navbar-toggler navbar-toggler-right hidden-lg-up" type="button" data-toggle="collapse" data-target="#primary" aria-label="Toggle navigation">
+			<button class="navbar-toggler navbar-toggler-right hidden-md-up" type="button" data-toggle="collapse" data-target="#primary" aria-label="Toggle navigation">
 				<span class="navbar-toggler-icon"></span>
 			</button>
 
@@ -23,6 +23,19 @@
 					<li><a class="nav-link" href="#">History</a></li>
 					<li><a class="nav-link" href="#">Admin</a></li>
 
+				</ul>
+
+				<ul class="navbar-nav" v-if="user">
+					<li class="nav-item dropdown">
+						<a class="nav-link dropdown-toggle" href="#" id="userMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+							{{ user.name }}
+						</a>
+						<div class="dropdown-menu" aria-labelledby="userMenu">
+							<router-link :to="{name: 'settings'}" class="dropdown-item">
+								Settings
+							</router-link>
+						</div>
+					</li>
 				</ul>
 			</div>
 
@@ -82,6 +95,11 @@
 			return {
 				directories: []
 			};
+		},
+		computed: {
+			user() {
+				return this.$store.state.user;
+			},
 		},
 		methods: {
 

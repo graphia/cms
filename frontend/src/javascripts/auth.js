@@ -1,5 +1,7 @@
+import store from './store.js';
 import config from './config.js';
 import {router} from './app.js';
+import checkResponse from './response';
 
 var jwtDecode = require('jwt-decode');
 
@@ -12,14 +14,19 @@ export default class CMSAuth {
 
 	get token() {
 		return this._token;
-	}
+	};
 
 	// updating the token, write the object property *and* to localStorage
 	set token(value) {
 		console.debug("setting token to", value);
 		this._token = value;
-		localStorage.setItem("token", value);
+		localStorage.setItem('token', value);
 		localStorage.setItem('token_received', Date.now());
+	}
+
+	loggedIn() {
+		debugger
+		return (this.token && !this.tokenExpired);
 	}
 
 	tokenExpired() {
@@ -99,7 +106,8 @@ export default class CMSAuth {
 		let json = await response.json();
 
 		// store the token and the time at which it was written
-		this.token = json.token;
+		this.token = json.jwt.token;
+		this.user = json.user;
 
 		return true
 	}

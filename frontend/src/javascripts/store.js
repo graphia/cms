@@ -5,6 +5,7 @@ import router from './app';
 import CMSFile from '../javascripts/models/file.js';
 import CMSCommit from '../javascripts/models/commit.js';
 import CMSDirectory from '../javascripts/models/directory.js';
+import CMSUser from '../javascripts/models/user.js';
 
 import CMSAuth from '../javascripts/auth.js';
 import CMSBroadcast from '../javascripts/broadcast.js';
@@ -22,7 +23,8 @@ const state = {
 	latestRevision: null,
 	defaultLanguage: "en",
 	languages: [],
-	translationEnabled: false
+	translationEnabled: false,
+	user: new CMSUser
 };
 
 const mutations = {

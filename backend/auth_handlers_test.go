@@ -61,13 +61,17 @@ func TestAuthLoginHandler(t *testing.T) {
 
 	resp, _ := client.Do(req)
 
-	var receiver Token
+	type response struct {
+		JWT  Token
+		User LimitedUser
+	}
+	receiver := response{}
 
 	json.NewDecoder(resp.Body).Decode(&receiver)
 
 	assert.NotEmpty(t, receiver)
 
-	decoded, _ := jwt.DecodeSegment(receiver.Token)
+	decoded, _ := jwt.DecodeSegment(receiver.JWT.Token)
 
 	var ta TokenAttributes
 
@@ -82,7 +86,11 @@ func TestAuthLoginHandler(t *testing.T) {
 	// Make sure that we've set the user's TokenString to equal
 	// the returned Token
 	user, _ := getUserByUsername("misshoover")
-	assert.Equal(t, receiver.Token, user.TokenString)
+	assert.Equal(t, receiver.JWT.Token, user.TokenString)
+
+	// And make sure that the user details match the authenticated
+	// users
+	assert.Equal(t, receiver.User, user.limitedUser())
 
 }
 
