@@ -83,6 +83,10 @@ func (u User) limitedUser() LimitedUser {
 	}
 }
 
+func (u User) setToken(tokenString string) error {
+	return db.UpdateField(&u, "TokenString", tokenString)
+}
+
 func getUserByID(id int) (user User, err error) {
 	err = db.One("ID", id, &user)
 
@@ -217,8 +221,4 @@ func deactivateUser(user User) error {
 func reactivateUser(user User) error {
 	return db.UpdateField(&user, "Active", true)
 
-}
-
-func setToken(user User, tokenString string) error {
-	return db.UpdateField(&user, "TokenString", tokenString)
 }

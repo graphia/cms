@@ -207,7 +207,7 @@ func TestProtectedMiddlewareWithToken(t *testing.T) {
 
 	token, _ := newToken(cookieKwan)
 	tokenString, _ := newTokenString(token)
-	setToken(cookieKwan, tokenString)
+	cookieKwan.setToken(tokenString)
 
 	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files/document_1.md")
 
@@ -272,12 +272,12 @@ func TestProtectedMiddlewareOutdatedToken(t *testing.T) {
 	// create the first token and assign it to the user
 	tokenOne, _ := newToken(cookieKwan)
 	tokenOneString, _ := newTokenString(tokenOne)
-	setToken(cookieKwan, tokenOneString)
+	cookieKwan.setToken(tokenOneString)
 
 	// now create a second one which we'll attempt to connect with
 	tokenTwo, _ := newToken(cookieKwan)
 	tokenTwoString, _ := newTokenString(tokenTwo)
-	setToken(cookieKwan, tokenTwoString)
+	cookieKwan.setToken(tokenTwoString)
 
 	cookieKwan, _ = getUserByUsername("cookie.kwan")
 
@@ -321,7 +321,7 @@ func TestProtectedMiddlewareDeletedUser(t *testing.T) {
 	// create the first token and assign it to the user
 	token, _ := newToken(cookieKwan)
 	tokenString, _ := newTokenString(token)
-	setToken(cookieKwan, tokenString)
+	cookieKwan.setToken(tokenString)
 
 	_ = deleteUser(cookieKwan)
 
@@ -365,7 +365,7 @@ func TestProtectedMiddlewareDeactivatedUser(t *testing.T) {
 	// create the first token and assign it to the user
 	token, _ := newToken(cookieKwan)
 	tokenString, _ := newTokenString(token)
-	setToken(cookieKwan, tokenString)
+	cookieKwan.setToken(tokenString)
 
 	_ = deactivateUser(cookieKwan)
 

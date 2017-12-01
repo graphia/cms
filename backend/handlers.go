@@ -91,7 +91,7 @@ func authLoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	Debug.Println("Setting user token", tokenString)
 
-	err = setToken(user, tokenString)
+	err = user.setToken(tokenString)
 	if err != nil {
 		fr = FailureResponse{
 			Message: fmt.Sprintln("Failed to set the user token", err.Error()),
@@ -111,6 +111,10 @@ func authLoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	JSONResponse(response, http.StatusOK, w)
+
+}
+
+func authLogoutHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
