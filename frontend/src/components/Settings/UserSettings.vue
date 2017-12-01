@@ -1,13 +1,12 @@
 <template>
-	<div>
-		<h1>Settings</h1>
+	<div class="row">
 
-		<div class="personal-details">
-			<h4>Personal Details</h4>
+		<SettingsNavigation/>
 
+		<div class="col-md-9 personal-details">
+			<h1>Personal Details</h1>
 
 			<form @submit="updateUser">
-
 
 				<div class="form-group">
 					<label class="form-control-label" for="name">Name</label>
@@ -17,7 +16,6 @@
 						placeholder="Charles Montgomery Burns"
 						v-model="user.name"
 						required="true"
-						readonly="true"
 					/>
 				</div>
 
@@ -34,12 +32,12 @@
 					/>
 				</div>
 
-
 				<div class="form-group">
 					<input
 						type="submit"
 						value="Update my details"
-						class="btn btn-primary"
+						class="btn btn-success"
+
 					/>
 				</div>
 			</form>
@@ -50,11 +48,25 @@
 </template>
 
 <script>
+
+	import SettingsNavigation from "./Navigation";
+
 	export default {
 		name: "Settings",
+		created() {
+			this.orignalUser = this.user;
+		},
+		data() {
+			return {
+				orignalUser: null,
+			};
+		},
 		computed: {
 			user() {
 				return this.$store.state.user;
+			},
+			userModified() {
+				return (this.user === this.originalUser);
 			}
 		},
 		methods: {
@@ -62,6 +74,10 @@
 				event.preventDefault();
 				console.debug("form submitted!");
 			}
+		},
+		components: {
+			SettingsNavigation
 		}
+
 	};
 </script>
