@@ -87,6 +87,10 @@ func (u User) setToken(tokenString string) error {
 	return db.UpdateField(&u, "TokenString", tokenString)
 }
 
+func (u User) unsetToken() error {
+	return db.UpdateField(&u, "TokenString", "")
+}
+
 func getUserByID(id int) (user User, err error) {
 	err = db.One("ID", id, &user)
 

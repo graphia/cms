@@ -472,3 +472,36 @@ func TestUser_keys(t *testing.T) {
 		})
 	}
 }
+
+func TestUser_setToken(t *testing.T) {
+	var dolph User
+	var newTokenVal = "abc123"
+
+	_ = createUser(ds)
+	dolph, _ = getUserByUsername("dolph.starbeam")
+
+	dolph.setToken(newTokenVal)
+	dolph, _ = getUserByUsername("dolph.starbeam")
+
+	assert.Equal(t, newTokenVal, dolph.TokenString)
+
+}
+
+func TestUser_unsetToken(t *testing.T) {
+	var dolph User
+	var newTokenVal = "abc123"
+
+	_ = createUser(ds)
+	dolph, _ = getUserByUsername("dolph.starbeam")
+
+	// first set a token and ensure it's correct
+	dolph.setToken(newTokenVal)
+	dolph, _ = getUserByUsername("dolph.starbeam")
+	assert.Equal(t, newTokenVal, dolph.TokenString)
+
+	// now unset
+	dolph.unsetToken()
+	dolph, _ = getUserByUsername("dolph.starbeam")
+	assert.Equal(t, "", dolph.TokenString)
+
+}
