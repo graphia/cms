@@ -9,6 +9,32 @@
 			<form @submit="updateUser">
 
 				<div class="form-group">
+					<label class="form-control-label" for="username">Username</label>
+					<input
+						name="username"
+						class="form-control"
+						type="username"
+						placeholder="monty.burns@springfieldpower.com"
+						v-model="user.username"
+						required="true"
+						disabled="true"
+					/>
+				</div>
+
+				<div class="form-group">
+					<label class="form-control-label" for="email">Email</label>
+					<input
+						name="email"
+						class="form-control"
+						type="email"
+						placeholder="monty.burns@springfieldpower.com"
+						v-model="user.email"
+						required="true"
+						disabled="true"
+					/>
+				</div>
+
+				<div class="form-group">
 					<label class="form-control-label" for="name">Name</label>
 					<input
 						name="name"
@@ -20,23 +46,11 @@
 				</div>
 
 				<div class="form-group">
-					<label class="form-control-label" for="email">Email</label>
-					<input
-						email="name"
-						class="form-control"
-						type="email"
-						placeholder="monty.burns@springfieldpower.com"
-						v-model="user.email"
-						required="true"
-						readonly="true"
-					/>
-				</div>
-
-				<div class="form-group">
 					<input
 						type="submit"
 						value="Update my details"
 						class="btn btn-success"
+						:disabled="!user.updated()"
 
 					/>
 				</div>
@@ -53,20 +67,9 @@
 
 	export default {
 		name: "Settings",
-		created() {
-			this.orignalUser = this.user;
-		},
-		data() {
-			return {
-				orignalUser: null,
-			};
-		},
 		computed: {
 			user() {
 				return this.$store.state.user;
-			},
-			userModified() {
-				return (this.user === this.originalUser);
 			}
 		},
 		methods: {

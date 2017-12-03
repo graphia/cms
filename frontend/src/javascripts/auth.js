@@ -112,6 +112,29 @@ export default class CMSAuth {
 		return true
 	}
 
+	async logout() {
+		let path = `${config.api}/logout`
+
+		try {
+			let response = await fetch(path, {
+				method: "POST",
+				headers: store.state.auth.authHeader()
+			});
+
+			if (!checkResponse(response.status)) {
+				throw(response);
+			};
+
+			localStorage.removeItem('token');
+			localStorage.removeItem('token_received');
+			this.redirectToLogin();
+
+		}
+		catch(err) {
+			console.error("Couldn't log out", err)
+		};
+	}
+
 	static async createInitialUser(user) {
 		console.debug("creating initial user");
 

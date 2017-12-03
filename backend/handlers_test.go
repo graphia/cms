@@ -2103,3 +2103,34 @@ func Test_apiDeletePublicKeyHandler(t *testing.T) {
 		})
 	}
 }
+
+func Test_apiUpdateUserNameHandler(t *testing.T) {
+	server = createTestServerWithContext()
+	createUser(apiTestUser())
+
+	type payload struct {
+		Name string `json:"name"`
+	}
+
+	update := payload{Name: "Selma McClure"}
+	pl, _ := json.Marshal(update)
+	b := bytes.NewBuffer(pl)
+
+	target := fmt.Sprintf(
+		"%s/%s",
+		server.URL,
+		fmt.Sprintf("api/settings/name"),
+	)
+
+	client := &http.Client{}
+	req, _ := http.NewRequest("PATCH", target, b)
+	resp, _ := client.Do(req)
+
+	var sr SuccessResponse
+	json.NewDecoder(resp.Body).Decode(&sr)
+
+	selma, _ := getUserByUsername("selma.bouvier")
+	assert.Equal(t, update.Name, selma.Name)
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+}

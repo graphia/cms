@@ -13,3 +13,7 @@ Then %r{^I should see subheadings:$} do |table|
     expect(page).to have_css("h4", sh)
   end
 end
+
+When %r{^I change my name to "([^"]*)"$} do |name|
+  fill_in "name", with: name
+end

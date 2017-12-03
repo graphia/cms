@@ -11,7 +11,7 @@
 				<h4>Existing keys</h4>
 				<ul class="list-group">
 
-					<li :id="`ssh-public-key-${key.id}`" class="list-group-item d-flex justify-content-between align-items-center" v-for="(key, i) in keys" :key="i">
+					<li :id="`ssh-public-key-${key.id}`" class="list-group-item d-flex flex-wrap justify-content-between align-items-center" v-for="(key, i) in keys" :key="i">
 
 						<h3>{{ key.name }}</h3>
 
@@ -193,8 +193,9 @@
 				margin: 0;
 			};
 
-			pre {
+			code {
 				white-space: pre;
+				text-overflow: ellipsis;
 			};
 
 			.delete-pk-button {

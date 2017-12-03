@@ -83,6 +83,14 @@ func (u User) limitedUser() LimitedUser {
 	}
 }
 
+func (u User) reload() (User, error) {
+	user, err := getUserByID(u.ID)
+	if err != nil {
+		return u, err
+	}
+	return user, err
+}
+
 func (u User) setToken(tokenString string) error {
 	return db.UpdateField(&u, "TokenString", tokenString)
 }

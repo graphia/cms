@@ -19,7 +19,7 @@ import (
 // update to the repository
 type SuccessResponse struct {
 	Message string `json:"message"`
-	Oid     string `json:"oid"`
+	Oid     string `json:"oid,omitempty"`
 	Meta    string `json:"meta,omitempty"`
 }
 
@@ -114,7 +114,26 @@ func authLoginHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func authLogoutHandler(w http.ResponseWriter, r *http.Request) {
+func apiLogoutHandler(w http.ResponseWriter, r *http.Request) {
+	var user User
+	var err error
+	var fr FailureResponse
+	var sr SuccessResponse
+
+	user = getCurrentUser(r.Context())
+
+	err = user.unsetToken()
+	if err != nil {
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Not a git repository"),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	// token is unset
+	sr = SuccessResponse{Message: "Logged out"}
+	JSONResponse(sr, http.StatusOK, w)
 
 }
 
@@ -1188,7 +1207,34 @@ func apiCreateUserHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // apiUpdateUser
-func apiUpdateUserHandler(w http.ResponseWriter, r *http.Request) {}
+func apiUpdateUserNameHandler(w http.ResponseWriter, r *http.Request) {
+
+	// FIXME add validation!
+	type payload struct {
+		Name string `json:"name"`
+	}
+
+	var params payload
+	var err error
+	var fr FailureResponse
+
+	user := getCurrentUser(r.Context())
+
+	// only updating the name is supported at this time
+
+	json.NewDecoder(r.Body).Decode(&params)
+
+	err = db.UpdateField(&user, "Name", params.Name)
+	if err != nil {
+		fr = FailureResponse{
+			Message: err.Error(),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	JSONResponse(SuccessResponse{Message: "User updated"}, http.StatusOK, w)
+}
 
 func apiUserListPublicKeysHandler(w http.ResponseWriter, r *http.Request) {
 	var user User

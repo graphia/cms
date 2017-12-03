@@ -8,21 +8,23 @@ export default class CMSUser {
 		console.debug("Initialising User", data);
 
 		if (!data) {
-			this.name = "";
+			this._name = "";
 			this._username = "";
-			this.email = "";
+			this._email = "";
+			this.persisted = null;
 
 			return;
 		};
 
-		this.name = data.name;
+		this._name = data.name;
 		this._username = data.username;
-		this.email = data.email;
+		this._email = data.email;
 
 		// non limited user fields
 		this.password = undefined;
 
 		// other stuff
+		this.persisted = data;
 		this.refreshInProgress = false;
 	};
 
@@ -73,6 +75,18 @@ export default class CMSUser {
 		return false;
 	};
 
+	updated() {
+		if (!this.persisted) {
+			return false;
+		};
+
+		return ['email', 'username', 'name']
+			.some((prop) => {
+				return this[prop] != this.persisted[prop];
+			});
+
+	}
+
 	async refresh() {
 
 		if (this.refreshInProgress) {
@@ -98,6 +112,7 @@ export default class CMSUser {
 			this.name = data.name;
 			this.username = data.username;
 			this.email = data.email;
+			this.persisted = data;
 
 		}
 		catch(e) {

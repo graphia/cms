@@ -27,13 +27,14 @@
 
 				<ul class="navbar-nav" v-if="user">
 					<li class="nav-item dropdown">
-						<a class="nav-link dropdown-toggle" href="#" id="userMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+						<a class="nav-link dropdown-toggle" href="#" id="user-menu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 							{{ user.name }}
 						</a>
-						<div class="dropdown-menu" aria-labelledby="userMenu">
-							<router-link :to="{name: 'settings'}" class="dropdown-item">
+						<div class="dropdown-menu" aria-labelledby="user-menu">
+							<router-link :to="{name: 'user_settings'}" class="dropdown-item">
 								Settings
 							</router-link>
+							<a class="dropdown-item logout" href="logout" @click="logout">Logout</a>
 						</div>
 					</li>
 				</ul>
@@ -142,9 +143,13 @@
 
 				}
 				catch(err) {
-					console.error("Couldn't retrieve top level directory list");
+					console.error("Couldn't retrieve top level directory list", err);
 				};
 
+			},
+			logout(event) {
+				event.preventDefault();
+				this.$store.state.auth.logout();
 			}
 		},
 		components: {

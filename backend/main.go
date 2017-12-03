@@ -195,13 +195,14 @@ func protectedRouter() (r *vestigo.Router) {
 	r.Get("/api/directories/:directory/files/:filename/attachments", apiGetFileAttachmentsHandler)
 	r.Get("/api/directories/:directory/files/:filename/attachments/:file", apiGetFileAttachmentHandler)
 
+	// user endpoints
 	r.Get("/api/users", apiListUsersHandler)
 	r.Post("/api/users", apiCreateUserHandler)
 	r.Get("/api/users/:username", apiGetUserHandler)
-	r.Post("/api/users/:username", apiUpdateUserHandler)
+	r.Patch("/api/settings/name", apiUpdateUserNameHandler)
 	r.Delete("/api/users/:username", apiDeleteUserHandler)
 
-	// user endpoints
+	r.Post("/api/logout", apiLogoutHandler)
 	r.Get("/api/user_info", apiGetUserInfoHandler)
 
 	// user ssh key management
