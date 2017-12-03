@@ -79,10 +79,12 @@
 				console.debug("token is present and has not expired, renewing");
 				this.$store.state.auth.renew();
 
-
-				this.fetchDirectories();
-				this.getRepoMetadata();
-				this.getTranslationInfo();
+				// only pull data if we're actually logged in
+				if (CMSAuth.isLoggedIn()) {
+					this.fetchDirectories();
+					this.getRepoMetadata();
+					this.getTranslationInfo();
+				};
 
 			}
 			catch(err) {
@@ -99,6 +101,10 @@
 		},
 		computed: {
 			user() {
+				if (CMSAuth.isLoggedIn() && !this.$store.state.user) {
+					this.$store.commit("setUser");
+				};
+
 				return this.$store.state.user;
 			},
 		},

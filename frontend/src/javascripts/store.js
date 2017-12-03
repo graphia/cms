@@ -24,7 +24,7 @@ const state = {
 	defaultLanguage: "en",
 	languages: [],
 	translationEnabled: false,
-	user: new CMSUser
+	user: null,
 };
 
 const mutations = {
@@ -48,6 +48,11 @@ const mutations = {
 	async setLatestRevision(context, hash) {
 		console.debug("setting latest revision", hash);
 		state.latestRevision = hash;
+	},
+	async setUser(context) {
+		let user = await CMSUser.fetchUser();
+		console.debug("setting user!");
+		state.user = user;
 	}
 };
 const getters = {};

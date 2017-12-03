@@ -25,7 +25,6 @@ export default class CMSAuth {
 	}
 
 	loggedIn() {
-		debugger
 		return (this.token && !this.tokenExpired);
 	}
 
@@ -107,7 +106,6 @@ export default class CMSAuth {
 
 		// store the token and the time at which it was written
 		this.token = json.jwt.token;
-		this.user = json.user;
 
 		return true
 	}
