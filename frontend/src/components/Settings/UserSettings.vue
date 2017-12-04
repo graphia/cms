@@ -42,6 +42,8 @@
 						placeholder="Charles Montgomery Burns"
 						v-model="user.name"
 						required="true"
+						minlength="3"
+						maxlength="64"
 					/>
 				</div>
 
@@ -64,18 +66,27 @@
 <script>
 
 	import SettingsNavigation from "./Navigation";
+	import CMSUser from '../../javascripts/models/user';
 
 	export default {
 		name: "Settings",
+		data() {
+			return {
+				 // so we can render the form bound to something
+				emptyUser: new CMSUser
+			};
+		},
 		computed: {
 			user() {
-				return this.$store.state.user;
+				return (this.$store.state.user || this.emptyUser);
 			}
 		},
 		methods: {
-			updateUser(event) {
+			async updateUser(event) {
 				event.preventDefault();
 				console.debug("form submitted!");
+				await this.user.save();
+				this.user.refresh();
 			}
 		},
 		components: {

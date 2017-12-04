@@ -53,6 +53,9 @@ const mutations = {
 		let user = await CMSUser.fetchUser();
 		console.debug("setting user!");
 		state.user = user;
+	},
+	async saveUser(context, user) {
+		return user.save();
 	}
 };
 const getters = {};

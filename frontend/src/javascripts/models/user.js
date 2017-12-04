@@ -8,6 +8,13 @@ export default class CMSUser {
 	constructor(data) {
 		console.debug("Initialising User", data);
 
+		if (!data) {
+			this._name = "";
+			this._username = "";
+			this._email = "";
+			return;
+		};
+
 		this._name = data.name;
 		this._username = data.username;
 		this._email = data.email;
@@ -18,6 +25,7 @@ export default class CMSUser {
 		// other stuff
 		this.persisted = data;
 		this.refreshInProgress = false;
+
 	};
 
 	// username getter/setter
@@ -36,6 +44,12 @@ export default class CMSUser {
 	get name() {
 		//this._checkRefreshRequired(this._name);
 		return this._name;
+	};
+
+	// persisted name allows us to modify the user obj without
+	// affecting the displayed name in the nav menu
+	get persistedName() {
+		return this.persisted.name;
 	};
 
 	set name(value) {
@@ -77,7 +91,35 @@ export default class CMSUser {
 				return this[prop] != this.persisted[prop];
 			});
 
-	}
+	};
+
+	async save() {
+
+		// FIXME currently only name is updateable, modifying
+		// username, email and password are a bit more 'involved'
+		let path = `${config.api}/settings/name`;
+
+		try {
+			let response = await fetch(path, {
+				method: "PATCH",
+				headers: store.state.auth.authHeader(),
+				body: JSON.stringify({
+					name: this.name
+				})
+			});
+
+			if (!checkResponse(response.status)) {
+				throw {reason: "Couldn't update user name", code: response.status}
+			}
+
+			let data = await response.json()
+			return response;
+
+		}
+		catch(err) {
+			console.error("initial user fetch failed", err);
+		};
+	};
 
 	static async fetchUser() {
 
@@ -97,7 +139,7 @@ export default class CMSUser {
 		catch(err) {
 			console.error("initial user fetch failed", err);
 		};
-	}
+	};
 
 	async refresh() {
 
@@ -121,9 +163,9 @@ export default class CMSUser {
 
 			let data = await response.json();
 
-			this.name = data.name;
-			this.username = data.username;
-			this.email = data.email;
+			this._name = data.name;
+			this._username = data.username;
+			this._email = data.email;
 			this.persisted = data;
 
 		}

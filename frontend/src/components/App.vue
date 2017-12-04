@@ -26,9 +26,9 @@
 				</ul>
 
 				<ul class="navbar-nav" v-if="user">
-					<li class="nav-item dropdown">
+					<li id="user-dropdown" class="nav-item dropdown">
 						<a class="nav-link dropdown-toggle" href="#" id="user-menu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-							{{ user.name }}
+							{{ user.persistedName }}
 						</a>
 						<div class="dropdown-menu" aria-labelledby="user-menu">
 							<router-link :to="{name: 'user_settings'}" class="dropdown-item">

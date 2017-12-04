@@ -13,10 +13,10 @@ Feature: Settings page
 		Given I am on my settings page
 		Then the page heading should be "Personal Details"
 		And I should see a form with the following fields:
-			| Name     | Type  | Required |
-			| Username | Text  | True     |
-			| Email    | Email | True     |
-			| Name     | Text  | True     |
+			| Name     | Type  | Required | Disabled |
+			| Username | Text  | Yes      | Yes      |
+			| Email    | Email | Yes      | Yes      |
+			| Name     | Text  | Yes      | No       |
 		And the submit button should be disabled
 
 	Scenario: Enabling of the submit button
@@ -27,5 +27,5 @@ Feature: Settings page
 	Scenario: Updating my name
 		Given I am on my settings page
 		When I change my name to "Ranier Wolfcastle"
-		And I click "Update my details"
+		And I submit the form
 		Then my name should have changed to "Ranier Wolfcastle"

@@ -14,6 +14,12 @@ Then %r{^I should see subheadings:$} do |table|
   end
 end
 
-When %r{^I change my name to "([^"]*)"$} do |name|
+When %r{^I change my name to "(.*?)"$} do |name|
   fill_in "name", with: name
+end
+
+Then %r{^my name should have changed to "(.*?)"$} do |name|
+  within("nav.navbar") do
+    expect(page).to have_css("li#user-dropdown", text: name)
+  end
 end
