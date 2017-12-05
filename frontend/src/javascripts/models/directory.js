@@ -1,5 +1,6 @@
 import store from '../store.js';
 import config from '../config.js';
+import {router} from '../app.js';
 import checkResponse from '../response.js';
 
 export default class CMSDirectory {
@@ -14,6 +15,49 @@ export default class CMSDirectory {
 		this.title       = title       || "";
 		this.description = description || "";
 		this.body        = body        || "";
+	};
+
+	static async all() {
+		let path = `${config.api}/directories`
+
+		try {
+			let response = await fetch(path, {method: "GET", mode: "cors", headers: store.state.auth.authHeader()});
+
+			let json = await response.json();
+
+			if (response.status == 404 && json.message == "No repository found") {
+				console.warn("No repository found, redirect to create", 404)
+				// FXIME redirect to create repo
+			};
+
+			if (response.status == 400 && json.message == "Not a git repository") {
+				console.warn("Directory found, not git repo", 400)
+				router.push({name: 'initialize_repo'});
+			};
+
+			if (!checkResponse(response.status)) {
+				console.warn("error:", response);
+				return;
+			};
+
+			let dirs = json.map((dir) => {
+				return new CMSDirectory(
+					dir.path,
+					dir.info.title,
+					dir.info.description,
+					dir.info.body
+				);
+			});
+
+			store.state.directories = dirs;
+
+			return dirs;
+
+		}
+		catch(err) {
+			console.error("Couldn't retrieve top level directory list", err);
+		};
+
 	};
 
 	async create(commit) {

@@ -1,7 +1,7 @@
 <template>
 	<div class="row messages">
 		<div class="col-md-12 mt-2">
-			<div v-for="message in messages" :class="message.classes" role="alert">
+			<div v-for="(message, i) in messages" :key=i :class="message.classes" role="alert">
 				<strong>{{ message.alert }}</strong>
 				{{ message.content }}
 			</div>
@@ -14,7 +14,11 @@
 		name: "Broadcast",
 		computed: {
 			messages() {
-				return this.$store.state.broadcast.activeMessages();
+				if (this.$store.state.broadcast) {
+					return this.$store.state.broadcast.activeMessages();
+				};
+
+				return [];
 			}
 		}
 	};

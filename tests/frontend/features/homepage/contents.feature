@@ -14,6 +14,15 @@ Feature: Home page contents
 		Given I am on the homepage
 		Then the main heading should be "Dashboard"
 
+	Scenario: Primary navigation bar should contain directory links
+		Given the following directories exist in the repository
+			| appendices |
+			| documents  |
+		When I am on the homepage
+		Then the navigation bar should contain the following links:
+			| Appendices           |
+			| Important Documents  |
+
 	Scenario: Home page sections
 		Given I am on the homepage
 		Then I should see a summary of recent changes

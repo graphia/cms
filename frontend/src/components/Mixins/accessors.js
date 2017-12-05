@@ -26,6 +26,10 @@ export default {
 			return this.$store.state.documents;
 		},
 
+		directories() {
+			return this.$store.state.directories;
+		},
+
 		commit() {
 			return this.$store.state.commit;
 		}

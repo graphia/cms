@@ -13,3 +13,11 @@ end
 Then %r{^the main heading should be "(.*?)"$} do |heading|
   expect(page.first("h1")).to have_content(heading)
 end
+
+Then %r{^the navigation bar should contain the following links:$} do |table|
+  within("nav.navbar") do
+    table.transpose.raw.flatten.each do |link|
+      expect(page).to have_css("li > a", text: link)
+    end
+  end
+end

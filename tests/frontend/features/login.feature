@@ -30,6 +30,11 @@ Feature: Logging in
 		Then I should see a message containing 'You have logged in successfully'
 		And I should be redirected to the CMS's landing page
 
+	Scenario: Primary navigation bar should be empty
+		Given I am not logged in
+		When I am on the login screen
+		Then there should be no entries in the navigation bar
+
 	Scenario: Logging in with valid credentials
 		Given I have logged in
 		Then I should have a JWT saved in localstorage
@@ -39,3 +44,4 @@ Feature: Logging in
 		When I select 'Logout' from the settings menu
 		Then I should be logged out
 		And I should be on the login screen
+		And there should be no entries in the navigation bar

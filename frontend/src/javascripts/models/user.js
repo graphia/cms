@@ -49,7 +49,11 @@ export default class CMSUser {
 	// persisted name allows us to modify the user obj without
 	// affecting the displayed name in the nav menu
 	get persistedName() {
-		return this.persisted.name;
+		console.log("persisted", this.persisted)
+		if (this.persisted) {
+			return this.persisted.name;
+		};
+		return "";
 	};
 
 	set name(value) {
@@ -134,7 +138,9 @@ export default class CMSUser {
 			}
 
 			let data = await response.json()
-			return new CMSUser(data);
+			let user = new CMSUser(data);
+			store.user = user;
+			return user;
 		}
 		catch(err) {
 			console.error("initial user fetch failed", err);

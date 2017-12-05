@@ -107,6 +107,22 @@ export default class CMSAuth {
 		// store the token and the time at which it was written
 		this.token = json.jwt.token;
 
+		["getLatestRevision", "getTranslationInfo", "getTopLevelDirectories"]
+			.map(func => {
+				console.log("executing", func)
+				store.dispatch(func);
+			});
+
+		store.commit("loadUser");
+
+
+		// only pull data if we're actually logged in
+		// if (this.loggedIn) {
+		// 	this.fetchDirectories();
+		// 	this.getRepoMetadata();
+		// 	this.getTranslationInfo();
+		// };
+
 		return true
 	}
 
@@ -123,8 +139,12 @@ export default class CMSAuth {
 				throw(response);
 			};
 
+			// clear local storage and unset the user
 			localStorage.removeItem('token');
 			localStorage.removeItem('token_received');
+
+			store.commit("logout");
+
 			this.redirectToLogin();
 
 		}

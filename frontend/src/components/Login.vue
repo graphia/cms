@@ -60,9 +60,6 @@
 
 				let success = await this.$store.state.auth.login(this.username, this.password);
 
-				// TODO if they'd attempted to navigate to a page
-				// we should store it and send them there.
-
 				if (!success) {
 					this.$store.state.broadcast.addMessage("danger", "Oops", "Invalid credentials", 5);
 					return;
