@@ -1,5 +1,7 @@
+import store from './store.js';
 import config from './config.js';
 import {router} from './app.js';
+import checkResponse from './response';
 
 var jwtDecode = require('jwt-decode');
 
@@ -12,14 +14,18 @@ export default class CMSAuth {
 
 	get token() {
 		return this._token;
-	}
+	};
 
 	// updating the token, write the object property *and* to localStorage
 	set token(value) {
 		console.debug("setting token to", value);
 		this._token = value;
-		localStorage.setItem("token", value);
+		localStorage.setItem('token', value);
 		localStorage.setItem('token_received', Date.now());
+	}
+
+	loggedIn() {
+		return (this.token && !this.tokenExpired);
 	}
 
 	tokenExpired() {
@@ -99,9 +105,32 @@ export default class CMSAuth {
 		let json = await response.json();
 
 		// store the token and the time at which it was written
-		this.token = json.token;
+		this.token = json.jwt.token;
 
 		return true
+	}
+
+	async logout() {
+		let path = `${config.api}/logout`
+
+		try {
+			let response = await fetch(path, {
+				method: "POST",
+				headers: store.state.auth.authHeader()
+			});
+
+			if (!checkResponse(response.status)) {
+				throw(response);
+			};
+
+			localStorage.removeItem('token');
+			localStorage.removeItem('token_received');
+			this.redirectToLogin();
+
+		}
+		catch(err) {
+			console.error("Couldn't log out", err)
+		};
 	}
 
 	static async createInitialUser(user) {

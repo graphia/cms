@@ -1,0 +1,4 @@
+host *
+  Port 2223
+  StrictHostKeyChecking no
+  UserKnownHostsFile /dev/null

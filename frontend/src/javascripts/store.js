@@ -5,6 +5,7 @@ import router from './app';
 import CMSFile from '../javascripts/models/file.js';
 import CMSCommit from '../javascripts/models/commit.js';
 import CMSDirectory from '../javascripts/models/directory.js';
+import CMSUser from '../javascripts/models/user.js';
 
 import CMSAuth from '../javascripts/auth.js';
 import CMSBroadcast from '../javascripts/broadcast.js';
@@ -22,7 +23,8 @@ const state = {
 	latestRevision: null,
 	defaultLanguage: "en",
 	languages: [],
-	translationEnabled: false
+	translationEnabled: false,
+	user: null,
 };
 
 const mutations = {
@@ -46,6 +48,14 @@ const mutations = {
 	async setLatestRevision(context, hash) {
 		console.debug("setting latest revision", hash);
 		state.latestRevision = hash;
+	},
+	async setUser(context) {
+		let user = await CMSUser.fetchUser();
+		console.debug("setting user!");
+		state.user = user;
+	},
+	async saveUser(context, user) {
+		return user.save();
 	}
 };
 const getters = {};

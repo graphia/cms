@@ -2,12 +2,12 @@
 	<div id="application">
 
 		<!-- Primary Navigation Start -->
-		<nav class="navbar navbar-dark bg-dark">
+		<nav class="navbar navbar-expand-md navbar-dark bg-dark">
 
 			<router-link class="navbar-brand" :to="{name: 'home'}">Graphia CMS</router-link>
 
 
-			<button class="navbar-toggler navbar-toggler-right hidden-lg-up" type="button" data-toggle="collapse" data-target="#primary" aria-label="Toggle navigation">
+			<button class="navbar-toggler navbar-toggler-right hidden-md-up" type="button" data-toggle="collapse" data-target="#primary" aria-label="Toggle navigation">
 				<span class="navbar-toggler-icon"></span>
 			</button>
 
@@ -23,6 +23,20 @@
 					<li><a class="nav-link" href="#">History</a></li>
 					<li><a class="nav-link" href="#">Admin</a></li>
 
+				</ul>
+
+				<ul class="navbar-nav" v-if="user">
+					<li id="user-dropdown" class="nav-item dropdown">
+						<a class="nav-link dropdown-toggle" href="#" id="user-menu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+							{{ user.persistedName }}
+						</a>
+						<div class="dropdown-menu" aria-labelledby="user-menu">
+							<router-link :to="{name: 'user_settings'}" class="dropdown-item">
+								Settings
+							</router-link>
+							<a class="dropdown-item logout" href="logout" @click="logout">Logout</a>
+						</div>
+					</li>
 				</ul>
 			</div>
 
@@ -65,10 +79,12 @@
 				console.debug("token is present and has not expired, renewing");
 				this.$store.state.auth.renew();
 
-
-				this.fetchDirectories();
-				this.getRepoMetadata();
-				this.getTranslationInfo();
+				// only pull data if we're actually logged in
+				if (CMSAuth.isLoggedIn()) {
+					this.fetchDirectories();
+					this.getRepoMetadata();
+					this.getTranslationInfo();
+				};
 
 			}
 			catch(err) {
@@ -82,6 +98,15 @@
 			return {
 				directories: []
 			};
+		},
+		computed: {
+			user() {
+				if (CMSAuth.isLoggedIn() && !this.$store.state.user) {
+					this.$store.commit("setUser");
+				};
+
+				return this.$store.state.user;
+			},
 		},
 		methods: {
 
@@ -124,9 +149,13 @@
 
 				}
 				catch(err) {
-					console.error("Couldn't retrieve top level directory list");
+					console.error("Couldn't retrieve top level directory list", err);
 				};
 
+			},
+			logout(event) {
+				event.preventDefault();
+				this.$store.state.auth.logout();
 			}
 		},
 		components: {

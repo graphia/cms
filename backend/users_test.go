@@ -1,11 +1,15 @@
 package main
 
 import (
+	"fmt"
+	"io/ioutil"
+	"path/filepath"
 	"testing"
 
-	"golang.org/x/crypto/bcrypt"
-
+	"github.com/gliderlabs/ssh"
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/crypto/bcrypt"
+	gossh "golang.org/x/crypto/ssh"
 )
 
 var (
@@ -33,6 +37,15 @@ var (
 		Email:    "dolph.starbeam@springfield.k12.us",
 		Name:     "Dolph Starbeam",
 		Password: "mightypig",
+		Active:   false,
+	}
+
+	sb = User{
+		ID:       4,
+		Username: "selma.bouvier",
+		Email:    "selma.bouvier@macguyver-fans.org",
+		Name:     "Selma Bouvier",
+		Password: "ilubjubjub",
 		Active:   false,
 	}
 )
@@ -145,8 +158,8 @@ func TestAllUsers(t *testing.T) {
 }
 
 func TestConvertToLimitedUser(t *testing.T) {
-	var lu LimitedUser
-	lu = convertToLimitedUser(ds)
+
+	lu := ds.limitedUser()
 
 	assert.IsType(t, LimitedUser{}, lu)
 	assert.Equal(t, ds.ID, lu.ID)
@@ -210,5 +223,285 @@ func TestReactivateUser(t *testing.T) {
 	user, _ = getUserByUsername(username)
 
 	assert.True(t, user.Active)
+
+}
+
+func TestUser_addPublicKey(t *testing.T) {
+
+	db.Drop("User")
+	db.Drop("PublicKey")
+
+	_ = createUser(ds)
+	certsPath := "../tests/backend/certificates"
+
+	validPub, _ := ioutil.ReadFile(filepath.Join(certsPath, "valid.pub"))
+	validPubParsed, _, _, _, _ := ssh.ParseAuthorizedKey(validPub)
+	tooShortPub, _ := ioutil.ReadFile(filepath.Join(certsPath, "too_short.pub"))
+	invalidPub, _ := ioutil.ReadFile(filepath.Join(certsPath, "invalid.pub"))
+
+	type args struct {
+		raw  string
+		name string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+		errMsg  string
+		want    PublicKey
+	}{
+		{
+			name: "Set valid public key",
+			args: args{
+				raw:  string(validPub),
+				name: "Laptop",
+			},
+			want: PublicKey{
+				Raw:         validPubParsed.Marshal(),
+				Fingerprint: gossh.FingerprintSHA256(validPubParsed),
+				Name:        "Laptop",
+			},
+		},
+		{
+			name: "Too short public key",
+			args: args{
+				raw: string(tooShortPub),
+			},
+			wantErr: true,
+			errMsg:  "invalid key",
+		},
+		{
+			name: "Invalid key",
+			args: args{
+				raw: string(invalidPub),
+			},
+			wantErr: true,
+			errMsg:  "invalid key",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			user, _ := getUserByUsername(ds.Username)
+			err := user.addPublicKey(tt.args.name, tt.args.raw)
+
+			if tt.wantErr && (err == nil) {
+				t.Fatal("Error expected, none found")
+			}
+
+			if tt.wantErr {
+				assert.Contains(t, err.Error(), tt.errMsg)
+				return
+			}
+
+			// should be no errors
+			assert.Nil(t, err)
+
+			// one public key should have been created for this user
+			var matchingKeys []PublicKey
+			db.Find("UserID", user.ID, &matchingKeys)
+			assert.Equal(t, 1, len(matchingKeys))
+
+			// and the public key should have the right attributes
+			var pk PublicKey
+			db.One("UserID", user.ID, &pk)
+			assert.Equal(t, tt.want.Name, pk.Name)
+			assert.Equal(t, tt.want.Fingerprint, pk.Fingerprint)
+			assert.Equal(t, tt.want.Raw, pk.Raw)
+
+		})
+	}
+}
+
+func Test_getUserByFingerprint(t *testing.T) {
+
+	db.Drop("User")
+	db.Drop("PublicKey")
+
+	certsPath := "../tests/backend/certificates"
+
+	validPub, _ := ioutil.ReadFile(filepath.Join(certsPath, "valid.pub"))
+	parsedValidPub, _, _, _, _ := gossh.ParseAuthorizedKey(validPub)
+
+	type args struct {
+		raw         string
+		user        User
+		fingerprint string
+		key         gossh.PublicKey
+	}
+	tests := []struct {
+		name         string
+		args         args
+		wantUsername string
+		wantErr      bool
+		errMsg       string
+		generateCert bool
+		generateUser bool
+	}{
+		{
+			name: "Successful match",
+			args: args{
+				raw:         string(validPub),
+				user:        mh,
+				fingerprint: gossh.FingerprintSHA256(parsedValidPub),
+				key:         parsedValidPub,
+			},
+			wantUsername: mh.Username,
+			wantErr:      false,
+			generateCert: true,
+			generateUser: true,
+		},
+		{
+			name: "Key not found by fingerprint",
+			args: args{
+				raw:         string(validPub),
+				user:        mh,
+				fingerprint: gossh.FingerprintSHA256(parsedValidPub),
+				key:         parsedValidPub,
+			},
+			wantUsername: ds.Username,
+			wantErr:      true,
+			errMsg: fmt.Sprintf(
+				"not found, fingerprint: %s",
+				gossh.FingerprintSHA256(parsedValidPub),
+			),
+			generateCert: false,
+			generateUser: true,
+		},
+		{
+			name: "Key found but no matching user",
+			args: args{
+				raw:         string(validPub),
+				user:        mh,
+				fingerprint: gossh.FingerprintSHA256(parsedValidPub),
+				key:         parsedValidPub,
+			},
+			wantUsername: ds.Username,
+			wantErr:      true,
+			errMsg:       "no user found for public key 1", // it *should* be the only one
+			generateCert: true,
+			generateUser: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			db.Drop("User")
+			db.Drop("PublicKey")
+
+			_ = createUser(mh)
+
+			var user User
+			if tt.generateUser {
+				user, _ = getUserByUsername(tt.wantUsername)
+			}
+
+			if tt.generateCert {
+				pk := PublicKey{
+					UserID:      user.ID,
+					Raw:         tt.args.key.Marshal(),
+					Fingerprint: tt.args.fingerprint,
+				}
+
+				db.Save(&pk)
+			}
+
+			gotUser, err := getUserByFingerprint(tt.args.key)
+
+			if tt.wantErr {
+				assert.Equal(t, err.Error(), tt.errMsg)
+				return
+			}
+
+			assert.Equal(t, tt.wantUsername, gotUser.Username)
+
+		})
+	}
+}
+
+func TestUser_keys(t *testing.T) {
+
+	db.Drop("User")
+	db.Drop("PublicKey")
+
+	_ = createUser(ds)
+	_ = createUser(mh)
+
+	pk, _ := ioutil.ReadFile(filepath.Join(certsPath, "valid.pub"))
+
+	dolph, _ := getUserByUsername("dolph.starbeam")
+	elizabeth, _ := getUserByUsername("miss.hoover")
+
+	dolph.addPublicKey("laptop", string(pk))
+
+	// FIXME could be enhanced to cofirm key is set correctly
+	type expectations struct {
+		keyCount    int
+		fingerPrint string
+	}
+	tests := []struct {
+		name         string
+		wantErr      bool
+		expectations expectations
+		user         User
+	}{
+		{
+			name: "User with a key",
+			user: dolph,
+			expectations: expectations{
+				keyCount:    1,
+				fingerPrint: "SHA256:YwVZ0Zs7a3n6MiAK9jH6vrX8jbFDT0UwqWP76JQvlK4",
+			},
+		},
+		{
+			name: "User with a key",
+			user: elizabeth,
+			expectations: expectations{
+				keyCount: 0,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			keys, _ := tt.user.keys()
+			assert.Equal(t, tt.expectations.keyCount, len(keys))
+
+			if tt.expectations.fingerPrint != "" {
+				assert.Equal(t, tt.expectations.fingerPrint, keys[0].Fingerprint)
+			}
+		})
+	}
+}
+
+func TestUser_setToken(t *testing.T) {
+	var dolph User
+	var newTokenVal = "abc123"
+
+	_ = createUser(ds)
+	dolph, _ = getUserByUsername("dolph.starbeam")
+
+	dolph.setToken(newTokenVal)
+	dolph, _ = getUserByUsername("dolph.starbeam")
+
+	assert.Equal(t, newTokenVal, dolph.TokenString)
+
+}
+
+func TestUser_unsetToken(t *testing.T) {
+	var dolph User
+	var newTokenVal = "abc123"
+
+	_ = createUser(ds)
+	dolph, _ = getUserByUsername("dolph.starbeam")
+
+	// first set a token and ensure it's correct
+	dolph.setToken(newTokenVal)
+	dolph, _ = getUserByUsername("dolph.starbeam")
+	assert.Equal(t, newTokenVal, dolph.TokenString)
+
+	// now unset
+	dolph.unsetToken()
+	dolph, _ = getUserByUsername("dolph.starbeam")
+	assert.Equal(t, "", dolph.TokenString)
 
 }

@@ -57,13 +57,8 @@ Then %r{^I should see a form with the following fields:$} do |table|
 
     name = row.fetch("Name")
     data_type = row.fetch("Type").downcase
-    required =
-      case row.fetch("Required").downcase
-      when "yes"
-        true
-      else
-        false
-      end
+    required = (row.fetch("Required", "no").downcase == "yes")
+    disabled = (row.fetch("Disabled", "no").downcase == "yes")
 
     within("form") do
       label = page.find("label", text: /^#{name}$/)
@@ -73,8 +68,8 @@ Then %r{^I should see a form with the following fields:$} do |table|
       expect(input).not_to be_nil
       expect(input['type']).to eql(data_type)
       expect(input['required']).to eql('true') if required
+      expect(input['disabled']).to eql('true') if disabled
     end
-
 
   end
 end

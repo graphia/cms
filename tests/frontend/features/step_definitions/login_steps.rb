@@ -56,3 +56,24 @@ Then %r{^I should have a JWT saved in localstorage$} do
   token = evaluate_script("localStorage.token")
   expect(token.split(".").size).to eql(3) # it at least looks like a JWT!
 end
+
+Given %r{^I am logged in$} do
+  step %{I have logged in}
+  @get_token = "localStorage.getItem('token');"
+  expect(page.evaluate_script(@get_token)).not_to be_nil
+end
+
+When %r{^I select 'Logout' from the settings menu$} do
+  within("nav.navbar") do
+    page.find("#user-menu").click
+    page.find(".dropdown-item.logout").click
+  end
+end
+
+Then %r{^I should be logged out$} do
+  expect(page.evaluate_script(@get_token)).to be_nil
+end
+
+Then %r{^I should be on the login screen$} do
+  expect(page.current_path).to eql("/cms/login")
+end

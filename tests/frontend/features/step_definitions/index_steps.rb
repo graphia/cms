@@ -37,7 +37,13 @@ end
 
 When %r{^I click the "([^"]*)" navigation link$} do |link_text|
   within("#application > .navbar") do
-    page.find(".navbar-toggler-icon").click
+
+    # If the window is too small and the nav is collapsed,
+    # we need to toggle the nav first. Normally, this is
+    # unnecessary, but here's how to do it:
+    #
+    #page.find(".navbar-toggler-icon").click
+
     click_link(link_text)
   end
 end

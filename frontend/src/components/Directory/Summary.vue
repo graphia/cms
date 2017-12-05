@@ -174,7 +174,7 @@
 						headers: this.$store.state.auth.authHeader()
 					});
 
-					if (!checkResponse(response)) {
+					if (!checkResponse(response.status)) {
 						console.error(response);
 						return;
 					}

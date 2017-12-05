@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/dgrijalva/jwt-go"
@@ -18,7 +19,7 @@ import (
 // update to the repository
 type SuccessResponse struct {
 	Message string `json:"message"`
-	Oid     string `json:"oid"`
+	Oid     string `json:"oid,omitempty"`
 	Meta    string `json:"meta,omitempty"`
 }
 
@@ -90,7 +91,7 @@ func authLoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	Debug.Println("Setting user token", tokenString)
 
-	err = setToken(user, tokenString)
+	err = user.setToken(tokenString)
 	if err != nil {
 		fr = FailureResponse{
 			Message: fmt.Sprintln("Failed to set the user token", err.Error()),
@@ -99,8 +100,40 @@ func authLoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := Token{tokenString}
+	type output struct {
+		Token       `json:"jwt"`
+		LimitedUser `json:"user"`
+	}
+
+	response := output{
+		Token:       Token{tokenString},
+		LimitedUser: user.limitedUser(),
+	}
+
 	JSONResponse(response, http.StatusOK, w)
+
+}
+
+func apiLogoutHandler(w http.ResponseWriter, r *http.Request) {
+	var user User
+	var err error
+	var fr FailureResponse
+	var sr SuccessResponse
+
+	user = getCurrentUser(r.Context())
+
+	err = user.unsetToken()
+	if err != nil {
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Not a git repository"),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	// token is unset
+	sr = SuccessResponse{Message: "Logged out"}
+	JSONResponse(sr, http.StatusOK, w)
 
 }
 
@@ -1174,7 +1207,184 @@ func apiCreateUserHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // apiUpdateUser
-func apiUpdateUserHandler(w http.ResponseWriter, r *http.Request) {}
+func apiUpdateUserNameHandler(w http.ResponseWriter, r *http.Request) {
+
+	// FIXME add validation!
+	type payload struct {
+		Name string `json:"name"`
+	}
+
+	var params payload
+	var err error
+	var fr FailureResponse
+
+	user := getCurrentUser(r.Context())
+
+	// only updating the name is supported at this time
+
+	json.NewDecoder(r.Body).Decode(&params)
+
+	err = db.UpdateField(&user, "Name", params.Name)
+	if err != nil {
+		fr = FailureResponse{
+			Message: err.Error(),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	JSONResponse(SuccessResponse{Message: "User updated"}, http.StatusOK, w)
+}
+
+func apiUserListPublicKeysHandler(w http.ResponseWriter, r *http.Request) {
+	var user User
+	var fr FailureResponse
+
+	user = getCurrentUser(r.Context())
+
+	type rk struct {
+		ID          int    `json:"id"`
+		Fingerprint string `json:"fingerprint"`
+		Raw         string `json:"raw"`
+		Name        string `json:"name"`
+	}
+
+	// properly initialise the slice so if empty,
+	// marshalled JSON is a empty array instead of null
+
+	upks, err := user.keys()
+	if err != nil {
+		Debug.Println("error", err.Error())
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Cannot retrieve keys belonging to: %s", user.Username),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+	}
+
+	var keys []rk
+	keys = make([]rk, 0)
+
+	for _, upk := range upks {
+
+		file, err := upk.File()
+		if err != nil {
+			Error.Println("Could not decode key", upk.Fingerprint)
+			continue
+		}
+
+		keys = append(keys, rk{
+			ID:          upk.ID,
+			Name:        upk.Name,
+			Fingerprint: upk.Fingerprint,
+			Raw:         file,
+		})
+	}
+
+	JSONResponse(keys, http.StatusOK, w)
+
+}
+
+func apiUserAddPublicKeyHandler(w http.ResponseWriter, r *http.Request) {
+	type payload struct {
+		Name string `json:"name"`
+		Key  string `json:"key"`
+	}
+
+	var user User
+	var pl payload
+	var err error
+	var sr SuccessResponse
+	var fr FailureResponse
+
+	json.NewDecoder(r.Body).Decode(&pl)
+
+	user = getCurrentUser(r.Context())
+
+	Debug.Println("supplied key:", pl.Key)
+
+	err = user.addPublicKey(pl.Name, pl.Key)
+
+	if err != nil && err.Error() == "already exists" {
+		Error.Println("Key already exists", user.Username, err.Error(), pl.Key)
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Key already exists\n%s", pl.Key),
+		}
+		JSONResponse(fr, http.StatusConflict, w)
+		return
+	}
+
+	if err != nil {
+		Error.Println("Failed to create public key", user.Username, err.Error())
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Cannot set public key for %s", user.Username),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	sr = SuccessResponse{
+		Message: fmt.Sprintf("Public key created for %s", user.Username),
+	}
+
+	JSONResponse(sr, http.StatusOK, w)
+
+}
+
+func apiUserDeletePublicKeyHandler(w http.ResponseWriter, r *http.Request) {
+	var err error
+	var pkr PublicKey
+	var sr SuccessResponse
+	var fr FailureResponse
+	var user User
+
+	sid := vestigo.Param(r, "id")
+	id, err := strconv.Atoi(sid)
+	if err != nil {
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Invalid id %d", id),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	user = getCurrentUser(r.Context())
+
+	err = db.One("ID", id, &pkr)
+	if err != nil {
+		Warning.Println("Cannot find public key", id)
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Cannot find public key %d", id),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+	if user.ID != pkr.UserID {
+		Warning.Println("Key does not belong to user", id, user)
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Key %d does not belong to you", id),
+		}
+		JSONResponse(fr, http.StatusForbidden, w)
+		return
+	}
+
+	err = db.DeleteStruct(&pkr)
+	if user.ID != pkr.UserID {
+		Error.Println("Could not delete public key", err.Error())
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Could not delete key %d", id),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	// no errors, success!
+	sr = SuccessResponse{
+		Message: fmt.Sprintf("Key %d deleted", id),
+	}
+
+	JSONResponse(sr, http.StatusOK, w)
+
+}
 
 // apiDeleteUser
 func apiDeleteUserHandler(w http.ResponseWriter, r *http.Request) {}
@@ -1350,7 +1560,17 @@ func apiGetFileHistoryHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// Translation data 🖍
+// User data 👩🏽‍💻
+
+// GET /api/user_info
+//
+// returns the currently logged in User info
+func apiGetUserInfoHandler(w http.ResponseWriter, r *http.Request) {
+	user := getCurrentUser(r.Context())
+	JSONResponse(user.limitedUser(), http.StatusOK, w)
+}
+
+// Translation data 💬
 
 // GET /api/translation_info
 //

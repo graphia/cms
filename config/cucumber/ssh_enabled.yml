@@ -1,0 +1,41 @@
+port: 9095
+repository: ../../tests/tmp/repositories/cucumber
+logfile: ../../logs/cucumber-server-ssh.log
+corsenabled: false
+corsorigin: null
+database: ../../db/cucumber.db
+static: ../../dist
+hugo_config_file: ../../config/hugo.development.yml
+hugo_bin: /usr/local/bin/hugo
+private_key_path: ../../tests/backend/keys/app.test.rsa
+public_key_path: ../../tests/backend/keys/app.test.rsa.pub
+ssh_enabled: true
+ssh_listen_port: 2223
+git_bin_path: /usr/local/bin/
+git_repo_path: ../../tests/tmp/repositories/
+git_user: git
+file_categories:
+  documents:
+    - .md
+  images:
+    - .png
+    - .jpg
+    - .gif
+  structured data:
+    - .xml
+    - .json
+  tabular data:
+    - .csv
+media_types:
+
+    # image types
+    gif: image/gif
+    jpeg: image/jpeg
+    jpg: image/jpeg
+    png: image/png
+    tiff: image/tiff
+
+    # structured data types
+    xml: text/xml
+    csv: text/csv
+    json: text/json

@@ -11,6 +11,8 @@ import SetupInitializeRepo from '../components/Setup/InitializeRepository.vue';
 import Login from '../components/Login.vue';
 import Commit from '../components/Commit.vue';
 import Home from '../components/Home.vue';
+import UserSettings from '../components/Settings/UserSettings.vue';
+import SSHKeySettings from '../components/Settings/SSHKeySettings.vue';
 
 // Document Paths
 import DocumentIndex from '../components/Document/Index.vue';
@@ -49,6 +51,9 @@ const routes = [
 	// Protected pages
 	{path: '/cms/setup/initialize_repo', component: SetupInitializeRepo, name: 'initialize_repo'},
 
+	{path: '/cms/settings/user', component: UserSettings, name: 'user_settings', alias: '/cms/settings'},
+	{path: '/cms/settings/keys', component: SSHKeySettings, name: 'ssh_key_settings'},
+
 	// Directory pages
 	{path: '/cms/new', component: DirectoryNew, name: 'directory_new'},
 
@@ -65,7 +70,8 @@ const routes = [
 
 const router = new VueRouter({
 	routes,
-	mode: 'history'
+	mode: 'history',
+	linkActiveClass: 'active'
 });
 
 export {router};

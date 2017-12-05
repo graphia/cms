@@ -61,13 +61,17 @@ func TestAuthLoginHandler(t *testing.T) {
 
 	resp, _ := client.Do(req)
 
-	var receiver Token
+	type response struct {
+		JWT  Token
+		User LimitedUser
+	}
+	receiver := response{}
 
 	json.NewDecoder(resp.Body).Decode(&receiver)
 
 	assert.NotEmpty(t, receiver)
 
-	decoded, _ := jwt.DecodeSegment(receiver.Token)
+	decoded, _ := jwt.DecodeSegment(receiver.JWT.Token)
 
 	var ta TokenAttributes
 
@@ -82,7 +86,11 @@ func TestAuthLoginHandler(t *testing.T) {
 	// Make sure that we've set the user's TokenString to equal
 	// the returned Token
 	user, _ := getUserByUsername("misshoover")
-	assert.Equal(t, receiver.Token, user.TokenString)
+	assert.Equal(t, receiver.JWT.Token, user.TokenString)
+
+	// And make sure that the user details match the authenticated
+	// users
+	assert.Equal(t, receiver.User, user.limitedUser())
 
 }
 
@@ -199,7 +207,7 @@ func TestProtectedMiddlewareWithToken(t *testing.T) {
 
 	token, _ := newToken(cookieKwan)
 	tokenString, _ := newTokenString(token)
-	setToken(cookieKwan, tokenString)
+	cookieKwan.setToken(tokenString)
 
 	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files/document_1.md")
 
@@ -264,12 +272,12 @@ func TestProtectedMiddlewareOutdatedToken(t *testing.T) {
 	// create the first token and assign it to the user
 	tokenOne, _ := newToken(cookieKwan)
 	tokenOneString, _ := newTokenString(tokenOne)
-	setToken(cookieKwan, tokenOneString)
+	cookieKwan.setToken(tokenOneString)
 
 	// now create a second one which we'll attempt to connect with
 	tokenTwo, _ := newToken(cookieKwan)
 	tokenTwoString, _ := newTokenString(tokenTwo)
-	setToken(cookieKwan, tokenTwoString)
+	cookieKwan.setToken(tokenTwoString)
 
 	cookieKwan, _ = getUserByUsername("cookie.kwan")
 
@@ -313,7 +321,7 @@ func TestProtectedMiddlewareDeletedUser(t *testing.T) {
 	// create the first token and assign it to the user
 	token, _ := newToken(cookieKwan)
 	tokenString, _ := newTokenString(token)
-	setToken(cookieKwan, tokenString)
+	cookieKwan.setToken(tokenString)
 
 	_ = deleteUser(cookieKwan)
 
@@ -357,7 +365,7 @@ func TestProtectedMiddlewareDeactivatedUser(t *testing.T) {
 	// create the first token and assign it to the user
 	token, _ := newToken(cookieKwan)
 	tokenString, _ := newTokenString(token)
-	setToken(cookieKwan, tokenString)
+	cookieKwan.setToken(tokenString)
 
 	_ = deactivateUser(cookieKwan)
 

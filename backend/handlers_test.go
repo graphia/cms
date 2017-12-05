@@ -12,8 +12,10 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/gliderlabs/ssh"
 	"github.com/graphia/particle"
 	"github.com/stretchr/testify/assert"
+	gossh "golang.org/x/crypto/ssh"
 	"gopkg.in/libgit2/git2go.v25"
 )
 
@@ -1835,4 +1837,300 @@ func Test_apiTranslateFileHandler(t *testing.T) {
 
 		})
 	}
+}
+
+func Test_apiAddPublicKeyHandler(t *testing.T) {
+
+	server = createTestServerWithContext()
+
+	validPub, _ := ioutil.ReadFile(filepath.Join(certsPath, "valid.pub"))
+	validPubParsed, _, _, _, _ := ssh.ParseAuthorizedKey(validPub)
+
+	invalidPub, _ := ioutil.ReadFile(filepath.Join(certsPath, "invalid.pub"))
+
+	config.SSHEnabled = true
+
+	type payload struct {
+		Key string `json:"key"`
+	}
+
+	type args struct {
+		payload  payload
+		username string
+		key      []byte
+	}
+	tests := []struct {
+		name            string
+		args            args
+		wantErr         bool
+		errMsg          string
+		wantCode        int
+		createDuplicate bool
+	}{
+		{
+			name: "Valid key",
+			args: args{
+				payload: payload{
+					Key: string(validPub),
+				},
+				username: "selma.bouvier",
+				key:      validPub,
+			},
+			wantErr:  false,
+			wantCode: http.StatusOK,
+		},
+		{
+			name: "Invalid key",
+			args: args{
+				payload: payload{
+					Key: string(invalidPub),
+				},
+				username: "selma.bouvier",
+				key:      invalidPub,
+			},
+			wantErr:  true,
+			errMsg:   "Cannot set public key",
+			wantCode: http.StatusBadRequest,
+		},
+		{
+			name: "Duplicate key",
+			args: args{
+				payload: payload{
+					Key: string(validPub),
+				},
+				username: "selma.bouvier",
+				key:      validPub,
+			},
+			wantErr:         true,
+			errMsg:          "Key already exists",
+			wantCode:        http.StatusConflict,
+			createDuplicate: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			db.Drop("User")
+			db.Drop("PublicKey")
+
+			_ = createUser(sb)
+
+			target := fmt.Sprintf(
+				"%s/%s",
+				server.URL,
+				"api/settings/ssh",
+			)
+
+			if tt.createDuplicate {
+				_ = createUser(sb)
+				sbr, _ := getUserByUsername("selma.bouvier")
+				sbr.addPublicKey("laptop", string(validPub))
+			}
+
+			payload, err := json.Marshal(tt.args.payload)
+			if err != nil {
+				panic(err)
+			}
+
+			b := bytes.NewBuffer(payload)
+			client := &http.Client{}
+			req, _ := http.NewRequest("POST", target, b)
+			resp, _ := client.Do(req)
+
+			assert.Equal(t, tt.wantCode, resp.StatusCode)
+
+			if tt.wantErr {
+				var fr FailureResponse
+				json.NewDecoder(resp.Body).Decode(&fr)
+				assert.Contains(t, fr.Message, tt.errMsg)
+				return
+			}
+
+			// with the correct message
+			var sr SuccessResponse
+			json.NewDecoder(resp.Body).Decode(&sr)
+			assert.Contains(t, sr.Message, "Public key created")
+
+			user, _ := getUserByUsername(tt.args.username)
+
+			// and the key should have actually updated!
+			keys, _ := user.keys()
+			assert.Equal(t, 1, len(keys))
+			key := keys[0]
+			keyFile, _ := key.File()
+
+			assert.Equal(t, key.Fingerprint, gossh.FingerprintSHA256(validPubParsed))
+			assert.Contains(t, keyFile, "ssh-rsa AAAAB3NzaC1yc2E")
+
+			// one public key should have been created for this user
+			var matchingKeys []PublicKey
+			db.Find("UserID", user.ID, &matchingKeys)
+			assert.Equal(t, 1, len(matchingKeys))
+
+			// and the saved public key should exist and have the right attributes
+			var actual PublicKey
+			db.One("UserID", user.ID, &actual)
+
+			expected, _, _, _, _ := gossh.ParseAuthorizedKey(validPub)
+
+			assert.Equal(t, gossh.FingerprintSHA256(expected), actual.Fingerprint)
+			assert.Equal(t, expected.Marshal(), actual.Raw)
+
+		})
+	}
+}
+
+func Test_apiUserListPublicKeysHandler(t *testing.T) {
+	db.Drop("User")
+	db.Drop("PublicKey")
+
+	server = createTestServerWithContext()
+
+	_ = createUser(sb)
+	user, _ := getUserByUsername(sb.Username) // set up by createTestServerWithContext
+	pkRaw, _ := ioutil.ReadFile(filepath.Join(certsPath, "valid.pub"))
+
+	user.addPublicKey("laptop", string(pkRaw))
+
+	target := fmt.Sprintf("%s/%s/%s", server.URL, "api/settings", "ssh")
+
+	resp, _ := http.Get(target)
+
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+	type rk struct {
+		Fingerprint string `json:"fingerprint"`
+		Raw         string `json:"raw"`
+		Name        string `json:"name"`
+	}
+	var keys []rk
+
+	json.NewDecoder(resp.Body).Decode(&keys)
+
+	assert.Equal(t, 1, len(keys))
+
+	key := keys[0]
+
+	assert.Equal(t, "SHA256:YwVZ0Zs7a3n6MiAK9jH6vrX8jbFDT0UwqWP76JQvlK4", key.Fingerprint)
+	assert.Equal(t, "laptop", key.Name)
+	assert.Contains(t, key.Raw, "ssh-rsa AAAAB3NzaC1yc2")
+}
+
+func Test_apiDeletePublicKeyHandler(t *testing.T) {
+
+	db.Drop("User")
+
+	_ = createUser(sb)
+	_ = createUser(ds)
+	selma, _ := getUserByUsername("selma.bouvier")
+	dolph, _ := getUserByUsername("dolph.starbeam")
+
+	server = createTestServerWithContext()
+
+	validPub, _ := ioutil.ReadFile(filepath.Join(certsPath, "valid.pub"))
+	anotherPub, _ := ioutil.ReadFile(filepath.Join(certsPath, "another.pub"))
+
+	config.SSHEnabled = true
+
+	type payload struct {
+		Key string `json:"key"`
+	}
+
+	type args struct {
+		id int
+	}
+	tests := []struct {
+		name     string
+		args     args
+		wantErr  bool
+		wantCode int
+		wantMsg  string
+	}{
+		{
+			name:     "Successful Deletion",
+			args:     args{id: 1},
+			wantCode: http.StatusOK,
+			wantMsg:  "Key 1 deleted",
+			wantErr:  false,
+		},
+		{
+			name:     "No key found",
+			args:     args{id: 6},
+			wantCode: http.StatusBadRequest,
+			wantMsg:  "Cannot find public key 6",
+			wantErr:  true,
+		},
+		{
+			name:     "Key belongs to another user",
+			args:     args{id: 2},
+			wantCode: http.StatusForbidden,
+			wantMsg:  "Key 2 does not belong to you",
+			wantErr:  true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			db.Drop("PublicKey")
+
+			selma.addPublicKey("laptop", string(validPub))    // 1
+			dolph.addPublicKey("desktop", string(anotherPub)) // 2
+
+			target := fmt.Sprintf(
+				"%s/%s",
+				server.URL,
+				fmt.Sprintf("api/settings/ssh/%d", tt.args.id),
+			)
+
+			client := &http.Client{}
+			req, _ := http.NewRequest("DELETE", target, nil)
+			resp, _ := client.Do(req)
+
+			if tt.wantErr {
+				var fr FailureResponse
+				json.NewDecoder(resp.Body).Decode(&fr)
+
+				assert.Equal(t, tt.wantCode, resp.StatusCode)
+				assert.Equal(t, tt.wantMsg, fr.Message)
+				return
+			}
+
+			var sr SuccessResponse
+			json.NewDecoder(resp.Body).Decode(&sr)
+			assert.Equal(t, tt.wantCode, resp.StatusCode)
+			assert.Equal(t, tt.wantMsg, sr.Message)
+
+		})
+	}
+}
+
+func Test_apiUpdateUserNameHandler(t *testing.T) {
+	server = createTestServerWithContext()
+	createUser(apiTestUser())
+
+	type payload struct {
+		Name string `json:"name"`
+	}
+
+	update := payload{Name: "Selma McClure"}
+	pl, _ := json.Marshal(update)
+	b := bytes.NewBuffer(pl)
+
+	target := fmt.Sprintf(
+		"%s/%s",
+		server.URL,
+		fmt.Sprintf("api/settings/name"),
+	)
+
+	client := &http.Client{}
+	req, _ := http.NewRequest("PATCH", target, b)
+	resp, _ := client.Do(req)
+
+	var sr SuccessResponse
+	json.NewDecoder(resp.Body).Decode(&sr)
+
+	selma, _ := getUserByUsername("selma.bouvier")
+	assert.Equal(t, update.Name, selma.Name)
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
 }

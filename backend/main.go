@@ -76,6 +76,13 @@ func main() {
 
 	Debug.Println("Router and Middleware set up")
 
+	if config.SSHEnabled {
+		Debug.Println("SSH is enabled")
+		setupSSH()
+	} else {
+		Debug.Println("SSH not enabled :(")
+	}
+
 	n.Run(fmt.Sprintf(":%s", config.Port))
 }
 
@@ -110,7 +117,7 @@ func setupMiddleware(r, pr *vestigo.Router) (n *negroni.Negroni) {
 		negroni.Wrap(pr),
 	))
 
-	n.Use(negroni.NewLogger())
+	//n.Use(negroni.NewLogger())
 	n.Use(negroni.NewRecovery())
 	return
 }
@@ -188,11 +195,20 @@ func protectedRouter() (r *vestigo.Router) {
 	r.Get("/api/directories/:directory/files/:filename/attachments", apiGetFileAttachmentsHandler)
 	r.Get("/api/directories/:directory/files/:filename/attachments/:file", apiGetFileAttachmentHandler)
 
+	// user endpoints
 	r.Get("/api/users", apiListUsersHandler)
 	r.Post("/api/users", apiCreateUserHandler)
 	r.Get("/api/users/:username", apiGetUserHandler)
-	r.Post("/api/users/:username", apiUpdateUserHandler)
 	r.Delete("/api/users/:username", apiDeleteUserHandler)
+
+	r.Post("/api/logout", apiLogoutHandler)
+	r.Get("/api/user_info", apiGetUserInfoHandler)
+
+	// user settings and ssh key management
+	r.Patch("/api/settings/name", apiUpdateUserNameHandler)
+	r.Get("/api/settings/ssh", apiUserListPublicKeysHandler)
+	r.Post("/api/settings/ssh", apiUserAddPublicKeyHandler)
+	r.Delete("/api/settings/ssh/:id", apiUserDeletePublicKeyHandler)
 
 	// repo endpoints
 	r.Get("/api/repository_info", apiGetRepositoryInformationHandler)

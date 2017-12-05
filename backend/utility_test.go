@@ -17,6 +17,8 @@ import (
 	"gopkg.in/libgit2/git2go.v25"
 )
 
+const certsPath = "../tests/backend/certificates"
+
 // CopyFile copies the contents of the file named src to the file named
 // by dst. The file will be created if it does not already exist. If the
 // destination file exists, all it's contents will be replaced by the contents
@@ -284,7 +286,7 @@ func createTestServerWithConfig(path string) (server *httptest.Server) {
 }
 
 func apiTestUser() (user User) {
-	return User{Name: "Selma Bouvier", Email: "selma.b@aol.com"}
+	return sb
 }
 
 func apiTestMiddleware(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {

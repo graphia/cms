@@ -22,6 +22,9 @@ build-dev:
 	cp -R frontend/public/cms dist/cms
 	go build -o graphia-cms ${ALL}
 
+build-backend-dev:
+	go build -o graphia-cms ${ALL}
+
 test:
 	go test -v ${ALL} -log-to-file=true -config=${TEST_CONFIG}
 
@@ -33,6 +36,9 @@ keep-testing:
 
 keep-building:
 	ls backend/*.go frontend/src/**/*.* | entr -r make build-dev
+
+keep-building-backend:
+	ls backend/*.go | entr -r make build-backend-dev
 
 run-backend:
 	ls backend/*.go | entr -r go run ${SRC} -log-to-file=true -config ${DEVELOPMENT_CONFIG}
