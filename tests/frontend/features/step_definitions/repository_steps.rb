@@ -9,5 +9,5 @@ Given %r{^there is an empty directory in place of a repository$} do
 end
 
 Then %r{^a repository should have been initialised$} do
-  expect{Git.open(REPO_PATH)}.not_to raise_error(ArgumentError, "path does not exist")
+  expect(Git.open(REPO_PATH)).to be_a(Git::Base)
 end
