@@ -29,3 +29,10 @@ Feature: Settings page
 		When I change my name to "Ranier Wolfcastle"
 		And I submit the form
 		Then my name should have changed to "Ranier Wolfcastle"
+
+	Scenario: Breadcrumbs
+		Given I am on my settings page
+		Then I should see the following breadcrumbs:
+			| Text                | Reference   |
+			| Dashboard           | /cms        |
+			| User settings       | None        |

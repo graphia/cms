@@ -27,7 +27,7 @@
 
 				<div class="col-md-4" v-for="(d, base, i) in groupedTranslations" :key="i">
 
-					<div class="card document-entry m-4" :data-filename="base">
+					<div class="card document-entry m-1" :data-filename="base">
 
 						<h3 class="card-header">
 							<router-link :to="{name: 'document_show', params: {filename: primary(d).filename}}">
@@ -97,7 +97,6 @@
 	import Error from '../Errors/Error';
 	import CMSBreadcrumb from '../../javascripts/models/breadcrumb.js';
 	import Accessors from '../Mixins/accessors';
-
 
 	export default {
 		name: "DocumentIndex",

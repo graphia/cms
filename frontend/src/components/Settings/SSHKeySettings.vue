@@ -1,77 +1,82 @@
 <template>
 
-	<div class="row">
 
-		<SettingsNavigation/>
+	<div>
+		<Breadcrumbs :levels="breadcrumbs"/>
 
-		<div class="col-md-9">
-			<h1>SSH Keys</h1>
+		<div class="row">
 
-			<div class="existing-keys" v-if="keys.length > 0">
-				<h4>Existing keys</h4>
-				<ul class="list-group">
+			<SettingsNavigation/>
 
-					<li :id="`ssh-public-key-${key.id}`" class="list-group-item d-flex flex-wrap justify-content-between align-items-center" v-for="(key, i) in keys" :key="i">
+			<div class="col-md-9">
+				<h1>SSH Keys</h1>
 
-						<h3>{{ key.name }}</h3>
+				<div class="existing-keys" v-if="keys.length > 0">
+					<h4>Existing keys</h4>
+					<ul class="list-group">
 
-						<code class="key-data">
-							{{ key.fingerprint }}
-						</code>
+						<li :id="`ssh-public-key-${key.id}`" class="list-group-item d-flex flex-wrap justify-content-between align-items-center" v-for="(key, i) in keys" :key="i">
 
-						<button class="btn btn-danger delete-pk-button" :data-key-id="key.id" @click="deleteKey">
-							Delete
-						</button>
-					</li>
-				</ul>
-			</div>
-			<div v-else class="alert alert-warning no-keys">
-				<h4 class="alert-heading">You have no keys</h4>
+							<h3>{{ key.name }}</h3>
 
-				<p>
-					In order to copy the entire repository to your own machine, so you
-					can work in your preferred editor or make sweeping changes to multiple
-					documents at once, we need to ensure you're connecting securely. The safest
-					and most commonly-used method is to generate a
-					<acronym title="Secure Shell">SSH</acronym> key.
-				</p>
+							<code class="key-data">
+								{{ key.fingerprint }}
+							</code>
 
-			</div>
+							<button class="btn btn-danger delete-pk-button" :data-key-id="key.id" @click="deleteKey">
+								Delete
+							</button>
+						</li>
+					</ul>
+				</div>
+				<div v-else class="alert alert-warning no-keys">
+					<h4 class="alert-heading">You have no keys</h4>
+
+					<p>
+						In order to copy the entire repository to your own machine, so you
+						can work in your preferred editor or make sweeping changes to multiple
+						documents at once, we need to ensure you're connecting securely. The safest
+						and most commonly-used method is to generate a
+						<acronym title="Secure Shell">SSH</acronym> key.
+					</p>
+
+				</div>
 
 
-			<div id="new-ssh-key" class="mt-4">
-				<h4>Upload a new SSH key</h4>
+				<div id="new-ssh-key" class="mt-4">
+					<h4>Upload a new SSH key</h4>
 
-				<form @submit="create">
+					<form @submit="create">
 
-					<div class="form-group">
-						<label for="name">Name</label>
-						<input
-							type="text"
-							name="name"
-							v-model="newKey.name"
-							class="form-control"
-							placeholder="laptop"
-							required
-						/>
-					</div>
+						<div class="form-group">
+							<label for="name">Name</label>
+							<input
+								type="text"
+								name="name"
+								v-model="newKey.name"
+								class="form-control"
+								placeholder="laptop"
+								required
+							/>
+						</div>
 
-					<div class="form-group">
-						<label for="ssh-key">SSH Key</label>
+						<div class="form-group">
+							<label for="ssh-key">SSH Key</label>
 
-						<textarea
-							name="ssh-key"
-							v-model="newKey.raw"
-							class="form-control"
-							placeholder="ssh-rsa ABC123…"
-						/>
+							<textarea
+								name="ssh-key"
+								v-model="newKey.raw"
+								class="form-control"
+								placeholder="ssh-rsa ABC123…"
+							/>
 
-					</div>
+						</div>
 
-					<div class="form-group">
-						<input class="form-control btn btn-success" type="submit" value="Create SSH Key">
-					</div>
-				</form>
+						<div class="form-group">
+							<input class="form-control btn btn-success" type="submit" value="Create SSH Key">
+						</div>
+					</form>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -80,8 +85,10 @@
 <script>
 	import checkResponse from "../../javascripts/response.js";
 	import CMSPublicKey from "../../javascripts/models/public_key.js";
+	import CMSBreadcrumb from '../../javascripts/models/breadcrumb.js';
 
 	import SettingsNavigation from "./Navigation";
+	import Breadcrumbs from '../Utilities/Breadcrumbs';
 
 	export default {
 		name: "SSHKeySettings",
@@ -93,6 +100,11 @@
 		},
 		created() {
 			this.refresh();
+		},
+		computed: {
+			breadcrumbs() {
+				return [new CMSBreadcrumb("SSH key settings", "ssh_key_settings")];
+			}
 		},
 		methods: {
 			async create(event) {
@@ -179,7 +191,8 @@
 			}
 		},
 		components: {
-			SettingsNavigation
+			SettingsNavigation,
+			Breadcrumbs
 		}
 	};
 </script>

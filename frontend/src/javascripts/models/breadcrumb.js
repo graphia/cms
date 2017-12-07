@@ -1,5 +1,5 @@
 export default class CMSBreadcrumb {
-	constructor(text, target, params) {
+	constructor(text, target, params={}) {
 		this.text   = text;
 		this.target = target;
 		this.params = params;
