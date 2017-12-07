@@ -217,7 +217,7 @@ func TestApiListDirectorySummaryHandler(t *testing.T) {
 }
 
 func Test_apiGetDirectoryMetadata(t *testing.T) {
-	server = createTestServerWithContext()
+	server = createTestServerWithContext(false)
 
 	repoPath := "../tests/tmp/repositories/create_directory"
 	setupSmallTestRepo(repoPath)
@@ -246,7 +246,7 @@ func Test_apiGetDirectoryMetadata(t *testing.T) {
 }
 
 func TestApiCreateDirectoryHandler(t *testing.T) {
-	server = createTestServerWithContext()
+	server = createTestServerWithContext(false)
 
 	repoPath := "../tests/tmp/repositories/create_directory"
 	setupSmallTestRepo(repoPath)
@@ -313,7 +313,7 @@ func TestApiCreateDirectoryHandler(t *testing.T) {
 }
 
 func TestApiCreateFileInDirectoryHandler(t *testing.T) {
-	server = createTestServerWithContext()
+	server = createTestServerWithContext(false)
 
 	repoPath := "../tests/tmp/repositories/create_file"
 	lr, _ := setupSmallTestRepo(repoPath)
@@ -378,7 +378,7 @@ func TestApiCreateFileInDirectoryHandler(t *testing.T) {
 }
 
 func TestApiCreateFileInDirectoryNoRepoInfo(t *testing.T) {
-	server = createTestServerWithContext()
+	server = createTestServerWithContext(false)
 
 	repoPath := "../tests/tmp/repositories/create_file"
 	_, _ = setupSmallTestRepo(repoPath)
@@ -427,7 +427,7 @@ func TestApiCreateFileInDirectoryNoRepoInfo(t *testing.T) {
 }
 
 func TestApiCreateFileInDirectoryWithErrors(t *testing.T) {
-	server = createTestServerWithContext()
+	server = createTestServerWithContext(false)
 
 	repoPath := "../tests/tmp/repositories/create_file"
 	setupSmallTestRepo(repoPath)
@@ -472,7 +472,7 @@ func TestApiCreateFileInDirectoryWithErrors(t *testing.T) {
 }
 
 func TestApiCreateFileInDirectoryRepoOutOfDate(t *testing.T) {
-	server = createTestServerWithContext()
+	server = createTestServerWithContext(false)
 
 	repoPath := "../tests/tmp/repositories/create_file"
 	firstCommit, _ := setupSmallTestRepo(repoPath)
@@ -522,7 +522,7 @@ func TestApiCreateFileInDirectoryRepoOutOfDate(t *testing.T) {
 }
 
 func TestApiCreateImageFileInDirectory(t *testing.T) {
-	server = createTestServerWithContext()
+	server = createTestServerWithContext(false)
 
 	repoPath := "../tests/tmp/repositories/create_image_file"
 	lr, _ := setupMultipleFiletypesTestRepo(repoPath)
@@ -587,7 +587,7 @@ func TestApiCreateImageFileInDirectory(t *testing.T) {
 }
 
 func TestApiUpdateFileInDirectory(t *testing.T) {
-	server = createTestServerWithContext()
+	server = createTestServerWithContext(false)
 
 	repoPath := "../tests/tmp/repositories/update_file"
 	lr, _ := setupSmallTestRepo(repoPath)
@@ -653,7 +653,7 @@ func TestApiUpdateFileInDirectory(t *testing.T) {
 }
 
 func TestApiUpdateFileInDirectoryWithErrors(t *testing.T) {
-	server = createTestServerWithContext()
+	server = createTestServerWithContext(false)
 
 	repoPath := "../tests/tmp/repositories/update_file"
 	setupSmallTestRepo(repoPath)
@@ -698,7 +698,7 @@ func TestApiUpdateFileInDirectoryWithErrors(t *testing.T) {
 }
 
 func TestApiUpdateFileInDirectoryRepoOutOfDate(t *testing.T) {
-	server = createTestServerWithContext()
+	server = createTestServerWithContext(false)
 	repo, _ := repository(config)
 
 	repoPath := "../tests/tmp/repositories/update_file"
@@ -746,7 +746,7 @@ func TestApiUpdateFileInDirectoryRepoOutOfDate(t *testing.T) {
 
 // Make sure that the file specified in the URL is included in the payload
 func TestApiUpdateOtherFileInDirectory(t *testing.T) {
-	server = createTestServerWithContext()
+	server = createTestServerWithContext(false)
 
 	repoPath := "../tests/tmp/repositories/update_file"
 	lr, _ := setupSmallTestRepo(repoPath)
@@ -793,7 +793,7 @@ func TestApiUpdateOtherFileInDirectory(t *testing.T) {
 
 // Make sure that at least one file is specified in the payload
 func TestApiUpdateNoFilesInDirectory(t *testing.T) {
-	server = createTestServerWithContext()
+	server = createTestServerWithContext(false)
 
 	repoPath := "../tests/tmp/repositories/update_file"
 	lr, _ := setupSmallTestRepo(repoPath)
@@ -829,7 +829,7 @@ func TestApiUpdateNoFilesInDirectory(t *testing.T) {
 }
 
 func TestApiDeleteFileFromDirectory(t *testing.T) {
-	server = createTestServerWithContext()
+	server = createTestServerWithContext(false)
 
 	repoPath := "../tests/tmp/repositories/delete_file"
 	oid, _ := setupSmallTestRepo(repoPath)
@@ -899,7 +899,7 @@ func TestApiDeleteFileFromDirectory(t *testing.T) {
 
 // Make sure that the file specified in the URL is included in the payload
 func TestApiDeleteOtherFileFromDirectory(t *testing.T) {
-	server = createTestServerWithContext()
+	server = createTestServerWithContext(false)
 
 	repoPath := "../tests/tmp/repositories/delete_file"
 	setupSmallTestRepo(repoPath)
@@ -945,7 +945,7 @@ func TestApiDeleteOtherFileFromDirectory(t *testing.T) {
 
 // Make sure that at least one file is specified in the payload
 func TestApiDeleteNoFilesFromDirectory(t *testing.T) {
-	server = createTestServerWithContext()
+	server = createTestServerWithContext(false)
 
 	repoPath := "../tests/tmp/repositories/delete_file"
 	setupSmallTestRepo(repoPath)
@@ -980,7 +980,7 @@ func TestApiDeleteNoFilesFromDirectory(t *testing.T) {
 }
 
 func TestApiDeleteDirectory(t *testing.T) {
-	server = createTestServerWithContext()
+	server = createTestServerWithContext(false)
 
 	var err error
 
@@ -1041,7 +1041,7 @@ func TestApiDeleteDirectory(t *testing.T) {
 }
 
 func TestApiDeleteDirectoryRepoOutOfDate(t *testing.T) {
-	server = createTestServerWithContext()
+	server = createTestServerWithContext(false)
 
 	var err error
 
@@ -1093,7 +1093,7 @@ func TestApiDeleteDirectoryRepoOutOfDate(t *testing.T) {
 }
 
 func TestApiDeleteDirectoryNoRepoInfo(t *testing.T) {
-	server = createTestServerWithContext()
+	server = createTestServerWithContext(false)
 
 	repoPath := "../tests/tmp/repositories/delete_dir"
 	setupSmallTestRepo(repoPath)
@@ -1128,7 +1128,7 @@ func TestApiDeleteDirectoryNoRepoInfo(t *testing.T) {
 
 // make sure error is returned when trying to delete a non-existant directory
 func TestApiDeleteDirectoryNotExists(t *testing.T) {
-	server = createTestServerWithContext()
+	server = createTestServerWithContext(false)
 	var err error
 
 	repoPath := "../tests/tmp/repositories/delete_dir"
@@ -1168,7 +1168,7 @@ func TestApiDeleteDirectoryNotExists(t *testing.T) {
 // ensure correct error returned dir named in URL path isn't specified
 // in the payload
 func TestApiDeleteAnotherDirectory(t *testing.T) {
-	server = createTestServerWithContext()
+	server = createTestServerWithContext(false)
 
 	var err error
 
@@ -1206,7 +1206,7 @@ func TestApiDeleteAnotherDirectory(t *testing.T) {
 }
 
 func TestApiGetFileInDirectory(t *testing.T) {
-	server = createTestServerWithContext()
+	server = createTestServerWithContext(false)
 
 	repoPath := "../tests/tmp/repositories/create_directory"
 	setupSmallTestRepo(repoPath)
@@ -1234,7 +1234,7 @@ func TestApiGetFileInDirectory(t *testing.T) {
 
 func TestApiEditFileInDirectory(t *testing.T) {
 
-	server = createTestServerWithContext()
+	server = createTestServerWithContext(false)
 
 	repoPath := "../tests/tmp/repositories/create_directory"
 	setupSmallTestRepo(repoPath)
@@ -1273,7 +1273,7 @@ func TestApiEditFileInDirectory(t *testing.T) {
 }
 
 func TestApiGetAttachmentsHandler(t *testing.T) {
-	server = createTestServerWithContext()
+	server = createTestServerWithContext(false)
 
 	repoPath := "../tests/tmp/repositories/get_attachments_handler"
 	setupMultipleFiletypesTestRepo(repoPath)
@@ -1345,7 +1345,7 @@ func TestApiGetAttachmentsHandler(t *testing.T) {
 }
 
 func TestApiGetAttachmentsNoDirectoryHandler(t *testing.T) {
-	server = createTestServerWithContext()
+	server = createTestServerWithContext(false)
 
 	repoPath := "../tests/tmp/repositories/get_attachments_handler"
 	setupMultipleFiletypesTestRepo(repoPath)
@@ -1368,7 +1368,7 @@ func TestApiGetAttachmentsNoDirectoryHandler(t *testing.T) {
 }
 
 func TestApiUpdateDirectoriesHandler(t *testing.T) {
-	server = createTestServerWithContext()
+	server = createTestServerWithContext(false)
 
 	repoPath := "../tests/tmp/repositories/update_directories"
 	setupSmallTestRepo(repoPath)
@@ -1438,7 +1438,7 @@ func TestApiUpdateDirectoriesHandler(t *testing.T) {
 }
 
 func TestApiUpdateDirectoriesHandlerNoDirectories(t *testing.T) {
-	server = createTestServerWithContext()
+	server = createTestServerWithContext(false)
 
 	repoPath := "../tests/tmp/repositories/update_directories"
 	setupSmallTestRepo(repoPath)
@@ -1475,7 +1475,7 @@ func TestApiUpdateDirectoriesHandlerNoDirectories(t *testing.T) {
 
 func TestApiUpdateDirectoriesHandlerWrongDirectories(t *testing.T) {
 	// in this example the path doesn't match the supplied dirs
-	server = createTestServerWithContext()
+	server = createTestServerWithContext(false)
 
 	repoPath := "../tests/tmp/repositories/update_directories"
 	setupSmallTestRepo(repoPath)
@@ -1521,7 +1521,7 @@ func TestApiUpdateDirectoriesHandlerWrongDirectories(t *testing.T) {
 // Setup tests
 
 func Test_setupAllowInitializeRepository_Success(t *testing.T) {
-	server = createTestServerWithContext()
+	server = createTestServerWithContext(false)
 
 	fullDirPath := "../tests/tmp/repositories/full"
 	os.RemoveAll(fullDirPath)
@@ -1545,7 +1545,7 @@ func Test_setupAllowInitializeRepository_Success(t *testing.T) {
 }
 
 func Test_setupAllowInitializeRepository_Fail(t *testing.T) {
-	server = createTestServerWithContext()
+	server = createTestServerWithContext(false)
 
 	gitRepoPath := "../tests/tmp/repositories/allow_initialize"
 	_, _ = setupSmallTestRepo(gitRepoPath)
@@ -1566,7 +1566,7 @@ func Test_setupAllowInitializeRepository_Fail(t *testing.T) {
 }
 
 func Test_setupInitializeRepository_Success(t *testing.T) {
-	server = createTestServerWithContext()
+	server = createTestServerWithContext(false)
 
 	newDir := "../tests/tmp/repositories/full"
 	os.RemoveAll(newDir)
@@ -1597,7 +1597,7 @@ func Test_setupInitializeRepository_Success(t *testing.T) {
 }
 
 func Test_setupInitializeRepository_Failure(t *testing.T) {
-	server = createTestServerWithContext()
+	server = createTestServerWithContext(false)
 
 	gitRepoPath := "../tests/tmp/repositories/allow_initialize"
 	_, _ = setupSmallTestRepo(gitRepoPath)
@@ -1622,7 +1622,7 @@ func Test_setupInitializeRepository_Failure(t *testing.T) {
 }
 
 func Test_apiGetRepositoryInformationHandler(t *testing.T) {
-	server = createTestServerWithContext()
+	server = createTestServerWithContext(false)
 
 	gitRepoPath := "../tests/tmp/repositories/repo_info"
 	oid, _ := setupSmallTestRepo(gitRepoPath)
@@ -1650,7 +1650,7 @@ func Test_apiGetLanguageInformationHandlerTranslationDisabled(t *testing.T) {
 
 	var translationDisabled = "../tests/backend/config/translation-disabled.yml"
 
-	server = createTestServerWithConfig(translationDisabled)
+	server = createTestServerWithConfig(translationDisabled, false)
 	target := fmt.Sprintf("%s/%s", server.URL, "api/translation_info")
 
 	resp, _ := http.Get(target)
@@ -1673,7 +1673,7 @@ func Test_apiGetLanguageInformationHandlerTranslationEnabled(t *testing.T) {
 
 	var translationEnabled = "../tests/backend/config/translation-enabled.yml"
 
-	server = createTestServerWithConfig(translationEnabled)
+	server = createTestServerWithConfig(translationEnabled, false)
 	target := fmt.Sprintf("%s/%s", server.URL, "api/translation_info")
 
 	resp, _ := http.Get(target)
@@ -1793,7 +1793,7 @@ func Test_apiTranslateFileHandler(t *testing.T) {
 			repoPath := "../tests/tmp/repositories/translation_handler"
 			lr, _ := setupSmallTestRepo(repoPath)
 
-			server = createTestServerWithConfig(translationEnabled)
+			server = createTestServerWithConfig(translationEnabled, false)
 			config.Repository = filepath.Join(repoPath)
 
 			tt.args.nt.RepositoryInfo = RepositoryInfo{LatestRevision: lr.String()}
@@ -1813,10 +1813,8 @@ func Test_apiTranslateFileHandler(t *testing.T) {
 			req, _ := http.NewRequest("POST", target, b)
 
 			if tt.doPriorUpdate {
-				fmt.Println("doing a sneaky update")
 				repo, _ := repository(config)
-				zoid, _ := createRandomFile(repo, "document_12.md", "whoosh")
-				fmt.Println("zoid", zoid)
+				_, _ = createRandomFile(repo, "document_12.md", "whoosh")
 			}
 
 			resp, _ := client.Do(req)
@@ -1841,7 +1839,7 @@ func Test_apiTranslateFileHandler(t *testing.T) {
 
 func Test_apiAddPublicKeyHandler(t *testing.T) {
 
-	server = createTestServerWithContext()
+	server = createTestServerWithContext(false)
 
 	validPub, _ := ioutil.ReadFile(filepath.Join(certsPath, "valid.pub"))
 	validPubParsed, _, _, _, _ := ssh.ParseAuthorizedKey(validPub)
@@ -1984,7 +1982,7 @@ func Test_apiUserListPublicKeysHandler(t *testing.T) {
 	db.Drop("User")
 	db.Drop("PublicKey")
 
-	server = createTestServerWithContext()
+	server = createTestServerWithContext(false)
 
 	_ = createUser(sb)
 	user, _ := getUserByUsername(sb.Username) // set up by createTestServerWithContext
@@ -2025,7 +2023,7 @@ func Test_apiDeletePublicKeyHandler(t *testing.T) {
 	selma, _ := getUserByUsername("selma.bouvier")
 	dolph, _ := getUserByUsername("dolph.starbeam")
 
-	server = createTestServerWithContext()
+	server = createTestServerWithContext(false)
 
 	validPub, _ := ioutil.ReadFile(filepath.Join(certsPath, "valid.pub"))
 	anotherPub, _ := ioutil.ReadFile(filepath.Join(certsPath, "another.pub"))
@@ -2105,7 +2103,7 @@ func Test_apiDeletePublicKeyHandler(t *testing.T) {
 }
 
 func Test_apiUpdateUserNameHandler(t *testing.T) {
-	server = createTestServerWithContext()
+	server = createTestServerWithContext(false)
 	createUser(apiTestUser())
 
 	type payload struct {
@@ -2133,4 +2131,114 @@ func Test_apiUpdateUserNameHandler(t *testing.T) {
 	assert.Equal(t, update.Name, selma.Name)
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
+}
+
+func Test_apiUpdatePasswordHandler(t *testing.T) {
+
+	type args struct {
+		payload PasswordUpdate
+	}
+	tests := []struct {
+		name              string
+		args              args
+		wantErr           bool
+		wantCode          int
+		wantMsg           string
+		wantValidationErr bool
+	}{
+		{
+			name: "Successful Password Update",
+			args: args{
+				payload: PasswordUpdate{
+					CurrentPassword: "ilubjubjub",
+					NewPassword:     "ihatetroy",
+				},
+			},
+			wantCode: http.StatusOK,
+			wantMsg:  "Password updated",
+			wantErr:  false,
+		},
+		{
+			name: "Incorrect Current Password",
+			args: args{
+				payload: PasswordUpdate{
+					CurrentPassword: "ilubsantaslittlehelper",
+					NewPassword:     "ihatetroy",
+				},
+			},
+			wantCode: http.StatusUnauthorized,
+			wantMsg:  "Current password is not correct",
+			wantErr:  true,
+		},
+		{
+			name: "Password Too Short",
+			args: args{
+				payload: PasswordUpdate{
+					CurrentPassword: "ilubjubjub",
+					NewPassword:     "jub",
+				},
+			},
+			wantCode:          http.StatusBadRequest,
+			wantMsg:           "must be at least 6 characters",
+			wantErr:           true,
+			wantValidationErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			db.Drop("User")
+
+			server = createTestServerWithContext(true)
+
+			target := fmt.Sprintf(
+				"%s/%s",
+				server.URL,
+				"api/settings/password",
+			)
+
+			payload, err := json.Marshal(tt.args.payload)
+			if err != nil {
+				panic(err)
+			}
+
+			b := bytes.NewBuffer(payload)
+			client := &http.Client{}
+			req, _ := http.NewRequest("PATCH", target, b)
+			resp, _ := client.Do(req)
+
+			if tt.wantErr {
+
+				assert.Equal(t, tt.wantCode, resp.StatusCode)
+
+				if tt.wantValidationErr {
+
+					actualOut := make(map[string]string)
+					json.NewDecoder(resp.Body).Decode(&actualOut)
+
+					expectedOut := make(map[string]string)
+					expectedOut["NewPassword"] = tt.wantMsg
+
+					assert.Equal(t, expectedOut, actualOut)
+					return
+				}
+
+				var fr FailureResponse
+				json.NewDecoder(resp.Body).Decode(&fr)
+
+				assert.Equal(t, tt.wantMsg, fr.Message)
+				return
+
+			}
+
+			var sr SuccessResponse
+			json.NewDecoder(resp.Body).Decode(&sr)
+			assert.Equal(t, tt.wantCode, resp.StatusCode)
+			assert.Equal(t, tt.wantMsg, sr.Message)
+
+			u, _ := sb.reload()
+			assert.Nil(t, u.checkPassword(tt.args.payload.NewPassword))
+
+		})
+	}
 }

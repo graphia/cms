@@ -15,8 +15,6 @@ func JSONResponse(response interface{}, status int, w http.ResponseWriter) {
 		panic(err)
 	}
 
-	Debug.Println("json", string(json))
-
 	w.WriteHeader(status)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(json)

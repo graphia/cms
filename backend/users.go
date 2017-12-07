@@ -34,6 +34,12 @@ type User struct {
 	TokenString string `json:"token_string" storm:"unique"`
 }
 
+// PasswordUpdate used by users to modify their password
+type PasswordUpdate struct {
+	CurrentPassword string `json:"current_password"`
+	NewPassword     string `json:"new_password" validate:"required,min=6"`
+}
+
 func (u User) addPublicKey(name, raw string) error {
 
 	// make sure the key is valid and populate fingerprint
@@ -97,6 +103,23 @@ func (u User) setToken(tokenString string) error {
 
 func (u User) unsetToken() error {
 	return db.UpdateField(&u, "TokenString", "")
+}
+
+func (u User) setPassword(pw string) error {
+	bcryptedPassword, err := bcrypt.GenerateFromPassword([]byte(pw), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	u.Password = string(bcryptedPassword)
+	return db.UpdateField(&u, "Password", string(bcryptedPassword))
+}
+
+func (u User) checkPassword(pw string) error {
+	err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(pw))
+	if err != nil {
+		return fmt.Errorf("passwords don't match")
+	}
+	return nil
 }
 
 func getUserByID(id int) (user User, err error) {
@@ -171,6 +194,10 @@ func getUserByFingerprint(pk gossh.PublicKey) (user User, err error) {
 func createUser(user User) (err error) {
 
 	bcryptedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+
 	user.Password = string(bcryptedPassword)
 
 	err = validate.Struct(user)

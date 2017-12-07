@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/gliderlabs/ssh"
@@ -504,4 +505,77 @@ func TestUser_unsetToken(t *testing.T) {
 	dolph, _ = getUserByUsername("dolph.starbeam")
 	assert.Equal(t, "", dolph.TokenString)
 
+}
+
+func TestUser_setPassword(t *testing.T) {
+
+	type args struct {
+		password string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "Successful Update",
+			args: args{
+				password: "MyNewPas123",
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_ = db.Drop("User")
+			_ = createUser(ds)
+			dolph, _ := getUserByUsername(ds.Username)
+
+			dolph.setPassword(tt.args.password)
+
+			dolph, _ = dolph.reload()
+
+			assert.Nil(t, dolph.checkPassword(tt.args.password))
+
+		})
+	}
+}
+
+func TestUser_checkPassword(t *testing.T) {
+
+	_ = db.Drop("User")
+	_ = createUser(ds)
+	dolph, _ := getUserByUsername(ds.Username)
+
+	type args struct {
+		password string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "Match",
+			args: args{password: ds.Password},
+		},
+		{
+			name:    "Non-match",
+			args:    args{password: "p455w0rd"},
+			wantErr: true,
+		},
+		{
+			name:    "Wrong-case",
+			args:    args{password: strings.ToUpper(ds.Password)},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.wantErr {
+				assert.Contains(t, dolph.checkPassword(tt.args.password).Error(), "passwords don't match")
+				return
+			}
+			assert.Nil(t, dolph.checkPassword(tt.args.password))
+		})
+	}
 }
