@@ -19,8 +19,9 @@ end
 
 # FIXME standardise on single or double quotes
 When %r{^I enter '(.*)' in the '(.*)' field$} do |value, field|
-  input = page.find("label", text: /^#{field}$/)['for']
-
+  field_matcher = /^#{field}$/
+  expect(page).to have_css("label", text: field_matcher)
+  input = page.find("label", text: field_matcher)['for']
   fill_in input, with: value
 end
 
@@ -111,23 +112,22 @@ Then %r{^I should see a "(.*?)" form with the following fields:$} do |form_id, t
   end
 
 Then %r{^the '(.*)' field should allow values from '(\d+)' to '(\d+)' characters$} do |field, min, max|
-  within("form") do
-    # make sure the form has properly loaded before continuing
-    expect(page).to have_css("label", text: /^#{field}$/)
 
-    name = page.find("label", text: /^#{field}$/)['for']
-    input = page.find("input[name='#{name}']")
-    expect(input['minlength']).to eql(min)
-    expect(input['maxlength']).to eql(max)
-  end
+  # this is a bit hacky, but it allows capybara to wait for the page to have loaded fully
+  # by ensuring that we don't continue until there's at least one field on the page
+  # that has a minlength or maxlength attr
+  expect(page).to have_xpath("//*[@minlength|@maxlength]")
+
+  name = page.find("label", text: /^#{field}$/)['for']
+  input = page.find("input[name='#{name}']")
+  expect(input['minlength']).to eql(min)
+  expect(input['maxlength']).to eql(max)
 end
 
 And %r{^the '(.*)' field should be at least '(\d+)' characters long$} do |field, min|
-  within("form") do
-    name = page.find("label", text: /^#{field}$/)['for']
-    input = page.find("input[name='#{name}']")
-    expect(input['minlength']).to eql(min)
-  end
+  name = page.find("label", text: /^#{field}$/)['for']
+  input = page.find("input[name='#{name}']")
+  expect(input['minlength']).to eql(min)
 end
 
 And %r{^the '(.*)' field should be at most '(\d+)' characters long$} do |field, max|

@@ -22,6 +22,7 @@ Feature: Settings page
 		Given I am on my settings page
 		When I enter 'abc123' in the 'New Password' field
 		And I enter 'def456' in the 'Confirm Password' field
+		And the 'New Password' field should be at least '6' characters long
 		Then the "Confirm Password" field should be marked invalid
 
 	Scenario: Non-matching confirmation

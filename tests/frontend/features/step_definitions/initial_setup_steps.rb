@@ -37,15 +37,15 @@ Then %r{^the '(.*)' field should be valid$} do |field|
 end
 
 Then %r{^the 'Confirm Password' field should be marked invalid$} do
-  within("form") do
-    expect(page).to have_css(".confirm-password-group.has-danger")
+  within("form .confirm-password-group") do
+    expect(page).to have_css("input.is-invalid")
   end
 end
 
 Then %r{^there should be a warning containing '(.*)'$} do |warning|
   within("form .confirm-password-group") do
     expect(page).to have_content(warning)
-    expect(page).to have_css(".passwords-do-not-match-message")
+    expect(page).to have_css(".password-match-feedback.form-control-feedback-message")
   end
 end
 
@@ -56,9 +56,9 @@ When %r{^I enter matching passwords in the '(.*)' and '(.*)' fields$} do |first,
 end
 
 Then %r{^no password\-related warnings should be visible$} do
-  within("form") do
-    expect(page).not_to have_css(".confirm-password-group.has-danger")
-    expect(page).not_to have_css(".passwords-do-not-match-message")
+  within("form .confirm-password-group") do
+    expect(page).not_to have_css("input.is-invalid")
+    expect(page).not_to have_css(".password-match-feedback.form-control-feedback-message")
   end
 end
 
