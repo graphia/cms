@@ -12,22 +12,22 @@ Feature: Settings page
 	Scenario: Page contents
 		Given I am on my settings page
 		Then the page heading should be "Personal Details"
-		And I should see a form with the following fields:
+		And I should see a "Personal Details" form with the following fields:
 			| Name     | Type  | Required | Disabled |
 			| Username | Text  | Yes      | Yes      |
 			| Email    | Email | Yes      | Yes      |
 			| Name     | Text  | Yes      | No       |
-		And the submit button should be disabled
+		And the "Personal Details" submit button should be disabled
 
 	Scenario: Enabling of the submit button
 		Given I am on my settings page
 		When I change my name to "Ranier Wolfcastle"
-		Then the submit button should be enabled
+		Then the "Personal Details" submit button should be enabled
 
 	Scenario: Updating my name
 		Given I am on my settings page
 		When I change my name to "Ranier Wolfcastle"
-		And I submit the form
+		And I submit the "Personal Details" form
 		Then my name should have changed to "Ranier Wolfcastle"
 
 	Scenario: Breadcrumbs

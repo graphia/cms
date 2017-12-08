@@ -113,7 +113,7 @@ export default class CMSUser {
 			});
 
 			if (!checkResponse(response.status)) {
-				throw {reason: "Couldn't update user name", code: response.status}
+				throw {reason: "Couldn't update user name", code: response.status};
 			}
 
 			let data = await response.json()
@@ -121,7 +121,31 @@ export default class CMSUser {
 
 		}
 		catch(err) {
-			console.error("initial user fetch failed", err);
+			console.error("Could not save user", err);
+		};
+	};
+
+	async updatePassword(currentPassword, newPassword) {
+		let path = `${config.api}/settings/password`;
+
+		console.debug("currentPassword", currentPassword)
+		console.debug("newPassword", newPassword)
+
+		try {
+			let response = fetch(path, {
+				method: "PATCH",
+				headers: store.state.auth.authHeader(),
+				body: JSON.stringify({
+					current_password: currentPassword,
+					new_password: newPassword
+				})
+			});
+
+			return response;
+
+		}
+		catch(err) {
+			console.error("Password update failed", err);
 		};
 	};
 

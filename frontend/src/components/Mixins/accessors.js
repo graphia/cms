@@ -32,6 +32,10 @@ export default {
 
 		commit() {
 			return this.$store.state.commit;
+		},
+
+		user() {
+			return this.$store.state.user;
 		}
 
 	}

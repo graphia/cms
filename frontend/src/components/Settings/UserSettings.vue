@@ -9,7 +9,7 @@
 			<div class="col-md-9 personal-details">
 				<h1>Personal Details</h1>
 
-				<form @submit="updateUser">
+				<form id="personal-details" @submit="updateUser">
 
 					<div class="form-group">
 						<label class="form-control-label" for="username">Username</label>
@@ -61,7 +61,12 @@
 					</div>
 				</form>
 
+
+				<PasswordSettings/>
+
+
 			</div>
+
 		</div>
 
 	</div>
@@ -71,6 +76,7 @@
 
 	import SettingsNavigation from "./Navigation";
 	import Breadcrumbs from '../Utilities/Breadcrumbs';
+	import PasswordSettings from './UserSettings/PasswordSettings';
 
 	import CMSUser from '../../javascripts/models/user.js';
 	import CMSBreadcrumb from '../../javascripts/models/breadcrumb.js';
@@ -103,7 +109,8 @@
 		},
 		components: {
 			SettingsNavigation,
-			Breadcrumbs
+			Breadcrumbs,
+			PasswordSettings
 		}
 
 	};

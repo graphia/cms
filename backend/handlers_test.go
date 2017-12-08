@@ -2166,7 +2166,7 @@ func Test_apiUpdatePasswordHandler(t *testing.T) {
 					NewPassword:     "ihatetroy",
 				},
 			},
-			wantCode: http.StatusUnauthorized,
+			wantCode: http.StatusBadRequest,
 			wantMsg:  "Current password is not correct",
 			wantErr:  true,
 		},

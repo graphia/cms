@@ -42,6 +42,16 @@ When %r{^I submit the form$} do
   end
 end
 
+When %r{^I submit the "(.*?)" form$} do |form_id|
+  within("form##{get_class(form_id)}") do
+    find("input[type='submit']").native.send_keys(:enter)
+  end
+end
+
+def get_class(desc)
+  desc.gsub(" ", "-").downcase
+end
+
 When %r{^I submit the form by clicking '(.*)'$} do |label_text|
   within("form") do
     page.find("input[type='submit'][value='#{label_text}']").click
@@ -73,6 +83,32 @@ Then %r{^I should see a form with the following fields:$} do |table|
 
   end
 end
+
+# | Name     | Type     | Required  |
+# | Name     | Text     | yes       |
+# | Password | Password | yes       |
+Then %r{^I should see a "(.*?)" form with the following fields:$} do |form_id, table|
+
+    table.hashes.each do |row|
+
+      name = row.fetch("Name")
+      data_type = row.fetch("Type").downcase
+      required = (row.fetch("Required", "no").downcase == "yes")
+      disabled = (row.fetch("Disabled", "no").downcase == "yes")
+
+      within("form##{get_class(form_id)}") do
+        label = page.find("label", text: /^#{name}$/)
+        input = page.find("input[name='#{label['for']}']")
+
+        # ensure the element exists and has the right attributes
+        expect(input).not_to be_nil
+        expect(input['type']).to eql(data_type)
+        expect(input['required']).to eql('true') if required
+        expect(input['disabled']).to eql('true') if disabled
+      end
+
+    end
+  end
 
 Then %r{^the '(.*)' field should allow values from '(\d+)' to '(\d+)' characters$} do |field, min, max|
   within("form") do
@@ -107,4 +143,16 @@ When %r{^I enter a '(\d+)' letter word into '(.*)'$} do |chars, field|
   fill_in(field.downcase, with: val)
   expect(page.find("input[name='#{field.downcase}']").value).to eql(val)
   page.find('body').click
+end
+
+Then %r{^the "(.*?)" submit button should be enabled$} do |form_id|
+  within("form##{get_class(form_id)}") do
+    expect(page.find("input[type='submit']")).not_to be_disabled
+  end
+end
+
+Then %r{^the "(.*?)" submit button should be disabled$} do |form_id|
+  within("form##{get_class(form_id)}") do
+    expect(page.find("input[type='submit']")).to be_disabled
+  end
 end

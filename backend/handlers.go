@@ -1235,6 +1235,17 @@ func apiUpdateUserNameHandler(w http.ResponseWriter, r *http.Request) {
 	JSONResponse(SuccessResponse{Message: "User updated"}, http.StatusOK, w)
 }
 
+// apiUpdatePasswordHandler updates the password after confirming that the
+// user knows their current password
+//
+// PATCH /api/settings/password
+//
+// returns
+//
+// {
+//   "current_password": "p455w0rd",
+//   "new_password": "passwORDx123",
+// }
 func apiUpdatePasswordHandler(w http.ResponseWriter, r *http.Request) {
 
 	var fr FailureResponse
@@ -1245,6 +1256,8 @@ func apiUpdatePasswordHandler(w http.ResponseWriter, r *http.Request) {
 	user := getCurrentUser(r.Context())
 
 	json.NewDecoder(r.Body).Decode(&pl)
+
+	Debug.Println("password update payload", pl)
 
 	err = validate.Struct(pl)
 	if err != nil {
@@ -1258,7 +1271,7 @@ func apiUpdatePasswordHandler(w http.ResponseWriter, r *http.Request) {
 		fr = FailureResponse{
 			Message: "Current password is not correct",
 		}
-		JSONResponse(fr, http.StatusUnauthorized, w)
+		JSONResponse(fr, http.StatusBadRequest, w)
 		return
 	}
 
