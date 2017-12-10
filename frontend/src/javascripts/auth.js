@@ -9,7 +9,7 @@ export default class CMSAuth {
 
 	constructor() {
 		this._token = localStorage.getItem("token");
-	}
+	};
 
 	get token() {
 		return this._token;
@@ -20,15 +20,15 @@ export default class CMSAuth {
 		this._token = value;
 		localStorage.setItem('token', value);
 		localStorage.setItem('token_received', Date.now());
-	}
+	};
 
 	loggedIn() {
 		return (this.token && !this.tokenExpired);
-	}
+	};
 
 	tokenExpired() {
 		return (this.tokenExpiry < Date.now);
-	}
+	};
 
 	tokenExpiry() {
 		if (this.token) {
@@ -36,7 +36,7 @@ export default class CMSAuth {
 			return decoded.exp
 		}
 		return 0;
-	}
+	};
 
 	static async doInitialSetup() {
 
@@ -163,8 +163,8 @@ export default class CMSAuth {
 		catch(error) {
 			console.error('Oops, there was a problem', response.status, error);
 			return false;
-		}
-	}
+		};
+	};
 
 	// pull the token from localStorage and return it inside a
 	// Headers object
@@ -184,21 +184,21 @@ export default class CMSAuth {
 
 		} catch(err) {
 			console.warn("No token found, rendering login", err);
+
+			store.state.broadcast.addMessage(
+				"warning",
+				"You are not logged in",
+				`Your session probably expired, please log in again`,
+				5
+			);
+
 			this.redirectToLogin();
 		};
 
-	}
+	};
 
 	redirectToLogin() {
-
-		store.state.broadcast.addMessage(
-			"warning",
-			"You are not logged in",
-			`Your session probably expired, please log in again`,
-			5
-		);
-
 		router.push({name: 'login'});
-	}
+	};
 
 };

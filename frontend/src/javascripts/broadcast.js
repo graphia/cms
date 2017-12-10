@@ -30,7 +30,6 @@ class CMSMessage {
 	}
 
 	expire() {
-		console.log("expiring...");
 		this.active = false;
 	}
 
@@ -49,7 +48,22 @@ export default class CMSBroadcast {
 	}
 
 	addMessage(type, alert, content, timeout = 10) {
+
+		if (!this.messages) {
+			console.error("no messages")
+			return
+		};
+
 		let message = new CMSMessage(type, alert, content, timeout);
+
+		// if message is already present, deactivate it
+		this.messages
+			.map((m) => {
+				if (m.type == type && m.content == content) {
+					m.expire();
+				}
+			});
+
 		this.messages.push(message);
 
 	};
