@@ -64,9 +64,10 @@ Given %r{^I am logged in$} do
 end
 
 When %r{^I select 'Logout' from the settings menu$} do
+  page.save_screenshot('/tmp/screenshot.png')
   within("nav.navbar") do
-    page.find("#user-menu").click
-    page.find(".dropdown-item.logout").click
+    click_link "user-menu" # finding by id
+    click_link "Logout"    # finding by text
   end
 end
 

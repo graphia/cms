@@ -79,8 +79,6 @@ export {router};
 // ensure that only logged-in users can continue
 router.beforeEach((to, from, next) => {
 
-	console.debug("checking user is accessing a 'safe' path", to.path)
-
 	// is the destination somewhere other than the login page?
 	if (to.path == '/cms/login' || to.path == '/cms/setup/initial_user') {
 		// destination is login page, continue
@@ -88,17 +86,14 @@ router.beforeEach((to, from, next) => {
 	}
 
 	else {
-		console.debug("no they aren't, make sure they're logged in", to.path)
-
 		// save original destination
 		window.originalDestination = to.path;
 
 		// if token exists, continue, otherwise redirect to login page
 		if (CMSAuth.isLoggedIn()) {
-			console.debug("yes, they're logged in, continue");
 			next();
 		} else {
-			console.warn("No, redirect them to the login page");
+			console.warn("Redirecting to the login page");
 			next(new Error("NotLoggedIn"));
 		};
 	}
@@ -107,7 +102,6 @@ router.beforeEach((to, from, next) => {
 
 router.onError((err) => {
 	if (err.message == "NotLoggedIn") {
-		console.debug("Not logged in, redirecting to login");
 		next('/cms/login');
 	}
 })
@@ -130,6 +124,7 @@ Vue.filter('capitalize', (value) => {
 		return value.charAt(0).toUpperCase() + value.slice(1);
 	} catch(err) {
 		console.warn("cannot capitalize:", value, err);
+		return value;
 	}
 });
 

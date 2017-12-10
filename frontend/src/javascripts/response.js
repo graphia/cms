@@ -1,7 +1,6 @@
 import store from './store.js';
 
 export default function checkResponse(responseCode) {
-	console.debug("checking response", responseCode);
 
 	// First deal with specific status codes
 

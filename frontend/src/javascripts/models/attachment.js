@@ -25,8 +25,6 @@ export default class CMSFileAttachment {
 	// Convert a file retrieved from the CMS into a CMSFileAttachment
 	static fromData(object) {
 
-		console.log("extracting attachment object from", object);
-
 		let ab = new ArrayBuffer(object.data.length);
 
 		let ia = new Uint8Array(ab);
@@ -47,8 +45,6 @@ export default class CMSFileAttachment {
 			`data:${object.filetype};base64,${object.data}`,
 			{base64Encoded: true}
 		);
-
-		console.log("new obj", attachment);
 
 		return attachment;
 	}

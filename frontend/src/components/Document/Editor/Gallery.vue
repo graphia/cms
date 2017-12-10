@@ -25,8 +25,6 @@
 		mixins: [Accessors],
 		methods: {
 			dragImage(event) {
-				console.log("dragging initiated!");
-				console.debug(event);
 				event.dataTransfer.setData(
 					"text/plain",
 					event.currentTarget.getAttribute('data-markdown')

@@ -6,7 +6,6 @@ import CMSAuth from '../auth.js';
 export default class CMSUser {
 
 	constructor(data) {
-		console.debug("Initialising User", data);
 
 		if (!data) {
 			this._name = "";
@@ -49,7 +48,6 @@ export default class CMSUser {
 	// persisted name allows us to modify the user obj without
 	// affecting the displayed name in the nav menu
 	get persistedName() {
-		console.log("persisted", this.persisted)
 		if (this.persisted) {
 			return this.persisted.name;
 		};
@@ -128,53 +126,41 @@ export default class CMSUser {
 	async updatePassword(currentPassword, newPassword) {
 		let path = `${config.api}/settings/password`;
 
-		console.debug("currentPassword", currentPassword)
-		console.debug("newPassword", newPassword)
+		let response = fetch(path, {
+			method: "PATCH",
+			headers: store.state.auth.authHeader(),
+			body: JSON.stringify({
+				current_password: currentPassword,
+				new_password: newPassword
+			})
+		});
 
-		try {
-			let response = fetch(path, {
-				method: "PATCH",
-				headers: store.state.auth.authHeader(),
-				body: JSON.stringify({
-					current_password: currentPassword,
-					new_password: newPassword
-				})
-			});
+		return response;
 
-			return response;
-
-		}
-		catch(err) {
-			console.error("Password update failed", err);
-		};
 	};
 
 	static async fetchUser() {
 
-		try {
-			let response = await fetch(`${config.api}/user_info`, {
-				method: "GET",
-				headers: store.state.auth.authHeader()
-			});
+		let response = await fetch(`${config.api}/user_info`, {
+			method: "GET",
+			headers: store.state.auth.authHeader()
+		});
 
-			if (!checkResponse(response.status)) {
-				throw {reason: "Couldn't get user info", code: response.status}
-			}
-
-			let data = await response.json()
-			let user = new CMSUser(data);
-			store.user = user;
-			return user;
+		if (!checkResponse(response.status)) {
+			throw {reason: "Couldn't get user info", code: response.status}
 		}
-		catch(err) {
-			console.error("initial user fetch failed", err);
-		};
+
+		let data = await response.json()
+		let user = new CMSUser(data);
+		store.user = user;
+		return user;
+
 	};
 
 	async refresh() {
 
 		if (this.refreshInProgress) {
-			console.debug("already requesting user info, skipping");
+			console.warn("already requesting user info, skipping");
 			return;
 		};
 

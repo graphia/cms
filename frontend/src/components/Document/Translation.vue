@@ -76,8 +76,6 @@
 						return
 					}
 
-					console.debug("Translation created", code, response);
-
 					let json = await response.json();
 
 					// the new filename is returned in the 'meta' field of the

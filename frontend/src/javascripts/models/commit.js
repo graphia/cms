@@ -7,7 +7,6 @@ export default class CMSCommit {
 	};
 
 	static initialize() {
-		console.debug("Initializing commit...");
 		store.state.commit = new CMSCommit(null);
 	};
 
@@ -61,8 +60,6 @@ export default class CMSCommit {
 				slug: file.slug
 			}
 		}
-
-		console.debug("json:", json);
 
 		return json;
 	};

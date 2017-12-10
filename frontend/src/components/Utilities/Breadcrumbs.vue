@@ -33,9 +33,6 @@
 		methods: {
 			currentPage(breadcrumb) {
 
-				console.debug("this.$router.history.current.name", this.$router.history.current.name)
-				console.debug("breadcrumb.target", breadcrumb.target)
-
 				if (this.$router.history.current.name === breadcrumb.target) {
 					return true;
 				};

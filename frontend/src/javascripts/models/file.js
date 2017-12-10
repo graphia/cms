@@ -8,7 +8,6 @@ export default class CMSFile {
 
 
 	static initialize(directory) {
-		console.debug("Initialising file in", directory);
 		let file = new CMSFile({initialzing: true, path: directory});
 		store.state.activeDocument = file;
 		return file;
@@ -178,15 +177,12 @@ export default class CMSFile {
 	 *    edit [boolean]: when true returns markdown from the API, when false HTML
 	 */
 	static async find(directory, filename, edit = false) {
-		console.debug(`finding ${filename} in ${directory}`);
-
 		let path = `${config.api}/directories/${directory}/files/${filename}`
 
 		// if we need the uncompiled markdown (for loading the editor), amend '/edit' to the path
 		if (edit) {
-			console.debug("edit is true, adding '/edit' to", path);
 			path = [path, "edit"].join("/");
-		}
+		};
 
 		let response = await fetch(path, {mode: "cors", headers: store.state.auth.authHeader()})
 
@@ -262,12 +258,10 @@ export default class CMSFile {
 	};
 
 	async destroy(commit) {
-		console.debug(commit);
 
 		var path = `${config.api}/directories/${this.path}/files/${this.filename}`
 
 		try {
-
 			let response = await fetch(path, {
 				mode: "cors",
 				method: "DELETE",
@@ -281,7 +275,6 @@ export default class CMSFile {
 			console.error(`There was a problem deleting document ${this.filename} from ${this.path}, ${err}`);
 		}
 
-		console.debug("Deleted")
 	};
 
 	async log() {
@@ -300,8 +293,6 @@ export default class CMSFile {
 			console.error(`There was a problem retriving log for ${filename} in ${directory}, ${err}`);
 		}
 
-
-		console.debug("Deleted")
 	};
 
 	async fetchAttachments() {
@@ -321,9 +312,8 @@ export default class CMSFile {
 			});
 
 			if (response.status == 404) {
-				console.debug("No attachments found");
-				return;
-			}
+				throw("no attachments found")
+			};
 
 			let data = await response.json();
 
@@ -335,8 +325,8 @@ export default class CMSFile {
 
 		}
 		catch(err) {
-			console.error(`There was a problem retriving attachments`);
-		}
+			console.error("There was a problem retriving attachments", err);
+		};
 	};
 
 	addAttachment(file) {

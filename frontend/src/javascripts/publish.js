@@ -13,7 +13,7 @@ export default class CMSPublisher {
 			return;
 		};
 
-		console.debug("Attempting to publish");
+		console.info("Publishing site");
 
 		let response = await fetch(`${config.api}/publish`, {
 			method: "POST",

@@ -81,7 +81,6 @@
 			}
 		},
 		created() {
-			console.debug("created");
 			this.retrievePatch(this.hash);
 		},
 		components: {

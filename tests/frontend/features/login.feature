@@ -38,10 +38,3 @@ Feature: Logging in
 	Scenario: Logging in with valid credentials
 		Given I have logged in
 		Then I should have a JWT saved in localstorage
-
-	Scenario: Logging out
-		Given I am logged in
-		When I select 'Logout' from the settings menu
-		Then I should be logged out
-		And I should be on the login screen
-		And there should be no entries in the navigation bar

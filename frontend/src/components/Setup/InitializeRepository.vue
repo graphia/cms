@@ -43,9 +43,11 @@
 
 					let json = await response.json();
 
-					console.debug("Repository initialised", json);
-
-					this.$store.state.broadcast.addMessage("success", "Repository initialised", "You have created a new place to store your documents, start by adding a new directory", 10);
+					this.$store.state.broadcast.addMessage(
+						"success",
+						"Repository initialised", "You have created a new place to store your documents, start by adding a new directory",
+						10
+					);
 
 					this.redirectToHome();
 

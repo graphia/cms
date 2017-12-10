@@ -24,9 +24,6 @@
 						</router-link>
 					</li>
 
-					<li><a class="nav-link" href="#">History</a></li>
-					<li><a class="nav-link" href="#">Admin</a></li>
-
 				</ul>
 
 				<ul class="navbar-nav">
@@ -81,12 +78,11 @@
 					throw 'Token expired';
 				}
 
-				console.debug("token is present and has not expired, renewing");
+				console.info("token is present and has not expired, renewing");
 				this.$store.state.auth.renew();
 
 				["getLatestRevision", "getTranslationInfo", "getTopLevelDirectories"]
 					.map(func => {
-						console.log("executing", func)
 						this.$store.dispatch(func);
 					});
 
@@ -98,9 +94,10 @@
 			}
 			catch(err) {
 				// Token rejected for renewal
-				console.warn(err);
+				console.warn("Token not valid", err);
 				this.$store.state.auth.redirectToLogin();
-			}
+			};
+
 		},
 
 		computed: {

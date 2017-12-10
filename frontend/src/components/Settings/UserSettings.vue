@@ -102,7 +102,6 @@
 		methods: {
 			async updateUser(event) {
 				event.preventDefault();
-				console.debug("form submitted!");
 				await this.user.save();
 				this.user.refresh();
 			}

@@ -23,12 +23,10 @@
 		name: "MarkdownEditor",
 		mixins: [Accessors],
 		mounted() {
-				console.log("MarkdownEditor Created");
 				this.simpleMDE = this.initializeSimpleMDE();
 		},
 		methods: {
 			initializeSimpleMDE() {
-				console.log("initializing SimpleMDE");
 
 				let self = this;
 
@@ -40,8 +38,6 @@
 					let attachments = self.document.attachments;
 
 					let html = $.parseHTML(this.parent.markdown(text));
-
-					console.debug("slug", self.document.slug);
 
 					$(html)
 						.find('img')
@@ -87,8 +83,6 @@
 					dropEvent.stopPropagation();
 					dropEvent.preventDefault();
 
-					console.log("Dropped!")
-
 					// grab some information from the editor so we know where to insert
 					// the image's placeholder later
 					let cursor = editor.getCursor();
@@ -105,14 +99,9 @@
 					for (var i = 0; i < dropEvent.dataTransfer.items.length; i++) {
 						let item = dropEvent.dataTransfer.items[i];
 
-						console.debug("dropped a gallery image");
-
 						if (item.type != "text/plain") {
-							console.debug(`item.type is ${item.type}, ignoring`);
 							continue;
 						};
-
-						console.debug("got a text/plain, continuing")
 
 						item.getAsString((imagePlaceholder) => {
 							doc.replaceRange(`\n${imagePlaceholder}\n`, pos);
@@ -122,8 +111,6 @@
 
 					// surely there's a nicer way of looping with an index in es6? 🤷
 					for (var i = 0; i < dropEvent.dataTransfer.files.length; i++) {
-						console.debug("dropped a filesystem image");
-
 						let file = dropEvent.dataTransfer.files[i];
 
 						let reader = new FileReader();
@@ -156,7 +143,6 @@
 		},
 		watch: {
 			"$parent.markdownLoaded": function() {
-				console.debug("syncing content");
 				this.simpleMDE.value(this.document.markdown);
 			}
 		}

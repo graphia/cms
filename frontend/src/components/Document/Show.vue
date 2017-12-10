@@ -144,18 +144,12 @@
 		},
 		methods: {
 			async getDocument() {
-
 				let filename = this.filename;
 				let directory = this.directory;
-
-				console.debug(`retrieving document ${filename} from ${directory}`);
-
 				this.$store.dispatch("getDocument", {directory, filename});
 			},
 			async destroy(event) {
 				event.preventDefault();
-				console.debug("delete clicked!");
-
 				let file = this.document;
 
 				let response = await this.document.destroy(this.commit);
@@ -181,7 +175,6 @@
 					return;
 				};
 
-				console.debug("File deleted, redirecting to document index");
 				this.redirectToDirectoryIndex(this.directory);
 
 			},

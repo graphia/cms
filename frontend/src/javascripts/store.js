@@ -43,11 +43,9 @@ const mutations = {
 		return dir;
 	},
 	setActiveDirectory(context, directory) {
-		console.debug("setting active directory", directory);
 		state.activeDirectory = directory;
 	},
 	async setLatestRevision(context, hash) {
-		console.debug("setting latest revision", hash);
 		state.latestRevision = hash;
 	},
 	async loadUser(context) {

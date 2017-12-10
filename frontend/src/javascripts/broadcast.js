@@ -49,8 +49,6 @@ export default class CMSBroadcast {
 	}
 
 	addMessage(type, alert, content, timeout = 10) {
-		console.debug("received broadcast content", type, alert, content)
-
 		let message = new CMSMessage(type, alert, content, timeout);
 		this.messages.push(message);
 

@@ -84,11 +84,9 @@
 
 				// if there are, abort!
 				if (!doSetup) {
-					console.debug("App is set up, don't load wizard")
 					return;
 				}
 
-				console.debug("App not setup, load the wizard");
 				// if there aren't, start the setup wizard
 				this.$router.push({
 					name: 'initial_setup'

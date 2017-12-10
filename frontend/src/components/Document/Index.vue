@@ -118,7 +118,6 @@
 		},
 		methods: {
 			async setup(directory) {
-				console.debug("retrieving all files from", directory);
 				this.$store.dispatch("getDocumentsInDirectory", directory);
 			},
 

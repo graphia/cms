@@ -119,7 +119,6 @@
 					return;
 				};
 
-				console.debug("Document saved, redirecting to 'document_show'");
 				this.redirectToShowDocument(this.document.path, this.document.filename);
 
 			},
