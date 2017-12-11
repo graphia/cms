@@ -22,6 +22,11 @@
 	export default {
 		name: "MarkdownEditor",
 		mixins: [Accessors],
+		data() {
+			return {
+				count: 0
+			}
+		},
 		mounted() {
 				this.simpleMDE = this.initializeSimpleMDE();
 		},
@@ -80,8 +85,22 @@
 
 				simpleMDE.codemirror.on('drop', async (editor, dropEvent) => {
 
-					dropEvent.stopPropagation();
-					dropEvent.preventDefault();
+
+					this.count++;
+
+
+					for (let type of event.dataTransfer.types) {
+						console.debug("type:", type);
+					};
+
+					/*
+					 * Draging text externally (dragging text from another file): types
+					 * has "text/plain" and "text/html"
+					 * Draging text internally (dragging text to another line): types
+					 * has just "text/plain"
+					 * Draging a file: types has "Files"
+					 * Draging a url: types has "text/plain" and "text/uri-list"
+					 */
 
 					// grab some information from the editor so we know where to insert
 					// the image's placeholder later
@@ -91,22 +110,6 @@
 					let pos = {
 						line: cursor.line,
 						ch: line.length
-					};
-
-
-					// if we've dropped an image from the gallery we just care about
-					// entering the placeholder into the editor
-					for (var i = 0; i < dropEvent.dataTransfer.items.length; i++) {
-						let item = dropEvent.dataTransfer.items[i];
-
-						if (item.type != "text/plain") {
-							continue;
-						};
-
-						item.getAsString((imagePlaceholder) => {
-							doc.replaceRange(`\n${imagePlaceholder}\n`, pos);
-						});
-
 					};
 
 					// surely there's a nicer way of looping with an index in es6? 🤷
@@ -128,7 +131,7 @@
 
 							let imagePlaceholder = attachment.markdownImage();
 
-							doc.replaceRange(`\n${imagePlaceholder}\n`, pos);
+							doc.replaceRange(`${imagePlaceholder}\n`, pos);
 
 						};
 

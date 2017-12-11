@@ -25,6 +25,8 @@
 		mixins: [Accessors],
 		methods: {
 			dragImage(event) {
+				event.dataTransfer.clearData();
+
 				event.dataTransfer.setData(
 					"text/plain",
 					event.currentTarget.getAttribute('data-markdown')
