@@ -28,13 +28,6 @@ Feature: Listing documents
 			| documents  | Documents  |
 			| appendices | Appendices |
 
-	Scenario: Breadcrumbs
-		Given I am on the "documents" index page
-		Then I should see the following breadcrumbs:
-			| Text                | Reference |
-			| Dashboard           | /cms      |
-			| Important Documents | None      |
-
 	Scenario: When the directory is empty
 		Given the 'empty' directory contains no files
 		When I am on the "empty" index page
@@ -52,3 +45,14 @@ Feature: Listing documents
 		When I am on the "operating-procedures" index page
 		Then the main heading should be "404"
 		And there should be an alert with the message "The item you were looking for cannot be found"
+
+	Scenario: Breadcrumbs
+		Given I am on the "documents" index page
+		Then I should see the following breadcrumbs:
+			| Text                | Reference |
+			| Dashboard           | /cms      |
+			| Important Documents | None      |
+
+	Scenario: Primary navigation highlighting
+		When I am on the "appendices" index page
+		Then the primary navigation link "Appendices" should be active

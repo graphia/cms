@@ -64,3 +64,9 @@ Feature: Home page contents
 	Scenario: Breadcrumbs
 		Given I am on the homepage
 		Then I should only see the inactive 'Dashboard' breadcrumb
+
+	Scenario: Primary navigation highlighting
+		Given I am on the homepage
+		Then the primary navigation link "Home" should be active
+		When I am on the "documetns" index page
+		Then the primary navigation link "Home" should not be active

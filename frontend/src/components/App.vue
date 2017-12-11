@@ -15,7 +15,7 @@
 				<ul class="navbar-nav mr-auto">
 
 					<li>
-						<router-link :to="{name: 'home'}" class="nav-link home-link">Home</router-link>
+						<router-link :to="{name: 'home'}" exact class="nav-link home-link">Home</router-link>
 					</li>
 
 					<li v-for="(directory, i) in directories" :key="i">

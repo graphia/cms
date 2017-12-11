@@ -15,3 +15,15 @@ end
 Then %r{^there should be a '(.*?)' link$} do |text|
   expect(page).to have_css("a", text: text)
 end
+
+Then %r{^the primary navigation link "(.*?)" should be active$} do |text|
+  within("nav.navbar") do
+    expect(page).to have_css("a.active", text: text)
+  end
+end
+
+Then %r{^the primary navigation link "(.*?)" should not be active$} do |text|
+  within("nav.navbar") do
+    expect(find_link(text)['class'].split).not_to include("active")
+  end
+end
