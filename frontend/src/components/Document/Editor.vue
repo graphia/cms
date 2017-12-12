@@ -46,7 +46,7 @@
 								v-bind:disabled="!valid"
 							/>
 
-							<router-link :to="formCancellationRedirectParams" class="btn btn-text">
+							<router-link :to="formCancellationRedirectParams" exact class="btn btn-text">
 								Cancel
 							</router-link>
 						</div>
