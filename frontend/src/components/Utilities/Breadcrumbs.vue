@@ -28,12 +28,7 @@
 		},
 		methods: {
 			currentPage(breadcrumb) {
-
-				if (this.$router.history.current.name === breadcrumb.target) {
-					return true;
-				};
-
-				return false;
+				return this.$router.history.current.name === breadcrumb.target;
 			}
 		}
 	};
