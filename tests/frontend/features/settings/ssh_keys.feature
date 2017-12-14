@@ -16,6 +16,10 @@ Feature: Setting up my SSH Keys
 			 | Existing keys        |
 			 | Upload a new SSH key |
 
+	Scenario: Page title
+		Given I visit my ssh key settings page
+		Then the page's title should be "Settings: SSH Keys"
+
 	Scenario: When I have no SSH keys I should see an informative message
 		Given I have no SSH keys
 		When I visit my ssh key settings page

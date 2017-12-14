@@ -1,5 +1,5 @@
 <template>
-	<div id="document-index">
+	<div id="document-index" v-title="title">
 
 		<div v-if="this.documents && this.documents.length > 0">
 
@@ -132,11 +132,10 @@
 					.filter((file) => { return file.translation })
 			}
 
-
 		},
 		computed: {
 			title() {
-				return this.$store.activeDirectory.title;
+				return (this.activeDirectory && this.activeDirectory.title) || "Listing documents";
 			},
 			breadcrumbs() {
 				return [

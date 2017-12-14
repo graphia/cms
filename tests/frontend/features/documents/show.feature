@@ -1,4 +1,4 @@
-Feature: Creating documents
+Feature: Displaying documents
 	So I can view CMS contents
 	As an author
 	I want to be able to read the fully formatted documents
@@ -13,6 +13,10 @@ Feature: Creating documents
 	Scenario: Viewing a document
 		Given I navigate to that document's 'show' page
 		Then I should see the correctly-formatted document
+
+	Scenario: Page title is properly set
+		Given I am on the document's show page
+		And the page's title should be "Appendix 1"
 
 	Scenario: Frontmatter
 		Given I am on the document's show page

@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<div v-title="heading">
 		<Breadcrumbs :levels="breadcrumbs"/>
 
 		<Conflict/>

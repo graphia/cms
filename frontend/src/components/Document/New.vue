@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<div v-title="heading">
 
 		<Breadcrumbs :levels="breadcrumbs"/>
 
@@ -78,7 +78,7 @@
 						{directory: this.directory}
 					)
 				];
-			}
+			},
 
 		},
 		methods: {

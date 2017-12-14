@@ -9,6 +9,10 @@ Feature: Listing documents
 		And my user account exists
 		And I have logged in
 
+	Scenario: Page title is properly set
+		Given I am on the "documents" index page
+		Then the page's title should be "Important Documents"
+
 	Scenario: Documents are visible on the documents page
 		Given there are directories called "documents" and "appendices"
 		And they both contain Markdown files

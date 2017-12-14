@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<div v-title="document.title">
 		<Breadcrumbs :levels="breadcrumbs"/>
 
 		<section class="row">

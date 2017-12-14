@@ -14,6 +14,10 @@ Feature: Home page contents
 		Given I am on the homepage
 		Then the main heading should be "Dashboard"
 
+	Scenario: Page title is dynamic
+		Given I am on the homepage
+		And the page's title should be "Graphia CMS"
+
 	Scenario: Primary navigation bar should contain directory links
 		Given the following directories exist in the repository
 			| appendices |

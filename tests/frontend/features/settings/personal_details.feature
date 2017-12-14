@@ -19,6 +19,10 @@ Feature: Settings page
 			| Name     | Text  | Yes      | No       |
 		And the "Personal Details" submit button should be disabled
 
+	Scenario: Page title
+		Given I am on my settings page
+		Then the page's title should be "Settings: Personal Details"
+
 	Scenario: Enabling of the submit button
 		Given I am on my settings page
 		When I change my name to "Ranier Wolfcastle"

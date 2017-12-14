@@ -14,6 +14,11 @@ Feature: Commits
 		When I navigate to the commit's details page
 		Then I should see some information specific to the commit
 
+	Scenario: Page title
+		Given I have added a new file
+		When I navigate to the commit's details page
+		Then the commits's page title should contain "Commit" and the short hash
+
 	Scenario: Added files
 		Given I have added a new file
 		When I navigate to the commit's details page

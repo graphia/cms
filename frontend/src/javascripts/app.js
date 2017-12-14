@@ -43,6 +43,11 @@ import vagueTime from 'vague-time';
 Vue.component('octicon', Octicon);
 Vue.use(VueRouter);
 
+Vue.directive('title', {
+	inserted: (el, binding) => document.title = binding.value,
+	update: (el, binding) => document.title = binding.value
+});
+
 const routes = [
 	// Unprotected pages
 	{path: '/cms/setup/initial_user', component: SetupInitialUser, name: 'initial_setup'},

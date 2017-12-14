@@ -9,6 +9,12 @@ Feature: Creating documents
 		And my user account exists
 		And I have logged in
 
+	Scenario: Page title is dynamic
+		Given I am on the new document page
+		And the page's title should be "New Document"
+		When I set the "title" to "Boo-urns"
+		Then now the title is "Boo-urns"
+
 	Scenario: The editor
 		Given I am on the new document page
 		Then I should see an editor with the following buttons:

@@ -21,3 +21,11 @@ Then %r{^the navigation bar should contain the following links:$} do |table|
     end
   end
 end
+
+Then %r{^the page's title (?:should be|is) "(.*?)"$} do |title|
+  expect(page).to have_title(title)
+end
+
+Then %r{^now the title is "(.*?)"$} do |title|
+  expect(page).to have_title(title)
+end

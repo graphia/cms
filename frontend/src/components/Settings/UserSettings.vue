@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<div v-title="title">
 
 		<Breadcrumbs :levels="breadcrumbs"/>
 
@@ -96,6 +96,10 @@
 
 			breadcrumbs() {
 				return [new CMSBreadcrumb("User settings", "user_settings")];
+			},
+
+			title() {
+				return "Settings: Personal Details";
 			}
 
 		},

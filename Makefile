@@ -35,7 +35,8 @@ keep-testing:
 	ls backend/*.go | entr -r go test -v ${ALL} -log-to-file=true -config=${TEST_CONFIG}
 
 keep-building:
-	ls backend/*.go frontend/src/**/*.* | entr -r make build-dev
+	#ls backend/*.go frontend/src/**/*.* | entr -r make build-dev
+	find backend frontend/src -name "*.go" -or -name "*.js" -or -name "*.vue" | entr -r make build-dev
 
 keep-building-backend:
 	ls backend/*.go | entr -r make build-backend-dev

@@ -1,7 +1,6 @@
 <template>
 
-
-	<div>
+	<div v-title="title">
 		<Breadcrumbs :levels="breadcrumbs"/>
 
 		<div class="row">
@@ -104,6 +103,10 @@
 		computed: {
 			breadcrumbs() {
 				return [new CMSBreadcrumb("SSH key settings", "ssh_key_settings")];
+			},
+
+			title() {
+				return "Settings: SSH Keys";
 			}
 		},
 		methods: {

@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<div v-title="title">
 
 		<Breadcrumbs :levels="breadcrumbs" />
 
@@ -76,7 +76,8 @@
 
 		data() {
 			return {
-				commits: []
+				commits: [],
+				title: "Graphia CMS"
 			};
 		},
 
@@ -93,7 +94,6 @@
 		},
 
 		methods: {
-
 
 			async getLatestCommits() {
 				let path = `${config.api}/recent_commits`;
