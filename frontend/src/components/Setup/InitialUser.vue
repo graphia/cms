@@ -1,6 +1,6 @@
 <template>
 
-	<div class="row">
+	<div class="row" v-title="title">
 
 		<div class="col-sm-8 offset-sm-2">
 
@@ -76,7 +76,8 @@
 					password: null,
 					confirm_password: null,
 					email: null
-				}
+				},
+				title: "Graphia CMS: Create an admin"
 			}
 		},
 		computed: {

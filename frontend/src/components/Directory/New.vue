@@ -1,6 +1,6 @@
 <template>
 
-	<div class="new-directory">
+	<div class="new-directory" v-title="title">
 
 		<h4>
 			Create a new directory
@@ -73,7 +73,8 @@
 			return {
 				markdownLoaded: true,
 				formID: "create-directory",
-				valid: false
+				valid: false,
+				title: "Create directory"
 			};
 		},
 		created() {

@@ -1,5 +1,5 @@
 <template>
-	<div class="row">
+	<div class="row" v-title="title">
 
 		<div class="col-sm-6 offset-sm-3">
 
@@ -48,7 +48,8 @@
 		data() {
 			return {
 				username: "",
-				password: ""
+				password: "",
+				title: "Graphia CMS: Login"
 			};
 		},
 		created() {

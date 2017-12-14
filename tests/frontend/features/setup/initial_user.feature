@@ -23,6 +23,10 @@ Feature: Setting up an initial user
 			| Confirm Password | Password | yes       |
 		And the submit button should be labelled 'Create'
 
+	Scenario: Page title
+		Given I am on the initial setup page
+		And the page's title should be "Graphia CMS: Create an admin"
+
 	Scenario: HTML5 input length validation attributes
 		Given I am on the initial setup page
 		Then the 'Username' field should allow values from '3' to '32' characters

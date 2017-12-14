@@ -14,6 +14,10 @@ Feature: Setting up an initial user
 		Given I try to navigate to the home page
 		Then I should be redirected to the initialize repository page
 
+	Scenario: Page title
+		Given I am on the initialize repository page
+		And the page's title should be "Graphia CMS: Create repository"
+
 	Scenario: Initialize repository page contents
 		Given I am on the initialize repository page
 		Then I should see a button with text 'Initialise Repository'

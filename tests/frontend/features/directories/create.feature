@@ -29,6 +29,10 @@ Feature: Creating directories
 			| Markdown Guide |
 		And the submit button should be labelled 'Create directory'
 
+	Scenario: Page title
+		Given I am on the new directory page
+		And the page's title should be "Create directory"
+
 	Scenario: Creating a directory
 		Given I am on the new directory page
 		And I fill in the form with the following data:

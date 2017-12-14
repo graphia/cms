@@ -1,5 +1,5 @@
 <template>
-	<div class="row">
+	<div class="row" v-title="title">
 
 		<div class="col col-md-9">
 			<div class="alert alert-warning">
@@ -23,6 +23,11 @@
 
 	export default {
 		name: "SetupInitialiseRepository",
+		data() {
+			return {
+				title: "Graphia CMS: Create repository"
+			};
+		},
 		methods: {
 			async initializeRepo(event) {
 				event.preventDefault();

@@ -16,6 +16,10 @@ Feature: Logging in
 			| Password         | Password | yes       |
 		And the submit button should be labelled 'Log in'
 
+	Scenario: Page title
+		Given I am on the login screen
+		And the page's title should be "Graphia CMS: Login"
+
 	Scenario: Logging in with invalid credentials
 		Given I am on the login screen
 		When I enter invalid credentials
