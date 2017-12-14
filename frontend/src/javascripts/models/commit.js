@@ -10,14 +10,14 @@ export default class CMSCommit {
 		store.state.commit = new CMSCommit(null);
 	};
 
-	filesJSON(file) {
+	filesJSON(file, includeAttachments=true) {
 
 		return JSON.stringify({
 			message: this.message,
 			repository_info: {
 				latest_revision: store.state.latestRevision
 			},
-			files: this._buildFilesArray(file)
+			files: this._buildFilesArray(file, includeAttachments)
 		});
 	};
 
@@ -31,11 +31,14 @@ export default class CMSCommit {
 		})
 	};
 
-	_buildFilesArray(file) {
-		// FIXME (maybe), only works for one file + attachments
-		return [
-			this._file(file)
-		].concat(this._attachments(file));
+	_buildFilesArray(file, includeAttachments) {
+		let arr = [this._file(file)];
+
+		if (includeAttachments) {
+			arr.concat(this._attachments(file));
+		};
+
+		return arr;
 	}
 
 	_buildDirectoriesArray(directory) {
