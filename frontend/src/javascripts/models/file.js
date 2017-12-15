@@ -257,7 +257,7 @@ export default class CMSFile {
 		}
 	};
 
-	async destroy(commit, includeAttachments=false) {
+	async destroy(commit, deleteAttachments=false) {
 
 		var path = `${config.api}/directories/${this.path}/files/${this.filename}`
 
@@ -266,7 +266,7 @@ export default class CMSFile {
 				mode: "cors",
 				method: "DELETE",
 				headers: store.state.auth.authHeader(),
-				body: commit.filesJSON(this, false)
+				body: commit.filesJSON(this, deleteAttachments)
 			});
 
 			return response;

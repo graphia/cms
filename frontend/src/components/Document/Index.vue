@@ -68,6 +68,8 @@
 
 		<div v-else-if="this.documents && this.documents.length === 0">
 
+			<Breadcrumbs :levels="breadcrumbs"/>
+
 			<div class="col-12">
 
 				<div class="alert alert-warning">
@@ -86,6 +88,8 @@
 		</div>
 
 		<div v-else>
+			<Breadcrumbs :levels="breadcrumbs"/>
+
 			<Error :code="404"/>
 		</div>
 	</div>

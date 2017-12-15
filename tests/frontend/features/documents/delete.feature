@@ -9,9 +9,14 @@ Feature: Deleting documents
 		And my user account exists
 		And I have logged in
 
-	Scenario: Deleting a file
+	Scenario: The deletion modal
 		Given I am on the document's show page
 		When I click the "Delete" button
+		Then I should see the deletion modal box
+
+	Scenario: Deleting a file
+		Given I can see the document's deletion modal
+		When I click the "Confirm deletion" button
 		Then I should be redirected to the parent directory's index
 		And the file should have been deleted
 
@@ -22,11 +27,11 @@ Feature: Deleting documents
 	Scenario: Should show a appropriate error when repo out of sync
 		Given I am on the document's show page
 		And a repository update has taken place in the background
-		When I click the "Delete" button
+		When I try to delete the file
 		Then there should be an alert with the message "The repository is out of sync"
 
 	Scenario: Deleting a file after reloading data
 		Given I have tried to delete a file after a repo update
-		When I click the "Delete" button again
+		When I try to delete the file again
 		Then I should be redirected to the parent directory's index
 		And the file should have been deleted

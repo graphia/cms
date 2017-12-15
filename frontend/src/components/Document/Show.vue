@@ -43,9 +43,7 @@
 								History
 							</router-link>
 
-							<button type="button" @click="destroy" class="btn btn-danger mr-2">
-								Delete
-							</button>
+							<DocumentDelete/>
 
 							<Translation/>
 
@@ -75,6 +73,7 @@
 
 	import Breadcrumbs from '../Utilities/Breadcrumbs';
 	import Translation from './Translation';
+	import DocumentDelete from './Delete';
 	import CMSBreadcrumb from '../../javascripts/models/breadcrumb.js';
 	import Accessors from '../Mixins/accessors';
 
@@ -148,47 +147,13 @@
 				let directory = this.directory;
 				this.$store.dispatch("getDocument", {directory, filename});
 			},
-			async destroy(event) {
-				event.preventDefault();
-				let file = this.document;
 
-				let response = await this.document.destroy(this.commit);
-
-				if (!checkResponse(response.status)) {
-
-					if (response.status == 409) {
-
-						this.$store.state.broadcast.addMessage(
-							"danger",
-							"Failed",
-							"The repository is out of sync",
-							3
-						);
-
-						this.getDocument();
-
-						return;
-					};
-
-					// any other error
-					throw("could not update document", response);
-					return;
-				};
-
-				this.redirectToDirectoryIndex(this.directory);
-
-			},
-			redirectToDirectoryIndex(directory) {
-				this.$router.push({
-					name: 'document_index',
-					params:{directory}
-				});
-			}
 		},
 		mixins: [Accessors],
 		components: {
 			Breadcrumbs,
-			Translation
+			Translation,
+			DocumentDelete
 		}
 	}
 </script>
