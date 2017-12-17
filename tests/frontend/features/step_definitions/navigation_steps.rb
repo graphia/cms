@@ -1,7 +1,6 @@
 When %r{^I click the "(.*?)" button(?: again)?$} do |button_text|
   button = page.find("a,button", text: button_text)
   scroll_into_view(button)
-  expect(button).to be_visible
   button.click
 end
 

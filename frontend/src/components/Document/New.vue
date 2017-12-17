@@ -85,6 +85,8 @@
 			async create(event) {
 				event.preventDefault();
 
+				this.commit.addFile(this.document);
+
 				let response = await this.document.create(this.commit);
 
 				if (!checkResponse(response.status)) {

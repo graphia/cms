@@ -38,7 +38,7 @@
 			},
 			availableLanguages() {
 
-				return this
+				return this.languages && this
 					.languages
 					.filter((language) => {
 						return !this

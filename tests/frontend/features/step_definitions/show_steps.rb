@@ -76,7 +76,7 @@ Then %r{^I should be on the document's edit page$} do
 end
 
 Then %r{^I should be on the directory's index page$} do
-  expect(page).to have_css('h1', 'Appendices')
+  expect(page).to have_css('h2', text: 'Appendices')
   expect(page.current_path).to eql("/cms/appendices")
 end
 

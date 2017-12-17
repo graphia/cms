@@ -2,6 +2,7 @@
 
 	<div>
 
+		<!-- FIXME had to remove 'fade' class from modal due to Cucumber, add it back -->
 		<div id="delete-warning" class="modal">
 			<div class="modal-dialog" role="document">
 				<div class="modal-content">
@@ -62,6 +63,7 @@
 
 	import Accessors from '../Mixins/accessors';
 
+	import CMSDirectory from '../../javascripts/models/directory.js';
 	import checkResponse from "../../javascripts/response.js";
 
 	export default {
@@ -71,8 +73,14 @@
 				deleteAttachments: false
 			};
 		},
+		created() {
+			// create a commit to be populated/used if delete is clicked
+			this.initializeCommit();
+		},
 		methods: {
-
+			initializeCommit() {
+				this.$store.dispatch("initializeCommit");
+			},
 			showDeleteModal() {
 				event.preventDefault();
 				$("#delete-warning.modal").modal();
@@ -85,11 +93,16 @@
 			async destroy(event, ) {
 
 				event.preventDefault();
-				console.debug("delete clicked");
 
-				let file = this.document;
+				// build and configure the commit 👷‍
 
-				let response = await this.document.destroy(this.commit, this.deleteAttachments);
+				this.commit.addFile(this.document);
+
+				if (this.deleteAttachments) {
+					this.commit.addDirectory(new CMSDirectory(this.document.attachmentsDir));
+				};
+
+				let response = await this.document.destroy(this.commit, false);
 
 				if (!checkResponse(response.status)) {
 
@@ -104,6 +117,7 @@
 
 						this.hideDeleteModal();
 						this.getDocument();
+						this.commit.reset();
 
 						return;
 					};

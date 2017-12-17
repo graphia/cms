@@ -45,7 +45,7 @@
 
 							<DocumentDelete/>
 
-							<Translation/>
+							<Translation v-if="$store.state.translationEnabled"/>
 
 						</div>
 					</div>
@@ -85,9 +85,6 @@
 			// populate $store.state.documents with docs from api
 
 			this.getDocument();
-
-			// create a commit to be populated/used if delete is clicked
-			this.$store.dispatch("initializeCommit")
 
 		},
 		computed: {

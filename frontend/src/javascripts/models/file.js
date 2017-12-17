@@ -29,7 +29,7 @@ export default class CMSFile {
 			this.title           = "";
 			this.author          = "";
 			this.synopsis        = "";
-			this.tags            = "";
+			this.tags            = [];
 			this.version         = "";
 			this.history         = [];
 			this.attachments     = [];
@@ -101,7 +101,7 @@ export default class CMSFile {
 	get translation() {
 
 		return this.translationRegex.test(this.filename)
-	}
+	};
 
 	get language() {
 		let code = this.translationRegex.exec(this.filename)
@@ -111,7 +111,49 @@ export default class CMSFile {
 		};
 
 		return store.state.languages.find(x => x.code === code[1]);
-	}
+	};
+
+	get attachmentsDir() {
+		return [this.path, this.slug].join("/");
+	};
+
+	// make the file usable by a commit
+	prepareJSON(includeAttachments=true) {
+		let a = [];
+
+		let f = [
+			{
+				path: this.path,
+				filename: this.filename,
+				body: this.markdown,
+
+				// and the frontmatter
+				frontmatter: {
+					title: this.title,
+					author: this.author,
+					tags: this.tags,
+					synopsis: this.synopsis,
+					version: this.version,
+					slug: this.slug
+				}
+			}
+		];
+
+		if (includeAttachments) {
+			a = this.attachments.map((attachment) => {
+				return {
+					path: [this.path, this.slug, "images"].join("/"),
+					filename: attachment.name,
+					base_64_encoded: attachment.options.base64Encoded,
+					body: attachment.contents()
+				};
+			});
+
+		};
+
+		return [...f, ...a];
+
+	};
 
 	// class methods
 
@@ -222,7 +264,7 @@ export default class CMSFile {
 				mode: "cors",
 				method: "POST",
 				headers: store.state.auth.authHeader(),
-				body: commit.filesJSON(this)
+				body: JSON.stringify(commit.prepareJSON())
 			});
 
 			return response;
@@ -247,7 +289,7 @@ export default class CMSFile {
 				mode: "cors",
 				method: "PATCH",
 				headers: store.state.auth.authHeader(),
-				body: commit.filesJSON(this)
+				body: JSON.stringify(commit.prepareJSON())
 			});
 
 			return response;
@@ -259,14 +301,14 @@ export default class CMSFile {
 
 	async destroy(commit, deleteAttachments=false) {
 
-		var path = `${config.api}/directories/${this.path}/files/${this.filename}`
+		var path = `${config.api}/directories/${this.path}/files/${this.filename}`;
 
 		try {
 			let response = await fetch(path, {
 				mode: "cors",
 				method: "DELETE",
 				headers: store.state.auth.authHeader(),
-				body: commit.filesJSON(this, deleteAttachments)
+				body: JSON.stringify(commit.prepareJSON(deleteAttachments))
 			});
 
 			return response;

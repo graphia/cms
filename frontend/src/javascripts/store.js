@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import Vuex from 'vuex';
+import Vuex, { mapActions } from 'vuex';
 import router from './app';
 
 import CMSFile from '../javascripts/models/file.js';

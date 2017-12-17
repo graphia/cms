@@ -105,6 +105,8 @@
 
 				event.preventDefault();
 
+				this.commit.addFile(this.document);
+
 				let response = await this.document.update(this.commit);
 
 				if (!checkResponse(response.status)) {

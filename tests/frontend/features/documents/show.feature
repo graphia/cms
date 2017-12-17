@@ -43,6 +43,7 @@ Feature: Displaying documents
 	Scenario: Clicking the Delete button
 		Given I am on the document's show page
 		When I click the toolbar's 'Delete' button
+		And I click the "Confirm deletion" button
 		Then I should be on the directory's index page
 		And the document should have been deleted
 

@@ -17,6 +17,18 @@ export default class CMSDirectory {
 		this.body        = body        || "";
 	};
 
+	prepareJSON() {
+		return {
+			name: this.path,
+			info: {
+				title: this.title,
+				description: this.description,
+				body: this.body
+			}
+		};
+	};
+
+
 	static async all() {
 		let path = `${config.api}/directories`
 
@@ -70,7 +82,7 @@ export default class CMSDirectory {
 				mode: "cors",
 				method: "POST",
 				headers: store.state.auth.authHeader(),
-				body: commit.directoriesJSON(this)
+				body: JSON.stringify(commit.prepareJSON())
 			});
 
 			if (!checkResponse(response.status)) {

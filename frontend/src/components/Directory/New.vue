@@ -89,6 +89,8 @@
 			async createDirectory(event) {
 				event.preventDefault();
 
+				this.commit.addDirectory(this.activeDirectory);
+
 				let response = await this.activeDirectory.create(this.commit);
 
 				if (!checkResponse(response.status)) {
