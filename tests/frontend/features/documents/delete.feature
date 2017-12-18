@@ -35,3 +35,16 @@ Feature: Deleting documents
 		When I try to delete the file again
 		Then I should be redirected to the parent directory's index
 		And the file should have been deleted
+
+	Scenario: Deleting a file plus its attachments
+		Given I can see the document's deletion modal
+		When I check the "Delete attachments" checkbox
+		And I click the "Confirm deletion" button
+		Then I should be redirected to the parent directory's index
+		And the file and attachments directory should have been deleted
+
+	Scenario: Deleting a file without its attachments
+		Given I can see the document's deletion modal
+		When I click the "Confirm deletion" button
+		Then I should be redirected to the parent directory's index
+		And the file should have been deleted but not the attachments directory

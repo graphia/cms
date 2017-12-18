@@ -1644,7 +1644,7 @@ func apiGetLanguageInformationHandler(w http.ResponseWriter, r *http.Request) {
 	// return enabled false if translation disabled in config
 	if !config.TranslationEnabled {
 		response := struct {
-			TranslationEnabled bool `json:"translation_enabled,omitempty"`
+			TranslationEnabled bool `json:"translation_enabled"`
 		}{
 			false,
 		}

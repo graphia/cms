@@ -897,6 +897,87 @@ func TestApiDeleteFileFromDirectory(t *testing.T) {
 
 }
 
+func TestApiDeleteFileAndAttachmentsFromDirectory(t *testing.T) {
+	var err error
+
+	server = createTestServerWithContext(false)
+
+	repoPath := "../tests/tmp/repositories/delete_file"
+	oid, _ := setupMultipleFiletypesTestRepo(repoPath)
+
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files/document_1.md")
+
+	ncf1 := NewCommitFile{
+		Filename: "document_1.md",
+		Path:     "documents",
+	}
+
+	ncd1 := NewCommitDirectory{
+		Path: "documents/document_1",
+	}
+
+	nc := &NewCommit{
+		Files:          []NewCommitFile{ncf1},
+		Directories:    []NewCommitDirectory{ncd1},
+		RepositoryInfo: RepositoryInfo{LatestRevision: oid.String()},
+	}
+
+	// ensure the files exist
+	_, err = os.Stat(filepath.Join(repoPath, ncf1.Path, ncf1.Filename))
+	assert.False(t, os.IsNotExist(err))
+
+	// ensure the directories exist
+	_, err = os.Stat(filepath.Join(repoPath, ncd1.Path))
+	assert.False(t, os.IsNotExist(err))
+
+	payload, err := json.Marshal(nc)
+	if err != nil {
+		panic(err)
+	}
+
+	client := &http.Client{}
+
+	buff := bytes.NewBuffer(payload)
+
+	req, _ := http.NewRequest("DELETE", target, buff)
+
+	resp, err := client.Do(req)
+
+	// We've created a commit so return 201, even though the
+	// commit contains a deletion
+	assert.Equal(t, http.StatusCreated, resp.StatusCode)
+
+	var receiver SuccessResponse
+
+	json.NewDecoder(resp.Body).Decode(&receiver)
+
+	repo, _ := repository(config)
+	hc, _ := headCommit(repo)
+
+	// ensure returned commit hash is hte same as the repo's head
+	assert.Equal(t, receiver.Oid, hc.Id().String())
+
+	// ensure the most recent nc has the right name and email
+	oid, _ = git.NewOid(receiver.Oid)
+	lastCommit, _ := repo.LookupCommit(oid)
+
+	user := apiTestUser()
+	assert.Equal(t, lastCommit.Committer().Name, user.Name)
+	assert.Equal(t, lastCommit.Committer().Email, user.Email)
+
+	// ensure the files no longer exist
+	_, err = os.Stat(filepath.Join(repoPath, ncf1.Path, ncf1.Filename))
+	assert.True(t, os.IsNotExist(err))
+
+	// ensure the directories no longer exist
+	_, err = os.Stat(filepath.Join(repoPath, ncd1.Path))
+	assert.True(t, os.IsNotExist(err))
+
+	// ensure a suitable commit message has been generated
+	assert.Equal(t, "File deleted documents/document_1.md", lastCommit.Message())
+
+}
+
 // Make sure that the file specified in the URL is included in the payload
 func TestApiDeleteOtherFileFromDirectory(t *testing.T) {
 	server = createTestServerWithContext(false)

@@ -18,7 +18,7 @@
 						technical user can restore files in the future.
 					</div>
 
-					<div class="modal-body" v-if="attachmentsPresent">
+					<div class="modal-body">
 						<p>
 							Are you sure you want to delete <code>{{ document.filename }}</code>?
 						</p>
@@ -31,7 +31,7 @@
 						<div class="form-check">
 							<label class="form-check-label">
 								<input v-model="deleteAttachments" class="form-check-input" type="checkbox">
-								Delete attachments?
+								Delete attachments
 							</label>
 						</div>
 
@@ -142,14 +142,6 @@
 				let directory = this.directory;
 				this.$store.dispatch("getDocument", {directory, filename});
 			},
-		},
-		computed: {
-			attachmentsCount() {
-				return this.document.attachments && this.document.attachments.length;
-			},
-			attachmentsPresent() {
-				return this.attachmentsCount && this.attachmentsCount > 0;
-			}
 		},
 		mixins: [Accessors]
 	};

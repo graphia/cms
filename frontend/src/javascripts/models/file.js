@@ -1,4 +1,5 @@
 import store from '../store.js';
+import slugify from '../utilities/slugify.js';
 import config from '../config.js';
 import checkResponse from '../response.js';
 import CMSFileAttachment from './attachment.js';
@@ -80,7 +81,7 @@ export default class CMSFile {
 			this.initializing   = true;
 			this.directory_info = new CMSDirectory;
 			this.translations   = [];
-		}
+		};
 
 	};
 
@@ -114,6 +115,9 @@ export default class CMSFile {
 	};
 
 	get attachmentsDir() {
+		if (!this.path || !this.slug) {
+			return null;
+		};
 		return [this.path, this.slug].join("/");
 	};
 
@@ -332,7 +336,7 @@ export default class CMSFile {
 			return response;
 		}
 		catch(err) {
-			console.error(`There was a problem retriving log for ${filename} in ${directory}, ${err}`);
+			console.error(`There was a problem retrieving log for ${filename} in ${directory}, ${err}`);
 		}
 
 	};
@@ -367,7 +371,7 @@ export default class CMSFile {
 
 		}
 		catch(err) {
-			console.error("There was a problem retriving attachments", err);
+			console.warn(err);
 		};
 	};
 

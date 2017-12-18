@@ -7,6 +7,16 @@ Then %r{^the file should have been deleted$} do
   expect(File.exist?(File.join(REPO_PATH, "appendices", "appendix_1.md"))).to be false
 end
 
+Then %r{^the file and attachments directory should have been deleted$} do
+  expect(File.exist?(File.join(REPO_PATH, "appendices", "appendix_1.md"))).to be false
+  expect(Dir.exist?(File.join(REPO_PATH, "appendices", "appendix_1"))).to be false
+end
+
+Then %r{^the file should have been deleted but not the attachments directory$} do
+  expect(File.exist?(File.join(REPO_PATH, "appendices", "appendix_1.md"))).to be false
+  expect(Dir.exist?(File.join(REPO_PATH, "appendices", "appendix_1"))).to be true
+end
+
 Given %r{^I have deleted a single file$} do
   steps %{
     Given I am on the document's show page

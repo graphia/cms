@@ -1,5 +1,6 @@
 ---
 title: Appendix 1
+slug: appendix_1
 author: Arnold Pye
 synopsis: The first appendix is the best appendix
 tags:

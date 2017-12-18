@@ -654,6 +654,26 @@ func deleteFiles(nc NewCommit, user User) (oid *git.Oid, err error) {
 
 	}
 
+	// if we're deleting the accompanying attachment directories too
+	for _, ncd := range nc.Directories {
+
+		// ensure that the directory exists before we try to delete it
+		// if it doesn't, continue rather than the usual error
+		d, _ := ht.EntryByPath(ncd.Path)
+		if d == nil {
+			Warning.Println("directory does not exist", ncd.Path)
+			continue
+		}
+
+		// and remove the target by path and everything beneath it
+		err = index.RemoveDirectory(ncd.Path, 0)
+		if err != nil {
+			Error.Println("cannot delete directory", ncd.Path, err.Error())
+			return nil, err
+		}
+
+	}
+
 	// final check, if no commit message supplied use a generic one
 	if nc.Message == "" {
 		nc.Message = "File deleted"
@@ -1006,6 +1026,8 @@ func pathInFiles(directory, filename string, files *[]NewCommitFile) bool {
 
 	// check that at least one file in files matches the directory and filename
 	for _, file := range *files {
+		Debug.Println("path", file.Path, directory)
+		Debug.Println("filename", file.Filename, filename)
 		if file.Path == directory && file.Filename == filename {
 			return true
 		}
