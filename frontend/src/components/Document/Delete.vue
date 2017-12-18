@@ -2,8 +2,7 @@
 
 	<div>
 
-		<!-- FIXME had to remove 'fade' class from modal due to Cucumber, add it back -->
-		<div id="delete-warning" class="modal">
+		<div id="delete-warning" class="modal fade">
 			<div class="modal-dialog" role="document">
 				<div class="modal-content">
 					<div class="modal-header">
