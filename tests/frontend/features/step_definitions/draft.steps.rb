@@ -1,11 +1,13 @@
 Then %r{^the "(.*?)" checkbox should be checked$} do |name|
-  target = page.find("label", text: name)['for']
-  expect(page.find("input[type='checkbox'][name='#{target}']")).to be_checked
+  within("label", text: /^#{name}$/) do
+    expect(page.find("input[type='checkbox']")).to be_checked
+  end
 end
 
 Then %r{^the "(.*?)" checkbox should be unchecked$} do |name|
-  target = page.find("label", text: name)['for']
-  expect(page.find("input[type='checkbox'][name='#{target}']")).not_to be_checked
+  within("label", text: /^#{name}$/) do
+    expect(page.find("input[type='checkbox']")).not_to be_checked
+  end
 end
 
 When %r{^I fill in the rest of the document form and submit it$} do

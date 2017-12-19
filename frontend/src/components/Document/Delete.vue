@@ -82,11 +82,11 @@
 			},
 			showDeleteModal() {
 				event.preventDefault();
-				$("#delete-warning.modal").modal();
+				return $("#delete-warning.modal").modal();
 			},
 
 			hideDeleteModal() {
-				$("#delete-warning.modal").modal("hide");
+				return $("#delete-warning.modal").modal("hide");
 			},
 
 			async destroy(event, ) {
@@ -107,16 +107,18 @@
 
 					if (response.status == 409) {
 
+						[
+							await this.hideDeleteModal(),
+							await this.getDocument(), // refresh
+							this.commit.reset()
+						];
+
 						this.$store.state.broadcast.addMessage(
 							"danger",
 							"Failed",
 							"The repository is out of sync",
 							3
 						);
-
-						this.hideDeleteModal();
-						this.getDocument();
-						this.commit.reset();
 
 						return;
 					};

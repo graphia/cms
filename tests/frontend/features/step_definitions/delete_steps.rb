@@ -55,8 +55,6 @@ Given %r{^I can see the document's deletion modal$} do
 end
 
 When %r{^I (?:try|attempt) to delete the file(?: again)?$} do
-  steps %{
-    When I click the "Delete" button
-    And I click the "Confirm deletion" button
-  }
+  click_button "Delete"
+  click_button "Confirm deletion"
 end
