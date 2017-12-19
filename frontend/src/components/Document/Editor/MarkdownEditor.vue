@@ -128,7 +128,7 @@
 							let attachment = new CMSFileAttachment(
 								file,
 								onloadendEvent.target.result,
-								{base64Encoded: true}
+								{base64Encoded: true, newFile: true}
 							);
 
 							this.document.addAttachment(attachment);

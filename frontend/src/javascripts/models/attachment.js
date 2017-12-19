@@ -43,7 +43,7 @@ export default class CMSFileAttachment {
 		let attachment = new CMSFileAttachment(
 			blob,
 			`data:${object.filetype};base64,${object.data}`,
-			{base64Encoded: true}
+			{base64Encoded: true, newFile: false}
 		);
 
 		return attachment;

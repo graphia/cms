@@ -144,14 +144,16 @@ export default class CMSFile {
 		];
 
 		if (includeAttachments) {
-			a = this.attachments.map((attachment) => {
-				return {
-					path: [this.path, this.slug, "images"].join("/"),
-					filename: attachment.name,
-					base_64_encoded: attachment.options.base64Encoded,
-					body: attachment.contents()
-				};
-			});
+			a = this.attachments
+				.filter(attachment => attachment.isNew())
+				.map((attachment) => {
+					return {
+						path: [this.path, this.slug, "images"].join("/"),
+						filename: attachment.name,
+						base_64_encoded: attachment.options.base64Encoded,
+						body: attachment.contents()
+					};
+				});
 
 		};
 
