@@ -1,14 +1,16 @@
 <template>
 
 	<div class="card-body image-list row">
-		<div class="col-xs-6" v-for="(attachment, i) in document.attachments" :key="i">
+		<div class="col-xs-3" v-for="(attachment, i) in document.attachments" :key="i">
 
 			<img
 				:src="attachment.dataURI()"
 				:data-size="attachment.size"
 				:data-type="attachment.type"
 				:data-markdown="attachment.markdownImage()"
+				class="img-thumbnail rounded"
 				draggable="true"
+				height="100px"
 				@dragstart="dragImage"
 			/>
 

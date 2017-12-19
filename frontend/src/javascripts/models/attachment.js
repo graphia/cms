@@ -50,10 +50,7 @@ export default class CMSFileAttachment {
 	}
 
 	isNew() {
-		if (this.options.newFile) {
-			return true;
-		};
-		return false;
+		return this.options.newFile;
 	};
 
 	dataURI() {
@@ -66,7 +63,7 @@ export default class CMSFileAttachment {
 
 		if (this.options.base64Encoded) {
 			return this.data.split("base64,").pop();
-		}
+		};
 
 		return this.data;
 	};
@@ -76,7 +73,7 @@ export default class CMSFileAttachment {
 	};
 
 	relativePath() {
-		return ["images", this.name].join('/');
+		return ["images", window.encodeURI(this.name)].join('/');
 	};
 
 	markdownImage() {

@@ -59,6 +59,10 @@
 										}
 									);
 
+								if (!attachment) {
+									console.warn("No attachment found matching", element);
+								};
+
 								$(element).attr('src', attachment.dataURI());
 
 							};
