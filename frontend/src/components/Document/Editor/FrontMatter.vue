@@ -16,16 +16,19 @@
 
 		<VersionField/>
 		<TagsField/>
+		<DraftField/>
 
 	</div>
 
 </template>
 
 <script lang="babel">
+	import Accessors from '../../Mixins/accessors';
+
 	import TitleField from "../Editor/FrontMatter/TitleField";
 	import TagsField from "../Editor/FrontMatter/TagsField";
 	import VersionField from "../Editor/FrontMatter/VersionField";
-	import Accessors from '../../Mixins/accessors';
+	import DraftField from "../Editor/FrontMatter/DraftField";
 
 
 	export default {
@@ -34,7 +37,8 @@
 		components: {
 			TitleField,
 			TagsField,
-			VersionField
+			VersionField,
+			DraftField
 		}
 	}
 </script>

@@ -62,6 +62,7 @@ Then %r{^I should download a copy of my file "(.*?)$} do |filename|
 
       contents = File.read(File.join(DOWNLOAD_DIR, "sample-document.md"))
       expect(contents).to include(SAMPLE_MARKDOWN)
+      break
 
     rescue RSpec::Expectations::ExpectationNotMetError
       sleep(0.1)

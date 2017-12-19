@@ -27,13 +27,19 @@
 
 				<div class="col-md-4" v-for="(d, base, i) in groupedTranslations" :key="i">
 
-					<div class="card document-entry m-1" :data-filename="base">
+					<div class="card document-entry m-1" :data-filename="base" :class="{'border-warning': primary(d).draft}" :data-draft="primary(d).draft">
 
-						<h3 class="card-header">
+						<div class="card-header">
+
 							<router-link :to="{name: 'document_show', params: {filename: primary(d).filename}}">
 								{{ primary(d).title || primary(d).filename }}
 							</router-link>
-						</h3>
+
+							<span v-if="primary(d).draft" class="badge badge-sm badge-warning text-right">
+								Draft
+							</span>
+
+						</div>
 
 						<div class="card-body">
 							<p class="card-text">{{ primary(d).synopsis || description_placeholder }}</p>

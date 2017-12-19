@@ -47,6 +47,7 @@ func (nt NewTranslation) TargetFilename() string {
 // FrontMatter contains the document's metadata
 type FrontMatter struct {
 	Author   string   `json:"author"   yaml:"author"`
+	Draft    bool     `json:"draft"    yaml:"draft"`
 	Slug     string   `json:"slug"     yaml:"slug"`
 	Synopsis string   `json:"synopsis" yaml:"synopsis"`
 	Tags     []string `json:"tags"     yaml:"tags"`

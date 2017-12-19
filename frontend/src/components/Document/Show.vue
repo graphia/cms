@@ -32,6 +32,9 @@
 									{{ tag }}
 								</span>
 							</dd>
+
+							<dt>Draft</dt>
+							<dd>{{ this.draftDescription() }}</dd>
 						</dl>
 
 						<div class="btn-toolbar" role="toolbar">
@@ -144,7 +147,12 @@
 				let directory = this.directory;
 				this.$store.dispatch("getDocument", {directory, filename});
 			},
-
+			draftDescription() {
+				if (this.document.draft) {
+					return "Yes";
+				};
+				return "No";
+			}
 		},
 		mixins: [Accessors],
 		components: {

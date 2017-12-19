@@ -156,3 +156,15 @@ Then %r{^the "(.*?)" submit button should be disabled$} do |form_id|
     expect(page.find("input[type='submit']")).to be_disabled
   end
 end
+
+When %r{^I check the "(.*)" checkbox$} do |checkbox|
+  check(checkbox.downcase)
+end
+
+When %r{^I uncheck the "(.*)" checkbox$} do |checkbox|
+  uncheck(checkbox.downcase)
+end
+
+Then %r{^there should be a checkbox called "(.*?)"$} do |name|
+  expect(page).to have_css("input[type='checkbox'][name='#{name.downcase}']")
+end

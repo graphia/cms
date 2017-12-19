@@ -7,7 +7,6 @@ import CMSDirectory from './directory.js';
 
 export default class CMSFile {
 
-
 	static initialize(directory) {
 		let file = new CMSFile({initialzing: true, path: directory});
 		store.state.activeDocument = file;
@@ -36,6 +35,7 @@ export default class CMSFile {
 			this.attachments     = [];
 			this.translations    = [];
 			this.initialMarkdown = "";
+			this.draft           = true;
 
 		} else if (file) {
 
@@ -48,7 +48,6 @@ export default class CMSFile {
 			this.markdown              = file.markdown;
 			this.translations          = file.translations;
 
-
 			// frontmatter fields
 			this.title                 = file.frontmatter.title;
 			this.author                = file.frontmatter.author;
@@ -56,6 +55,7 @@ export default class CMSFile {
 			this.tags                  = file.frontmatter.tags;
 			this.slug                  = file.frontmatter.slug;
 			this.version               = file.frontmatter.version;
+			this.draft                 = file.frontmatter.draft;
 
 			// we don't *always* need to return directory_info with a file,
 			// but if it is here, set it up
@@ -79,6 +79,7 @@ export default class CMSFile {
 		} else {
 			// do the minimum setup needed
 			this.initializing   = true;
+			this.draft          = true;
 			this.directory_info = new CMSDirectory;
 			this.translations   = [];
 		};
@@ -138,7 +139,8 @@ export default class CMSFile {
 					tags: this.tags,
 					synopsis: this.synopsis,
 					version: this.version,
-					slug: this.slug
+					slug: this.slug,
+					draft: this.draft
 				}
 			}
 		];

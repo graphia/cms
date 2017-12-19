@@ -139,10 +139,6 @@ Given %r{^I have entered my new document's details$} do
   }
 end
 
-When %r{^I check the "(.*)" checkbox$} do |checkbox|
-  check(checkbox)
-end
-
 When %r{^the "([^"]*)" is blank$} do |field_name|
   field = page.find("input[name='#{field_name}']")
   expect(field.value).to be_empty

@@ -1026,8 +1026,6 @@ func pathInFiles(directory, filename string, files *[]NewCommitFile) bool {
 
 	// check that at least one file in files matches the directory and filename
 	for _, file := range *files {
-		Debug.Println("path", file.Path, directory)
-		Debug.Println("filename", file.Filename, filename)
 		if file.Path == directory && file.Filename == filename {
 			return true
 		}

@@ -60,3 +60,8 @@ Feature: Listing documents
 	Scenario: Primary navigation highlighting
 		When I am on the "appendices" index page
 		Then the primary navigation link "Appendices" should be active
+
+	Scenario: Identifying draft documents
+		Given I have some documents that are drafts
+		When I am on the "appendices" index page
+		Then the draft document should be highlighted
