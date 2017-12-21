@@ -14,6 +14,7 @@
 			<input name="author" class="form-control" v-model="document.author"/>
 		</div>
 
+		<DateField/>
 		<VersionField/>
 		<TagsField/>
 		<DraftField/>
@@ -29,7 +30,7 @@
 	import TagsField from "../Editor/FrontMatter/TagsField";
 	import VersionField from "../Editor/FrontMatter/VersionField";
 	import DraftField from "../Editor/FrontMatter/DraftField";
-
+	import DateField from "../Editor/FrontMatter/DateField";
 
 	export default {
 		name: "FrontMatter",
@@ -38,7 +39,8 @@
 			TitleField,
 			TagsField,
 			VersionField,
-			DraftField
+			DraftField,
+			DateField
 		}
 	}
 </script>

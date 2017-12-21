@@ -25,6 +25,7 @@ Feature: Displaying documents
 			| Title       |
 			| Author      |
 			| Tags        |
+			| Date        |
 			| Synopsis    |
 			| Version     |
 

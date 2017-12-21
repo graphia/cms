@@ -36,6 +36,10 @@ Feature: Creating documents
 		And I should see a tags editing field
 		And I should see a text area for the commit message
 
+	Scenario: Default date
+		Given I am on the new document page
+		Then the date should be set to today
+
 	Scenario: Creating a file
 		Given I am on the new document page
 		When I enter some text into the editor

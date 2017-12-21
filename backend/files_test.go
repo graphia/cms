@@ -390,6 +390,7 @@ func TestExtractContents(t *testing.T) {
 				ncf: NewCommitFile{
 					FrontMatter: FrontMatter{
 						Author:   "Bernice Hibbert",
+						Date:     "2016-04-05",
 						Draft:    true,
 						Slug:     "pangram",
 						Synopsis: "Use all of the characters",
@@ -404,6 +405,7 @@ func TestExtractContents(t *testing.T) {
 			// Multiline string so any leading whitespace remains 😒
 			wantContents: []byte(`---
 author: Bernice Hibbert
+date: 2016-04-05
 draft: true
 slug: pangram
 synopsis: Use all of the characters

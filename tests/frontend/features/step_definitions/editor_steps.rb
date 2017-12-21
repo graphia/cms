@@ -250,3 +250,7 @@ Then %r{^the title validation feedback should not be visible$} do
     expect(page).not_to have_css(".form-control-feedback.invalid-feedback")
   end
 end
+
+Then %r{^the date should be set to today$} do
+  expect(page.find("#document-date").value).to eql(Date.today.iso8601)
+end

@@ -26,6 +26,9 @@
 							<dt>Author</dt>
 							<dd>{{ document.author }}</dd>
 
+							<dt>Date</dt>
+							<dd>{{ document.date }}</dd>
+
 							<dt>Tags</dt>
 							<dd>
 								<span v-for="(tag, i) in document.tags" class="tag badge badge-primary" :key="i">

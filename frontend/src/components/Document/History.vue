@@ -130,7 +130,7 @@
 				});
 
 			} catch(err) {
-				error.log("Failed to get file history", err)
+				console.error("Failed to get file history", err);
 			};
 
 		},

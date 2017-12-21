@@ -4,6 +4,7 @@ import config from '../config.js';
 import checkResponse from '../response.js';
 import CMSFileAttachment from './attachment.js';
 import CMSDirectory from './directory.js';
+import fecha from 'fecha';
 
 export default class CMSFile {
 
@@ -35,6 +36,7 @@ export default class CMSFile {
 			this.attachments     = [];
 			this.translations    = [];
 			this.initialMarkdown = "";
+			this.date            = this.todayString();
 			this.draft           = true;
 
 		} else if (file) {
@@ -56,6 +58,7 @@ export default class CMSFile {
 			this.slug                  = file.frontmatter.slug;
 			this.version               = file.frontmatter.version;
 			this.draft                 = file.frontmatter.draft;
+			this.date                  = file.frontmatter.date || this.todayString();
 
 			// we don't *always* need to return directory_info with a file,
 			// but if it is here, set it up
@@ -82,6 +85,7 @@ export default class CMSFile {
 			this.draft          = true;
 			this.directory_info = new CMSDirectory;
 			this.translations   = [];
+			this.date           = this.todayString();
 		};
 
 	};
@@ -140,7 +144,8 @@ export default class CMSFile {
 					synopsis: this.synopsis,
 					version: this.version,
 					slug: this.slug,
-					draft: this.draft
+					draft: this.draft,
+					date: this.date
 				}
 			}
 		];
@@ -161,6 +166,10 @@ export default class CMSFile {
 
 		return [...f, ...a];
 
+	};
+
+	todayString() {
+		return fecha.format(new Date, "YYYY-MM-DD");
 	};
 
 	// class methods
