@@ -72,7 +72,7 @@
 						</div>
 
 						<div class="form-group">
-							<input class="form-control btn btn-success" type="submit" value="Create SSH Key">
+							<input class="btn btn-primary" type="submit" value="Create SSH Key">
 						</div>
 					</form>
 				</div>

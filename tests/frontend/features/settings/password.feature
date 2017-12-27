@@ -11,7 +11,7 @@ Feature: Settings page
 
 	Scenario: Page contents
 		Given I am on my settings page
-		Then I should see a section called "Change my password"
+		Then I should see a section called "Update password"
 		And I should see a "Passwords" form with the following fields:
 			| Name             | Type     | Required | Disabled |
 			| Current Password | Password | Yes      | No       |

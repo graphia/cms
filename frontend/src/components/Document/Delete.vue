@@ -2,6 +2,11 @@
 
 	<div>
 
+		<button type="button" @click="showDeleteModal" class="btn btn-danger mr-2">
+			Delete
+
+		</button>
+
 		<div id="delete-warning" class="modal fade">
 			<div class="modal-dialog" role="document">
 				<div class="modal-content">
@@ -13,8 +18,9 @@
 					</div>
 
 					<div class="modal-body">
-						Deleting a file removes it from the CMS, but don't worry, an administrator or
-						technical user can restore files in the future.
+						Deleting a file removes it from the CMS. The deletion, along with the contents
+						of the deleted files and all associated metadata <em>will be preserved</em> by
+						the underlying version control system.
 					</div>
 
 					<div class="modal-body">
@@ -22,16 +28,15 @@
 							Are you sure you want to delete <code>{{ document.filename }}</code>?
 						</p>
 
-						<p class="text-muted">
-							By default attachments are left in the repository when a file is deleted.
-							If you want to delete them, please check the box below.
-						</p>
-
 						<div class="form-check">
 							<label class="form-check-label">
 								<input v-model="deleteAttachments" class="form-check-input" type="checkbox">
 								Delete attachments
 							</label>
+
+							<p class="form-text text-muted">
+								By default attachments are left in the repository when a file is deleted.
+							</p>
 						</div>
 
 					</div>
@@ -48,11 +53,6 @@
 				</div>
 			</div>
 		</div>
-
-
-		<button type="button" @click="showDeleteModal" class="btn btn-danger mr-2">
-			Delete
-		</button>
 
 	</div>
 

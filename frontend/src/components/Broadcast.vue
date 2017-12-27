@@ -1,5 +1,5 @@
 <template>
-	<div class="row messages">
+	<div id="broadcast-messages" class="row messages">
 		<div class="col-md-12 mt-2">
 			<div v-for="(message, i) in messages" :key=i :class="message.classes" role="alert">
 				<strong>{{ message.alert }}</strong>

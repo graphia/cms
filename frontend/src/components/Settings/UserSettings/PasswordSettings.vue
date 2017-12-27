@@ -1,10 +1,9 @@
 <template>
 	<div class="password-update card border-warning mb-3">
-		<div class="card-header bg-light">
-			<h2>Change my password</h2>
-		</div>
 
 		<div class="card-body">
+
+			<h2 class="card-title">Update password</h2>
 
 			<div class="alert alert-danger" v-if="anyErrors">
 				{{ this.error }}
@@ -56,6 +55,7 @@
 						type="submit"
 						value="Update password"
 						class="btn btn-warning"
+						:disabled="anyEmpty || !confirmPasswordMatch"
 					/>
 				</div>
 			</form>
@@ -88,6 +88,10 @@
 			},
 			anyErrors() {
 				return this.error != "";
+			},
+			anyEmpty() {
+				return [this.newPassword, this.currentPassword, this.confirmPassword]
+					.some(input => input === "");
 			}
 		},
 		methods: {

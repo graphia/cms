@@ -41,17 +41,18 @@
 						</dl>
 
 						<div class="btn-toolbar" role="toolbar">
-							<router-link class="btn btn-success mr-2" :to="{name: 'document_edit', params: {directory: this.directory, filename: this.filename}}">
+
+							<router-link class="btn btn-primary mr-2" :to="{name: 'document_edit', params: {directory: this.directory, filename: this.filename}}">
 								Edit
 							</router-link>
+
+							<Translation v-if="$store.state.translationEnabled"/>
 
 							<router-link class="btn btn-info mr-2" :to="{name: 'document_history', params: {directory: this.directory, filename: this.filename}}">
 								History
 							</router-link>
 
 							<DocumentDelete/>
-
-							<Translation v-if="$store.state.translationEnabled"/>
 
 						</div>
 					</div>

@@ -1,5 +1,7 @@
 Then %r{^I should see a section called "([^"]*)"$} do |text|
-  expect(page).to have_css(".card-header > h2", text: text)
+  within(".password-update") do
+    expect(page).to have_css("h2", text: text)
+  end
 end
 
 # FIXME this clashes with an outdated single-quoted version

@@ -105,11 +105,16 @@ router.beforeEach((to, from, next) => {
 
 });
 
+router.afterEach(() => {
+	// scroll to the top of the page
+	window.scrollTo(0, 0);
+});
+
 router.onError((err) => {
 	if (err.message == "NotLoggedIn") {
 		next('/cms/login');
 	}
-})
+});
 
 Vue.filter('format_date', (value) => {
 	let d = new Date(Date.parse(value));
@@ -122,7 +127,7 @@ Vue.filter('time_ago', (value) => {
 		to: Date.parse(value),
 		units: 'ms'
 	});
-})
+});
 
 Vue.filter('capitalize', (value) => {
 	try {
@@ -134,7 +139,7 @@ Vue.filter('capitalize', (value) => {
 });
 
 // Create a global Event Bus
-var EventBus = new Vue()
+var EventBus = new Vue();
 
 Object.defineProperties(Vue.prototype, {
 	$bus: {

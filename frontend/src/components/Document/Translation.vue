@@ -2,7 +2,7 @@
 	<div class="dropdown" v-if="anyAvailableLanguages">
 
 		<button
-			class="btn btn-info dropdown-toggle"
+			class="btn btn-primary dropdown-toggle"
 			type="button"
 			id="translationMenu"
 			data-toggle="dropdown"
@@ -110,5 +110,9 @@
 <style lang="scss">
 	button > span.flag {
 		margin-right: 10px;
+	};
+
+	.dropdown {
+		margin-right: 0.5rem;
 	};
 </style>

@@ -66,6 +66,9 @@ export default class CMSBroadcast {
 
 		this.messages.push(message);
 
+		// scroll messages div into view
+		document.getElementById("broadcast-messages").scrollIntoView();
+
 	};
 
 };

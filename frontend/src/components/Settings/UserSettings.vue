@@ -54,13 +54,12 @@
 						<input
 							type="submit"
 							value="Update my details"
-							class="btn btn-success"
+							class="btn btn-primary"
 							:disabled="!user.updated()"
 
 						/>
 					</div>
 				</form>
-
 
 				<PasswordSettings/>
 
