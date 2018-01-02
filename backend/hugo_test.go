@@ -25,7 +25,9 @@ func Test_buildStaticSite(t *testing.T) {
 
 	output, err := buildStaticSite()
 	assert.Nil(t, err)
-	assert.Contains(t, string(output), "Started building sites")
+	assert.Contains(t, string(output), "Pages")
+	assert.Contains(t, string(output), "Paginator pages")
+	assert.Contains(t, string(output), "Non-page files")
 
 	thingsThatShouldExist := []string{"index.html", "index.xml", "documents", "appendices", "sitemap.xml"}
 
