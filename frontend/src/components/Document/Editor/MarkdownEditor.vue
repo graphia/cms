@@ -22,13 +22,16 @@
 	export default {
 		name: "MarkdownEditor",
 		mixins: [Accessors],
+		data() {
+			return {
+				count: 0
+			}
+		},
 		mounted() {
-				console.log("MarkdownEditor Created");
 				this.simpleMDE = this.initializeSimpleMDE();
 		},
 		methods: {
 			initializeSimpleMDE() {
-				console.log("initializing SimpleMDE");
 
 				let self = this;
 
@@ -40,8 +43,6 @@
 					let attachments = self.document.attachments;
 
 					let html = $.parseHTML(this.parent.markdown(text));
-
-					console.debug("slug", self.document.slug);
 
 					$(html)
 						.find('img')
@@ -57,6 +58,10 @@
 											return a.relativePath() === $(element).attr('src')
 										}
 									);
+
+								if (!attachment) {
+									console.warn("No attachment found matching", element);
+								};
 
 								$(element).attr('src', attachment.dataURI());
 
@@ -84,10 +89,22 @@
 
 				simpleMDE.codemirror.on('drop', async (editor, dropEvent) => {
 
-					dropEvent.stopPropagation();
-					dropEvent.preventDefault();
 
-					console.log("Dropped!")
+					this.count++;
+
+
+					for (let type of event.dataTransfer.types) {
+						console.debug("type:", type);
+					};
+
+					/*
+					 * Draging text externally (dragging text from another file): types
+					 * has "text/plain" and "text/html"
+					 * Draging text internally (dragging text to another line): types
+					 * has just "text/plain"
+					 * Draging a file: types has "Files"
+					 * Draging a url: types has "text/plain" and "text/uri-list"
+					 */
 
 					// grab some information from the editor so we know where to insert
 					// the image's placeholder later
@@ -99,31 +116,8 @@
 						ch: line.length
 					};
 
-
-					// if we've dropped an image from the gallery we just care about
-					// entering the placeholder into the editor
-					for (var i = 0; i < dropEvent.dataTransfer.items.length; i++) {
-						let item = dropEvent.dataTransfer.items[i];
-
-						console.debug("dropped a gallery image");
-
-						if (item.type != "text/plain") {
-							console.debug(`item.type is ${item.type}, ignoring`);
-							continue;
-						};
-
-						console.debug("got a text/plain, continuing")
-
-						item.getAsString((imagePlaceholder) => {
-							doc.replaceRange(`\n${imagePlaceholder}\n`, pos);
-						});
-
-					};
-
 					// surely there's a nicer way of looping with an index in es6? 🤷
 					for (var i = 0; i < dropEvent.dataTransfer.files.length; i++) {
-						console.debug("dropped a filesystem image");
-
 						let file = dropEvent.dataTransfer.files[i];
 
 						let reader = new FileReader();
@@ -134,14 +128,14 @@
 							let attachment = new CMSFileAttachment(
 								file,
 								onloadendEvent.target.result,
-								{base64Encoded: true}
+								{base64Encoded: true, newFile: true}
 							);
 
 							this.document.addAttachment(attachment);
 
 							let imagePlaceholder = attachment.markdownImage();
 
-							doc.replaceRange(`\n${imagePlaceholder}\n`, pos);
+							doc.replaceRange(`${imagePlaceholder}\n`, pos);
 
 						};
 
@@ -156,7 +150,6 @@
 		},
 		watch: {
 			"$parent.markdownLoaded": function() {
-				console.debug("syncing content");
 				this.simpleMDE.value(this.document.markdown);
 			}
 		}

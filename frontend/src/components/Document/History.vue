@@ -1,5 +1,5 @@
 <template>
-	<div class="row history">
+	<div class="row history" v-title="title">
 
 		<div class="col-sm-12">
 
@@ -72,6 +72,9 @@
 		},
 
 		computed: {
+			title() {
+				return `${this.document.title}: History`;
+			},
 			breadcrumbs() {
 				let directory_title, filename;
 
@@ -127,7 +130,7 @@
 				});
 
 			} catch(err) {
-				error.log("Failed to get file history", err)
+				console.error("Failed to get file history", err);
 			};
 
 		},

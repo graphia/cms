@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<div v-title="heading">
 		<Breadcrumbs :levels="breadcrumbs"/>
 
 		<Conflict/>
@@ -105,6 +105,8 @@
 
 				event.preventDefault();
 
+				this.commit.addFile(this.document);
+
 				let response = await this.document.update(this.commit);
 
 				if (!checkResponse(response.status)) {
@@ -119,7 +121,6 @@
 					return;
 				};
 
-				console.debug("Document saved, redirecting to 'document_show'");
 				this.redirectToShowDocument(this.document.path, this.document.filename);
 
 			},

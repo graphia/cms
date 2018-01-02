@@ -67,3 +67,16 @@ end
 Given %r{^there is no directory called "(.*?)"$} do |directory|
   expect(Dir.exist?(File.join(REPO_PATH, directory))).to be false
 end
+
+Given %r{^I have some documents that are drafts$} do
+  file = File.read(File.join(REPO_PATH, "appendices", "appendix_1.md"))
+  expect(file).to have_content("draft: true")
+end
+
+Then %r{^the draft document should be highlighted$} do
+  within(".document-list") do
+    # highlighted by a border-warning with data-draft attr and matching filename stub
+    matcher = "div.border-warning[data-filename='appendix_1'][data-draft='true']"
+    expect(page).to have_css(matcher)
+  end
+end

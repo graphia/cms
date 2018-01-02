@@ -2,7 +2,7 @@
 	<div class="dropdown" v-if="anyAvailableLanguages">
 
 		<button
-			class="btn btn-info dropdown-toggle"
+			class="btn btn-primary dropdown-toggle"
 			type="button"
 			id="translationMenu"
 			data-toggle="dropdown"
@@ -38,7 +38,7 @@
 			},
 			availableLanguages() {
 
-				return this
+				return this.languages && this
 					.languages
 					.filter((language) => {
 						return !this
@@ -76,8 +76,6 @@
 						return
 					}
 
-					console.debug("Translation created", code, response);
-
 					let json = await response.json();
 
 					// the new filename is returned in the 'meta' field of the
@@ -112,5 +110,9 @@
 <style lang="scss">
 	button > span.flag {
 		margin-right: 10px;
+	};
+
+	.dropdown {
+		margin-right: 0.5rem;
 	};
 </style>

@@ -1,11 +1,14 @@
 ---
 title: Appendix 1
+slug: appendix_1
 author: Arnold Pye
 synopsis: The first appendix is the best appendix
+date: 2016-04-05
 tags:
   - Traffic News
   - KBBL TV
 version: 1.1
+draft: true
 ---
 
 # Appendix 1

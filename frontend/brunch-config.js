@@ -22,6 +22,7 @@ exports.paths = {
 		'node_modules/bootstrap/dist',
 		'node_modules/octicons',
 		'node_modules/text-diff',
+		'node_modules/fecha',
 		'node_modules/babel-runtime/core-js/object'
 	]
 };

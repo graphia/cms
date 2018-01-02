@@ -14,6 +14,19 @@ Feature: Home page contents
 		Given I am on the homepage
 		Then the main heading should be "Dashboard"
 
+	Scenario: Page title is dynamic
+		Given I am on the homepage
+		And the page's title should be "Graphia CMS"
+
+	Scenario: Primary navigation bar should contain directory links
+		Given the following directories exist in the repository
+			| appendices |
+			| documents  |
+		When I am on the homepage
+		Then the navigation bar should contain the following links:
+			| Appendices           |
+			| Important Documents  |
+
 	Scenario: Home page sections
 		Given I am on the homepage
 		Then I should see a summary of recent changes
@@ -55,3 +68,9 @@ Feature: Home page contents
 	Scenario: Breadcrumbs
 		Given I am on the homepage
 		Then I should only see the inactive 'Dashboard' breadcrumb
+
+	Scenario: Primary navigation highlighting
+		Given I am on the homepage
+		Then the primary navigation link "Home" should be active
+		When I am on the "documetns" index page
+		Then the primary navigation link "Home" should not be active

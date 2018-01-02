@@ -122,7 +122,6 @@
 		computed: {
 			numberOfDirectories() {
 				let count = Object.keys(this.directories).length;
-				console.debug("directory count", count);
 				return count;
 			},
 			translationEnabled() {
@@ -165,8 +164,6 @@
 
 				let path = `${config.api}/summary`
 
-				console.log("fetching directories", path);
-
 				try {
 					let response = await fetch(path, {
 						mode: "cors",
@@ -182,17 +179,15 @@
 					let json = await response.json();
 
 					this.loading = false;
-					console.log("got json", json)
 
 					// TODO map the directories into CMSFile objects
 					this.directories = json;
 
-					console.log("directories", json);
-
 				}
 				catch(error) {
 					console.error(error);
-				}
+				};
+
 			},
 			primary(files) {
 				return files[0];

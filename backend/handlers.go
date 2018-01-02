@@ -12,7 +12,6 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/dgrijalva/jwt-go/request"
 	"github.com/husobee/vestigo"
-	"golang.org/x/crypto/bcrypt"
 )
 
 // SuccessResponse contains information about a successful
@@ -62,7 +61,7 @@ func authLoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(uc.Password))
+	err = user.checkPassword(uc.Password)
 	if err != nil {
 		fr = FailureResponse{
 			Message: "Invalid credentials",
@@ -1236,6 +1235,60 @@ func apiUpdateUserNameHandler(w http.ResponseWriter, r *http.Request) {
 	JSONResponse(SuccessResponse{Message: "User updated"}, http.StatusOK, w)
 }
 
+// apiUpdatePasswordHandler updates the password after confirming that the
+// user knows their current password
+//
+// PATCH /api/settings/password
+//
+// returns
+//
+// {
+//   "current_password": "p455w0rd",
+//   "new_password": "passwORDx123",
+// }
+func apiUpdatePasswordHandler(w http.ResponseWriter, r *http.Request) {
+
+	var fr FailureResponse
+	var err error
+
+	var pl PasswordUpdate
+
+	user := getCurrentUser(r.Context())
+
+	json.NewDecoder(r.Body).Decode(&pl)
+
+	Debug.Println("password update payload", pl)
+
+	err = validate.Struct(pl)
+	if err != nil {
+		JSONResponse(validationErrorsToJSON(err), http.StatusBadRequest, w)
+		return
+	}
+
+	// check current matches old
+	err = user.checkPassword(pl.CurrentPassword)
+	if err != nil {
+		fr = FailureResponse{
+			Message: "Current password is not correct",
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	// everything's ok, update
+	err = user.setPassword(pl.NewPassword)
+	if err != nil {
+		fr = FailureResponse{
+			Message: "Password could not be set",
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	JSONResponse(SuccessResponse{Message: "Password updated"}, http.StatusOK, w)
+
+}
+
 func apiUserListPublicKeysHandler(w http.ResponseWriter, r *http.Request) {
 	var user User
 	var fr FailureResponse
@@ -1591,7 +1644,7 @@ func apiGetLanguageInformationHandler(w http.ResponseWriter, r *http.Request) {
 	// return enabled false if translation disabled in config
 	if !config.TranslationEnabled {
 		response := struct {
-			TranslationEnabled bool `json:"translation_enabled,omitempty"`
+			TranslationEnabled bool `json:"translation_enabled"`
 		}{
 			false,
 		}

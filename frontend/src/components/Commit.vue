@@ -1,6 +1,6 @@
 <template>
 
-	<div class="row">
+	<div class="row" v-title="title">
 
 		<Breadcrumbs class="col-lg-12 commit" :levels="breadcrumbs"/>
 
@@ -53,6 +53,12 @@
 			hash() {
 				return this.$route.params.hash;
 			},
+			shortHash() {
+				return this.hash.substring(0,8);
+			},
+			title() {
+				return `Commit ${this.shortHash}`;
+			},
 			files() {
 				return this.commit.files;
 			},
@@ -73,7 +79,7 @@
 			breadcrumbs() {
 				return [
 					new CMSBreadcrumb(
-						`Commit ${this.hash.substring(0,8)}`,
+						this.title,
 						"commit",
 						{name: this.hash}
 					)
@@ -81,7 +87,6 @@
 			}
 		},
 		created() {
-			console.debug("created");
 			this.retrievePatch(this.hash);
 		},
 		components: {

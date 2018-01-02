@@ -4,13 +4,9 @@
 
 
 			<!-- if we're currently on this page, don't show a link and add active class -->
-			<li v-if="currentPage(breadcrumb)" v-for="breadcrumb in breadcrumbs" class="breadcrumb-item active">
-				{{ breadcrumb.text }}
-			</li>
+			<li v-if="currentPage(breadcrumb)" v-for="(breadcrumb, i) in breadcrumbs" :key="i" class="breadcrumb-item active">{{breadcrumb.text}}</li>
 			<li v-else class="breadcrumb-item">
-				<router-link :to="{name: breadcrumb.target, params: breadcrumb.params}">
-					{{ breadcrumb.text }}
-				</router-link>
+				<router-link :to="{name: breadcrumb.target, params: breadcrumb.params}">{{breadcrumb.text}}</router-link>
 			</li>
 		</ol>
 	</nav>
@@ -32,16 +28,8 @@
 		},
 		methods: {
 			currentPage(breadcrumb) {
-
-				console.debug("this.$router.history.current.name", this.$router.history.current.name)
-				console.debug("breadcrumb.target", breadcrumb.target)
-
-				if (this.$router.history.current.name === breadcrumb.target) {
-					return true;
-				};
-
-				return false;
+				return this.$router.history.current.name === breadcrumb.target;
 			}
 		}
-	}
+	};
 </script>

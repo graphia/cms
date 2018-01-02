@@ -45,13 +45,19 @@ func (nt NewTranslation) TargetFilename() string {
 }
 
 // FrontMatter contains the document's metadata
+//
+// date is a string because we never actually *do* anything with it
+// other than read/write it, and Go has no sane 'Date' type
+// https://github.com/golang/go/issues/21365
 type FrontMatter struct {
-	Author   string   `json:"author"   yaml:"author"`
-	Slug     string   `json:"slug"     yaml:"slug"`
-	Synopsis string   `json:"synopsis" yaml:"synopsis"`
-	Tags     []string `json:"tags"     yaml:"tags"`
-	Title    string   `json:"title"    yaml:"title"`
-	Version  string   `json:"version"  yaml:"version"`
+	Author   string   `json:"author"         yaml:"author"`
+	Date     string   `json:"date,omitempty" yaml:"date"`
+	Draft    bool     `json:"draft"          yaml:"draft"`
+	Slug     string   `json:"slug"           yaml:"slug"`
+	Synopsis string   `json:"synopsis"       yaml:"synopsis"`
+	Tags     []string `json:"tags"           yaml:"tags"`
+	Title    string   `json:"title"          yaml:"title"`
+	Version  string   `json:"version"        yaml:"version"`
 }
 
 // Directory contains the directory's metadata

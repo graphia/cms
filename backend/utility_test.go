@@ -260,16 +260,23 @@ func setupTestKeys() {
 	}
 }
 
-func createTestServerWithContext() (server *httptest.Server) {
+func createTestServerWithContext(persistUsers bool) (server *httptest.Server) {
 	n := negroni.New()
 
 	r := unprotectedRouter()
 	pr := protectedRouter()
 
-	r.Handle("/api/*", negroni.New(
-		negroni.HandlerFunc(apiTestMiddleware),
-		negroni.Wrap(pr),
-	))
+	if persistUsers {
+		r.Handle("/api/*", negroni.New(
+			negroni.HandlerFunc(apiTestMiddlewareWithPersistedUser),
+			negroni.Wrap(pr),
+		))
+	} else {
+		r.Handle("/api/*", negroni.New(
+			negroni.HandlerFunc(apiTestMiddleware),
+			negroni.Wrap(pr),
+		))
+	}
 
 	n.UseHandler(r)
 
@@ -279,18 +286,30 @@ func createTestServerWithContext() (server *httptest.Server) {
 
 }
 
-func createTestServerWithConfig(path string) (server *httptest.Server) {
+func createTestServerWithConfig(path string, persistUsers bool) (server *httptest.Server) {
 	Debug.Println("Loading config from", path)
 	config, _ = loadConfig(&path)
-	return createTestServerWithContext()
+	return createTestServerWithContext(persistUsers)
 }
 
 func apiTestUser() (user User) {
 	return sb
 }
 
+func apiPersistedTestUser() (user User) {
+	_ = createUser(sb)
+	selma, _ := getUserByUsername(sb.Username)
+	return selma
+}
+
 func apiTestMiddleware(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	user := apiTestUser()
+	ctx := newContextWithCurrentUser(r.Context(), r, user)
+	next(w, r.WithContext(ctx))
+}
+
+func apiTestMiddlewareWithPersistedUser(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+	user := apiPersistedTestUser()
 	ctx := newContextWithCurrentUser(r.Context(), r, user)
 	next(w, r.WithContext(ctx))
 }

@@ -1,14 +1,14 @@
 import store from '../store.js';
+import slugify from '../utilities/slugify.js';
 import config from '../config.js';
 import checkResponse from '../response.js';
 import CMSFileAttachment from './attachment.js';
 import CMSDirectory from './directory.js';
+import fecha from 'fecha';
 
 export default class CMSFile {
 
-
 	static initialize(directory) {
-		console.debug("Initialising file in", directory);
 		let file = new CMSFile({initialzing: true, path: directory});
 		store.state.activeDocument = file;
 		return file;
@@ -16,7 +16,7 @@ export default class CMSFile {
 
 	constructor(file) {
 
-		this.translationRegex = /\.([A-z]{2})\.md$/
+		this.translationRegex = /\.([A-z]{2})\.md$/;
 
 		if (file && file.initialzing) {
 
@@ -30,12 +30,14 @@ export default class CMSFile {
 			this.title           = "";
 			this.author          = "";
 			this.synopsis        = "";
-			this.tags            = "";
+			this.tags            = [];
 			this.version         = "";
 			this.history         = [];
 			this.attachments     = [];
 			this.translations    = [];
 			this.initialMarkdown = "";
+			this.date            = this.todayString();
+			this.draft           = true;
 
 		} else if (file) {
 
@@ -48,7 +50,6 @@ export default class CMSFile {
 			this.markdown              = file.markdown;
 			this.translations          = file.translations;
 
-
 			// frontmatter fields
 			this.title                 = file.frontmatter.title;
 			this.author                = file.frontmatter.author;
@@ -56,6 +57,8 @@ export default class CMSFile {
 			this.tags                  = file.frontmatter.tags;
 			this.slug                  = file.frontmatter.slug;
 			this.version               = file.frontmatter.version;
+			this.draft                 = file.frontmatter.draft;
+			this.date                  = file.frontmatter.date || this.todayString();
 
 			// we don't *always* need to return directory_info with a file,
 			// but if it is here, set it up
@@ -79,9 +82,11 @@ export default class CMSFile {
 		} else {
 			// do the minimum setup needed
 			this.initializing   = true;
+			this.draft          = true;
 			this.directory_info = new CMSDirectory;
 			this.translations   = [];
-		}
+			this.date           = this.todayString();
+		};
 
 	};
 
@@ -102,7 +107,7 @@ export default class CMSFile {
 	get translation() {
 
 		return this.translationRegex.test(this.filename)
-	}
+	};
 
 	get language() {
 		let code = this.translationRegex.exec(this.filename)
@@ -112,7 +117,60 @@ export default class CMSFile {
 		};
 
 		return store.state.languages.find(x => x.code === code[1]);
-	}
+	};
+
+	get attachmentsDir() {
+		if (!this.path || !this.slug) {
+			return null;
+		};
+		return [this.path, this.slug].join("/");
+	};
+
+	// make the file usable by a commit
+	prepareJSON(includeAttachments=true) {
+		let a = [];
+
+		let f = [
+			{
+				path: this.path,
+				filename: this.filename,
+				body: this.markdown,
+
+				// and the frontmatter
+				frontmatter: {
+					title: this.title,
+					author: this.author,
+					tags: this.tags,
+					synopsis: this.synopsis,
+					version: this.version,
+					slug: this.slug,
+					draft: this.draft,
+					date: this.date
+				}
+			}
+		];
+
+		if (includeAttachments) {
+			a = this.attachments
+				.filter(attachment => attachment.isNew())
+				.map((attachment) => {
+					return {
+						path: [this.path, this.slug, "images"].join("/"),
+						filename: attachment.name,
+						base_64_encoded: attachment.options.base64Encoded,
+						body: attachment.contents()
+					};
+				});
+
+		};
+
+		return [...f, ...a];
+
+	};
+
+	todayString() {
+		return fecha.format(new Date, "YYYY-MM-DD");
+	};
 
 	// class methods
 
@@ -178,15 +236,12 @@ export default class CMSFile {
 	 *    edit [boolean]: when true returns markdown from the API, when false HTML
 	 */
 	static async find(directory, filename, edit = false) {
-		console.debug(`finding ${filename} in ${directory}`);
-
 		let path = `${config.api}/directories/${directory}/files/${filename}`
 
 		// if we need the uncompiled markdown (for loading the editor), amend '/edit' to the path
 		if (edit) {
-			console.debug("edit is true, adding '/edit' to", path);
 			path = [path, "edit"].join("/");
-		}
+		};
 
 		let response = await fetch(path, {mode: "cors", headers: store.state.auth.authHeader()})
 
@@ -226,7 +281,7 @@ export default class CMSFile {
 				mode: "cors",
 				method: "POST",
 				headers: store.state.auth.authHeader(),
-				body: commit.filesJSON(this)
+				body: JSON.stringify(commit.prepareJSON())
 			});
 
 			return response;
@@ -251,7 +306,7 @@ export default class CMSFile {
 				mode: "cors",
 				method: "PATCH",
 				headers: store.state.auth.authHeader(),
-				body: commit.filesJSON(this)
+				body: JSON.stringify(commit.prepareJSON())
 			});
 
 			return response;
@@ -261,18 +316,16 @@ export default class CMSFile {
 		}
 	};
 
-	async destroy(commit) {
-		console.debug(commit);
+	async destroy(commit, deleteAttachments=false) {
 
-		var path = `${config.api}/directories/${this.path}/files/${this.filename}`
+		var path = `${config.api}/directories/${this.path}/files/${this.filename}`;
 
 		try {
-
 			let response = await fetch(path, {
 				mode: "cors",
 				method: "DELETE",
 				headers: store.state.auth.authHeader(),
-				body: commit.filesJSON(this)
+				body: JSON.stringify(commit.prepareJSON(deleteAttachments))
 			});
 
 			return response;
@@ -281,7 +334,6 @@ export default class CMSFile {
 			console.error(`There was a problem deleting document ${this.filename} from ${this.path}, ${err}`);
 		}
 
-		console.debug("Deleted")
 	};
 
 	async log() {
@@ -297,11 +349,9 @@ export default class CMSFile {
 			return response;
 		}
 		catch(err) {
-			console.error(`There was a problem retriving log for ${filename} in ${directory}, ${err}`);
+			console.error(`There was a problem retrieving log for ${filename} in ${directory}, ${err}`);
 		}
 
-
-		console.debug("Deleted")
 	};
 
 	async fetchAttachments() {
@@ -321,9 +371,8 @@ export default class CMSFile {
 			});
 
 			if (response.status == 404) {
-				console.debug("No attachments found");
-				return;
-			}
+				throw("no attachments found")
+			};
 
 			let data = await response.json();
 
@@ -335,12 +384,12 @@ export default class CMSFile {
 
 		}
 		catch(err) {
-			console.error(`There was a problem retriving attachments`);
-		}
+			console.warn(err);
+		};
 	};
 
-	addAttachment(file) {
-		store.commit("addAttachment", file);
+	addAttachment(attachment) {
+		store.commit("addAttachment", attachment);
 	};
 
 	// has the markdown changed since loading?

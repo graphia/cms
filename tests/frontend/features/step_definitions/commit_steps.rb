@@ -138,3 +138,7 @@ Then %r{^I should see two file sections, one for each affected file$} do
     expect(page).to have_css("div.card.commit-file", count: 2)
   end
 end
+
+Then %r{^the commits's page title should contain "(.*?)" and the short hash$} do |title|
+  expect(page).to have_title("#{title} #{@hash.slice(0..6)}")
+end

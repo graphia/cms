@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import Vuex from 'vuex';
+import Vuex, { mapActions } from 'vuex';
 import router from './app';
 
 import CMSFile from '../javascripts/models/file.js';
@@ -25,6 +25,7 @@ const state = {
 	languages: [],
 	translationEnabled: false,
 	user: null,
+	directories: []
 };
 
 const mutations = {
@@ -42,17 +43,21 @@ const mutations = {
 		return dir;
 	},
 	setActiveDirectory(context, directory) {
-		console.debug("setting active directory", directory);
 		state.activeDirectory = directory;
 	},
 	async setLatestRevision(context, hash) {
-		console.debug("setting latest revision", hash);
 		state.latestRevision = hash;
 	},
-	async setUser(context) {
-		let user = await CMSUser.fetchUser();
-		console.debug("setting user!");
-		state.user = user;
+	async loadUser(context) {
+		let u = await CMSUser.fetchUser();
+		state.user = u;
+	},
+	async logout(context) {
+		state.user = null;
+		state.directories = []
+		state.documents = []
+		state.activeDocument = new CMSFile
+		state.activeDirectory = new CMSDirectory
 	},
 	async saveUser(context, user) {
 		return user.save();
@@ -66,6 +71,9 @@ const actions = {
 	getDocumentsInDirectory(context, directory) {
 		state.activeDirectory = new CMSDirectory;
 		return CMSFile.all(directory);
+	},
+	getTopLevelDirectories(context) {
+		return CMSDirectory.all();
 	},
 	getDocument(context, args) {
 		// set activeDocument to compiled doc from API

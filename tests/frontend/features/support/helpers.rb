@@ -19,3 +19,7 @@ def setup_repo(template=REPO_TEMPLATE_PATH)
     g.commit("Initial commit")
   end
 end
+
+def prevent_modal_animations
+  page.execute_script('$(".modal").removeClass("fade")')
+end

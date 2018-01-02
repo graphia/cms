@@ -172,3 +172,67 @@ func TestDeleteFilesRepoOutOfDate(t *testing.T) {
 	assert.False(t, os.IsNotExist(err))
 
 }
+
+func TestDeleteFileAndAttachmentsDirectory(t *testing.T) {
+	var err error
+
+	repoPath := "../tests/tmp/repositories/delete_file_and_dir"
+
+	oid, _ := setupMultipleFiletypesTestRepo(repoPath)
+
+	user := User{
+		Name:  "Milhouse van Houten",
+		Email: "milhouse@springfield.gov",
+	}
+
+	ncf1 := NewCommitFile{
+		Filename: "document_1.md",
+		Path:     "documents",
+	}
+
+	ncd1 := NewCommitDirectory{
+		Path: "documents/document_1",
+	}
+
+	nc := NewCommit{
+		Message:        "Delete documents 1 and 2",
+		Files:          []NewCommitFile{ncf1},
+		Directories:    []NewCommitDirectory{ncd1},
+		RepositoryInfo: RepositoryInfo{LatestRevision: oid.String()},
+	}
+
+	repo, _ := repository(config)
+
+	// ensure the file is present on the filesystem
+	_, err = os.Stat(filepath.Join(repoPath, ncf1.Path, ncf1.Filename))
+	assert.False(t, os.IsNotExist(err))
+
+	// ensure the directory is present on the filesystem
+	_, err = os.Stat(filepath.Join(repoPath, ncd1.Path))
+	assert.False(t, os.IsNotExist(err))
+
+	// actually delete the files
+	oid, err = deleteFiles(nc, user)
+	if err != nil {
+		panic(err)
+	}
+
+	// our commit hash should now equal the repo's head
+	hc, _ := headCommit(repo)
+	assert.Equal(t, oid, hc.Id())
+
+	// ensure the file isn't present on the filesystem
+	_, err = os.Stat(filepath.Join(repoPath, ncf1.Path, ncf1.Filename))
+	assert.True(t, os.IsNotExist(err))
+
+	// ensure the directory isn't present on the filesystem
+	_, err = os.Stat(filepath.Join(repoPath, ncd1.Path))
+	assert.True(t, os.IsNotExist(err))
+
+	// ensure the most recent commit has the right name and email
+	lastCommit, _ := repo.LookupCommit(oid)
+	assert.Equal(t, lastCommit.Committer().Name, user.Name)
+	assert.Equal(t, lastCommit.Committer().Email, user.Email)
+	assert.Equal(t, lastCommit.Message(), nc.Message)
+
+}

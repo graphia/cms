@@ -25,8 +25,6 @@ export default class CMSFileAttachment {
 	// Convert a file retrieved from the CMS into a CMSFileAttachment
 	static fromData(object) {
 
-		console.log("extracting attachment object from", object);
-
 		let ab = new ArrayBuffer(object.data.length);
 
 		let ia = new Uint8Array(ab);
@@ -45,19 +43,14 @@ export default class CMSFileAttachment {
 		let attachment = new CMSFileAttachment(
 			blob,
 			`data:${object.filetype};base64,${object.data}`,
-			{base64Encoded: true}
+			{base64Encoded: true, newFile: false}
 		);
-
-		console.log("new obj", attachment);
 
 		return attachment;
 	}
 
 	isNew() {
-		if (this.options.newFile) {
-			return true;
-		};
-		return false;
+		return this.options.newFile;
 	};
 
 	dataURI() {
@@ -70,7 +63,7 @@ export default class CMSFileAttachment {
 
 		if (this.options.base64Encoded) {
 			return this.data.split("base64,").pop();
-		}
+		};
 
 		return this.data;
 	};
@@ -80,7 +73,7 @@ export default class CMSFileAttachment {
 	};
 
 	relativePath() {
-		return ["images", this.name].join('/');
+		return ["images", window.encodeURI(this.name)].join('/');
 	};
 
 	markdownImage() {

@@ -64,7 +64,6 @@ Then %r{^each entry should have a 'Delete' button$} do
 end
 
 When %r{^I click the 'Delete' button for my SSH key$} do
-  page.save_screenshot('/tmp/screenshot.png')
   within(".existing-keys li#ssh-public-key-1") do
     # page.find("button", text: "Delete").click
     click_button "Delete"

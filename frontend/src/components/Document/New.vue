@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<div v-title="heading">
 
 		<Breadcrumbs :levels="breadcrumbs"/>
 
@@ -78,12 +78,14 @@
 						{directory: this.directory}
 					)
 				];
-			}
+			},
 
 		},
 		methods: {
 			async create(event) {
 				event.preventDefault();
+
+				this.commit.addFile(this.document);
 
 				let response = await this.document.create(this.commit);
 
@@ -99,7 +101,6 @@
 					return;
 				};
 
-				console.debug("Document saved, redirecting to 'document_show'");
 				this.redirectToShowDocument(this.document.path, this.document.filename);
 
 			},

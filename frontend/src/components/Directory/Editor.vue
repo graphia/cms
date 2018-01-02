@@ -32,12 +32,10 @@
 			}
 		},
 		mounted() {
-				console.log("MarkdownEditor Created");
 				this.simpleMDE = this.initializeSimpleMDE();
 		},
 		methods: {
 			initializeSimpleMDE() {
-				console.log("initializing SimpleMDE");
 
 				let self = this;
 
@@ -58,7 +56,6 @@
 		mixins: [Accessors],
 		watch: {
 			"$parent.markdownLoaded": function() {
-				console.debug("syncing content");
 				this.simpleMDE.value(this.activeDirectory.body);
 			}
 		}

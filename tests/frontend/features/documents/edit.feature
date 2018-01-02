@@ -30,6 +30,12 @@ Feature: Creating documents
 		And I should not see the "Filename" field
 		And I should see a text area for the commit message
 
+	Scenario: Page title is dynamic
+		Given I am on the edit document page for "document_1.md"
+		And the page's title should be "document 1"
+		When I set the "title" to "Boo-urns"
+		Then now the title is "Boo-urns"
+
 	Scenario: Updating a file
 		Given I am on the edit document page for "document_1.md"
 		When I amend the text in the editor, modify the metadata and add a commit message

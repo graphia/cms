@@ -65,8 +65,8 @@ end
 
 When %r{^I select 'Logout' from the settings menu$} do
   within("nav.navbar") do
-    page.find("#user-menu").click
-    page.find(".dropdown-item.logout").click
+    click_link "user-menu" # finding by id
+    click_link "Logout"    # finding by text
   end
 end
 
@@ -76,4 +76,10 @@ end
 
 Then %r{^I should be on the login screen$} do
   expect(page.current_path).to eql("/cms/login")
+end
+
+Then %r{^there should be no entries in the navigation bar$} do
+  within("nav.navbar") do
+    expect(page).not_to have_css("li a")
+  end
 end

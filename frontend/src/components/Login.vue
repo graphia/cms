@@ -1,5 +1,5 @@
 <template>
-	<div class="row">
+	<div class="row" v-title="title">
 
 		<div class="col-sm-6 offset-sm-3">
 
@@ -48,7 +48,8 @@
 		data() {
 			return {
 				username: "",
-				password: ""
+				password: "",
+				title: "Graphia CMS: Login"
 			};
 		},
 		created() {
@@ -59,9 +60,6 @@
 				event.preventDefault();
 
 				let success = await this.$store.state.auth.login(this.username, this.password);
-
-				// TODO if they'd attempted to navigate to a page
-				// we should store it and send them there.
 
 				if (!success) {
 					this.$store.state.broadcast.addMessage("danger", "Oops", "Invalid credentials", 5);
@@ -87,11 +85,9 @@
 
 				// if there are, abort!
 				if (!doSetup) {
-					console.debug("App is set up, don't load wizard")
 					return;
 				}
 
-				console.debug("App not setup, load the wizard");
 				// if there aren't, start the setup wizard
 				this.$router.push({
 					name: 'initial_setup'

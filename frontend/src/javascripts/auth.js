@@ -8,9 +8,8 @@ var jwtDecode = require('jwt-decode');
 export default class CMSAuth {
 
 	constructor() {
-		console.debug("Initialising CMSAuth");
 		this._token = localStorage.getItem("token");
-	}
+	};
 
 	get token() {
 		return this._token;
@@ -18,19 +17,18 @@ export default class CMSAuth {
 
 	// updating the token, write the object property *and* to localStorage
 	set token(value) {
-		console.debug("setting token to", value);
 		this._token = value;
 		localStorage.setItem('token', value);
 		localStorage.setItem('token_received', Date.now());
-	}
+	};
 
 	loggedIn() {
 		return (this.token && !this.tokenExpired);
-	}
+	};
 
 	tokenExpired() {
 		return (this.tokenExpiry < Date.now);
-	}
+	};
 
 	tokenExpiry() {
 		if (this.token) {
@@ -38,21 +36,17 @@ export default class CMSAuth {
 			return decoded.exp
 		}
 		return 0;
-	}
+	};
 
 	static async doInitialSetup() {
+
+		// check for initial users
 		let response = await fetch(`${config.setup}/create_initial_user`, {});
-
-		console.debug("Checking for initial users!");
-
-		if (response.status !== 200) {
+		if (!checkResponse(response.status)) {
 			console.error('Oops, there was a problem', response.status);
+			return false
 		}
-
 		let json = await response.json();
-
-		console.debug("run initial setup:", json);
-
 		return json.enabled;
 
 	}
@@ -79,17 +73,13 @@ export default class CMSAuth {
 		if (this.token &&                                    // we have a token
 			!this.tokenExpired() &&                          // that's not expired
 			((Date.now - this.tokenExpiry()) < (60 * 20))) { // but expires in the next 20 mins
-
-				console.debug("Renewing token!");
-
+				// renew the token
 				let response = await fetch(`${config.api}/renew`,
 				{mode: "cors", method: "POST", headers: this.authHeader()}
 			)};
 	}
 
 	async login(username, password) {
-
-		console.debug("logging in", username);
 
 		let response = await fetch(`${config.auth}/login`, {
 			method: "POST",
@@ -107,6 +97,21 @@ export default class CMSAuth {
 		// store the token and the time at which it was written
 		this.token = json.jwt.token;
 
+		["getLatestRevision", "getTranslationInfo", "getTopLevelDirectories"]
+			.map(func => {
+				store.dispatch(func);
+			});
+
+		store.commit("loadUser");
+
+
+		// only pull data if we're actually logged in
+		// if (this.loggedIn) {
+		// 	this.fetchDirectories();
+		// 	this.getRepoMetadata();
+		// 	this.getTranslationInfo();
+		// };
+
 		return true
 	}
 
@@ -123,8 +128,12 @@ export default class CMSAuth {
 				throw(response);
 			};
 
+			// clear local storage and unset the user
 			localStorage.removeItem('token');
 			localStorage.removeItem('token_received');
+
+			store.commit("logout");
+
 			this.redirectToLogin();
 
 		}
@@ -134,24 +143,28 @@ export default class CMSAuth {
 	}
 
 	static async createInitialUser(user) {
-		console.debug("creating initial user");
 
-		let response = await fetch(`${config.setup}/create_initial_user`, {
-			method: "POST",
-			mode: "cors",
-			body: JSON.stringify(user)
-		});
+		let path = `${config.setup}/create_initial_user`;
 
-		if (response.status !== 201) {
-			console.error('Oops, there was a problem', response.status);
-			return false
+		try {
+
+			let response = await fetch(path, {
+				method: "POST",
+				mode: "cors",
+				body: JSON.stringify(user)
+			});
+
+			if (!checkResponse(response.status)) {
+				throw "request failed";
+			};
+
+			return true;
 		}
-
-		let json = await response.json();
-
-		return true
-		//this.redirectToLogin();
-	}
+		catch(error) {
+			console.error('Oops, there was a problem', response.status, error);
+			return false;
+		};
+	};
 
 	// pull the token from localStorage and return it inside a
 	// Headers object
@@ -168,15 +181,24 @@ export default class CMSAuth {
 			});
 
 			return headers;
+
 		} catch(err) {
 			console.warn("No token found, rendering login", err);
+
+			store.state.broadcast.addMessage(
+				"warning",
+				"You are not logged in",
+				`Your session probably expired, please log in again`,
+				5
+			);
+
 			this.redirectToLogin();
-		}
-	}
+		};
+
+	};
 
 	redirectToLogin() {
-		// FIXME display a flash message
 		router.push({name: 'login'});
-	}
+	};
 
 };

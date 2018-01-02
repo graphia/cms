@@ -17,9 +17,6 @@ export default class CMSPublicKey {
 			this.fingerprint = "";
 		};
 
-
-		console.log(this);
-
 	};
 
 	static async all() {

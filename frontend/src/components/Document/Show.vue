@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<div v-title="document.title">
 		<Breadcrumbs :levels="breadcrumbs"/>
 
 		<section class="row">
@@ -26,28 +26,33 @@
 							<dt>Author</dt>
 							<dd>{{ document.author }}</dd>
 
+							<dt>Date</dt>
+							<dd>{{ document.date }}</dd>
+
 							<dt>Tags</dt>
 							<dd>
 								<span v-for="(tag, i) in document.tags" class="tag badge badge-primary" :key="i">
 									{{ tag }}
 								</span>
 							</dd>
+
+							<dt>Draft</dt>
+							<dd>{{ this.draftDescription() }}</dd>
 						</dl>
 
 						<div class="btn-toolbar" role="toolbar">
-							<router-link class="btn btn-success mr-2" :to="{name: 'document_edit', params: {directory: this.directory, filename: this.filename}}">
+
+							<router-link class="btn btn-primary mr-2" :to="{name: 'document_edit', params: {directory: this.directory, filename: this.filename}}">
 								Edit
 							</router-link>
+
+							<Translation v-if="$store.state.translationEnabled"/>
 
 							<router-link class="btn btn-info mr-2" :to="{name: 'document_history', params: {directory: this.directory, filename: this.filename}}">
 								History
 							</router-link>
 
-							<button type="button" @click="destroy" class="btn btn-danger mr-2">
-								Delete
-							</button>
-
-							<Translation/>
+							<DocumentDelete/>
 
 						</div>
 					</div>
@@ -75,6 +80,7 @@
 
 	import Breadcrumbs from '../Utilities/Breadcrumbs';
 	import Translation from './Translation';
+	import DocumentDelete from './Delete';
 	import CMSBreadcrumb from '../../javascripts/models/breadcrumb.js';
 	import Accessors from '../Mixins/accessors';
 
@@ -86,9 +92,6 @@
 			// populate $store.state.documents with docs from api
 
 			this.getDocument();
-
-			// create a commit to be populated/used if delete is clicked
-			this.$store.dispatch("initializeCommit")
 
 		},
 		computed: {
@@ -144,58 +147,22 @@
 		},
 		methods: {
 			async getDocument() {
-
 				let filename = this.filename;
 				let directory = this.directory;
-
-				console.debug(`retrieving document ${filename} from ${directory}`);
-
 				this.$store.dispatch("getDocument", {directory, filename});
 			},
-			async destroy(event) {
-				event.preventDefault();
-				console.debug("delete clicked!");
-
-				let file = this.document;
-
-				let response = await this.document.destroy(this.commit);
-
-				if (!checkResponse(response.status)) {
-
-					if (response.status == 409) {
-
-						this.$store.state.broadcast.addMessage(
-							"danger",
-							"Failed",
-							"The repository is out of sync",
-							3
-						);
-
-						this.getDocument();
-
-						return;
-					};
-
-					// any other error
-					throw("could not update document", response);
-					return;
+			draftDescription() {
+				if (this.document.draft) {
+					return "Yes";
 				};
-
-				console.debug("File deleted, redirecting to document index");
-				this.redirectToDirectoryIndex(this.directory);
-
-			},
-			redirectToDirectoryIndex(directory) {
-				this.$router.push({
-					name: 'document_index',
-					params:{directory}
-				});
+				return "No";
 			}
 		},
 		mixins: [Accessors],
 		components: {
 			Breadcrumbs,
-			Translation
+			Translation,
+			DocumentDelete
 		}
 	}
 </script>

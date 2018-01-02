@@ -1,6 +1,6 @@
 <template>
 
-	<div class="row">
+	<div class="row" v-title="title">
 
 		<div class="col-sm-8 offset-sm-2">
 
@@ -33,11 +33,18 @@
 							<input type="password" name="password" class="form-control" v-model="user.password" required minlength="6"/>
 						</div>
 
-						<div class="form-group confirm-password-group" v-bind:class="[{'has-danger passwords-do-not-match': !passwordsMatch}]">
+						<div class="form-group confirm-password-group">
 							<label for="confirm-password">Confirm Password</label>
-							<input type="password" name="confirm-password" class="form-control" v-model="user.confirm_password" required/>
+							<input
+								type="password"
+								name="confirm-password"
+								class="form-control"
+								:class="[{'is-invalid': !passwordsMatch}]"
+								v-model="user.confirm_password"
+								required
+							/>
 
-							<div class="form-control-feedback passwords-do-not-match-message">Password and confirmation must match</div>
+							<div v-if="!passwordsMatch" class="password-match-feedback form-control-feedback-message">Password and confirmation must match</div>
 						</div>
 
 						<div class="form-group" >
@@ -56,15 +63,6 @@
 	</div>
 </template>
 
-<style lang="scss">
-	.passwords-do-not-match-message {
-		display: none;
-	}
-	.passwords-do-not-match > .passwords-do-not-match-message {
-		display: block;
-	}
-</style>
-
 <script>
 	import CMSAuth from '../../javascripts/auth.js';
 
@@ -79,7 +77,7 @@
 					confirm_password: null,
 					email: null
 				},
-				errorClass: 'has-danger'
+				title: "Graphia CMS: Create an admin"
 			}
 		},
 		computed: {

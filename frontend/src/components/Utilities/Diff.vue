@@ -33,13 +33,14 @@
 
 			if (!this.patch) {
 				console.warn("A patch is required to display a diff!");
-			}
+			};
 
 			if (this.collapsible == undefined) {
 				this.collapse = false;
 			} else {
 				this.collapse = this.collapsible;
 			};
+
 		},
 		computed: {
 			hashPresent() {

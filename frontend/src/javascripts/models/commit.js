@@ -2,92 +2,53 @@ import store from '../store.js';
 
 export default class CMSCommit {
 
-	constructor(message) {
-		this.message = message;
+	constructor(message, files=[], directories=[]) {
+		this.message     = message;
+		this.files       = files;
+		this.directories = directories;
 	};
 
 	static initialize() {
-		console.debug("Initializing commit...");
 		store.state.commit = new CMSCommit(null);
 	};
 
-	filesJSON(file) {
+	addFile(file) {
+		this.files.push(file);
+	};
 
-		return JSON.stringify({
+	addDirectory(dir) {
+		this.directories.push(dir);
+	};
+
+	reset() {
+		return this.resetFiles() && this.resetDirectories();
+	};
+
+	resetFiles() {
+		this.files = [];
+	};
+
+	resetDirectories() {
+		this.directories = [];
+	};
+
+	// creates JSON string for transmission, includeAttachments when true adds
+	// each new (or modified) attachment as a file in the files array. When
+	// deleting, set to false as the entire attchments directory is likely to be
+	// removed
+	prepareJSON(includeAttachments=true) {
+
+		return {
 			message: this.message,
 			repository_info: {
 				latest_revision: store.state.latestRevision
 			},
-			files: this._buildFilesArray(file)
-		});
-	};
-
-	directoriesJSON(directory) {
-		return JSON.stringify({
-			//message: "creating dir",
-			repository_info: {
-				latest_revision: store.state.latestRevision
-			},
-			directories: this._buildDirectoriesArray(directory)
-		})
-	};
-
-	_buildFilesArray(file) {
-		// FIXME (maybe), only works for one file + attachments
-		return [
-			this._file(file)
-		].concat(this._attachments(file));
-	}
-
-	_buildDirectoriesArray(directory) {
-		// FIXME (maybe), only works for one directory
-		return [this._directory(directory)];
-	}
-
-	_file(file) {
-
-		let json = {
-			path: file.path,
-			filename: file.filename,
-			body: file.markdown,
-
-			// and the frontmatter
-			frontmatter: {
-				title: file.title,
-				author: file.author,
-				tags: file.tags,
-				synopsis: file.synopsis,
-				version: file.version,
-				slug: file.slug
-			}
-		}
-
-		console.debug("json:", json);
-
-		return json;
-	};
-
-	_directory(directory) {
-		return {
-			name: directory.path,
-			info: {
-				title: directory.title,
-				description: directory.description,
-				body: directory.body
-			}
+			files: this.files
+				.map((f) => {return f.prepareJSON(includeAttachments)})
+				.reduce((acc,cur) => {return [...acc, ...cur]}, []),
+			directories: this.directories.map((d) => {return d.prepareJSON()})
 		};
-	};
 
-	_attachments(document) {
-		// FIXME filter to only get new files
-		return document.attachments.map((attachment) => {
-			return {
-				path: [document.path, document.slug, "images"].join("/"),
-				filename: attachment.name,
-				base_64_encoded: attachment.options.base64Encoded,
-				body: attachment.contents()
-			}
-		});
 	};
 
 };

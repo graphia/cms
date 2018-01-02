@@ -16,6 +16,10 @@ Feature: Setting up my SSH Keys
 			 | Existing keys        |
 			 | Upload a new SSH key |
 
+	Scenario: Page title
+		Given I visit my ssh key settings page
+		Then the page's title should be "Settings: SSH Keys"
+
 	Scenario: When I have no SSH keys I should see an informative message
 		Given I have no SSH keys
 		When I visit my ssh key settings page
@@ -47,3 +51,10 @@ Feature: Setting up my SSH Keys
 		When I click the 'Delete' button for my SSH key
 		Then there should be an alert with the message "SSH Key Deleted"
 		And my key should have been deleted
+
+	Scenario: Breadcrumbs
+		Given I am on my ssh key settings page
+		Then I should see the following breadcrumbs:
+			| Text                | Reference   |
+			| Dashboard           | /cms        |
+			| SSH key settings    | None        |

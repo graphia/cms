@@ -14,6 +14,11 @@ Feature: Commits
 		When I am on the document's history page
 		Then I should see each revision listed
 
+	Scenario: Page title
+		Given there is a document with some revisions
+		And I am on the document's history page
+		Then the page's title should be "History Test: History"
+
 	Scenario: Viewing a revision's commit
 		Given there is a document with some revisions
 		And I am on the document's history page

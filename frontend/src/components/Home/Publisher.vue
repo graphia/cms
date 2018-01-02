@@ -38,7 +38,7 @@
 			async publish(event) {
 
 				this.publishing = true;
-				console.debug("Starting publishing");
+				console.info("Publishing");
 
 				try {
 

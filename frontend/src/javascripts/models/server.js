@@ -53,8 +53,6 @@ export default class CMSServer {
 
 			let translationInfo = await response.json();
 
-			//console.debug("retrieved translation info", translationInfo);
-
 			store.state.defaultLanguage = translationInfo.default_language;
 			store.state.languages = translationInfo.languages;
 			store.state.translationEnabled = translationInfo.translation_enabled;

@@ -119,9 +119,11 @@ end
 
 
 def valid_key
-  "../backend/certificates/valid"
+  "../backend/certificates/valid".tap do |path|
+    File.chmod(0600, path)
+  end
 end
 
 def invalid_key
-  "../backend/certificates/invalid"
+  "../backend/certificates/missing"
 end

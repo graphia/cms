@@ -43,6 +43,11 @@ import vagueTime from 'vague-time';
 Vue.component('octicon', Octicon);
 Vue.use(VueRouter);
 
+Vue.directive('title', {
+	inserted: (el, binding) => document.title = binding.value,
+	update: (el, binding) => document.title = binding.value
+});
+
 const routes = [
 	// Unprotected pages
 	{path: '/cms/setup/initial_user', component: SetupInitialUser, name: 'initial_setup'},
@@ -79,8 +84,6 @@ export {router};
 // ensure that only logged-in users can continue
 router.beforeEach((to, from, next) => {
 
-	console.debug("checking user is accessing a 'safe' path", to.path)
-
 	// is the destination somewhere other than the login page?
 	if (to.path == '/cms/login' || to.path == '/cms/setup/initial_user') {
 		// destination is login page, continue
@@ -88,29 +91,30 @@ router.beforeEach((to, from, next) => {
 	}
 
 	else {
-		console.debug("no they aren't, make sure they're logged in", to.path)
-
 		// save original destination
 		window.originalDestination = to.path;
 
 		// if token exists, continue, otherwise redirect to login page
 		if (CMSAuth.isLoggedIn()) {
-			console.debug("yes, they're logged in, continue");
 			next();
 		} else {
-			console.warn("No, redirect them to the login page");
+			console.warn("Redirecting to the login page");
 			next(new Error("NotLoggedIn"));
 		};
 	}
 
 });
 
+router.afterEach(() => {
+	// scroll to the top of the page
+	window.scrollTo(0, 0);
+});
+
 router.onError((err) => {
 	if (err.message == "NotLoggedIn") {
-		console.debug("Not logged in, redirecting to login");
 		next('/cms/login');
 	}
-})
+});
 
 Vue.filter('format_date', (value) => {
 	let d = new Date(Date.parse(value));
@@ -123,18 +127,19 @@ Vue.filter('time_ago', (value) => {
 		to: Date.parse(value),
 		units: 'ms'
 	});
-})
+});
 
 Vue.filter('capitalize', (value) => {
 	try {
 		return value.charAt(0).toUpperCase() + value.slice(1);
 	} catch(err) {
 		console.warn("cannot capitalize:", value, err);
+		return value;
 	}
 });
 
 // Create a global Event Bus
-var EventBus = new Vue()
+var EventBus = new Vue();
 
 Object.defineProperties(Vue.prototype, {
 	$bus: {
