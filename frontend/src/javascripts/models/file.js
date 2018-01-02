@@ -16,7 +16,7 @@ export default class CMSFile {
 
 	constructor(file) {
 
-		this.translationRegex = /\.([A-z]{2})\.md$/
+		this.translationRegex = /\.([A-z]{2})\.md$/;
 
 		if (file && file.initialzing) {
 
@@ -388,8 +388,8 @@ export default class CMSFile {
 		};
 	};
 
-	addAttachment(file) {
-		store.commit("addAttachment", file);
+	addAttachment(attachment) {
+		store.commit("addAttachment", attachment);
 	};
 
 	// has the markdown changed since loading?
