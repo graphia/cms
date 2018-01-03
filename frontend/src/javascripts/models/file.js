@@ -36,6 +36,7 @@ export default class CMSFile {
 			this.attachments     = [];
 			this.translations    = [];
 			this.initialMarkdown = "";
+			this.language        = store.state.defaultLanguage;
 			this.date            = this.todayString();
 			this.draft           = true;
 
@@ -79,6 +80,8 @@ export default class CMSFile {
 			// and display a diff if necessary
 			this.initialMarkdown = file.markdown;
 
+			this.language = this.filenameLanguage();
+
 		} else {
 			// do the minimum setup needed
 			this.initializing   = true;
@@ -104,13 +107,12 @@ export default class CMSFile {
 		return this._tags;
 	};
 
-	get translation() {
-
-		return this.translationRegex.test(this.filename)
+	isTranslation() {
+		return this.translationRegex.test(this.filename);
 	};
 
-	get language() {
-		let code = this.translationRegex.exec(this.filename)
+	filenameLanguage() {
+		let code = this.translationRegex.exec(this.filename);
 
 		if (!code) {
 			return store.state.defaultLanguage;
@@ -132,8 +134,8 @@ export default class CMSFile {
 
 		let f = [
 			{
-				path: this.path,
-				filename: this.filename,
+				path: [this.path, this.slug].join("/"),
+				filename: "index.md",
 				body: this.markdown,
 
 				// and the frontmatter
@@ -361,7 +363,7 @@ export default class CMSFile {
 			return;
 		}
 
-		let path = `${config.api}/directories/${this.path}/files/${this.slug}/attachments`
+		let path = `${config.api}/directories/${this.path}/files/${this.slug}/attachments`;
 
 		try {
 			let response = await fetch(path, {
