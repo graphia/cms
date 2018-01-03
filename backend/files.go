@@ -112,10 +112,9 @@ func getFilesInDir(directory string) (files []FileItem, err error) {
 			}
 
 			fi := FileItem{
-				AbsoluteFilename: fmt.Sprintf("%s/%s", directory, te.Name),
-				Filename:         te.Name,
-				Path:             directory,
-				FrontMatter:      fm,
+				Filename:    te.Name,
+				Path:        directory,
+				FrontMatter: fm,
 			}
 
 			files = append(files, fi)
@@ -892,12 +891,11 @@ func getAttachments(directory string) (files []Attachment, err error) {
 			data := blob.Contents()
 
 			attachment = Attachment{
-				Filename:         te.Name,
-				AbsoluteFilename: filepath.Join(directory, path, te.Name),
-				Extension:        ext,
-				Data:             base64.StdEncoding.EncodeToString(data),
-				Path:             filepath.Join(directory, path),
-				MediaType:        getMediaType(ext),
+				Filename:  te.Name,
+				Extension: ext,
+				Data:      base64.StdEncoding.EncodeToString(data),
+				Path:      filepath.Join(directory, path),
+				MediaType: getMediaType(ext),
 			}
 
 			files = append(files, attachment)

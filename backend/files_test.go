@@ -60,7 +60,6 @@ func TestGetFilesInDirContents(t *testing.T) {
 	// file attributes
 	assert.Equal(t, "appendix_1.md", file.Filename)
 	assert.Equal(t, "appendices", file.Path)
-	assert.Equal(t, "appendices/appendix_1.md", file.AbsoluteFilename)
 
 	// frontmattter metadata
 	assert.Equal(t, "Appendix 1", file.FrontMatter.Title)
@@ -323,36 +322,32 @@ func TestGetAttachments(t *testing.T) {
 
 	expectedAttachments := []Attachment{
 		Attachment{
-			Path:             "appendices/appendix_1/data",
-			AbsoluteFilename: "appendices/appendix_1/data/data.json",
-			Extension:        ".json",
-			MediaType:        "text/json",
-			Data:             base64.StdEncoding.EncodeToString(jsonAttachmentContents),
-			Filename:         "data.json",
+			Path:      "appendices/appendix_1/data",
+			Extension: ".json",
+			MediaType: "text/json",
+			Data:      base64.StdEncoding.EncodeToString(jsonAttachmentContents),
+			Filename:  "data.json",
 		},
 		Attachment{
-			Path:             "appendices/appendix_1/data",
-			AbsoluteFilename: "appendices/appendix_1/data/data.xml",
-			Extension:        ".xml",
-			MediaType:        "text/xml",
-			Data:             base64.StdEncoding.EncodeToString(xmlAttachmentContents),
-			Filename:         "data.xml",
+			Path:      "appendices/appendix_1/data",
+			Extension: ".xml",
+			MediaType: "text/xml",
+			Data:      base64.StdEncoding.EncodeToString(xmlAttachmentContents),
+			Filename:  "data.xml",
 		},
 		Attachment{
-			Path:             "appendices/appendix_1/images",
-			AbsoluteFilename: "appendices/appendix_1/images/image_1.png",
-			Extension:        ".png",
-			MediaType:        "image/png",
-			Data:             base64.StdEncoding.EncodeToString(pngAttachmentContents),
-			Filename:         "image_1.png",
+			Path:      "appendices/appendix_1/images",
+			Extension: ".png",
+			MediaType: "image/png",
+			Data:      base64.StdEncoding.EncodeToString(pngAttachmentContents),
+			Filename:  "image_1.png",
 		},
 		Attachment{
-			Path:             "appendices/appendix_1/images",
-			AbsoluteFilename: "appendices/appendix_1/images/image_2.jpg",
-			Extension:        ".jpg",
-			MediaType:        "image/jpeg",
-			Data:             base64.StdEncoding.EncodeToString(jpegAttachmentContents),
-			Filename:         "image_2.jpg",
+			Path:      "appendices/appendix_1/images",
+			Extension: ".jpg",
+			MediaType: "image/jpeg",
+			Data:      base64.StdEncoding.EncodeToString(jpegAttachmentContents),
+			Filename:  "image_2.jpg",
 		},
 	}
 

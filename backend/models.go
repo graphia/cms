@@ -103,36 +103,35 @@ type Language struct {
 // FileItem contains enough file information for listing
 // HTML and raw Markdown content is omitted
 type FileItem struct {
-	AbsoluteFilename string      `json:"absolute_filename"`
-	Filename         string      `json:"filename"`
-	Path             string      `json:"path"`
-	Date             time.Time   `json:"updated_at"`
-	FrontMatter      FrontMatter `json:"frontmatter"`
+	Filename    string      `json:"filename"`
+	Path        string      `json:"path"`
+	Document    string      `json:"document"`
+	Date        time.Time   `json:"updated_at"`
+	FrontMatter FrontMatter `json:"frontmatter"`
 }
 
 // File represents a Markdown file and can be returned with
 // HTML or Markdown contents (or both if required)
 type File struct {
-	AbsoluteFilename string          `json:"absolute_filename"`
-	Filename         string          `json:"filename"`
-	Path             string          `json:"path"`
-	Language         string          `json:"language"`
-	HTML             *string         `json:"html"`
-	Markdown         *string         `json:"markdown"`
-	FrontMatter      FrontMatter     `json:"frontmatter"`
-	DirectoryInfo    *DirectoryInfo  `json:"directory_info,omitempty"`
-	RepositoryInfo   *RepositoryInfo `json:"repository_info,omitempty"`
-	Translations     []string        `json:"translations"`
+	Filename       string          `json:"filename"`
+	Path           string          `json:"path"`
+	Document       string          `json:"document"`
+	Language       string          `json:"language"`
+	HTML           *string         `json:"html"`
+	Markdown       *string         `json:"markdown"`
+	FrontMatter    FrontMatter     `json:"frontmatter"`
+	DirectoryInfo  *DirectoryInfo  `json:"directory_info,omitempty"`
+	RepositoryInfo *RepositoryInfo `json:"repository_info,omitempty"`
+	Translations   []string        `json:"translations"`
 }
 
 // Attachment belongs to a File, usually an image
 type Attachment struct {
-	Path             string `json:"path"`
-	Filename         string `json:"filename"`
-	AbsoluteFilename string `json:"absolute_filename"`
-	Extension        string `json:"extension"`
-	MediaType        string `json:"filetype"`
-	Data             string `json:"data"`
+	Path      string `json:"path"`
+	Filename  string `json:"filename"`
+	Extension string `json:"extension"`
+	MediaType string `json:"filetype"`
+	Data      string `json:"data"`
 }
 
 // Token holds a JSON Web Token
