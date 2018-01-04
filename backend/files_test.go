@@ -88,10 +88,11 @@ func TestGetConvertedFile(t *testing.T) {
 		t.Error("error", err)
 	}
 
-	assert.Equal(t, file.Filename, "document_2.md")
+	assert.Equal(t, file.Filename, "index.md")
+	assert.Equal(t, file.Document, "document_2")
 	assert.Equal(t, file.Path, "documents")
 
-	// just look for the title rather than rerender md in  here
+	// just look for the title rather than rerender md in here
 	assert.Contains(t, *file.HTML, "<h1>Document 2</h1>")
 
 	// markdown should be nil
@@ -111,12 +112,14 @@ func TestGetRawFile(t *testing.T) {
 	raw, _ := ioutil.ReadFile(filepath.Join(
 		config.Repository,
 		"documents",
-		"document_2.md",
+		"document_2",
+		"index.md",
 	))
 
 	contents, err := particle.YAMLEncoding.DecodeString(string(raw), &FrontMatter{})
 
-	assert.Equal(t, file.Filename, "document_2.md")
+	assert.Equal(t, file.Filename, "index.md")
+	assert.Equal(t, file.Document, "document_2")
 	assert.Equal(t, file.Path, "documents")
 	assert.Equal(t, *file.Markdown, string(contents))
 

@@ -20,12 +20,14 @@ func TestDeleteFiles(t *testing.T) {
 	}
 
 	ncf1 := NewCommitFile{
-		Filename: "document_1.md",
+		Filename: "index.md",
+		Document: "document_1",
 		Path:     "documents",
 	}
 
 	ncf2 := NewCommitFile{
-		Filename: "document_2.md",
+		Filename: "index.md",
+		Document: "document_2",
 		Path:     "documents",
 	}
 
@@ -74,7 +76,8 @@ func TestDeleteFileNotExists(t *testing.T) {
 	}
 
 	ncf := NewCommitFile{
-		Filename: "document_5.md",
+		Filename: "index.md",
+		Document: "document_5",
 		Path:     "documents",
 	}
 
@@ -102,7 +105,8 @@ func TestDeleteFilesNoMessage(t *testing.T) {
 	}
 
 	ncf := NewCommitFile{
-		Filename: "document_1.md",
+		Filename: "index.md",
+		Document: "document_1",
 		Path:     "documents",
 	}
 
@@ -148,7 +152,8 @@ func TestDeleteFilesRepoOutOfDate(t *testing.T) {
 	}
 
 	ncf := NewCommitFile{
-		Filename: "document_1.md",
+		Filename: "index.md",
+		Document: "document_1",
 		Path:     "documents",
 	}
 
@@ -168,7 +173,7 @@ func TestDeleteFilesRepoOutOfDate(t *testing.T) {
 	assert.Equal(t, err, ErrRepoOutOfSync)
 
 	// ensure the file hasn't been deleted
-	_, err = os.Stat(filepath.Join(repoPath, ncf.Path, ncf.Filename))
+	_, err = os.Stat(filepath.Join(repoPath, ncf.Path, ncf.Document, ncf.Filename))
 	assert.False(t, os.IsNotExist(err))
 
 }
@@ -186,7 +191,8 @@ func TestDeleteFileAndAttachmentsDirectory(t *testing.T) {
 	}
 
 	ncf1 := NewCommitFile{
-		Filename: "document_1.md",
+		Filename: "index.md",
+		Document: "document_1",
 		Path:     "documents",
 	}
 
@@ -204,7 +210,7 @@ func TestDeleteFileAndAttachmentsDirectory(t *testing.T) {
 	repo, _ := repository(config)
 
 	// ensure the file is present on the filesystem
-	_, err = os.Stat(filepath.Join(repoPath, ncf1.Path, ncf1.Filename))
+	_, err = os.Stat(filepath.Join(repoPath, ncf1.Path, ncf1.Document, ncf1.Filename))
 	assert.False(t, os.IsNotExist(err))
 
 	// ensure the directory is present on the filesystem

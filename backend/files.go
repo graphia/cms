@@ -632,7 +632,7 @@ func deleteFiles(nc NewCommit, user User) (oid *git.Oid, err error) {
 
 	for _, ncf := range nc.Files {
 
-		target := filepath.Join(ncf.Path, ncf.Filename)
+		target := filepath.Join(ncf.Path, ncf.Document, ncf.Filename)
 
 		// ensure that the file exists before we try to delete it
 		file, err := ht.EntryByPath(target)
@@ -653,6 +653,9 @@ func deleteFiles(nc NewCommit, user User) (oid *git.Oid, err error) {
 
 	}
 
+	// FIXME moving to Bundles this will *also* delete the translations
+	// this is the correct behaviour but need to make it clear in the UI
+	//
 	// if we're deleting the accompanying attachment directories too
 	for _, ncd := range nc.Directories {
 
