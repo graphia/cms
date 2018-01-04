@@ -23,6 +23,7 @@ type NewCommitDirectory struct {
 // NewCommitFile will replace RepoWrite's file attributes
 type NewCommitFile struct {
 	Filename      string      `json:"filename" validate:"required"`
+	Document      string      `json:"document" validate:"required"`
 	Path          string      `json:"path" validate:"required"`
 	Body          string      `json:"body"`
 	FrontMatter   FrontMatter `json:"frontmatter"`
@@ -32,6 +33,7 @@ type NewCommitFile struct {
 // NewTranslation creates a new copy of a file ready for translation
 type NewTranslation struct {
 	SourceFilename string `json:"source_filename" validate:"required"`
+	SourceDocument string `json:"source_document" validate:"required"`
 	Path           string `json:"path" validate:"required"`
 	LanguageCode   string `json:"language_code" validate:"required"`
 	RepositoryInfo `json:"repository_info"`

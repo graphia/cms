@@ -146,7 +146,7 @@ func createFiles(nc NewCommit, user User) (oid *git.Oid, err error) {
 	// check none of the files already exist
 	for _, ncf := range nc.Files {
 
-		target := filepath.Join(ncf.Path, ncf.Filename)
+		target := filepath.Join(ncf.Path, ncf.Document, ncf.Filename)
 
 		//FIXME would it make more sense to switch this
 		//around and check for the error instead?
@@ -383,7 +383,7 @@ func createTranslation(nt NewTranslation, user User) (oid *git.Oid, target strin
 	repo, err := repository(config)
 	target = nt.TargetFilename()
 
-	exists, err := fileExists(repo, nt.Path, target)
+	exists, err := fileExists(repo, nt.Path, nt.SourceDocument, target)
 	if exists {
 		return oid, target, ErrFileAlreadyExists
 	}
@@ -402,7 +402,7 @@ func createTranslation(nt NewTranslation, user User) (oid *git.Oid, target strin
 	if err != nil {
 		return oid, target, err
 	}
-	source := filepath.Join(nt.Path, nt.SourceFilename)
+	source := filepath.Join(nt.Path, nt.SourceDocument, nt.SourceFilename)
 
 	entry, err := tree.EntryByPath(source)
 	if err != nil {
@@ -726,7 +726,7 @@ func buildIndexEntryDirectory(oid *git.Oid, ncd NewCommitDirectory) git.IndexEnt
 func buildIndexEntryTranslation(oid *git.Oid, nt NewTranslation, size int) git.IndexEntry {
 	return git.IndexEntry{
 		Id:   oid,
-		Path: filepath.Join(nt.Path, nt.TargetFilename()),
+		Path: filepath.Join(nt.Path, nt.SourceDocument, nt.TargetFilename()),
 		Size: uint32(size),
 
 		Ctime: git.IndexTime{},
@@ -791,7 +791,7 @@ func getFile(directory, document, filename string, includeMd, includeHTML bool) 
 		return nil, err
 	}
 
-	translations, err := getTranslations(repo, directory, filename)
+	translations, err := getTranslations(repo, directory, document, filename)
 
 	file = &File{
 		Filename:       filename,
@@ -808,7 +808,7 @@ func getFile(directory, document, filename string, includeMd, includeHTML bool) 
 	return file, nil
 }
 
-func getTranslations(repo *git.Repository, directory, filename string) (langs []string, err error) {
+func getTranslations(repo *git.Repository, directory, document, filename string) (langs []string, err error) {
 
 	langs = []string{}
 	tree, err := headTree(repo)
@@ -819,7 +819,7 @@ func getTranslations(repo *git.Repository, directory, filename string) (langs []
 
 	for _, lc := range config.EnabledLanguages {
 
-		target := filepath.Join(directory, translationFilename(filename, lc))
+		target := filepath.Join(directory, document, translationFilename(filename, lc))
 
 		Debug.Println("checking for translation", target)
 
@@ -1245,14 +1245,14 @@ func translationFilename(fn, code string) (tfn string) {
 
 }
 
-func fileExists(repo *git.Repository, path, filename string) (exists bool, err error) {
+func fileExists(repo *git.Repository, path, document, filename string) (exists bool, err error) {
 
 	tree, err := headTree(repo)
 	if err != nil {
 		return false, err
 	}
 
-	_, err = tree.EntryByPath(filepath.Join(path, filename))
+	_, err = tree.EntryByPath(filepath.Join(path, document, filename))
 	if err != nil {
 		return false, err
 	}

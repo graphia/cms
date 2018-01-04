@@ -659,6 +659,7 @@ func Test_getTranslations(t *testing.T) {
 	type args struct {
 		repo      *git.Repository
 		directory string
+		document  string
 		filename  string
 	}
 	tests := []struct {
@@ -673,7 +674,8 @@ func Test_getTranslations(t *testing.T) {
 			args: args{
 				repo:      repo,
 				directory: "documents",
-				filename:  "document_1.md",
+				document:  "document_1",
+				filename:  "index.md",
 			},
 			wantLangs: []string{"en", "sv"},
 		},
@@ -682,7 +684,8 @@ func Test_getTranslations(t *testing.T) {
 			args: args{
 				repo:      repo,
 				directory: "documents",
-				filename:  "document_2.md",
+				document:  "document_2",
+				filename:  "index.md",
 			},
 			wantLangs: []string{"en", "fi", "sv"},
 		},
@@ -691,7 +694,8 @@ func Test_getTranslations(t *testing.T) {
 			args: args{
 				repo:      repo,
 				directory: "documents",
-				filename:  "document_3.md",
+				document:  "document_3",
+				filename:  "index.md",
 			},
 			wantLangs: []string{"en", "fi"},
 		},
@@ -700,7 +704,8 @@ func Test_getTranslations(t *testing.T) {
 			args: args{
 				repo:      repo,
 				directory: "documents",
-				filename:  "missing_document.md",
+				document:  "missing_document",
+				filename:  "index.md",
 			},
 			wantErr: true,
 			errMsg:  "No translations found",
@@ -708,7 +713,7 @@ func Test_getTranslations(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotLangs, err := getTranslations(tt.args.repo, tt.args.directory, tt.args.filename)
+			gotLangs, err := getTranslations(tt.args.repo, tt.args.directory, tt.args.document, tt.args.filename)
 			if tt.wantErr {
 				assert.Equal(t, tt.errMsg, err.Error())
 				return
@@ -720,13 +725,14 @@ func Test_getTranslations(t *testing.T) {
 
 func Test_fileExists(t *testing.T) {
 
-	repoPath := "../tests/tmp/repositories/get_translations"
+	repoPath := "../tests/tmp/repositories/file_exists"
 	setupTranslationsTestRepo(repoPath)
 	repo, _ := repository(config)
 
 	type args struct {
 		repo     *git.Repository
 		path     string
+		document string
 		filename string
 	}
 	tests := []struct {
@@ -738,20 +744,20 @@ func Test_fileExists(t *testing.T) {
 	}{
 		{
 			name:       "Existing file",
-			args:       args{repo: repo, path: "documents", filename: "document_1.md"},
+			args:       args{repo: repo, path: "documents", document: "document_1", filename: "index.md"},
 			wantExists: true,
 		},
 		{
 			name:       "Non-existing file",
-			args:       args{repo: repo, path: "documents", filename: "document_1.de.md"},
+			args:       args{repo: repo, path: "documents", document: "document_1", filename: "index.de.md"},
 			wantExists: false,
 			wantErr:    true,
-			errMsg:     "the path 'document_1.de.md' does not exist in the given tree",
+			errMsg:     "the path 'index.de.md' does not exist in the given tree",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotExists, err := fileExists(tt.args.repo, tt.args.path, tt.args.filename)
+			gotExists, err := fileExists(tt.args.repo, tt.args.path, tt.args.document, tt.args.filename)
 
 			assert.Equal(t, tt.wantExists, gotExists)
 
