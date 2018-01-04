@@ -71,7 +71,7 @@ func getFilesInDir(directory string) (files []FileItem, err error) {
 
 	defer tree.Free()
 
-	walkIterator := func(_ string, te *git.TreeEntry) int {
+	walkIterator := func(currentDir string, te *git.TreeEntry) int {
 		var fm FrontMatter
 		var blob *git.Blob
 
@@ -113,6 +113,7 @@ func getFilesInDir(directory string) (files []FileItem, err error) {
 
 			fi := FileItem{
 				Filename:    te.Name,
+				Document:    filepath.Clean(currentDir),
 				Path:        directory,
 				FrontMatter: fm,
 			}

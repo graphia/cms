@@ -173,22 +173,22 @@ func TestDiffForCommit(t *testing.T) {
 	assert.Equal(t, 0, cs.NumDeleted)
 	assert.Equal(t, 6, cs.NumAdded)
 	assert.Contains(t, cs.FullDiff, "+++ b/documents/_index.md")
-	assert.Contains(t, cs.FullDiff, "+++ b/documents/document_1.md")
-	assert.Contains(t, cs.FullDiff, "+++ b/documents/document_2.md")
-	assert.Contains(t, cs.FullDiff, "+++ b/documents/document_3.md")
-	assert.Contains(t, cs.FullDiff, "+++ b/appendices/appendix_1.md")
-	assert.Contains(t, cs.FullDiff, "+++ b/appendices/appendix_2.md")
+	assert.Contains(t, cs.FullDiff, "+++ b/documents/document_1/index.md")
+	assert.Contains(t, cs.FullDiff, "+++ b/documents/document_2/index.md")
+	assert.Contains(t, cs.FullDiff, "+++ b/documents/document_3/index.md")
+	assert.Contains(t, cs.FullDiff, "+++ b/appendices/appendix_1/index.md")
+	assert.Contains(t, cs.FullDiff, "+++ b/appendices/appendix_2/index.md")
 
 	// Ensure the file contents are included
 	assert.Contains(t, cs.FullDiff, "+Lorem ipsum dolor sit")
 
 	var allFilesInRepo = []string{
 		"documents/_index.md",
-		"documents/document_1.md",
-		"documents/document_2.md",
-		"documents/document_3.md",
-		"appendices/appendix_1.md",
-		"appendices/appendix_2.md",
+		"documents/document_1/index.md",
+		"documents/document_2/index.md",
+		"documents/document_3/index.md",
+		"appendices/appendix_1/index.md",
+		"appendices/appendix_2/index.md",
 	}
 
 	for _, path := range allFilesInRepo {

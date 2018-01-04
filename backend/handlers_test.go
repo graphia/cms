@@ -151,13 +151,14 @@ func Test_apiListFilesInDirectoryHandler(t *testing.T) {
 	assert.Equal(t, 3, len(receiver.Files))
 
 	// ensure all files are returned
-	var expectedFilenames, actualFilenames []string
+	var expectedDocuments, actualDocuments []string
 
-	expectedFilenames = []string{"document_1.md", "document_2.md", "document_3.md"}
+	expectedDocuments = []string{"document_1", "document_2", "document_3"}
 	for _, fi := range receiver.Files {
-		actualFilenames = append(actualFilenames, fi.Filename)
+		assert.Equal(t, "index.md", fi.Filename)
+		actualDocuments = append(actualDocuments, fi.Document)
 	}
-	assert.Equal(t, expectedFilenames, actualFilenames)
+	assert.Equal(t, expectedDocuments, actualDocuments)
 
 	// ensure frontmatter is returned correctly
 	var expectedTitles, actualTitles []string

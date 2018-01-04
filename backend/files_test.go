@@ -58,7 +58,8 @@ func TestGetFilesInDirContents(t *testing.T) {
 	file := files[0]
 
 	// file attributes
-	assert.Equal(t, "appendix_1.md", file.Filename)
+	assert.Equal(t, "index.md", file.Filename)
+	assert.Equal(t, "appendix_1", file.Document)
 	assert.Equal(t, "appendices", file.Path)
 
 	// frontmattter metadata
@@ -140,7 +141,8 @@ func TestGetFileBothMarkdownAndHTML(t *testing.T) {
 	raw, _ := ioutil.ReadFile(filepath.Join(
 		config.Repository,
 		"documents",
-		"document_2.md",
+		"document_2",
+		"index.md",
 	))
 
 	contents, err := particle.YAMLEncoding.DecodeString(string(raw), &FrontMatter{})
@@ -149,7 +151,8 @@ func TestGetFileBothMarkdownAndHTML(t *testing.T) {
 	hc, _ := headCommit(repo)
 	repoInfo := RepositoryInfo{LatestRevision: hc.Id().String()}
 
-	assert.Equal(t, file.Filename, "document_2.md")
+	assert.Equal(t, file.Filename, "index.md")
+	assert.Equal(t, file.Document, "document_2")
 	assert.Equal(t, file.Path, "documents")
 	assert.Equal(t, *file.Markdown, string(contents))
 	assert.Contains(t, *file.HTML, "<h1>Document 2</h1")
@@ -171,7 +174,8 @@ func TestGetFileNeitherMarkdownOrHTML(t *testing.T) {
 	hc, _ := headCommit(repo)
 	repoInfo := RepositoryInfo{LatestRevision: hc.Id().String()}
 
-	assert.Equal(t, file.Filename, "document_2.md")
+	assert.Equal(t, file.Filename, "index.md")
+	assert.Equal(t, file.Document, "document_2")
 	assert.Equal(t, file.Path, "documents")
 	assert.Nil(t, file.HTML)
 	assert.Nil(t, file.Markdown)
@@ -191,7 +195,8 @@ func TestGetFileNoRepoMetadata(t *testing.T) {
 	repoInfo := RepositoryInfo{LatestRevision: hc.Id().String()}
 
 	assert.Nil(t, err) // make sure getFile doesn't return an error
-	assert.Equal(t, file.Filename, "appendix_1.md")
+	assert.Equal(t, file.Filename, "index.md")
+	assert.Equal(t, file.Document, "appendix_1")
 	assert.Equal(t, file.Path, "appendices")
 	assert.Nil(t, file.DirectoryInfo)
 	assert.Equal(t, *file.RepositoryInfo, repoInfo)
@@ -548,13 +553,13 @@ func Test_getMetadataFromBlob(t *testing.T) {
 	repo, _ := repository(config)
 	ht, _ := headTree(repo)
 
-	entryFullFM, _ := ht.EntryByPath("documents/full-frontmatter.md")
+	entryFullFM, _ := ht.EntryByPath("documents/full-frontmatter/index.md")
 	blobFullFM, _ := repo.LookupBlob(entryFullFM.Id)
 
-	entryNoFM, _ := ht.EntryByPath("documents/no-frontmatter.md")
+	entryNoFM, _ := ht.EntryByPath("documents/no-frontmatter/index.md")
 	blobNoFM, _ := repo.LookupBlob(entryNoFM.Id)
 
-	entryBrokenFM, _ := ht.EntryByPath("documents/broken-frontmatter.md")
+	entryBrokenFM, _ := ht.EntryByPath("documents/broken-frontmatter/index.md")
 	blobBrokenFM, _ := repo.LookupBlob(entryBrokenFM.Id)
 
 	type args struct {
@@ -567,7 +572,7 @@ func Test_getMetadataFromBlob(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "documents/full-frontmatter.md",
+			name: "documents/full-frontmatter/index.md",
 			args: args{
 				blob: blobFullFM,
 			},
@@ -581,7 +586,7 @@ func Test_getMetadataFromBlob(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "documents/no-frontmatter.md",
+			name: "documents/no-frontmatter/index.md",
 			args: args{
 				blob: blobNoFM,
 			},
@@ -589,7 +594,7 @@ func Test_getMetadataFromBlob(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "documents/broken-frontmatter.md",
+			name: "documents/broken-frontmatter/index.md",
 			args: args{
 				blob: blobBrokenFM,
 			},
