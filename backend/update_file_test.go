@@ -101,7 +101,8 @@ func TestUpdateFilesRepoOutOfDate(t *testing.T) {
 	}
 
 	nfc := NewCommitFile{
-		Filename: "document_1.md",
+		Filename: "index.md",
+		Document: "document_1",
 		Path:     "documents",
 		Body:     "Cows don't look like cows on film. You gotta use horses.",
 		FrontMatter: FrontMatter{
@@ -124,7 +125,7 @@ func TestUpdateFilesRepoOutOfDate(t *testing.T) {
 	assert.Equal(t, err, ErrRepoOutOfSync)
 
 	// make sure the file hasn't been updated
-	contents, _ := ioutil.ReadFile(filepath.Join(repoPath, nfc.Path, nfc.Filename))
+	contents, _ := ioutil.ReadFile(filepath.Join(repoPath, nfc.Path, nfc.Document, nfc.Filename))
 	assert.Contains(t, string(contents), "Lorem ipsum dolor sit amet")
 
 }

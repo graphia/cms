@@ -827,13 +827,14 @@ func apiCreateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 //	  ]
 // }
 func apiUpdateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
-	var filename, directory string
+	var filename, document, directory string
 	var nc NewCommit
 	var fr FailureResponse
 	var sr SuccessResponse
 	var err error
 
 	filename = vestigo.Param(r, "file")
+	document = vestigo.Param(r, "document")
 	directory = vestigo.Param(r, "directory")
 
 	json.NewDecoder(r.Body).Decode(&nc)
@@ -853,7 +854,7 @@ func apiUpdateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !pathInFiles(directory, filename, &nc.Files) {
+	if !pathInFiles(directory, document, filename, &nc.Files) {
 		fr = FailureResponse{
 			Message: "No supplied file matches path",
 		}
@@ -895,14 +896,16 @@ func apiUpdateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func apiTranslateFileHandler(w http.ResponseWriter, r *http.Request) {
-	var filename, directory string
+	var filename, document, directory string
 	var nt NewTranslation
 	var fr FailureResponse
 	var sr SuccessResponse
 	var err error
 
 	filename = vestigo.Param(r, "file")
+	document = vestigo.Param(r, "document")
 	directory = vestigo.Param(r, "directory")
+
 	user := getCurrentUser(r.Context())
 
 	json.NewDecoder(r.Body).Decode(&nt)
@@ -918,7 +921,7 @@ func apiTranslateFileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if filename != nt.SourceFilename {
+	if filename != nt.SourceFilename || document != nt.SourceDocument {
 		fr = FailureResponse{Message: "Filename does not match payload"}
 		Warning.Printf(
 			"Filename does not match contents, param: %s, payload: %s",
@@ -961,12 +964,13 @@ func apiTranslateFileHandler(w http.ResponseWriter, r *http.Request) {
 //	  ]
 // }
 func apiDeleteFileFromDirectoryHandler(w http.ResponseWriter, r *http.Request) {
-	var filename, directory string
+	var filename, document, directory string
 	var nc NewCommit
 	var fr FailureResponse
 	var sr SuccessResponse
 
 	filename = vestigo.Param(r, "file")
+	document = vestigo.Param(r, "document")
 	directory = vestigo.Param(r, "directory")
 
 	json.NewDecoder(r.Body).Decode(&nc)
@@ -979,7 +983,7 @@ func apiDeleteFileFromDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !pathInFiles(directory, filename, &nc.Files) {
+	if !pathInFiles(directory, document, filename, &nc.Files) {
 		fr = FailureResponse{
 			Message: "No supplied file matches path",
 		}
@@ -992,7 +996,7 @@ func apiDeleteFileFromDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 	// in the message rather than just the one specified by the URL
 	// UI only offers one at a time so far so not vital.
 	if nc.Message == "" {
-		nc.Message = fmt.Sprintf("File deleted %s/%s", directory, filename)
+		nc.Message = fmt.Sprintf("File deleted %s/%s/%s", directory, document, filename)
 	}
 
 	user := getCurrentUser(r.Context())
@@ -1069,11 +1073,12 @@ func apiGetFileAttachmentsHandler(w http.ResponseWriter, r *http.Request) {
 	var fr FailureResponse
 
 	directory := vestigo.Param(r, "directory")
-	filename := vestigo.Param(r, "filename")
+	document := vestigo.Param(r, "document")
 
-	path := fmt.Sprintf("%s/%s", directory, filename)
+	path := fmt.Sprintf("%s/%s", directory, document)
 
 	files, err := getAttachments(path)
+
 	if err != nil {
 
 		Warning.Println("No attachments dir found for path", path)
@@ -1091,10 +1096,8 @@ func apiGetFileAttachmentsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func apiGetFileAttachmentHandler(w http.ResponseWriter, r *http.Request) {
-
-	Debug.Println("***** HANDLING ATTACHMENT!")
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("ok"))
+	w.Write([]byte("Not implemented yet"))
 }
 
 // apiEditFileInDirectoryHandler returns a File object representing the

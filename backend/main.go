@@ -188,15 +188,15 @@ func protectedRouter() (r *vestigo.Router) {
 	r.Get("/api/directories/:directory/documents/:document/files/:file/edit", apiEditFileInDirectoryHandler)
 
 	r.Patch("/api/directories/:directory/files/:file", apiUpdateFileInDirectoryHandler)
-	r.Delete("/api/directories/:directory/files/:file", apiDeleteFileFromDirectoryHandler)
-	r.Post("/api/directories/:directory/files/:file/translate", apiTranslateFileHandler)
+	r.Delete("/api/directories/:directory/documents/:document/files/:file", apiDeleteFileFromDirectoryHandler)
+	r.Post("/api/directories/:directory/documents/:document/files/:file/translate", apiTranslateFileHandler)
 
 	r.Get("/api/directories/:directory/files/:file/history", apiGetFileHistoryHandler)
 
 	// attachment endpoint
 	// note filename used rather than :file because we're not using the extension
-	r.Get("/api/directories/:directory/files/:filename/attachments", apiGetFileAttachmentsHandler)
-	r.Get("/api/directories/:directory/files/:filename/attachments/:file", apiGetFileAttachmentHandler)
+	r.Get("/api/directories/:directory/documents/:document/attachments", apiGetFileAttachmentsHandler)
+	r.Get("/api/directories/:directory/documents/:document/attachments/:file", apiGetFileAttachmentHandler)
 
 	// user endpoints
 	r.Get("/api/users", apiListUsersHandler)

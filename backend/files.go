@@ -1027,11 +1027,13 @@ func writeTreeAndCommit(repo *git.Repository, index *git.Index, message string, 
 
 }
 
-func pathInFiles(directory, filename string, files *[]NewCommitFile) bool {
+func pathInFiles(directory, document, filename string, files *[]NewCommitFile) bool {
 
 	// check that at least one file in files matches the directory and filename
 	for _, file := range *files {
-		if file.Path == directory && file.Filename == filename {
+		if file.Path == directory &&
+			file.Document == document &&
+			file.Filename == filename {
 			return true
 		}
 	}
