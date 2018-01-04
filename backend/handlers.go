@@ -1046,12 +1046,13 @@ func apiGetFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 	var fr FailureResponse
 
 	directory := vestigo.Param(r, "directory")
+	document := vestigo.Param(r, "document")
 	filename := vestigo.Param(r, "file")
 
-	file, err := getConvertedFile(directory, filename)
+	file, err := getConvertedFile(directory, document, filename)
 	if err != nil {
 
-		Error.Println("Could not find converted file", directory, filename, err.Error())
+		Error.Println("Could not find converted file", directory, document, filename, err.Error())
 
 		fr = FailureResponse{
 			Message: fmt.Sprintf("Failed to get converted file: %s", err.Error()),
@@ -1117,9 +1118,11 @@ func apiEditFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 	var fr FailureResponse
 
 	directory := vestigo.Param(r, "directory")
+	document := vestigo.Param(r, "document")
 	filename := vestigo.Param(r, "file")
 
-	file, err := getRawFile(directory, filename)
+	file, err := getRawFile(directory, document, filename)
+
 	if err != nil {
 		Error.Println("Could not update file", err.Error())
 

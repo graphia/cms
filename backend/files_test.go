@@ -83,7 +83,7 @@ func TestGetConvertedFile(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/get_file"
 	setupSmallTestRepo(repoPath)
 
-	file, err := getConvertedFile("documents", "document_2.md")
+	file, err := getConvertedFile("documents", "document_2", "index.md")
 	if err != nil {
 		t.Error("error", err)
 	}
@@ -103,7 +103,7 @@ func TestGetRawFile(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/get_file"
 	setupSmallTestRepo(repoPath)
 
-	file, err := getRawFile("documents", "document_2.md")
+	file, err := getRawFile("documents", "document_2", "index.md")
 	if err != nil {
 		t.Error("error", err)
 	}
@@ -129,7 +129,7 @@ func TestGetFileBothMarkdownAndHTML(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/get_file"
 	setupSmallTestRepo(repoPath)
 
-	file, err := getFile("documents", "document_2.md", true, true)
+	file, err := getFile("documents", "document_2", "index.md", true, true)
 	if err != nil {
 		t.Error("error", err)
 	}
@@ -159,7 +159,7 @@ func TestGetFileNeitherMarkdownOrHTML(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/get_file"
 	setupSmallTestRepo(repoPath)
 
-	file, err := getFile("documents", "document_2.md", false, false)
+	file, err := getFile("documents", "document_2", "index.md", false, false)
 	if err != nil {
 		t.Error("error", err)
 	}
@@ -181,7 +181,7 @@ func TestGetFileNoRepoMetadata(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/get_file"
 	setupSmallTestRepo(repoPath)
 
-	file, err := getFile("appendices", "appendix_1.md", false, false)
+	file, err := getFile("appendices", "appendix_1", "index.md", false, false)
 
 	repo, _ := repository(config)
 	hc, _ := headCommit(repo)

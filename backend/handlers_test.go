@@ -1289,13 +1289,13 @@ func TestApiDeleteAnotherDirectory(t *testing.T) {
 func TestApiGetFileInDirectory(t *testing.T) {
 	server = createTestServerWithContext(false)
 
-	repoPath := "../tests/tmp/repositories/create_directory"
+	repoPath := "../tests/tmp/repositories/get_file"
 	setupSmallTestRepo(repoPath)
 
 	target := fmt.Sprintf(
 		"%s/%s",
 		server.URL,
-		"api/directories/documents/files/document_3.md",
+		"api/directories/documents/documents/document_3/files/index.md",
 	)
 
 	resp, _ := http.Get(target)
@@ -1306,7 +1306,8 @@ func TestApiGetFileInDirectory(t *testing.T) {
 
 	json.NewDecoder(resp.Body).Decode(&file)
 
-	assert.Equal(t, file.Filename, "document_3.md")
+	assert.Equal(t, file.Filename, "index.md")
+	assert.Equal(t, file.Document, "document_3")
 	assert.Equal(t, file.Path, "documents")
 	assert.Contains(t, *file.HTML, "<h1>Document 3</h1>")
 	assert.Equal(t, &DirectoryInfo{Title: "Documents", Description: "Documents go here"}, file.DirectoryInfo)
@@ -1317,13 +1318,13 @@ func TestApiEditFileInDirectory(t *testing.T) {
 
 	server = createTestServerWithContext(false)
 
-	repoPath := "../tests/tmp/repositories/create_directory"
+	repoPath := "../tests/tmp/repositories/edit_file"
 	setupSmallTestRepo(repoPath)
 
 	target := fmt.Sprintf(
 		"%s/%s",
 		server.URL,
-		"api/directories/documents/files/document_3.md/edit",
+		"api/directories/documents/documents/document_3/files/index.md/edit",
 	)
 
 	resp, err := http.Get(target)
@@ -1338,14 +1339,18 @@ func TestApiEditFileInDirectory(t *testing.T) {
 
 	json.NewDecoder(resp.Body).Decode(&file)
 
-	assert.Equal(t, file.Filename, "document_3.md")
+	assert.Equal(t, file.Filename, "index.md")
+	assert.Equal(t, file.Document, "document_3")
 	assert.Equal(t, file.Path, "documents")
 
-	raw, _ := ioutil.ReadFile(filepath.Join(
-		config.Repository,
-		"documents",
-		"document_3.md",
-	))
+	raw, _ := ioutil.ReadFile(
+		filepath.Join(
+			config.Repository,
+			"documents",
+			"document_3",
+			"index.md",
+		),
+	)
 
 	contents, err := particle.YAMLEncoding.DecodeString(string(raw), &FrontMatter{})
 

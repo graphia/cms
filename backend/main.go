@@ -181,9 +181,12 @@ func protectedRouter() (r *vestigo.Router) {
 
 	// file endpoints
 	r.Get("/api/directories/:directory/files", apiListFilesInDirectoryHandler)
+
 	r.Post("/api/directories/:directory/files", apiCreateFileInDirectoryHandler)
-	r.Get("/api/directories/:directory/files/:file", apiGetFileInDirectoryHandler)
-	r.Get("/api/directories/:directory/files/:file/edit", apiEditFileInDirectoryHandler)
+
+	r.Get("/api/directories/:directory/documents/:document/files/:file", apiGetFileInDirectoryHandler)
+	r.Get("/api/directories/:directory/documents/:document/files/:file/edit", apiEditFileInDirectoryHandler)
+
 	r.Patch("/api/directories/:directory/files/:file", apiUpdateFileInDirectoryHandler)
 	r.Delete("/api/directories/:directory/files/:file", apiDeleteFileFromDirectoryHandler)
 	r.Post("/api/directories/:directory/files/:file/translate", apiTranslateFileHandler)

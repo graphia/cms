@@ -737,7 +737,7 @@ func buildIndexEntryTranslation(oid *git.Oid, nt NewTranslation, size int) git.I
 	}
 }
 
-func getFile(directory string, filename string, includeMd, includeHTML bool) (file *File, err error) {
+func getFile(directory, document, filename string, includeMd, includeHTML bool) (file *File, err error) {
 	var html, markdown *string = nil, nil
 	var fm FrontMatter
 
@@ -747,7 +747,9 @@ func getFile(directory string, filename string, includeMd, includeHTML bool) (fi
 	if err != nil {
 		return nil, err
 	}
-	target := filepath.Join(directory, filename)
+	target := filepath.Join(directory, document, filename)
+
+	fmt.Println("target", target)
 
 	entry, err := tree.EntryByPath(target)
 	if err != nil {
@@ -793,6 +795,7 @@ func getFile(directory string, filename string, includeMd, includeHTML bool) (fi
 
 	file = &File{
 		Filename:       filename,
+		Document:       document,
 		Path:           directory,
 		HTML:           html,
 		Markdown:       markdown,
@@ -911,18 +914,18 @@ func getAttachments(directory string) (files []Attachment, err error) {
 
 }
 
-func getConvertedFile(directory, filename string) (file *File, err error) {
+func getConvertedFile(directory, document, filename string) (file *File, err error) {
 	Debug.Println("Getting converted file", directory, filename)
-	file, err = getFile(directory, filename, false, true)
+	file, err = getFile(directory, document, filename, false, true)
 	if err != nil {
 		return nil, err
 	}
 	return
 }
 
-func getRawFile(directory, filename string) (file *File, err error) {
+func getRawFile(directory, document, filename string) (file *File, err error) {
 	Debug.Println("Getting raw file", directory, filename)
-	file, err = getFile(directory, filename, true, false)
+	file, err = getFile(directory, document, filename, true, false)
 	if err != nil {
 		return nil, err
 	}
