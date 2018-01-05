@@ -702,7 +702,7 @@ func sign(user User) *git.Signature {
 func buildIndexEntry(oid *git.Oid, ncf NewCommitFile) git.IndexEntry {
 	return git.IndexEntry{
 		Id:   oid,
-		Path: filepath.Join(ncf.Path, ncf.Filename),
+		Path: filepath.Join(ncf.Path, ncf.Document, ncf.Filename),
 		Size: uint32(len(ncf.Body)),
 
 		Ctime: git.IndexTime{},
@@ -752,8 +752,6 @@ func getFile(directory, document, filename string, includeMd, includeHTML bool) 
 		return nil, err
 	}
 	target := filepath.Join(directory, document, filename)
-
-	fmt.Println("target", target)
 
 	entry, err := tree.EntryByPath(target)
 	if err != nil {

@@ -187,11 +187,11 @@ func protectedRouter() (r *vestigo.Router) {
 	r.Get("/api/directories/:directory/documents/:document/files/:file", apiGetFileInDirectoryHandler)
 	r.Get("/api/directories/:directory/documents/:document/files/:file/edit", apiEditFileInDirectoryHandler)
 
-	r.Patch("/api/directories/:directory/files/:file", apiUpdateFileInDirectoryHandler)
+	r.Patch("/api/directories/:directory/documents/:document/files/:file", apiUpdateFileInDirectoryHandler)
 	r.Delete("/api/directories/:directory/documents/:document/files/:file", apiDeleteFileFromDirectoryHandler)
 	r.Post("/api/directories/:directory/documents/:document/files/:file/translate", apiTranslateFileHandler)
 
-	r.Get("/api/directories/:directory/files/:file/history", apiGetFileHistoryHandler)
+	r.Get("/api/directories/:directory/documents/:document/files/:file/history", apiGetFileHistoryHandler)
 
 	// attachment endpoint
 	// note filename used rather than :file because we're not using the extension

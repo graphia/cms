@@ -593,11 +593,12 @@ func TestApiUpdateFileInDirectory(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/update_file"
 	lr, _ := setupSmallTestRepo(repoPath)
 
-	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files/document_3.md")
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/documents/document_3/files/index.md")
 
 	ncf := NewCommitFile{
 		Path:     "documents",
-		Filename: "document_3.md",
+		Document: "document_3",
+		Filename: "index.md",
 		Body:     "# The quick brown fox",
 		FrontMatter: FrontMatter{
 			Title:  "Document Three",
@@ -638,7 +639,7 @@ func TestApiUpdateFileInDirectory(t *testing.T) {
 	assert.Equal(t, receiver.Oid, hc.Id().String())
 
 	// ensure the file exists and has the right content
-	contents, _ := ioutil.ReadFile(filepath.Join(repoPath, ncf.Path, ncf.Filename))
+	contents, _ := ioutil.ReadFile(filepath.Join(repoPath, ncf.Path, ncf.Document, ncf.Filename))
 	assert.Contains(t, string(contents), ncf.Body)
 	assert.Contains(t, string(contents), ncf.FrontMatter.Author)
 	assert.Contains(t, string(contents), ncf.FrontMatter.Title)
@@ -659,11 +660,12 @@ func TestApiUpdateFileInDirectoryWithErrors(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/update_file"
 	setupSmallTestRepo(repoPath)
 
-	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files/document_3.md")
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/documents/document_3/files/index.md")
 
 	ncf := NewCommitFile{
 		Path:     "documents",
-		Filename: "document_3.md",
+		Document: "document_3",
+		Filename: "index.md",
 		Body:     "# The quick brown fox",
 		FrontMatter: FrontMatter{
 			Title:  "Document Three",
@@ -705,11 +707,12 @@ func TestApiUpdateFileInDirectoryRepoOutOfDate(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/update_file"
 	firstCommit, _ := setupSmallTestRepo(repoPath)
 
-	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files/document_3.md")
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/documents/document_3/files/index.md")
 
 	ncf := NewCommitFile{
 		Path:     "documents",
-		Filename: "document_3.md",
+		Document: "document_3",
+		Filename: "index.md",
 		Body:     "# The quick brown fox",
 		FrontMatter: FrontMatter{
 			Title:  "Document Three",
@@ -752,11 +755,12 @@ func TestApiUpdateOtherFileInDirectory(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/update_file"
 	lr, _ := setupSmallTestRepo(repoPath)
 
-	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files/document_3.md")
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/documents/document_3/files/index.md")
 
 	ncf := NewCommitFile{
 		Path:     "documents",
-		Filename: "document_2.md", // note, target contains document_2.md
+		Document: "document_2",
+		Filename: "index.md", // note, target contains document_2.md
 		Body:     "# The quick brown fox",
 		FrontMatter: FrontMatter{
 			Title:  "Document Three",
@@ -799,7 +803,7 @@ func TestApiUpdateNoFilesInDirectory(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/update_file"
 	lr, _ := setupSmallTestRepo(repoPath)
 
-	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files/document_3.md")
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/documents/document_3/files/index.md")
 
 	nc := &NewCommit{
 		Message:        "Forty whacks with a wet noodle",

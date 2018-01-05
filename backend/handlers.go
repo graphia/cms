@@ -819,7 +819,7 @@ func apiCreateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 // apiUpdateFileInDirectory updates an existing file the specified
 // directory
 //
-// PATCH /api/directories/:directory/files/:filename
+// PATCH /api/directories/:directory/documents/:document/files/:filename
 // {
 //	  "message": "Added document six"
 //	  "files": [
@@ -1600,9 +1600,10 @@ func apiGetFileHistoryHandler(w http.ResponseWriter, r *http.Request) {
 	var fr FailureResponse
 
 	directory := vestigo.Param(r, "directory")
+	document := vestigo.Param(r, "document")
 	filename := vestigo.Param(r, "file")
 
-	path := fmt.Sprintf("%s/%s", directory, filename)
+	path := filepath.Join(directory, document, filename)
 
 	history, err := getFileHistory(path, 10)
 	if err != nil {
