@@ -12,6 +12,10 @@ export default {
 			return this.$route.params.filename;
 		},
 
+		params() {
+			return this.$route.params;
+		},
+
 		// quick access to stuff in the store
 
 		activeDirectory() {

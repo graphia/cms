@@ -63,10 +63,17 @@
 				try {
 					let code = sender.currentTarget.value;
 
+					let filename = "index.md";
+
+					if (this.params.language_code) {
+						filename = `index.${this.params.language_code}.md`;
+					};
+
 					let translation = new CMSTranslation(
-						this.directory,
-						this.filename,
-						code,
+						this.params.directory,
+						this.params.document,
+						filename,
+						code
 					);
 
 					let response = await translation.create();

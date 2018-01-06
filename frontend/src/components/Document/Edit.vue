@@ -42,8 +42,20 @@
 			// set up a fresh new commit
 			this.$store.dispatch("initializeCommit");
 
-			// retrieve the document and add it to vuex's store
-			await this.$store.dispatch("editDocument", {directory: this.directory, filename: this.filename});
+			let filename = "index.md";
+
+			if (this.params.language_code) {
+				filename = `index.${this.params.language_code}.md`;
+			};
+
+			console.debug("filename", filename)
+
+			// retrieve the document and make it Active
+			await this.$store.dispatch("editDocument", {
+				directory: this.params.directory,
+				document: this.params.document,
+				filename: filename
+			});
 
 			// FIMXE use the bus 🚌
 			this.markdownLoaded = true;

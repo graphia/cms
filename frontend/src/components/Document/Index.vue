@@ -31,7 +31,7 @@
 
 						<div class="card-header">
 
-							<router-link :to="{name: 'document_show', params: {filename: primary(d).filename}}">
+							<router-link :to="{name: 'document_show', params: {document: primary(d).document}}">
 								{{ primary(d).title || primary(d).filename }}
 							</router-link>
 
@@ -47,9 +47,9 @@
 
 						<div class="card-footer" v-if="translationEnabled && d.length > 1">
 							<ul class="list-inline">
-								<li class="list-inline-item" v-for="(t, k) in translations(d)" :key="k" :data-lang="t.language.name">
-									<router-link :to="{name: 'document_show', params: {filename: t.filename}}">
-										{{ (t.language && t.language.flag) || "missing" }}
+								<li class="list-inline-item" v-for="(t, k) in translations(d)" :key="k" :data-lang="t.languageInfo.name">
+									<router-link :to="{name: 'document_show', params: {filename: t.filename, document: t.document, language_code: t.language}}">
+										{{ (t.languageInfo && t.languageInfo.flag) || "missing" }}
 									</router-link>
 								</li>
 							</ul>
@@ -139,7 +139,7 @@
 
 			translations(files) {
 				return files
-					.filter((file) => { return file.translation })
+					.filter((file) => { return file.isTranslation() })
 			}
 
 		},
@@ -172,7 +172,8 @@
 					})
 					.reduce((summary, doc) => {
 						// use the file's basename to group translations
-						let base = doc.filename.split(".")[0]
+						// let base = doc.filename.split(".")[0]
+						let base = doc.document;
 
 						summary[base] ? summary[base].push(doc) : summary[base] = [doc];
 

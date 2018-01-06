@@ -23,6 +23,7 @@ export default class CMSFile {
 			this.initializing    = file.initializing;
 
 			this.path            = file.path;
+			this.document        = "";
 			this.filename        = "";
 			this.slug            = "";
 			this.html            = "";
@@ -46,6 +47,7 @@ export default class CMSFile {
 
 			// TODO this is a bit long and ugly; can it be neatened up?
 			this.path                  = file.path;
+			this.document              = file.document;
 			this.filename              = file.filename;
 			this.html                  = file.html;
 			this.markdown              = file.markdown;
@@ -76,11 +78,12 @@ export default class CMSFile {
 			this.history = [];     // historic commits
 			this.attachments = []; // related files from the directory named after file
 
+			// set the language by extracting the code from the filename
+			this.language = this.filenameLanguage();
+
 			// finally save the initial markdown value so we can detect changes
 			// and display a diff if necessary
 			this.initialMarkdown = file.markdown;
-
-			this.language = this.filenameLanguage();
 
 		} else {
 			// do the minimum setup needed
@@ -118,7 +121,11 @@ export default class CMSFile {
 			return store.state.defaultLanguage;
 		};
 
-		return store.state.languages.find(x => x.code === code[1]);
+		return code[1];
+	};
+
+	get languageInfo() {
+		return store.state.languages.find(x => x.code === this.language);
 	};
 
 	get attachmentsDir() {
@@ -134,8 +141,9 @@ export default class CMSFile {
 
 		let f = [
 			{
-				path: [this.path, this.slug].join("/"),
-				filename: "index.md",
+				path: this.path,
+				filename: this.filename,
+				document: this.document,
 				body: this.markdown,
 
 				// and the frontmatter
@@ -237,8 +245,9 @@ export default class CMSFile {
 	 *    filename [string]: the file's filename
 	 *    edit [boolean]: when true returns markdown from the API, when false HTML
 	 */
-	static async find(directory, filename, edit = false) {
-		let path = `${config.api}/directories/${directory}/files/${filename}`
+	static async find(directory, document, filename, edit = false) {
+
+		let path = `${config.api}/directories/${directory}/documents/${document}/files/${filename}`
 
 		// if we need the uncompiled markdown (for loading the editor), amend '/edit' to the path
 		if (edit) {
@@ -248,7 +257,8 @@ export default class CMSFile {
 		let response = await fetch(path, {mode: "cors", headers: store.state.auth.authHeader()})
 
 		if (!checkResponse(response.status)) {
-			return
+			console.error("Document cannot be retrieved", response);
+			return;
 		}
 
 		let file = await response.json()
@@ -320,7 +330,7 @@ export default class CMSFile {
 
 	async destroy(commit, deleteAttachments=false) {
 
-		var path = `${config.api}/directories/${this.path}/files/${this.filename}`;
+		var path = `${config.api}/directories/${this.path}/documents/${this.document}/files/${this.filename}`;
 
 		try {
 			let response = await fetch(path, {
@@ -339,20 +349,16 @@ export default class CMSFile {
 	};
 
 	async log() {
-		let path = `${config.api}/directories/${this.path}/files/${this.filename}/history`
+
+		let path = `${config.api}/directories/${this.path}/documents/${this.document}/files/${this.filename}/history`;
 
 		try {
-			let response = await fetch(path, {
-				mode: "cors",
-				method: "GET",
-				headers: store.state.auth.authHeader()
-			});
-
+			let response = await fetch(path, {headers: store.state.auth.authHeader()});
 			return response;
 		}
 		catch(err) {
 			console.error(`There was a problem retrieving log for ${filename} in ${directory}, ${err}`);
-		}
+		};
 
 	};
 
@@ -363,7 +369,7 @@ export default class CMSFile {
 			return;
 		}
 
-		let path = `${config.api}/directories/${this.path}/files/${this.slug}/attachments`;
+		let path = `${config.api}/directories/${this.path}/documents/${this.slug}/attachments`;
 
 		try {
 			let response = await fetch(path, {
@@ -373,10 +379,14 @@ export default class CMSFile {
 			});
 
 			if (response.status == 404) {
-				throw("no attachments found")
+				throw(`no attachments directory found for ${this.document}`);
 			};
 
 			let data = await response.json();
+
+			if (data.length === 0) {
+				throw(`no attachments found for ${this.document}`);
+			};
 
 			this.attachments = data.map((att) => {
 				return CMSFileAttachment.fromData(att);

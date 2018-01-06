@@ -42,13 +42,13 @@
 
 						<div class="btn-toolbar" role="toolbar">
 
-							<router-link class="btn btn-primary mr-2" :to="{name: 'document_edit', params: {directory: this.directory, filename: this.filename}}">
+							<router-link class="btn btn-primary mr-2" :to="{name: 'document_edit', params: this.navigationParams}">
 								Edit
 							</router-link>
 
 							<Translation v-if="$store.state.translationEnabled"/>
 
-							<router-link class="btn btn-info mr-2" :to="{name: 'document_history', params: {directory: this.directory, filename: this.filename}}">
+							<router-link class="btn btn-info mr-2" :to="{name: 'document_history', params: this.navigationParams}">
 								History
 							</router-link>
 
@@ -115,9 +115,8 @@
 					});
 
 				return html
-						.map((e) => {return e.outerHTML})
-						.join("");
-
+					.map((e) => {return e.outerHTML})
+					.join("");
 
 			},
 			breadcrumbs() {
@@ -143,13 +142,34 @@
 						{directory: this.directory, document: (filename || this.filename)}
 					)
 				];
+			},
+			navigationParams() {
+				let p = {
+					directory: this.params.directory,
+					document: this.params.document
+				};
+
+				if (this.document.isTranslation()) {
+					p.language_code = this.document.language;
+				};
+
+				return p;
 			}
 		},
 		methods: {
 			async getDocument() {
-				let filename = this.filename;
-				let directory = this.directory;
-				this.$store.dispatch("getDocument", {directory, filename});
+				// FIXME make it use the language code too
+
+				let filename = "index.md";
+
+				if (this.params.language_code) {
+					filename = `index.${this.params.language_code}.md`;
+				};
+
+				let document = this.params.document;
+				let directory = this.params.directory;
+
+				this.$store.dispatch("getDocument", {directory, document, filename});
 			},
 			draftDescription() {
 				if (this.document.draft) {

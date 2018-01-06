@@ -39,7 +39,7 @@
 						<router-link
 							v-for="(documents, base, j) in directory.contents"
 							:key="j"
-							:to="{name: 'document_show', params: {directory: directory.path, filename: primary(documents).filename}}"
+							:to="{name: 'document_show', params: {directory: directory.path, document: primary(documents).document, filename: primary(documents).filename}}"
 							:data-filename="base"
 							class="list-group-item list-group-item-action"
 						>
@@ -141,7 +141,8 @@
 							.reduce((summary, doc) => {
 
 								// use the file's basename to group translations
-								let base = doc.filename.split(".")[0]
+								//let base = doc.filename.split(".")[0]
+								let base = doc.document;
 								let parsedDoc = new CMSFile(doc);
 
 								summary[base] ? summary[base].push(parsedDoc) : summary[base] = [parsedDoc];
