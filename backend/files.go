@@ -843,6 +843,9 @@ func getTranslations(repo *git.Repository, directory, document, filename string)
 
 func getAttachments(directory string) (files []Attachment, err error) {
 
+	// Initialise the slice so [] is marshalled instead of null
+	files = make([]Attachment, 0)
+
 	repo, err := repository(config)
 	if err != nil {
 		return nil, err

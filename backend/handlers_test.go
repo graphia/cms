@@ -1452,6 +1452,7 @@ func TestApiGetAttachmentsNoDirectoryHandler(t *testing.T) {
 	resp, _ := http.Get(target)
 
 	var actualAttachments, expectedAttachments []Attachment
+	expectedAttachments = make([]Attachment, 0)
 
 	json.NewDecoder(resp.Body).Decode(&actualAttachments)
 

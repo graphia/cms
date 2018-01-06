@@ -1308,9 +1308,6 @@ func apiUserListPublicKeysHandler(w http.ResponseWriter, r *http.Request) {
 		Name        string `json:"name"`
 	}
 
-	// properly initialise the slice so if empty,
-	// marshalled JSON is a empty array instead of null
-
 	upks, err := user.keys()
 	if err != nil {
 		Debug.Println("error", err.Error())
@@ -1320,6 +1317,8 @@ func apiUserListPublicKeysHandler(w http.ResponseWriter, r *http.Request) {
 		JSONResponse(fr, http.StatusBadRequest, w)
 	}
 
+	// properly initialise the slice so if empty,
+	// marshalled JSON is a empty array instead of null
 	var keys []rk
 	keys = make([]rk, 0)
 
