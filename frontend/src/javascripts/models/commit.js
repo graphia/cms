@@ -32,11 +32,7 @@ export default class CMSCommit {
 		this.directories = [];
 	};
 
-	// creates JSON string for transmission, includeAttachments when true adds
-	// each new (or modified) attachment as a file in the files array. When
-	// deleting, set to false as the entire attchments directory is likely to be
-	// removed
-	prepareJSON(includeAttachments=true) {
+	prepareJSON() {
 
 		return {
 			message: this.message,
@@ -44,7 +40,7 @@ export default class CMSCommit {
 				latest_revision: store.state.latestRevision
 			},
 			files: this.files
-				.map((f) => {return f.prepareJSON(includeAttachments)})
+				.map((f) => {return f.prepareJSON()})
 				.reduce((acc,cur) => {return [...acc, ...cur]}, []),
 			directories: this.directories.map((d) => {return d.prepareJSON()})
 		};

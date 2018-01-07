@@ -31,23 +31,11 @@ Then %r{^the last commit message should contain the file's name$} do
   expect(g.log.first.message.to_s).to eql("File deleted appendices/appendix_1/index.md")
 end
 
-Given %r{^I have tried to delete a file after a repo update$} do
-  steps %{
-    Given I am on the document's show page
-    And a repository update has taken place in the background
-    When I click the "Delete" button
-    And I should see the deletion modal box
-    And I click the "Confirm deletion" button
-    Then there should be an alert with the message "The repository is out of sync"
-  }
-end
-
 Then %r{^I should see the deletion modal box$} do
   expect(page).to have_css("#delete-warning.modal")
 end
 
 Given %r{^I can see the document's deletion modal$} do
-  prevent_modal_animations
   steps %{
     Given I am on the document's show page
     When I click the "Delete" button
@@ -56,17 +44,6 @@ Given %r{^I can see the document's deletion modal$} do
 end
 
 When %r{^I (?:try|attempt) to delete the file(?: again)?$} do
-
-  # FIXME this is *still* not quite right since this batch
-  # of updates
-
-  prevent_modal_animations
-  # if page.has_css?(".modal", visible: true)
-  #   puts "modal still visible"
-  #   click_button "Cancel"
-  # end
   click_button "Delete"
   click_button "Confirm deletion"
-
-
 end

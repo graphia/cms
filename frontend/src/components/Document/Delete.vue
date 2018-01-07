@@ -6,7 +6,7 @@
 			Delete
 		</button>
 
-		<div id="delete-warning" class="modal">
+		<div id="delete-warning" class="modal fade">
 			<div class="modal-dialog" role="document">
 				<div class="modal-content">
 					<div class="modal-header">
@@ -41,7 +41,7 @@
 					</div>
 					<div class="modal-footer">
 
-						<button type="button" @click="destroy" class="btn btn-danger mr-2">
+						<button type="button" @click="remove" class="btn btn-danger mr-2">
 							Confirm deletion
 						</button>
 
@@ -89,55 +89,44 @@
 				return $("#delete-warning.modal").modal("hide");
 			},
 
-			async destroy(event) {
+			async remove(event) {
 
 				event.preventDefault();
 
-				// build and configure the commit 👷‍
-
+				// prepare the commit
 				this.commit.addFile(this.document);
-
 				if (this.deleteAttachments) {
 					this.commit.addDirectory(new CMSDirectory(this.document.attachmentsDir));
 				};
 
-				try {
-					let response = await this.document.destroy(this.commit);
+				// try to destroy
+				let response = await this.destroy();
 
-					if (!checkResponse(response.status)) {
-
-						if (response.status == 409) {
-
-							this.commit.reset()
-
-							let a = this.hideDeleteModal();
-							let b = this.getDocument();
-							let c = [
-								await a,
-								await b, // refresh
-							];
-
-							this.$store.state.broadcast.addMessage(
-								"danger",
-								"Failed",
-								"The repository is out of sync",
-								3
-							);
-
-							return;
-						};
-
-						// any other error
-						console.error("could not delete document", response);
-						return;
-					};
-				} finally {
-					this.hideDeleteModal();
+				// if the repo has been updated in the background, refresh the
+				// document and try again
+				if (response.status == 409) {
+					await this.getDocument();
+					response = await this.destroy();
 				};
 
+				if (!checkResponse(response.status)) {
+					console.error("Could not delete document", response);
+					return;
+				};
+
+				// deletion was successful, update the latest rev and redirect
+				let json = await response.json();
+				this.$store.commit("setLatestRevision", json.oid);
+				this.hideDeleteModal();
 				this.redirectToDirectoryIndex(this.params.directory);
 
 			},
+
+			async destroy() {
+				let response = await this.document.destroy(this.commit);
+				return response;
+			},
+
 			redirectToDirectoryIndex(directory) {
 				this.$router.push({
 					name: 'document_index',
@@ -154,7 +143,7 @@
 				let directory = this.params.directory;
 				let document = this.params.document;
 
-				this.$store.dispatch("getDocument", {directory, document, filename});
+				return this.$store.dispatch("getDocument", {directory, document, filename});
 			},
 		},
 		mixins: [Accessors]
