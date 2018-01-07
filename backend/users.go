@@ -117,7 +117,6 @@ func (u User) setPassword(pw string) error {
 func (u User) checkPassword(pw string) error {
 	err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(pw))
 
-	Debug.Println("old password", pw)
 	if err != nil {
 		return fmt.Errorf("passwords don't match")
 	}
