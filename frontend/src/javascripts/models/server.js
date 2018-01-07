@@ -23,8 +23,8 @@ export default class CMSServer {
 				throw response;
 			};
 
-			let repositoryInfo = await response.json();
-			store.state.latestRevision = repositoryInfo.latest_revision;
+			let ri = await response.json();
+			store.commit("setLatestRevision", ri.latest_revision);
 
 			return response;
 

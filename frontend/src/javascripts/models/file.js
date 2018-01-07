@@ -357,8 +357,6 @@ export default class CMSFile {
 			console.warn(`no attachments found for ${this.document}`);
 		};
 
-		console.debug("receieved attachments", data);
-
 		this.attachments = data.map((att) => {
 			return CMSFileAttachment.fromData(att);
 		});

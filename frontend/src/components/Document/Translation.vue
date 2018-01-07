@@ -87,6 +87,7 @@
 
 					// the new filename is returned in the 'meta' field of the
 					// response
+					this.$store.commit("setLatestRevision", json.oid);
 					this.redirectToShowDocument(this.params.directory, this.params.document, code);
 
 					this.$store.state.broadcast.addMessage(

@@ -56,15 +56,17 @@ Given %r{^I can see the document's deletion modal$} do
 end
 
 When %r{^I (?:try|attempt) to delete the file(?: again)?$} do
+
+  # FIXME this is *still* not quite right since this batch
+  # of updates
+
   prevent_modal_animations
   # if page.has_css?(".modal", visible: true)
   #   puts "modal still visible"
   #   click_button "Cancel"
   # end
-  page.save_screenshot("/tmp/1.png")
   click_button "Delete"
-  page.save_screenshot("/tmp/2.png")
   click_button "Confirm deletion"
-  page.save_screenshot("/tmp/3.png")
+
 
 end
