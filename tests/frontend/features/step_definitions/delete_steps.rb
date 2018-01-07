@@ -8,12 +8,12 @@ Then %r{^the file should have been deleted$} do
 end
 
 Then %r{^the file and attachments directory should have been deleted$} do
-  expect(File.exist?(File.join(REPO_PATH, "appendices", "appendix_1.md"))).to be false
+  expect(File.exist?(File.join(REPO_PATH, "appendices", "appendix_1", "index.md"))).to be false
   expect(Dir.exist?(File.join(REPO_PATH, "appendices", "appendix_1"))).to be false
 end
 
 Then %r{^the file should have been deleted but not the attachments directory$} do
-  expect(File.exist?(File.join(REPO_PATH, "appendices", "appendix_1.md"))).to be false
+  expect(File.exist?(File.join(REPO_PATH, "appendices", "appendix_1", "index.md"))).to be false
   expect(Dir.exist?(File.join(REPO_PATH, "appendices", "appendix_1"))).to be true
 end
 
@@ -28,7 +28,7 @@ end
 
 Then %r{^the last commit message should contain the file's name$} do
   g = Git.open(REPO_PATH)
-  expect(g.log.first.message.to_s).to eql("File deleted appendices/appendix_1.md")
+  expect(g.log.first.message.to_s).to eql("File deleted appendices/appendix_1/index.md")
 end
 
 Given %r{^I have tried to delete a file after a repo update$} do
@@ -47,6 +47,7 @@ Then %r{^I should see the deletion modal box$} do
 end
 
 Given %r{^I can see the document's deletion modal$} do
+  prevent_modal_animations
   steps %{
     Given I am on the document's show page
     When I click the "Delete" button
@@ -56,6 +57,14 @@ end
 
 When %r{^I (?:try|attempt) to delete the file(?: again)?$} do
   prevent_modal_animations
+  # if page.has_css?(".modal", visible: true)
+  #   puts "modal still visible"
+  #   click_button "Cancel"
+  # end
+  page.save_screenshot("/tmp/1.png")
   click_button "Delete"
+  page.save_screenshot("/tmp/2.png")
   click_button "Confirm deletion"
+  page.save_screenshot("/tmp/3.png")
+
 end

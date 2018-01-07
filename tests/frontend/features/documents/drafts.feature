@@ -30,6 +30,7 @@ Feature: Publishing drafts
 	Scenario: Marking an existing document as a draft
 		Given I am on the edit document page for "document_1.md"
 		When I uncheck the "Draft" checkbox
+		And I enter 'the first document' in the 'Title' field
 		And I enter 'commit-message' in the 'Commit Message' field
 		And I submit the form
 		Then my document should be a draft

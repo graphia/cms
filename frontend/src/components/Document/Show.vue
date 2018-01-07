@@ -121,13 +121,13 @@
 			},
 			breadcrumbs() {
 
-				let directory_title, filename;
+				let directory_title, doc;
 
 				// if we have it, use the metadata provided directory and
 				// document title
 				if (this.document.directory_info) {
 					directory_title = this.document.directory_info.title;
-					filename = this.document.title;
+					doc = this.document.title;
 				};
 
 				return [
@@ -137,9 +137,9 @@
 						{directory: this.directory}
 					),
 					new CMSBreadcrumb(
-						filename || this.filename,
+						doc || this.params.document,
 						"document_show",
-						{directory: this.directory, document: (filename || this.filename)}
+						{directory: this.directory, document: doc}
 					)
 				];
 			},
@@ -158,7 +158,6 @@
 		},
 		methods: {
 			async getDocument() {
-				// FIXME make it use the language code too
 
 				let filename = "index.md";
 

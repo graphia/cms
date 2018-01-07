@@ -76,11 +76,11 @@
 				return `${this.document.title}: History`;
 			},
 			breadcrumbs() {
-				let directory_title, filename;
+				let directory_title, doc;
 
 				if (this.document.directory_info) {
 					directory_title = this.document.directory_info.title;
-					filename = this.document.title;
+					doc = this.document.title;
 				};
 
 				return [
@@ -91,14 +91,14 @@
 						{directory: this.directory}
 					),
 					new CMSBreadcrumb(
-						filename || this.filename,
+						doc || this.params.document,
 						"document_show",
-						{directory: this.document.path, document: this.document.filename}
+						{directory: this.params.directory, document: this.params.document}
 					),
 					new CMSBreadcrumb(
 						"History",
 						"document_history",
-						{directory: this.directory, document: (filename || this.filename)}
+						{directory: this.params.directory, document: doc}
 					)
 				];
 			}

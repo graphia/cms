@@ -7,7 +7,7 @@ Feature: Displaying documents
 		Given a repository has been initialised
 		And the CMS is running with the "default" config
 		And my user account exists
-		And a document called 'appendix_1.md' exists
+		And a document called 'appendix_1' exists
 		And I have logged in
 
 	Scenario: Viewing a document
@@ -59,7 +59,7 @@ Feature: Displaying documents
 			| Text                | Reference           |
 			| Dashboard           | /cms                |
 			| appendices          | /cms/appendices     |
-			| appendix_1.md       | None                |
+			| appendix_1          | None                |
 
 	Scenario: Breadcrumbs with metadata
 		Given I am on the show page for a document with metadata

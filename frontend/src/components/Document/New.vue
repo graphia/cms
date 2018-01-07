@@ -101,7 +101,7 @@
 					return;
 				};
 
-				this.redirectToShowDocument(this.document.path, this.document.filename);
+				this.redirectToShowDocument(this.document.path, this.document.document);
 
 			},
 
@@ -109,10 +109,11 @@
 				$("#conflict-warning.modal").modal()
 			},
 
-			redirectToShowDocument(directory, filename) {
+			redirectToShowDocument(directory, document) {
+				console.log("dir, doc", directory, document)
 				this.$router.push({
 					name: 'document_show',
-					params:{directory, filename}
+					params:{directory, document}
 				});
 			}
 

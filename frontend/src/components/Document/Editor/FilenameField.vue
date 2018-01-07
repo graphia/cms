@@ -75,9 +75,9 @@
 			},
 
 			filenameWithExtension() {
-				let translation = (this.document.language != "en");
+				let translation = this.document.isTranslation();
 
-				return [this.filenameBase, (translation && this.document.language), "md"]
+				return ["index", (translation && this.document.language), "md"]
 					.filter(Boolean)
 					.join(".");
 
@@ -91,14 +91,15 @@
 			 * make sure the slug matches it
 			 */
 			filenameBase() {
-				this.document.filename = this.filenameWithExtension;
 				this.document.slug = this.filenameBase;
+				this.document.document = this.filenameBase;
 			},
 
 			/*
 			 * if the language is changed after the title we need to trigger the updating
 			 * of the filename, so the language code in the extension is present
 			 */
+			 // FIXME for some reason this isn't working!
 			"this.document.language": () => {
 				this.document.filename = this.filenameWithExtension;
 			}

@@ -1,4 +1,4 @@
-def modify_file(path)
+def modify_file(path, filename)
   @modified_document = <<~CONTENTS
     ---
     title: Bart's Friend Falls in Love
@@ -9,7 +9,8 @@ def modify_file(path)
     …but it ended in tragedy.
   CONTENTS
 
-  File.write(path, @modified_document)
+  Dir.mkdir(path) unless Dir.exist?(path)
+  File.write(File.join(path, filename), @modified_document)
 end
 
 
@@ -30,7 +31,9 @@ Given %r{^I have added a new file$} do
     …but it ended in tragedy.
   CONTENTS
 
-  File.write(File.join(REPO_PATH, "documents", "s03e23.md"), @new_document)
+  dir = File.join(REPO_PATH, "documents", "s03e23")
+  Dir.mkdir(dir)
+  File.write(File.join(dir, "index.md"), @new_document)
 
   g.add(all: true)
 
@@ -77,7 +80,7 @@ Given %r{^I have made changes to an existing file$} do
   g.config('user.name', 'Constance Harm')
   g.config('user.email', 'constance.harm@springfield.court.us')
 
-  modify_file(File.join(REPO_PATH, "documents", "s03e23.md"))
+  modify_file(File.join(REPO_PATH, "documents", "s03e23"), "index.md")
 
   g.add(all: true)
   g.commit("Switched Romeo and Juliet for Kirk and Luann")
@@ -95,7 +98,7 @@ Given %r{^I have deleted a file$} do
   g.config('user.name', 'Lionel Hutz')
   g.config('user.email', 'lionel.hutz@lawyers101.com')
 
-  g.remove(File.join("documents", "s03e23.md"))
+  g.remove(File.join("documents", "s03e23", "index.md"))
   g.commit("Deleted Bart's Friend Falls in Love ")
 
   @hash = g.log.first.to_s
@@ -124,9 +127,9 @@ Given %r{^I have modified one file and removed another in a single commit$} do
   g.config('user.name', 'Lenny Leonard')
   g.config('user.email', 'lenny.leonard@nuclear.springfield.com')
 
-  modify_file(File.join(REPO_PATH, "documents", "s03e23.md"))
+  modify_file(File.join(REPO_PATH, "documents", "s03e23"), "index.md")
 
-  g.remove(File.join("documents", "document_1.md"))
+  g.remove(File.join("documents", "document_1", "index.md"))
 
   g.add(all: true)
   g.commit("Various changes")

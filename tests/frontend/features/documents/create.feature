@@ -56,7 +56,7 @@ Feature: Creating documents
 	Scenario: Redirection to new document after creation
 		Given I am on the new document page
 		When I have created a new document titled "sample document 2"
-		Then I should be redirected to "/cms/documents/sample-document-2.md"
+		Then I should be redirected to "/cms/documents/sample-document-2"
 
 	Scenario: Automatically setting the new file name
 		Given I am on the new document page

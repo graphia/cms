@@ -84,29 +84,30 @@
 			},
 			breadcrumbs() {
 
-				let directory_title, filename;
+				let dir_title, doc_title;
 
+				// if we have it, use the metadata provided directory and
+				// document title
 				if (this.document.directory_info) {
-					directory_title = this.document.directory_info.title;
-					filename = this.document.title;
+					dir_title = this.document.directory_info.title;
+					doc_title = this.document.title;
 				};
-
 				return [
 
 					new CMSBreadcrumb(
-						directory_title || this.directory,
+						dir_title || this.directory,
 						"document_index",
 						{directory: this.directory}
 					),
 					new CMSBreadcrumb(
-						filename || this.filename,
+						doc_title || this.params.document,
 						"document_show",
-						{directory: this.document.path, document: this.document.filename}
+						{directory: this.directory, document: this.params.document}
 					),
 					new CMSBreadcrumb(
 						"Edit",
 						"document_edit",
-						{directory: this.directory, document: (filename || this.filename)}
+						{directory: this.directory, document: this.params.document}
 					)
 				];
 			}

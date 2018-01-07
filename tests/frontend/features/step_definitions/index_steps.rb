@@ -7,7 +7,7 @@ end
 
 Given %r{^they both contain Markdown files$} do
   @directories.each do |dir|
-    expect(Dir.glob(File.join(REPO_PATH, dir, "*.md")).any?).to be true
+    expect(Dir.glob(File.join(REPO_PATH, dir, "**/index.md")).any?).to be true
   end
 end
 
@@ -69,7 +69,7 @@ Given %r{^there is no directory called "(.*?)"$} do |directory|
 end
 
 Given %r{^I have some documents that are drafts$} do
-  file = File.read(File.join(REPO_PATH, "appendices", "appendix_1.md"))
+  file = File.read(File.join(REPO_PATH, "appendices", "appendix_1", "index.md"))
   expect(file).to have_content("draft: true")
 end
 

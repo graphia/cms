@@ -72,10 +72,6 @@ const routes = [
 	{path: '/cms/:directory/:document/:language_code?/history', component: DocumentHistory, name: 'document_history'},
 	{path: '/cms/:directory/:document/:language_code?', component: DocumentShow, name: 'document_show'},
 
-	// {path: '/cms/:directory/:document/:language_code', component: DocumentShow, name: 'document_show_translation'},
-	// {path: '/cms/:directory/:document/:language_code/edit', component: DocumentEdit, name: 'document_edit_translation'},
-	// {path: '/cms/:directory/:document/:language_code/history', component: DocumentHistory, name: 'document_history_translation'}
-
 ];
 
 const router = new VueRouter({

@@ -24,7 +24,7 @@ export default class CMSFile {
 
 			this.path            = file.path;
 			this.document        = "";
-			this.filename        = "";
+			this.filename        = "index.md";
 			this.slug            = "";
 			this.html            = "";
 			this.markdown        = "";
@@ -136,10 +136,8 @@ export default class CMSFile {
 	};
 
 	// make the file usable by a commit
-	prepareJSON(includeAttachments=true) {
-		let a = [];
-
-		let f = [
+	prepareJSON() {
+		return [
 			{
 				path: this.path,
 				filename: this.filename,
@@ -159,23 +157,6 @@ export default class CMSFile {
 				}
 			}
 		];
-
-		if (includeAttachments) {
-			a = this.attachments
-				.filter(attachment => attachment.isNew())
-				.map((attachment) => {
-					return {
-						path: [this.path, this.slug, "images"].join("/"),
-						filename: attachment.name,
-						base_64_encoded: attachment.options.base64Encoded,
-						body: attachment.contents()
-					};
-				});
-
-		};
-
-		return [...f, ...a];
-
 	};
 
 	todayString() {
@@ -304,47 +285,35 @@ export default class CMSFile {
 	};
 
 	async update(commit) {
-		// create a commit object containing relevant info
-		// and despatch it
 
 		if (!this.changed) {
 			console.warn("Update called but content hasn't changed");
 		}
 
-		var path = `${config.api}/directories/${this.path}/files/${this.filename}`
+		var path = `${config.api}/directories/${this.path}/documents/${this.document}/files/${this.filename}`;
 
-		try {
-			let response = await fetch(path, {
-				mode: "cors",
-				method: "PATCH",
-				headers: store.state.auth.authHeader(),
-				body: JSON.stringify(commit.prepareJSON())
-			});
+		let response = await fetch(path, {
+			mode: "cors",
+			method: "PATCH",
+			headers: store.state.auth.authHeader(),
+			body: JSON.stringify(commit.prepareJSON())
+		});
 
-			return response;
-		}
-		catch(err) {
-			console.error(`There was a problem updating document ${this.filename} in ${this.directory}, ${err}`);
-		}
+		return response;
+
 	};
 
-	async destroy(commit, deleteAttachments=false) {
+	async destroy(commit) {
 
 		var path = `${config.api}/directories/${this.path}/documents/${this.document}/files/${this.filename}`;
 
-		try {
-			let response = await fetch(path, {
-				mode: "cors",
-				method: "DELETE",
-				headers: store.state.auth.authHeader(),
-				body: JSON.stringify(commit.prepareJSON(deleteAttachments))
-			});
+		let response = await fetch(path, {
+			method: "DELETE",
+			headers: store.state.auth.authHeader(),
+			body: JSON.stringify(commit.prepareJSON())
+		});
 
-			return response;
-		}
-		catch(err) {
-			console.error(`There was a problem deleting document ${this.filename} from ${this.path}, ${err}`);
-		}
+		return response;
 
 	};
 
@@ -371,33 +340,31 @@ export default class CMSFile {
 
 		let path = `${config.api}/directories/${this.path}/documents/${this.slug}/attachments`;
 
-		try {
-			let response = await fetch(path, {
-				mode: "cors",
-				method: "GET",
-				headers: store.state.auth.authHeader()
-			});
+		let response = await fetch(path, {
+			mode: "cors",
+			method: "GET",
+			headers: store.state.auth.authHeader()
+		});
 
-			if (response.status == 404) {
-				throw(`no attachments directory found for ${this.document}`);
-			};
-
-			let data = await response.json();
-
-			if (data.length === 0) {
-				throw(`no attachments found for ${this.document}`);
-			};
-
-			this.attachments = data.map((att) => {
-				return CMSFileAttachment.fromData(att);
-			});
-
+		if (response.status == 404) {
+			console.error(`no attachments directory found for ${this.document}`);
 			return;
-
-		}
-		catch(err) {
-			console.warn(err);
 		};
+
+		let data = await response.json();
+
+		if (data.length === 0) {
+			console.warn(`no attachments found for ${this.document}`);
+		};
+
+		console.debug("receieved attachments", data);
+
+		this.attachments = data.map((att) => {
+			return CMSFileAttachment.fromData(att);
+		});
+
+		return;
+
 	};
 
 	addAttachment(attachment) {

@@ -26,7 +26,7 @@ Given %r{^I am on the edit appendix page for "(.*?)"$} do |appendix_filename|
 end
 
 Given %r{^I am on the edit document page for a document$} do
-  steps %q{Given I am on the edit document page for "document_1.md"}
+  steps %q{Given I am on the edit document page for "document_1"}
 end
 
 Then %r{^I should see an editor with the following buttons:$} do |table|
@@ -155,7 +155,7 @@ end
 
 When %r{^I clear the "([^"]*)"$} do |field_name|
   field = page.find("input[name='#{field_name}']")
-  field.send_keys(Array.new("document_1.md".length, :backspace))
+  field.send_keys(Array.new("document_1".length, :backspace))
 end
 
 Then %r{^I should not see the "([^"]*)" field$} do |field_name|

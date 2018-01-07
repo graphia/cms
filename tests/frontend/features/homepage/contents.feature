@@ -46,9 +46,9 @@ Feature: Home page contents
 
 	Scenario: Files within a repository
 		Given the documents directory contains the following files:
-			| document_1.md |
-			| document_2.md |
-			| document_3.md |
+			| document_1 |
+			| document_2 |
+			| document_3 |
 		When I am on the homepage
 		Then I should see all three documents listed
 		And there should be a 'new file' button

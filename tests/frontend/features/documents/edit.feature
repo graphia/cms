@@ -31,72 +31,72 @@ Feature: Creating documents
 		And I should see a text area for the commit message
 
 	Scenario: Page title is dynamic
-		Given I am on the edit document page for "document_1.md"
+		Given I am on the edit document page for "document_1"
 		And the page's title should be "document 1"
 		When I set the "title" to "Boo-urns"
 		Then now the title is "Boo-urns"
 
 	Scenario: Updating a file
-		Given I am on the edit document page for "document_1.md"
+		Given I am on the edit document page for "document_1"
 		When I amend the text in the editor, modify the metadata and add a commit message
 		And I submit the form
 		Then I should see my updated document
 
 	Scenario: Updating a file with tags
-		Given I am on the edit document page for "document_1.md"
+		Given I am on the edit document page for "document_1"
 		When I add tags for Sales and Marketing
 		And I enter "added some tags" in the "Commit Message" field
 		And I submit the form
 		Then I should see my document with the correct tags
 
 	Scenario: Redirection to modified document after post update
-		Given I am on the edit document page for "document_1.md"
+		Given I am on the edit document page for "document_1"
 		When I set the "title" to "updated document"
 		And I have edited the document and commit message
 		And I submit the form
 		Then I should see the document containing my recent changes
-		And I should have been redirected to "/cms/documents/document_1.md"
+		And I should have been redirected to "/cms/documents/document_1"
 
 	Scenario: Cancelling an edit
-		Given I am on the edit document page for "document_1.md"
+		Given I am on the edit document page for "document_1"
 		When I click the "Cancel" button
-		Then I should be redirected to "/cms/documents/document_1.md"
+		Then I should be redirected to "/cms/documents/document_1"
 
 	Scenario: Default page heading
-		Given I am on the edit document page for "document_1.md"
+		Given I am on the edit document page for "document_1"
 		When the "title" is "document 1"
 		Then the page heading should be "document 1"
 
 	Scenario: Updating the page heading
-		Given I am on the edit document page for "document_1.md"
+		Given I am on the edit document page for "document_1"
 		When I clear the "title"
 		Then the page heading should be "No title"
 
 	Scenario: Submit button disabled by default
-		Given I am on the edit document page for "document_1.md"
+		Given I am on the edit document page for "document_1"
 		When I haven't interacted with the form
 		Then the submit button should be disabled
 
 	Scenario: Correctly dealing with conflicts
-		Given I am on the edit document page for "document_1.md"
+		Given I am on the edit document page for "document_1"
 		And a repository update has taken place in the background
 		When I make my changes and submit the form
 		Then I should see the conflict modal box
 
 	Scenario: Breadcrumbs without metadata
-		Given I am on the edit appendix page for "appendix_1.md"
+		Given I am on the edit appendix page for "appendix_1"
 		Then I should see the following breadcrumbs:
 			| Text                | Reference                     |
 			| Dashboard           | /cms                          |
 			| appendices          | /cms/appendices               |
-			| appendix_1.md       | /cms/appendices/appendix_1.md |
+			| appendix_1          | /cms/appendices/appendix_1    |
 			| Edit                | None                          |
 
 	Scenario: Breadcrumbs with metadata
-		Given I am on the edit document page for "document_1.md"
+		Given I am on the edit document page for "document_1"
 		Then I should see the following breadcrumbs:
 			| Text                | Reference                    |
 			| Dashboard           | /cms                         |
 			| Important Documents | /cms/documents               |
-			| document 1          | /cms/documents/document_1.md |
+			| document 1          | /cms/documents/document_1    |
 			| Edit                | None                         |

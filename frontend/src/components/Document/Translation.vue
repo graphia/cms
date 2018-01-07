@@ -87,7 +87,7 @@
 
 					// the new filename is returned in the 'meta' field of the
 					// response
-					this.redirectToShowDocument(this.directory, json.meta);
+					this.redirectToShowDocument(this.params.directory, this.params.document, code);
 
 					this.$store.state.broadcast.addMessage(
 						"success",
@@ -103,10 +103,10 @@
 
 
 			},
-			redirectToShowDocument(directory, filename) {
+			redirectToShowDocument(directory, doc, language_code) {
 				this.$router.push({
 					name: 'document_show',
-					params:{directory, filename}
+					params:{directory, doc, language_code}
 				});
 			}
 		},

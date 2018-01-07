@@ -4,10 +4,9 @@
 
 		<button type="button" @click="showDeleteModal" class="btn btn-danger mr-2">
 			Delete
-
 		</button>
 
-		<div id="delete-warning" class="modal fade">
+		<div id="delete-warning" class="modal">
 			<div class="modal-dialog" role="document">
 				<div class="modal-content">
 					<div class="modal-header">
@@ -80,6 +79,7 @@
 			initializeCommit() {
 				this.$store.dispatch("initializeCommit");
 			},
+
 			showDeleteModal() {
 				event.preventDefault();
 				return $("#delete-warning.modal").modal();
@@ -89,7 +89,7 @@
 				return $("#delete-warning.modal").modal("hide");
 			},
 
-			async destroy(event, ) {
+			async destroy(event) {
 
 				event.preventDefault();
 
@@ -101,35 +101,41 @@
 					this.commit.addDirectory(new CMSDirectory(this.document.attachmentsDir));
 				};
 
-				let response = await this.document.destroy(this.commit, false);
+				try {
+					let response = await this.document.destroy(this.commit);
 
-				if (!checkResponse(response.status)) {
+					if (!checkResponse(response.status)) {
 
-					if (response.status == 409) {
+						if (response.status == 409) {
 
-						[
-							await this.hideDeleteModal(),
-							await this.getDocument(), // refresh
 							this.commit.reset()
-						];
 
-						this.$store.state.broadcast.addMessage(
-							"danger",
-							"Failed",
-							"The repository is out of sync",
-							3
-						);
+							let a = this.hideDeleteModal();
+							let b = this.getDocument();
+							let c = [
+								await a,
+								await b, // refresh
+							];
 
+							this.$store.state.broadcast.addMessage(
+								"danger",
+								"Failed",
+								"The repository is out of sync",
+								3
+							);
+
+							return;
+						};
+
+						// any other error
+						console.error("could not delete document", response);
 						return;
 					};
-
-					// any other error
-					throw("could not delete document", response);
-					return;
+				} finally {
+					this.hideDeleteModal();
 				};
 
-				this.hideDeleteModal();
-				this.redirectToDirectoryIndex(this.directory);
+				this.redirectToDirectoryIndex(this.params.directory);
 
 			},
 			redirectToDirectoryIndex(directory) {
@@ -139,9 +145,16 @@
 				});
 			},
 			async getDocument() {
-				let filename = this.filename;
-				let directory = this.directory;
-				this.$store.dispatch("getDocument", {directory, filename});
+				let filename = "index.md";
+
+				if (this.params.language_code) {
+					filename = `index.${this.params.language_code}.md`;
+				};
+
+				let directory = this.params.directory;
+				let document = this.params.document;
+
+				this.$store.dispatch("getDocument", {directory, document, filename});
 			},
 		},
 		mixins: [Accessors]
