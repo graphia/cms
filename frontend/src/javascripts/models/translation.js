@@ -19,7 +19,7 @@ export default class CMSTranslation {
 				mode: "cors",
 				method: "POST",
 				headers: store.state.auth.authHeader(),
-				body: this.toJSON()
+				body: this.prepareJSON()
 			});
 
 			if (!checkResponse(response.status)) {
@@ -33,7 +33,7 @@ export default class CMSTranslation {
 		};
 	};
 
-	toJSON() {
+	prepareJSON() {
 		let obj = {
 			source_filename: this.sourceFilename,
 			path: this.path,
