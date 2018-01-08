@@ -24,7 +24,6 @@ export default class CMSFile {
 
 			this.path            = file.path;
 			this.document        = "";
-			this.filename        = "index.md";
 			this.slug            = "";
 			this.html            = "";
 			this.markdown        = "";
@@ -46,9 +45,9 @@ export default class CMSFile {
 			this.initializing          = false;
 
 			// TODO this is a bit long and ugly; can it be neatened up?
+			this._filename             = file.filename;
 			this.path                  = file.path;
 			this.document              = file.document;
-			this.filename              = file.filename;
 			this.html                  = file.html;
 			this.markdown              = file.markdown;
 			this.translations          = file.translations;
@@ -79,7 +78,7 @@ export default class CMSFile {
 			this.attachments = []; // related files from the directory named after file
 
 			// set the language by extracting the code from the filename
-			this.language = this.filenameLanguage();
+			this.language = this._filenameLanguage();
 
 			// finally save the initial markdown value so we can detect changes
 			// and display a diff if necessary
@@ -111,10 +110,18 @@ export default class CMSFile {
 	};
 
 	isTranslation() {
-		return this.translationRegex.test(this.filename);
+
+		if (this.language) {
+			return (this.language != store.state.defaultLanguage);
+		} else {
+			return this.translationRegex.test(this.filename);
+		};
+
+		console.warn("Couldn't determine translation status for", this);
+
 	};
 
-	filenameLanguage() {
+	_filenameLanguage() {
 		let code = this.translationRegex.exec(this.filename);
 
 		if (!code) {
@@ -122,6 +129,31 @@ export default class CMSFile {
 		};
 
 		return code[1];
+	};
+
+	set filename(value) {
+		console.warn("filename cannot be set manually");
+		return false;
+	};
+
+	get filename() {
+
+		// if there is a filename value already set, use it
+		if (this._filename) {
+			return this._filename;
+		};
+
+		// if there's not, construct one. the format will be:
+		// index.md      (for the default language)
+		// index.code.md (for all other languages)
+		let addLanguageCode = (store.state.translationEnabled && this.isTranslation());
+
+		return [
+			"index",
+			(addLanguageCode && this.language),
+			"md"
+		].filter(Boolean).join(".");
+
 	};
 
 	get languageInfo() {
@@ -255,7 +287,7 @@ export default class CMSFile {
 	};
 
 	populated() {
-		return (this.path || this.filename);
+		return (this.path || this.document);
 	};
 
 	// instance methods

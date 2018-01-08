@@ -1,31 +1,28 @@
 <template>
 	<div class="form-group">
 
-		<label for="filename">Filename</label>
+		<label for="document">Document Identifier</label>
 
 		<div class="input-group">
 
 			<span class="input-group-addon">
-				<label for="custom-filename" class="sr-only">Manually set the filename</label>
-				<input name="custom-filename" type="checkbox" v-model="enableCustomFilename" title="Toggle custom filename"/>
+				<label for="custom-document-identifier" class="sr-only">Manually set the document's identifier</label>
+				<input name="custom-document-identifier" type="checkbox" v-model="cdi" title="Toggle custom document"/>
 			</span>
 
-			<!-- disable tabindex when custom filename is disabled -->
-			<input	:readonly="!enableCustomFilename"
-					:tabindex="!enableCustomFilename ? '-1' : '0'"
-					name="filename"
-					class="form-control filename form-control-label"
+			<!-- disable tabindex when custom document is disabled -->
+			<input	:readonly="!cdi"
+					:tabindex="!cdi ? '-1' : '0'"
+					name="document"
+					class="form-control document form-control-label"
 					type="text"
-					v-model="customFilename"
+					v-model="documentName"
+					required
 			/>
 
-			<!-- only display if language isn't default, currently hardcoded to 'en' -->
-			<span class="input-group-addon language-indicator" v-if="document.language != 'en'">
-				.{{ document.language }}
-			</span>
-
+			<!-- only display language part if language isn't default, currently hardcoded to 'en' -->
 			<span class="input-group-addon extension-indicator">
-				.md
+				index<span v-if="translationEnabled && document.language != 'en'">.{{ document.language }}</span>.md
 			</span>
 
 		</div>
@@ -40,75 +37,41 @@
 		name: "Filename",
 		data() {
 			return {
-				enableCustomFilename: false,
-				filenameBase: "", // filename *without* extension
+				cdi: false, // custom document identifier toggle
+				dn: "",     // helper variable used to hold the slugged value
 			};
 		},
-		mixins: [Accessors],
 		computed: {
-
-			/*
-			 * Deal with updates to the form's filename field depending on whether the
-			 * title changes (get) or if it is modified manually (set)
-			 */
-			customFilename: {
-				cache: true,
+			documentName: {
 				get() {
+					if (this.cdi) {
+						return slugify(this.dn);
+					};
 
-					if (this.enableCustomFilename) {
-						return this.filenameBase;
-					}
-
-					let fn = "";
-					if (this.document.title) {
-						fn = slugify(this.document.title);
-					}
-					this.filenameBase = fn;
-
-					return this.filenameBase;
+					return slugify(this.document.title);
 				},
-				set(name) {
-					if (this.enableCustomFilename) {
-						this.filenameBase = slugify(name);
-					}
+				set(value) {
+					let slug = slugify(value);
+					this.dn = slug;
 				}
 			},
-
-			filenameWithExtension() {
-				let translation = this.document.isTranslation();
-
-				return ["index", (translation && this.document.language), "md"]
-					.filter(Boolean)
-					.join(".");
-
-			}
-		},
-		watch: {
-
-			/*
-			 * when the filename on the form is changed (either manually or automatically)
-			 * update the document's filename attribute by adding the markdown extension, and
-			 * make sure the slug matches it
-			 */
-			filenameBase() {
-				this.document.slug = this.filenameBase;
-				this.document.document = this.filenameBase;
+			translationEnabled() {
+				return this.$store.state.translationEnabled;
 			},
-
-			/*
-			 * if the language is changed after the title we need to trigger the updating
-			 * of the filename, so the language code in the extension is present
-			 */
-			 // FIXME for some reason this isn't working!
-			"this.document.language": () => {
-				this.document.filename = this.filenameWithExtension;
+		},
+		mixins: [Accessors],
+		watch: {
+			documentName() {
+				let slug = slugify(this.documentName);
+				this.document.document = slug;
+				this.dn = slug;
 			}
 		}
 	};
 </script>
 
 <style lang="scss" scoped>
-	input.filename {
+	input.document {
 		text-align: right;
 	}
 </style>

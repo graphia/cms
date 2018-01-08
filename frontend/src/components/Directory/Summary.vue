@@ -195,6 +195,8 @@
 			},
 
 			translations(files) {
+
+				console.debug(files)
 				return files
 					.filter((file) => { return file.isTranslation() })
 			}

@@ -101,7 +101,11 @@
 					return;
 				};
 
-				this.redirectToShowDocument(this.document.path, this.document.document);
+				this.redirectToShowDocument(
+					this.document.path,
+					this.document.document,
+					this.document.language
+				);
 
 			},
 
@@ -109,12 +113,17 @@
 				$("#conflict-warning.modal").modal()
 			},
 
-			redirectToShowDocument(directory, document) {
-				console.log("dir, doc", directory, document)
-				this.$router.push({
-					name: 'document_show',
-					params:{directory, document}
-				});
+			redirectToShowDocument(directory, document, language_code) {
+
+				let params = {directory, document};
+				let enabled = this.$store.state.translationEnabled;
+				let isDefault = (language_code !== this.$store.state.defaultLanguage)
+
+				if (enabled && isDefault) {
+					params.language_code = language_code;
+				};
+
+				this.$router.push({name: 'document_show', params});
 			}
 
 		},

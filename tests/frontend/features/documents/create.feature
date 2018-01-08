@@ -29,10 +29,10 @@ Feature: Creating documents
 			| Toggle Preview |
 			| Markdown Guide |
 		And I should see the following fields for document metadata:
-			| Title    |
-			| Filename |
-			| Synopsis |
-			| Author   |
+			| Title               |
+			| Document Identifier |
+			| Synopsis            |
+			| Author              |
 		And I should see a tags editing field
 		And I should see a text area for the commit message
 
@@ -58,17 +58,17 @@ Feature: Creating documents
 		When I have created a new document titled "sample document 2"
 		Then I should be redirected to "/cms/documents/sample-document-2"
 
-	Scenario: Automatically setting the new file name
+	Scenario: Automatically setting the new document identifier
 		Given I am on the new document page
 		When I set the "title" to "the world's most amazing, fantastic file"
-		Then the "filename" should equal "the-worlds-most-amazing-fantastic-file"
-		And the "filename" field should be read only
+		Then the "document" field should equal "the-worlds-most-amazing-fantastic-file"
+		And the "document" field should be read only
 
-	Scenario: Customising the filename
+	Scenario: Customising the document name
 		Given I am on the new document page
+		When I check the "custom-document-identifier" checkbox
 		And I have entered my new document's details
-		When I check the "custom-filename" checkbox
-		And the "filename" field should not be read only
+		Then the "document" field should not be read only
 
 	Scenario: Cancelling document creation
 		Given I am on the new document page
