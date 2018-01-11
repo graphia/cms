@@ -120,7 +120,7 @@ func Test_apiListFilesInDirectoryHandler(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/list_files_in_directory"
 	setupSmallTestRepo(repoPath)
 
-	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files")
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/documents")
 
 	req, _ := http.NewRequest("GET", target, nil)
 	client := &http.Client{}
@@ -319,7 +319,7 @@ func TestApiCreateFileInDirectoryHandler(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/create_file"
 	lr, _ := setupSmallTestRepo(repoPath)
 
-	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files")
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/documents")
 
 	ncf := NewCommitFile{
 		Path:     "documents",
@@ -384,7 +384,7 @@ func TestApiCreateFileInDirectoryNoRepoInfo(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/create_file"
 	_, _ = setupSmallTestRepo(repoPath)
 
-	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files")
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/documents")
 
 	ncf := NewCommitFile{
 		Path:     "documents",
@@ -433,7 +433,7 @@ func TestApiCreateFileInDirectoryWithErrors(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/create_file"
 	setupSmallTestRepo(repoPath)
 
-	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files")
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/documents")
 
 	ncf := NewCommitFile{
 		Path:     "documents",
@@ -479,7 +479,7 @@ func TestApiCreateFileInDirectoryRepoOutOfDate(t *testing.T) {
 	firstCommit, _ := setupSmallTestRepo(repoPath)
 	repo, _ := repository(config)
 
-	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files")
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/documents")
 
 	ncf := NewCommitFile{
 		Path:     "documents",
@@ -528,7 +528,7 @@ func TestApiCreateImageFileInDirectory(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/create_image_file"
 	lr, _ := setupMultipleFiletypesTestRepo(repoPath)
 
-	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files")
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/documents")
 
 	pngImage, _ := ioutil.ReadFile(filepath.Join(repoPath, "appendices", "appendix_1", "images", "image_1.png"))
 

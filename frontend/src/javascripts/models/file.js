@@ -225,7 +225,7 @@ export default class CMSFile {
 	 */
 	static async all(directory) {
 
-		let path = `${config.api}/directories/${directory}/files`;
+		let path = `${config.api}/directories/${directory}/documents`;
 
 		try {
 
@@ -321,7 +321,7 @@ export default class CMSFile {
 			console.warn("Update called but content hasn't changed");
 		}
 
-		let path = `${config.api}/directories/${this.path}/files`
+		let path = `${config.api}/directories/${this.path}/documents`
 
 		try {
 			let response = await fetch(path, {
