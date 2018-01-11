@@ -114,7 +114,7 @@ export default class CMSFile {
 		if (this.language) {
 			return (this.language != store.state.defaultLanguage);
 		} else {
-			return this.translationRegex.test(this.filename);
+			return this.translationRegex.test(this._filename);
 		};
 
 		console.warn("Couldn't determine translation status for", this);
@@ -167,9 +167,14 @@ export default class CMSFile {
 		return [this.path, this.slug].join("/");
 	};
 
-	// make the file usable by a commit
-	prepareJSON() {
-		return [
+	// Make the file usable by a commit. When deleting, we will remove
+	// the entire attachments directory rather than individual attachments,
+	// so includeAttachments can be set to false. In other situations, we
+	// usually want to include them hence the default
+	prepareJSON(includeAttachments=true) {
+
+		let a = [];
+		let f = [
 			{
 				path: this.path,
 				filename: this.filename,
@@ -189,6 +194,21 @@ export default class CMSFile {
 				}
 			}
 		];
+
+		if (includeAttachments) {
+			a = this.attachments
+				.filter(attachment => attachment.isNew())
+				.map((attachment) => {
+					return {
+						path: [this.path, this.document, "images"].join("/"),
+						filename: attachment.name,
+						base_64_encoded: attachment.options.base64Encoded,
+						body: attachment.contents()
+					};
+				});
+		};
+
+		return [...f, ...a];
 	};
 
 	todayString() {
@@ -344,7 +364,7 @@ export default class CMSFile {
 		let response = await fetch(path, {
 			method: "DELETE",
 			headers: store.state.auth.authHeader(),
-			body: JSON.stringify(commit.prepareJSON())
+			body: JSON.stringify(commit.prepareJSON(false))
 		});
 
 		return response;
@@ -355,22 +375,21 @@ export default class CMSFile {
 
 		let path = `${config.api}/directories/${this.path}/documents/${this.document}/files/${this.filename}/history`;
 
-		try {
-			let response = await fetch(path, {headers: store.state.auth.authHeader()});
-			return response;
-		}
-		catch(err) {
-			console.error(`There was a problem retrieving log for ${filename} in ${directory}, ${err}`);
-		};
+		let response = await fetch(path,
+			{headers: store.state.auth.authHeader()}
+		);
+
+		return response;
 
 	};
 
 	async fetchAttachments() {
 
+		// abort unless path and slug are present
 		if (!this.path || !this.slug) {
 			console.warn("Missing params, cannot retrieve attachments", this.path, this.slug);
 			return;
-		}
+		};
 
 		let path = `${config.api}/directories/${this.path}/documents/${this.slug}/attachments`;
 
