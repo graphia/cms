@@ -146,7 +146,7 @@ func apiLogoutHandler(w http.ResponseWriter, r *http.Request) {
 //
 func authRenewTokenHandler(w http.ResponseWriter, r *http.Request) {
 
-	token, err := request.ParseFromRequest(
+	ot, err := request.ParseFromRequest(
 		r,
 		request.AuthorizationHeaderExtractor,
 		func(token *jwt.Token) (interface{}, error) {
@@ -154,51 +154,36 @@ func authRenewTokenHandler(w http.ResponseWriter, r *http.Request) {
 		},
 	)
 
-	if err == nil {
-		if token.Valid {
-
-			Debug.Println("Token valid, issuing a new one")
-			// TODO print the claims?
-
-			claims := token.Claims.(jwt.MapClaims)
-			username := claims["sub"]
-			user, err := getUserByUsername("joey")
-			if err != nil {
-				panic(fmt.Errorf("Cannot find user %s, %s", username, err.Error()))
-			}
-
-			token, err := newToken(user)
-			if err != nil {
-				panic(err)
-			}
-
-			tokenString, err := newTokenString(token)
-			if err != nil {
-				panic(err)
-			}
-
-			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				fmt.Fprintln(w, "Error extracting the key")
-				panic(err)
-			}
-
-			response := Token{tokenString}
-			JSONResponse(response, http.StatusOK, w)
-
-		} else {
-			w.WriteHeader(http.StatusUnauthorized)
-			response := FailureResponse{Message: "Invalid credentials"}
-			json, err := json.Marshal(response)
-			if err != nil {
-				panic(err)
-			}
-			w.Write(json)
-		}
-	} else {
-		w.WriteHeader(http.StatusUnauthorized)
-		fmt.Fprint(w, "Unauthorized access to this resource")
+	if err != nil {
+		response := FailureResponse{Message: "Could not authorise user"}
+		JSONResponse(response, http.StatusUnauthorized, w)
+		return
 	}
+
+	if !ot.Valid {
+		response := FailureResponse{Message: "Token invalid"}
+		JSONResponse(response, http.StatusUnauthorized, w)
+		return
+	}
+
+	user := getCurrentUser(r.Context())
+
+	nt, err := newToken(user)
+	if err != nil {
+		response := FailureResponse{Message: "Could not create new token"}
+		JSONResponse(response, http.StatusBadRequest, w)
+		return
+	}
+
+	tokenString, err := newTokenString(nt)
+	if err != nil {
+		response := FailureResponse{Message: "Could not extract string from new token"}
+		JSONResponse(response, http.StatusBadRequest, w)
+		return
+	}
+
+	response := Token{tokenString}
+	JSONResponse(response, http.StatusOK, w)
 
 }
 
@@ -210,21 +195,19 @@ func authRenewTokenHandler(w http.ResponseWriter, r *http.Request) {
 // {"enabled": false}
 func setupAllowCreateInitialUserHandler(w http.ResponseWriter, r *http.Request) {
 	var zeroUsers bool
+	var so SetupOption
 
 	count, err := countUsers()
 	if err != nil {
-		panic(err)
+		response := FailureResponse{Message: "Could not perform user count"}
+		JSONResponse(response, http.StatusBadRequest, w)
+		return
 	}
 
 	zeroUsers = (count == 0)
 
-	output, err := json.Marshal(SetupOption{Enabled: zeroUsers})
-	if err != nil {
-		panic(err)
-	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Write(output)
+	so = SetupOption{Enabled: zeroUsers}
+	JSONResponse(so, http.StatusOK, w)
 }
 
 // setupAllowInitializeRepository will return true if a Git repository does not
