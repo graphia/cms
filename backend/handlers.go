@@ -578,15 +578,6 @@ func apiUpdateDirectoriesHandler(w http.ResponseWriter, r *http.Request) {
 //	 "name": "Martin Prince",
 //	 "email": "mp@springfield-elementary.gov",
 // }
-// DELETE /api/directories
-// {
-//	  "name": "Martin Prince",
-//	  "email": "mp@springfield-elementary.gov",
-//	  "message": "Added new directory called Bobbins",
-//	  "directories": [
-//	    {"path": "documents"}
-//	  ]
-// }
 //
 // returns a SuccessResponse containing the git commit hash or a FailureResponse
 // containing an error message
@@ -653,7 +644,7 @@ func apiDeleteDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 // apiListFilesInDirectoryHandler returns a JSON array containing
 // the all files belonging to :directory
 //
-// GET /api/directories/:directory/files
+// GET /api/directories/:directory/documents
 //
 // eg. when the documents directory contains Documents 1 and 2:
 //
@@ -669,16 +660,16 @@ func apiListFilesInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err == ErrDirectoryNotFound {
 		fr = FailureResponse{
-			Message: fmt.Sprintf("Could not get list of files in directory %s: %s", directory, err.Error()),
+			Message: ErrDirectoryNotFound.Error(),
 		}
 		JSONResponse(fr, http.StatusNotFound, w)
 		return
 
 	} else if err != nil {
 		fr = FailureResponse{
-			Message: ErrDirectoryNotFound.Error(),
+			Message: fmt.Sprintf("Could not get list of files in directory %s: %s", directory, err.Error()),
 		}
-		JSONResponse(fr, http.StatusBadRequest, w)
+		JSONResponse(fr, http.StatusNotFound, w)
 		return
 	}
 
@@ -747,7 +738,7 @@ func apiGetDirectoryMetadataHandler(w http.ResponseWriter, r *http.Request) {
 
 // apiCreateFileInDirectory creates a file the specified directory
 //
-// POST /api/directories/:directory/files
+// POST /api/directories/:directory/documents
 // {
 //	  "message": "Added document six"
 //	  "files": [
@@ -939,7 +930,7 @@ func apiTranslateFileHandler(w http.ResponseWriter, r *http.Request) {
 // apiDeleteFileFromDirectoryHandler deletes a file from the specified
 // directory
 //
-// DELETE /api/directories/:directory/files/:filename
+// DELETE /api/directories/:directory/documents/:document/files/:filename
 // {
 //	  "message": "Deleted document 6 as it's no longer required",
 //	  "files": [
@@ -1017,7 +1008,7 @@ func apiDeleteFileFromDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 // specified file to be displayed in a web page; the raw Markdown is not
 // sent but the compiled HTML is.
 //
-// GET /api/directories/:directory/files/:filename
+// GET /api/directories/:directory/documents/:document/files/:filename
 //
 // returns
 //
@@ -1088,7 +1079,7 @@ func apiGetFileAttachmentHandler(w http.ResponseWriter, r *http.Request) {
 // server-renedered preview isn't shown, so we don't generate HTML but
 // just send the raw Markdown
 //
-// GET /api/directories/:directory/files/:filename/edit
+// GET /api/directories/:directory/documents/:document/files/:filename/edit
 //
 // returns
 //
@@ -1564,7 +1555,7 @@ func apiGetCommitHandler(w http.ResponseWriter, r *http.Request) {
 	JSONResponse(cs, http.StatusOK, w)
 }
 
-// GET /api/directories/:directory/files/:filename/history
+// GET /api/directories/:directory/documents/:document/files/:filename/history
 //
 // returns the basic commit information for every commit that has
 // affected the specified file

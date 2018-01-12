@@ -224,7 +224,6 @@ func protectedRouter() (r *vestigo.Router) {
 
 	// missing operations:
 	// how should file and directory moves/copies be represented?
-	// auth..
 
 	return r
 }
