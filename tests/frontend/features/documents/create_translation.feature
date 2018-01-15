@@ -9,6 +9,16 @@ Feature: Creating documents
 		And my user account exists
 		And I have logged in
 
+	Scenario: The filename should have no language code when default language
+		Given I am on the new document page
+		When I haven't changed the document's language
+		Then the filename should be "index.md"
+
+	Scenario: Updating the displayed filename when changing language
+		Given I am on the new document page
+		When I select "Finnish" from the languages dropdown
+		Then the filename should be "index.fi.md"
+
 	Scenario: Creating a new file with a non-default language code
 		Given I am on the new document page
 		When I enter some text into the editor

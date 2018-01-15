@@ -218,3 +218,15 @@ def write_swedish_file(doc="translated_doc")
     doc
   )
 end
+
+When %r{^I haven't changed the document's language$} do
+  # do nothing
+end
+
+Then %r{^the filename should be "(.*?)"$} do |filename|
+  # we need to extract the text and remove spaces because the
+  # language code is actually within a <span> tag, and the text
+  # method on the element returns spaces: "index .fi .md"
+  text = page.find("span.extension-indicator").text.gsub(" ", "")
+  expect(filename).to eql(text)
+end
