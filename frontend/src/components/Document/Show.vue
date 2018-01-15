@@ -80,7 +80,7 @@
 
 	import Breadcrumbs from '../Utilities/Breadcrumbs';
 	import Translation from './Translation';
-	import DocumentDelete from './Delete';
+	import DocumentDelete from './Buttons/Delete';
 	import CMSBreadcrumb from '../../javascripts/models/breadcrumb.js';
 	import Accessors from '../Mixins/accessors';
 

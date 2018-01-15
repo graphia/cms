@@ -59,10 +59,10 @@
 
 <script lang="babel">
 
-	import Accessors from '../Mixins/accessors';
+	import Accessors from '../../Mixins/accessors';
 
-	import CMSDirectory from '../../javascripts/models/directory.js';
-	import checkResponse from "../../javascripts/response.js";
+	import CMSDirectory from '../../../javascripts/models/directory.js';
+	import checkResponse from "../../../javascripts/response.js";
 
 	export default {
 		name: "DocumentDelete",
