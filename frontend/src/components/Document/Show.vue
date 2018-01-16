@@ -100,7 +100,7 @@
 			// correct resource
 			relativeHTML() {
 
-				let attachmentsDir = this.document.slug;
+				let attachmentsDir = this.document.document;
 				let html = $.parseHTML(this.document.html);
 
 				$(html)

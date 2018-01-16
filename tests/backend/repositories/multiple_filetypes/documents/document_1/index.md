@@ -1,6 +1,5 @@
 ---
 title: document 1
-slug: document_1
 ---
 
 # Document 1

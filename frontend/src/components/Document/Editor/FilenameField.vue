@@ -51,8 +51,7 @@
 					return slugify(this.document.title);
 				},
 				set(value) {
-					let slug = slugify(value);
-					this.dn = slug;
+					this.dn = slugify(value);
 				}
 			},
 			translationEnabled() {

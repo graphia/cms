@@ -395,7 +395,6 @@ func TestExtractContents(t *testing.T) {
 						Author:   "Bernice Hibbert",
 						Date:     "2016-04-05",
 						Draft:    true,
-						Slug:     "pangram",
 						Synopsis: "Use all of the characters",
 						Tags:     nil,
 						Title:    "Pangram",
@@ -410,7 +409,6 @@ func TestExtractContents(t *testing.T) {
 author: Bernice Hibbert
 date: 2016-04-05
 draft: true
-slug: pangram
 synopsis: Use all of the characters
 tags: []
 title: Pangram
@@ -579,7 +577,6 @@ func Test_getMetadataFromBlob(t *testing.T) {
 			wantFm: FrontMatter{
 				Title:    "Document 1",
 				Author:   "Gil Gunderson",
-				Slug:     "document-1",
 				Synopsis: "I brought that wall from home",
 				Tags:     []string{"ol'", "gil", "ol' gil"},
 			},

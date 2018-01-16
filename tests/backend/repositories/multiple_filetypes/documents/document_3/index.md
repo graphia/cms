@@ -1,7 +1,6 @@
 ---
 title: document 3
 author: Troy McClure
-slug: document_3
 ---
 # Document 3
 

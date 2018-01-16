@@ -24,7 +24,6 @@ export default class CMSFile {
 
 			this.path            = file.path;
 			this.document        = "";
-			this.slug            = "";
 			this.html            = "";
 			this.markdown        = "";
 			this.title           = "";
@@ -57,7 +56,6 @@ export default class CMSFile {
 			this.author                = file.frontmatter.author;
 			this.synopsis              = file.frontmatter.synopsis;
 			this.tags                  = file.frontmatter.tags;
-			this.slug                  = file.frontmatter.slug;
 			this.version               = file.frontmatter.version;
 			this.draft                 = file.frontmatter.draft;
 			this.date                  = file.frontmatter.date || this.todayString();
@@ -161,10 +159,10 @@ export default class CMSFile {
 	};
 
 	get attachmentsDir() {
-		if (!this.path || !this.slug) {
+		if (!this.path || !this.document) {
 			return null;
 		};
-		return [this.path, this.slug].join("/");
+		return [this.path, this.document].join("/");
 	};
 
 	// Make the file usable by a commit. When deleting, we will remove
@@ -188,7 +186,6 @@ export default class CMSFile {
 					tags: this.tags,
 					synopsis: this.synopsis,
 					version: this.version,
-					slug: this.slug,
 					draft: this.draft,
 					date: this.date
 				}
@@ -386,12 +383,12 @@ export default class CMSFile {
 	async fetchAttachments() {
 
 		// abort unless path and slug are present
-		if (!this.path || !this.slug) {
-			console.warn("Missing params, cannot retrieve attachments", this.path, this.slug);
+		if (!this.path || !this.document) {
+			console.warn("Missing params, cannot retrieve attachments", this.path, this.document);
 			return;
 		};
 
-		let path = `${config.api}/directories/${this.path}/documents/${this.slug}/attachments`;
+		let path = `${config.api}/directories/${this.path}/documents/${this.document}/attachments`;
 
 		let response = await fetch(path, {
 			mode: "cors",

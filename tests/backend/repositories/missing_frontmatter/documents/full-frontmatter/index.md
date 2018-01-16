@@ -1,7 +1,6 @@
 ---
 title: Document 1
 author: Gil Gunderson
-slug: document-1
 synopsis: I brought that wall from home
 tags:
   - ol'

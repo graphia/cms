@@ -55,7 +55,6 @@ type FrontMatter struct {
 	Author   string   `json:"author"         yaml:"author"`
 	Date     string   `json:"date,omitempty" yaml:"date"`
 	Draft    bool     `json:"draft"          yaml:"draft"`
-	Slug     string   `json:"slug"           yaml:"slug"`
 	Synopsis string   `json:"synopsis"       yaml:"synopsis"`
 	Tags     []string `json:"tags"           yaml:"tags"`
 	Title    string   `json:"title"          yaml:"title"`

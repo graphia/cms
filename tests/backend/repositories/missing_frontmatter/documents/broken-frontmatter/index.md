@@ -1,7 +1,6 @@
 ---
 title: Document 2
 author: Marvin Monroe
-slug: document-2
 synopsis: >
   Family bliss or double your money back
 tags:
