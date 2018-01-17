@@ -1,11 +1,11 @@
 Given %r{^I am on the appendix history page for "([^"]*)"$} do |arg1|
-  path = "/cms/appendices/appendix_1.md/history"
+  path = "/cms/appendices/appendix_1/history"
   visit(path)
   expect(page.current_path).to eql(path)
 end
 
 Given %r{^I am on the document history page for "([^"]*)"$} do |arg1|
-  path = "/cms/documents/document_1.md/history"
+  path = "/cms/documents/document_1/history"
   visit(path)
   expect(page.current_path).to eql(path)
 end
@@ -27,9 +27,12 @@ Given %r{^there is a document with '(\d+)' revisions$} do |revs|
       Revision 1
     CONTENTS
 
-    @doc = "history.md"
-    filename = File.join(REPO_PATH, "documents", @doc)
-    File.write(filename, new_document)
+    @doc = "history"
+
+    dir = File.join(REPO_PATH, "documents", @doc)
+    Dir.mkdir(dir)
+    full_path = File.join(dir, "index.md")
+    File.write(full_path, new_document)
 
     g.add(all: true)
 
@@ -39,7 +42,7 @@ Given %r{^there is a document with '(\d+)' revisions$} do |revs|
     @commits =  [{name: "revision 1", hash: g.log.first.to_s}]
 
     2.upto(revs.to_i) do |i|
-      File.write(filename, File.read(filename).gsub(/Revision \d+/, "Revision #{i}"))
+      File.write(full_path, File.read(full_path).gsub(/Revision \d+/, "Revision #{i}"))
       g.add(all: true)
       g.commit("Added revision #{i}")
       @commits.push({name: "revision #{i}", hash: g.log.first.to_s})

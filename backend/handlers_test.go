@@ -120,7 +120,7 @@ func Test_apiListFilesInDirectoryHandler(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/list_files_in_directory"
 	setupSmallTestRepo(repoPath)
 
-	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files")
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/documents")
 
 	req, _ := http.NewRequest("GET", target, nil)
 	client := &http.Client{}
@@ -151,13 +151,14 @@ func Test_apiListFilesInDirectoryHandler(t *testing.T) {
 	assert.Equal(t, 3, len(receiver.Files))
 
 	// ensure all files are returned
-	var expectedFilenames, actualFilenames []string
+	var expectedDocuments, actualDocuments []string
 
-	expectedFilenames = []string{"document_1.md", "document_2.md", "document_3.md"}
+	expectedDocuments = []string{"document_1", "document_2", "document_3"}
 	for _, fi := range receiver.Files {
-		actualFilenames = append(actualFilenames, fi.Filename)
+		assert.Equal(t, "index.md", fi.Filename)
+		actualDocuments = append(actualDocuments, fi.Document)
 	}
-	assert.Equal(t, expectedFilenames, actualFilenames)
+	assert.Equal(t, expectedDocuments, actualDocuments)
 
 	// ensure frontmatter is returned correctly
 	var expectedTitles, actualTitles []string
@@ -318,7 +319,7 @@ func TestApiCreateFileInDirectoryHandler(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/create_file"
 	lr, _ := setupSmallTestRepo(repoPath)
 
-	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files")
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/documents")
 
 	ncf := NewCommitFile{
 		Path:     "documents",
@@ -383,7 +384,7 @@ func TestApiCreateFileInDirectoryNoRepoInfo(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/create_file"
 	_, _ = setupSmallTestRepo(repoPath)
 
-	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files")
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/documents")
 
 	ncf := NewCommitFile{
 		Path:     "documents",
@@ -432,7 +433,7 @@ func TestApiCreateFileInDirectoryWithErrors(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/create_file"
 	setupSmallTestRepo(repoPath)
 
-	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files")
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/documents")
 
 	ncf := NewCommitFile{
 		Path:     "documents",
@@ -478,7 +479,7 @@ func TestApiCreateFileInDirectoryRepoOutOfDate(t *testing.T) {
 	firstCommit, _ := setupSmallTestRepo(repoPath)
 	repo, _ := repository(config)
 
-	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files")
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/documents")
 
 	ncf := NewCommitFile{
 		Path:     "documents",
@@ -527,7 +528,7 @@ func TestApiCreateImageFileInDirectory(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/create_image_file"
 	lr, _ := setupMultipleFiletypesTestRepo(repoPath)
 
-	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files")
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/documents")
 
 	pngImage, _ := ioutil.ReadFile(filepath.Join(repoPath, "appendices", "appendix_1", "images", "image_1.png"))
 
@@ -592,11 +593,12 @@ func TestApiUpdateFileInDirectory(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/update_file"
 	lr, _ := setupSmallTestRepo(repoPath)
 
-	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files/document_3.md")
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/documents/document_3/files/index.md")
 
 	ncf := NewCommitFile{
 		Path:     "documents",
-		Filename: "document_3.md",
+		Document: "document_3",
+		Filename: "index.md",
 		Body:     "# The quick brown fox",
 		FrontMatter: FrontMatter{
 			Title:  "Document Three",
@@ -637,7 +639,7 @@ func TestApiUpdateFileInDirectory(t *testing.T) {
 	assert.Equal(t, receiver.Oid, hc.Id().String())
 
 	// ensure the file exists and has the right content
-	contents, _ := ioutil.ReadFile(filepath.Join(repoPath, ncf.Path, ncf.Filename))
+	contents, _ := ioutil.ReadFile(filepath.Join(repoPath, ncf.Path, ncf.Document, ncf.Filename))
 	assert.Contains(t, string(contents), ncf.Body)
 	assert.Contains(t, string(contents), ncf.FrontMatter.Author)
 	assert.Contains(t, string(contents), ncf.FrontMatter.Title)
@@ -658,11 +660,12 @@ func TestApiUpdateFileInDirectoryWithErrors(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/update_file"
 	setupSmallTestRepo(repoPath)
 
-	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files/document_3.md")
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/documents/document_3/files/index.md")
 
 	ncf := NewCommitFile{
 		Path:     "documents",
-		Filename: "document_3.md",
+		Document: "document_3",
+		Filename: "index.md",
 		Body:     "# The quick brown fox",
 		FrontMatter: FrontMatter{
 			Title:  "Document Three",
@@ -704,11 +707,12 @@ func TestApiUpdateFileInDirectoryRepoOutOfDate(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/update_file"
 	firstCommit, _ := setupSmallTestRepo(repoPath)
 
-	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files/document_3.md")
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/documents/document_3/files/index.md")
 
 	ncf := NewCommitFile{
 		Path:     "documents",
-		Filename: "document_3.md",
+		Document: "document_3",
+		Filename: "index.md",
 		Body:     "# The quick brown fox",
 		FrontMatter: FrontMatter{
 			Title:  "Document Three",
@@ -751,11 +755,12 @@ func TestApiUpdateOtherFileInDirectory(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/update_file"
 	lr, _ := setupSmallTestRepo(repoPath)
 
-	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files/document_3.md")
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/documents/document_3/files/index.md")
 
 	ncf := NewCommitFile{
 		Path:     "documents",
-		Filename: "document_2.md", // note, target contains document_2.md
+		Document: "document_2",
+		Filename: "index.md", // note, target contains document_2.md
 		Body:     "# The quick brown fox",
 		FrontMatter: FrontMatter{
 			Title:  "Document Three",
@@ -798,7 +803,7 @@ func TestApiUpdateNoFilesInDirectory(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/update_file"
 	lr, _ := setupSmallTestRepo(repoPath)
 
-	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files/document_3.md")
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/documents/document_3/files/index.md")
 
 	nc := &NewCommit{
 		Message:        "Forty whacks with a wet noodle",
@@ -834,15 +839,17 @@ func TestApiDeleteFileFromDirectory(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/delete_file"
 	oid, _ := setupSmallTestRepo(repoPath)
 
-	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files/document_2.md")
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/documents/document_2/files/index.md")
 
 	ncf1 := NewCommitFile{
-		Filename: "document_1.md",
+		Filename: "index.md",
+		Document: "document_1",
 		Path:     "documents",
 	}
 
 	ncf2 := NewCommitFile{
-		Filename: "document_2.md",
+		Filename: "index.md",
+		Document: "document_2",
 		Path:     "documents",
 	}
 
@@ -893,7 +900,7 @@ func TestApiDeleteFileFromDirectory(t *testing.T) {
 	assert.True(t, os.IsNotExist(err))
 
 	// ensure a suitable commit message has been generated
-	assert.Equal(t, "File deleted documents/document_2.md", lastCommit.Message())
+	assert.Equal(t, "File deleted documents/document_2/index.md", lastCommit.Message())
 
 }
 
@@ -905,10 +912,11 @@ func TestApiDeleteFileAndAttachmentsFromDirectory(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/delete_file"
 	oid, _ := setupMultipleFiletypesTestRepo(repoPath)
 
-	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files/document_1.md")
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/documents/document_1/files/index.md")
 
 	ncf1 := NewCommitFile{
-		Filename: "document_1.md",
+		Filename: "index.md",
+		Document: "document_1",
 		Path:     "documents",
 	}
 
@@ -923,7 +931,7 @@ func TestApiDeleteFileAndAttachmentsFromDirectory(t *testing.T) {
 	}
 
 	// ensure the files exist
-	_, err = os.Stat(filepath.Join(repoPath, ncf1.Path, ncf1.Filename))
+	_, err = os.Stat(filepath.Join(repoPath, ncf1.Path, ncf1.Document, ncf1.Filename))
 	assert.False(t, os.IsNotExist(err))
 
 	// ensure the directories exist
@@ -974,7 +982,7 @@ func TestApiDeleteFileAndAttachmentsFromDirectory(t *testing.T) {
 	assert.True(t, os.IsNotExist(err))
 
 	// ensure a suitable commit message has been generated
-	assert.Equal(t, "File deleted documents/document_1.md", lastCommit.Message())
+	assert.Equal(t, "File deleted documents/document_1/index.md", lastCommit.Message())
 
 }
 
@@ -985,15 +993,17 @@ func TestApiDeleteOtherFileFromDirectory(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/delete_file"
 	setupSmallTestRepo(repoPath)
 
-	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files/document_3.md")
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/documents/document_3/files/index.md")
 
 	ncf1 := NewCommitFile{
-		Filename: "document_1.md",
+		Filename: "index.md",
+		Document: "document_1",
 		Path:     "documents",
 	}
 
 	ncf2 := NewCommitFile{
-		Filename: "document_2.md",
+		Filename: "index.md",
+		Document: "document_2",
 		Path:     "documents",
 	}
 
@@ -1031,7 +1041,7 @@ func TestApiDeleteNoFilesFromDirectory(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/delete_file"
 	setupSmallTestRepo(repoPath)
 
-	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files/document_3.md")
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/documents/document_3/files/index.md")
 
 	nc := &NewCommit{
 		Message: "Suspect is hatless. Repeat, hatless.",
@@ -1077,9 +1087,10 @@ func TestApiDeleteDirectory(t *testing.T) {
 	target := fmt.Sprintf("%s/%s/%s", server.URL, "api/directories", ncd.Path)
 
 	// before deleting, make sure appendix files are present
-	_, err = os.Stat(filepath.Join(repoPath, ncd.Path, "appendix_1.md"))
+	_, err = os.Stat(filepath.Join(repoPath, ncd.Path, "appendix_1", "index.md"))
 	assert.False(t, os.IsNotExist(err))
-	_, err = os.Stat(filepath.Join(repoPath, ncd.Path, "appendix_2.md"))
+
+	_, err = os.Stat(filepath.Join(repoPath, ncd.Path, "appendix_2", "index.md"))
 	assert.False(t, os.IsNotExist(err))
 
 	payload, _ := json.Marshal(nc)
@@ -1141,9 +1152,9 @@ func TestApiDeleteDirectoryRepoOutOfDate(t *testing.T) {
 	target := fmt.Sprintf("%s/%s/%s", server.URL, "api/directories", ncd.Path)
 
 	// before deleting, make sure appendix files are present
-	_, err = os.Stat(filepath.Join(repoPath, ncd.Path, "appendix_1.md"))
+	_, err = os.Stat(filepath.Join(repoPath, ncd.Path, "appendix_1", "index.md"))
 	assert.False(t, os.IsNotExist(err))
-	_, err = os.Stat(filepath.Join(repoPath, ncd.Path, "appendix_2.md"))
+	_, err = os.Stat(filepath.Join(repoPath, ncd.Path, "appendix_2", "index.md"))
 	assert.False(t, os.IsNotExist(err))
 
 	payload, _ := json.Marshal(nc)
@@ -1166,9 +1177,9 @@ func TestApiDeleteDirectoryRepoOutOfDate(t *testing.T) {
 	assert.Contains(t, fr.Message, "Repository out of sync with commit")
 
 	// make sure dirs haven't actually been deleted
-	_, err = os.Stat(filepath.Join(repoPath, ncd.Path, "appendix_1.md"))
+	_, err = os.Stat(filepath.Join(repoPath, ncd.Path, "appendix_1", "index.md"))
 	assert.False(t, os.IsNotExist(err))
-	_, err = os.Stat(filepath.Join(repoPath, ncd.Path, "appendix_2.md"))
+	_, err = os.Stat(filepath.Join(repoPath, ncd.Path, "appendix_2", "index.md"))
 	assert.False(t, os.IsNotExist(err))
 
 }
@@ -1289,13 +1300,13 @@ func TestApiDeleteAnotherDirectory(t *testing.T) {
 func TestApiGetFileInDirectory(t *testing.T) {
 	server = createTestServerWithContext(false)
 
-	repoPath := "../tests/tmp/repositories/create_directory"
+	repoPath := "../tests/tmp/repositories/get_file"
 	setupSmallTestRepo(repoPath)
 
 	target := fmt.Sprintf(
 		"%s/%s",
 		server.URL,
-		"api/directories/documents/files/document_3.md",
+		"api/directories/documents/documents/document_3/files/index.md",
 	)
 
 	resp, _ := http.Get(target)
@@ -1306,7 +1317,8 @@ func TestApiGetFileInDirectory(t *testing.T) {
 
 	json.NewDecoder(resp.Body).Decode(&file)
 
-	assert.Equal(t, file.Filename, "document_3.md")
+	assert.Equal(t, file.Filename, "index.md")
+	assert.Equal(t, file.Document, "document_3")
 	assert.Equal(t, file.Path, "documents")
 	assert.Contains(t, *file.HTML, "<h1>Document 3</h1>")
 	assert.Equal(t, &DirectoryInfo{Title: "Documents", Description: "Documents go here"}, file.DirectoryInfo)
@@ -1317,13 +1329,13 @@ func TestApiEditFileInDirectory(t *testing.T) {
 
 	server = createTestServerWithContext(false)
 
-	repoPath := "../tests/tmp/repositories/create_directory"
+	repoPath := "../tests/tmp/repositories/edit_file"
 	setupSmallTestRepo(repoPath)
 
 	target := fmt.Sprintf(
 		"%s/%s",
 		server.URL,
-		"api/directories/documents/files/document_3.md/edit",
+		"api/directories/documents/documents/document_3/files/index.md/edit",
 	)
 
 	resp, err := http.Get(target)
@@ -1338,14 +1350,18 @@ func TestApiEditFileInDirectory(t *testing.T) {
 
 	json.NewDecoder(resp.Body).Decode(&file)
 
-	assert.Equal(t, file.Filename, "document_3.md")
+	assert.Equal(t, file.Filename, "index.md")
+	assert.Equal(t, file.Document, "document_3")
 	assert.Equal(t, file.Path, "documents")
 
-	raw, _ := ioutil.ReadFile(filepath.Join(
-		config.Repository,
-		"documents",
-		"document_3.md",
-	))
+	raw, _ := ioutil.ReadFile(
+		filepath.Join(
+			config.Repository,
+			"documents",
+			"document_3",
+			"index.md",
+		),
+	)
 
 	contents, err := particle.YAMLEncoding.DecodeString(string(raw), &FrontMatter{})
 
@@ -1362,7 +1378,7 @@ func TestApiGetAttachmentsHandler(t *testing.T) {
 	target := fmt.Sprintf(
 		"%s/%s",
 		server.URL,
-		"api/directories/appendices/files/appendix_1/attachments",
+		"api/directories/appendices/documents/appendix_1/attachments",
 	)
 
 	resp, err := http.Get(target)
@@ -1384,36 +1400,32 @@ func TestApiGetAttachmentsHandler(t *testing.T) {
 
 	expectedAttachments := []Attachment{
 		Attachment{
-			Path:             "appendices/appendix_1/data",
-			AbsoluteFilename: "appendices/appendix_1/data/data.json",
-			Extension:        ".json",
-			MediaType:        "text/json",
-			Data:             base64.StdEncoding.EncodeToString(jsonAttachmentContents),
-			Filename:         "data.json",
+			Path:      "appendices/appendix_1/data",
+			Extension: ".json",
+			MediaType: "text/json",
+			Data:      base64.StdEncoding.EncodeToString(jsonAttachmentContents),
+			Filename:  "data.json",
 		},
 		Attachment{
-			Path:             "appendices/appendix_1/data",
-			AbsoluteFilename: "appendices/appendix_1/data/data.xml",
-			Extension:        ".xml",
-			MediaType:        "text/xml",
-			Data:             base64.StdEncoding.EncodeToString(xmlAttachmentContents),
-			Filename:         "data.xml",
+			Path:      "appendices/appendix_1/data",
+			Extension: ".xml",
+			MediaType: "text/xml",
+			Data:      base64.StdEncoding.EncodeToString(xmlAttachmentContents),
+			Filename:  "data.xml",
 		},
 		Attachment{
-			Path:             "appendices/appendix_1/images",
-			AbsoluteFilename: "appendices/appendix_1/images/image_1.png",
-			Extension:        ".png",
-			MediaType:        "image/png",
-			Data:             base64.StdEncoding.EncodeToString(pngAttachmentContents),
-			Filename:         "image_1.png",
+			Path:      "appendices/appendix_1/images",
+			Extension: ".png",
+			MediaType: "image/png",
+			Data:      base64.StdEncoding.EncodeToString(pngAttachmentContents),
+			Filename:  "image_1.png",
 		},
 		Attachment{
-			Path:             "appendices/appendix_1/images",
-			AbsoluteFilename: "appendices/appendix_1/images/image_2.jpg",
-			Extension:        ".jpg",
-			MediaType:        "image/jpeg",
-			Data:             base64.StdEncoding.EncodeToString(jpegAttachmentContents),
-			Filename:         "image_2.jpg",
+			Path:      "appendices/appendix_1/images",
+			Extension: ".jpg",
+			MediaType: "image/jpeg",
+			Data:      base64.StdEncoding.EncodeToString(jpegAttachmentContents),
+			Filename:  "image_2.jpg",
 		},
 	}
 
@@ -1434,17 +1446,18 @@ func TestApiGetAttachmentsNoDirectoryHandler(t *testing.T) {
 	target := fmt.Sprintf(
 		"%s/%s",
 		server.URL,
-		"api/directories/documents/files/document_3/attachments",
+		"api/directories/documents/documents/document_3/attachments",
 	)
 
 	resp, _ := http.Get(target)
 
-	var fr FailureResponse
+	var actualAttachments, expectedAttachments []Attachment
+	expectedAttachments = make([]Attachment, 0)
 
-	json.NewDecoder(resp.Body).Decode(&fr)
+	json.NewDecoder(resp.Body).Decode(&actualAttachments)
 
-	assert.Equal(t, http.StatusNotFound, resp.StatusCode)
-	assert.Equal(t, "No attachments", fr.Message)
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+	assert.Equal(t, expectedAttachments, actualAttachments)
 
 }
 
@@ -1806,7 +1819,8 @@ func Test_apiTranslateFileHandler(t *testing.T) {
 			name: "Creating a translation",
 			args: args{
 				nt: NewTranslation{
-					SourceFilename: "document_1.md",
+					SourceFilename: "index.md",
+					SourceDocument: "document_1",
 					Path:           "documents",
 					LanguageCode:   "es",
 				},
@@ -1817,7 +1831,8 @@ func Test_apiTranslateFileHandler(t *testing.T) {
 			name: "Non-matching filename",
 			args: args{
 				nt: NewTranslation{
-					SourceFilename: "document_2.md",
+					SourceFilename: "index.md",
+					SourceDocument: "document_2",
 					Path:           "documents",
 					LanguageCode:   "es",
 				},
@@ -1830,7 +1845,8 @@ func Test_apiTranslateFileHandler(t *testing.T) {
 			name: "Non-matching directory",
 			args: args{
 				nt: NewTranslation{
-					SourceFilename: "document_1.md",
+					SourceFilename: "index.md",
+					SourceDocument: "document_1",
 					Path:           "appendices",
 					LanguageCode:   "es",
 				},
@@ -1843,7 +1859,8 @@ func Test_apiTranslateFileHandler(t *testing.T) {
 			name: "Non-matching directory",
 			args: args{
 				nt: NewTranslation{
-					SourceFilename: "document_1.md",
+					SourceFilename: "index.md",
+					SourceDocument: "document_1",
 					Path:           "documents",
 					LanguageCode:   "fi",
 				},
@@ -1856,7 +1873,8 @@ func Test_apiTranslateFileHandler(t *testing.T) {
 			name: "Out of sync repo",
 			args: args{
 				nt: NewTranslation{
-					SourceFilename: "document_1.md",
+					SourceFilename: "index.md",
+					SourceDocument: "document_1",
 					Path:           "documents",
 					LanguageCode:   "es",
 				},
@@ -1882,7 +1900,7 @@ func Test_apiTranslateFileHandler(t *testing.T) {
 			target := fmt.Sprintf(
 				"%s/%s",
 				server.URL,
-				"api/directories/documents/files/document_1.md/translate",
+				"api/directories/documents/documents/document_1/files/index.md/translate",
 			)
 
 			payload, _ := json.Marshal(tt.args.nt)

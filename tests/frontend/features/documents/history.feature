@@ -38,7 +38,7 @@ Feature: Commits
 			| Text                | Reference                     |
 			| Dashboard           | /cms                          |
 			| appendices          | /cms/appendices               |
-			| appendix_1.md       | /cms/appendices/appendix_1.md |
+			| appendix_1          | /cms/appendices/appendix_1    |
 			| History             | None                          |
 
 	Scenario: Breadcrumbs with metadata
@@ -47,5 +47,5 @@ Feature: Commits
 			| Text                | Reference                    |
 			| Dashboard           | /cms                         |
 			| Important Documents | /cms/documents               |
-			| document 1          | /cms/documents/document_1.md |
+			| document 1          | /cms/documents/document_1    |
 			| History             | None                         |

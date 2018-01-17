@@ -26,7 +26,7 @@ Given %r{^I am on the edit appendix page for "(.*?)"$} do |appendix_filename|
 end
 
 Given %r{^I am on the edit document page for a document$} do
-  steps %q{Given I am on the edit document page for "document_1.md"}
+  steps %q{Given I am on the edit document page for "document_1"}
 end
 
 Then %r{^I should see an editor with the following buttons:$} do |table|
@@ -116,7 +116,7 @@ Then %r{^I should see the document containing my recent changes$} do
   expect(page).to have_css("p", text: SAMPLE_TEXT)
 end
 
-Then %r{^the "([^"]*)" should equal "([^"]*)"$} do |field_name, value|
+Then %r{^the "([^"]*)" field should equal "([^"]*)"$} do |field_name, value|
   field = page.find("input[type=text][name='#{field_name}']")
   expect(field[:value]).to eql(value)
 end
@@ -133,7 +133,7 @@ end
 
 Given %r{^I have entered my new document's details$} do
   steps %{
-    When I set the "filename" to "sample document 1"
+    When I set the "document" to "sample document 1"
     When I set the "commit message" to "added sample doc"
     And I enter some text into the editor
   }
@@ -155,7 +155,7 @@ end
 
 When %r{^I clear the "([^"]*)"$} do |field_name|
   field = page.find("input[name='#{field_name}']")
-  field.send_keys(Array.new("document_1.md".length, :backspace))
+  field.send_keys(Array.new("document_1".length, :backspace))
 end
 
 Then %r{^I should not see the "([^"]*)" field$} do |field_name|
@@ -253,4 +253,46 @@ end
 
 Then %r{^the date should be set to today$} do
   expect(page.find("#document-date").value).to eql(Date.today.iso8601)
+end
+
+When %r{^I select "([^"]*)" from the languages dropdown$} do |arg1|
+  select "Finnish", from: "language"
+end
+
+Then %r{^the "(.*?)" file should be created and contain the correct information$} do |name|
+  expect(page).to have_css("h1", text: "Sample Document")
+
+  languages = {
+    "Finnish" => "fi"
+  }
+
+  expect(File.exist?(File.join(REPO_PATH, "documents", "sample-document", "index.#{languages[name]}.md"))).to be true
+  expect(page.current_path).to eql("/cms/documents/sample-document/fi")
+end
+
+Given %r{^I have filled in details for a new "([^"]*)" document$} do |lang|
+  steps %{
+    When I enter some text into the editor
+		And I fill in the document metadata
+		And I select "#{lang}" from the languages dropdown
+  }
+end
+
+Given %r{^I have entered the custom document "([^"]*)"$} do |name|
+  steps %{
+    When I check the "custom-document-identifier" checkbox
+  }
+  fill_in "document", with: name
+end
+
+Then %r{^the "([^"]*)" custom file should be created and contain the correct information$} do |name|
+  expect(page).to have_css("h1", text: "Sample Document")
+
+  languages = {
+    "Finnish" => "fi"
+  }
+
+  expect(File.exist?(File.join(REPO_PATH, "documents", "top-10-moomins", "index.#{languages[name]}.md"))).to be true
+  expect(page.current_path).to eql("/cms/documents/top-10-moomins/fi")
+
 end

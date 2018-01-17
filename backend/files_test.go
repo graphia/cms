@@ -58,9 +58,9 @@ func TestGetFilesInDirContents(t *testing.T) {
 	file := files[0]
 
 	// file attributes
-	assert.Equal(t, "appendix_1.md", file.Filename)
+	assert.Equal(t, "index.md", file.Filename)
+	assert.Equal(t, "appendix_1", file.Document)
 	assert.Equal(t, "appendices", file.Path)
-	assert.Equal(t, "appendices/appendix_1.md", file.AbsoluteFilename)
 
 	// frontmattter metadata
 	assert.Equal(t, "Appendix 1", file.FrontMatter.Title)
@@ -84,15 +84,16 @@ func TestGetConvertedFile(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/get_file"
 	setupSmallTestRepo(repoPath)
 
-	file, err := getConvertedFile("documents", "document_2.md")
+	file, err := getConvertedFile("documents", "document_2", "index.md")
 	if err != nil {
 		t.Error("error", err)
 	}
 
-	assert.Equal(t, file.Filename, "document_2.md")
+	assert.Equal(t, file.Filename, "index.md")
+	assert.Equal(t, file.Document, "document_2")
 	assert.Equal(t, file.Path, "documents")
 
-	// just look for the title rather than rerender md in  here
+	// just look for the title rather than rerender md in here
 	assert.Contains(t, *file.HTML, "<h1>Document 2</h1>")
 
 	// markdown should be nil
@@ -104,7 +105,7 @@ func TestGetRawFile(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/get_file"
 	setupSmallTestRepo(repoPath)
 
-	file, err := getRawFile("documents", "document_2.md")
+	file, err := getRawFile("documents", "document_2", "index.md")
 	if err != nil {
 		t.Error("error", err)
 	}
@@ -112,12 +113,14 @@ func TestGetRawFile(t *testing.T) {
 	raw, _ := ioutil.ReadFile(filepath.Join(
 		config.Repository,
 		"documents",
-		"document_2.md",
+		"document_2",
+		"index.md",
 	))
 
 	contents, err := particle.YAMLEncoding.DecodeString(string(raw), &FrontMatter{})
 
-	assert.Equal(t, file.Filename, "document_2.md")
+	assert.Equal(t, file.Filename, "index.md")
+	assert.Equal(t, file.Document, "document_2")
 	assert.Equal(t, file.Path, "documents")
 	assert.Equal(t, *file.Markdown, string(contents))
 
@@ -130,7 +133,7 @@ func TestGetFileBothMarkdownAndHTML(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/get_file"
 	setupSmallTestRepo(repoPath)
 
-	file, err := getFile("documents", "document_2.md", true, true)
+	file, err := getFile("documents", "document_2", "index.md", true, true)
 	if err != nil {
 		t.Error("error", err)
 	}
@@ -138,7 +141,8 @@ func TestGetFileBothMarkdownAndHTML(t *testing.T) {
 	raw, _ := ioutil.ReadFile(filepath.Join(
 		config.Repository,
 		"documents",
-		"document_2.md",
+		"document_2",
+		"index.md",
 	))
 
 	contents, err := particle.YAMLEncoding.DecodeString(string(raw), &FrontMatter{})
@@ -147,7 +151,8 @@ func TestGetFileBothMarkdownAndHTML(t *testing.T) {
 	hc, _ := headCommit(repo)
 	repoInfo := RepositoryInfo{LatestRevision: hc.Id().String()}
 
-	assert.Equal(t, file.Filename, "document_2.md")
+	assert.Equal(t, file.Filename, "index.md")
+	assert.Equal(t, file.Document, "document_2")
 	assert.Equal(t, file.Path, "documents")
 	assert.Equal(t, *file.Markdown, string(contents))
 	assert.Contains(t, *file.HTML, "<h1>Document 2</h1")
@@ -160,7 +165,7 @@ func TestGetFileNeitherMarkdownOrHTML(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/get_file"
 	setupSmallTestRepo(repoPath)
 
-	file, err := getFile("documents", "document_2.md", false, false)
+	file, err := getFile("documents", "document_2", "index.md", false, false)
 	if err != nil {
 		t.Error("error", err)
 	}
@@ -169,7 +174,8 @@ func TestGetFileNeitherMarkdownOrHTML(t *testing.T) {
 	hc, _ := headCommit(repo)
 	repoInfo := RepositoryInfo{LatestRevision: hc.Id().String()}
 
-	assert.Equal(t, file.Filename, "document_2.md")
+	assert.Equal(t, file.Filename, "index.md")
+	assert.Equal(t, file.Document, "document_2")
 	assert.Equal(t, file.Path, "documents")
 	assert.Nil(t, file.HTML)
 	assert.Nil(t, file.Markdown)
@@ -182,14 +188,15 @@ func TestGetFileNoRepoMetadata(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/get_file"
 	setupSmallTestRepo(repoPath)
 
-	file, err := getFile("appendices", "appendix_1.md", false, false)
+	file, err := getFile("appendices", "appendix_1", "index.md", false, false)
 
 	repo, _ := repository(config)
 	hc, _ := headCommit(repo)
 	repoInfo := RepositoryInfo{LatestRevision: hc.Id().String()}
 
 	assert.Nil(t, err) // make sure getFile doesn't return an error
-	assert.Equal(t, file.Filename, "appendix_1.md")
+	assert.Equal(t, file.Filename, "index.md")
+	assert.Equal(t, file.Document, "appendix_1")
 	assert.Equal(t, file.Path, "appendices")
 	assert.Nil(t, file.DirectoryInfo)
 	assert.Equal(t, *file.RepositoryInfo, repoInfo)
@@ -323,36 +330,32 @@ func TestGetAttachments(t *testing.T) {
 
 	expectedAttachments := []Attachment{
 		Attachment{
-			Path:             "appendices/appendix_1/data",
-			AbsoluteFilename: "appendices/appendix_1/data/data.json",
-			Extension:        ".json",
-			MediaType:        "text/json",
-			Data:             base64.StdEncoding.EncodeToString(jsonAttachmentContents),
-			Filename:         "data.json",
+			Path:      "appendices/appendix_1/data",
+			Extension: ".json",
+			MediaType: "text/json",
+			Data:      base64.StdEncoding.EncodeToString(jsonAttachmentContents),
+			Filename:  "data.json",
 		},
 		Attachment{
-			Path:             "appendices/appendix_1/data",
-			AbsoluteFilename: "appendices/appendix_1/data/data.xml",
-			Extension:        ".xml",
-			MediaType:        "text/xml",
-			Data:             base64.StdEncoding.EncodeToString(xmlAttachmentContents),
-			Filename:         "data.xml",
+			Path:      "appendices/appendix_1/data",
+			Extension: ".xml",
+			MediaType: "text/xml",
+			Data:      base64.StdEncoding.EncodeToString(xmlAttachmentContents),
+			Filename:  "data.xml",
 		},
 		Attachment{
-			Path:             "appendices/appendix_1/images",
-			AbsoluteFilename: "appendices/appendix_1/images/image_1.png",
-			Extension:        ".png",
-			MediaType:        "image/png",
-			Data:             base64.StdEncoding.EncodeToString(pngAttachmentContents),
-			Filename:         "image_1.png",
+			Path:      "appendices/appendix_1/images",
+			Extension: ".png",
+			MediaType: "image/png",
+			Data:      base64.StdEncoding.EncodeToString(pngAttachmentContents),
+			Filename:  "image_1.png",
 		},
 		Attachment{
-			Path:             "appendices/appendix_1/images",
-			AbsoluteFilename: "appendices/appendix_1/images/image_2.jpg",
-			Extension:        ".jpg",
-			MediaType:        "image/jpeg",
-			Data:             base64.StdEncoding.EncodeToString(jpegAttachmentContents),
-			Filename:         "image_2.jpg",
+			Path:      "appendices/appendix_1/images",
+			Extension: ".jpg",
+			MediaType: "image/jpeg",
+			Data:      base64.StdEncoding.EncodeToString(jpegAttachmentContents),
+			Filename:  "image_2.jpg",
 		},
 	}
 
@@ -392,7 +395,6 @@ func TestExtractContents(t *testing.T) {
 						Author:   "Bernice Hibbert",
 						Date:     "2016-04-05",
 						Draft:    true,
-						Slug:     "pangram",
 						Synopsis: "Use all of the characters",
 						Tags:     nil,
 						Title:    "Pangram",
@@ -407,7 +409,6 @@ func TestExtractContents(t *testing.T) {
 author: Bernice Hibbert
 date: 2016-04-05
 draft: true
-slug: pangram
 synopsis: Use all of the characters
 tags: []
 title: Pangram
@@ -550,13 +551,13 @@ func Test_getMetadataFromBlob(t *testing.T) {
 	repo, _ := repository(config)
 	ht, _ := headTree(repo)
 
-	entryFullFM, _ := ht.EntryByPath("documents/full-frontmatter.md")
+	entryFullFM, _ := ht.EntryByPath("documents/full-frontmatter/index.md")
 	blobFullFM, _ := repo.LookupBlob(entryFullFM.Id)
 
-	entryNoFM, _ := ht.EntryByPath("documents/no-frontmatter.md")
+	entryNoFM, _ := ht.EntryByPath("documents/no-frontmatter/index.md")
 	blobNoFM, _ := repo.LookupBlob(entryNoFM.Id)
 
-	entryBrokenFM, _ := ht.EntryByPath("documents/broken-frontmatter.md")
+	entryBrokenFM, _ := ht.EntryByPath("documents/broken-frontmatter/index.md")
 	blobBrokenFM, _ := repo.LookupBlob(entryBrokenFM.Id)
 
 	type args struct {
@@ -569,21 +570,20 @@ func Test_getMetadataFromBlob(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "documents/full-frontmatter.md",
+			name: "documents/full-frontmatter/index.md",
 			args: args{
 				blob: blobFullFM,
 			},
 			wantFm: FrontMatter{
 				Title:    "Document 1",
 				Author:   "Gil Gunderson",
-				Slug:     "document-1",
 				Synopsis: "I brought that wall from home",
 				Tags:     []string{"ol'", "gil", "ol' gil"},
 			},
 			wantErr: false,
 		},
 		{
-			name: "documents/no-frontmatter.md",
+			name: "documents/no-frontmatter/index.md",
 			args: args{
 				blob: blobNoFM,
 			},
@@ -591,7 +591,7 @@ func Test_getMetadataFromBlob(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "documents/broken-frontmatter.md",
+			name: "documents/broken-frontmatter/index.md",
 			args: args{
 				blob: blobBrokenFM,
 			},
@@ -664,6 +664,7 @@ func Test_getTranslations(t *testing.T) {
 	type args struct {
 		repo      *git.Repository
 		directory string
+		document  string
 		filename  string
 	}
 	tests := []struct {
@@ -678,7 +679,8 @@ func Test_getTranslations(t *testing.T) {
 			args: args{
 				repo:      repo,
 				directory: "documents",
-				filename:  "document_1.md",
+				document:  "document_1",
+				filename:  "index.md",
 			},
 			wantLangs: []string{"en", "sv"},
 		},
@@ -687,7 +689,8 @@ func Test_getTranslations(t *testing.T) {
 			args: args{
 				repo:      repo,
 				directory: "documents",
-				filename:  "document_2.md",
+				document:  "document_2",
+				filename:  "index.md",
 			},
 			wantLangs: []string{"en", "fi", "sv"},
 		},
@@ -696,7 +699,8 @@ func Test_getTranslations(t *testing.T) {
 			args: args{
 				repo:      repo,
 				directory: "documents",
-				filename:  "document_3.md",
+				document:  "document_3",
+				filename:  "index.md",
 			},
 			wantLangs: []string{"en", "fi"},
 		},
@@ -705,7 +709,8 @@ func Test_getTranslations(t *testing.T) {
 			args: args{
 				repo:      repo,
 				directory: "documents",
-				filename:  "missing_document.md",
+				document:  "missing_document",
+				filename:  "index.md",
 			},
 			wantErr: true,
 			errMsg:  "No translations found",
@@ -713,7 +718,7 @@ func Test_getTranslations(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotLangs, err := getTranslations(tt.args.repo, tt.args.directory, tt.args.filename)
+			gotLangs, err := getTranslations(tt.args.repo, tt.args.directory, tt.args.document, tt.args.filename)
 			if tt.wantErr {
 				assert.Equal(t, tt.errMsg, err.Error())
 				return
@@ -725,13 +730,14 @@ func Test_getTranslations(t *testing.T) {
 
 func Test_fileExists(t *testing.T) {
 
-	repoPath := "../tests/tmp/repositories/get_translations"
+	repoPath := "../tests/tmp/repositories/file_exists"
 	setupTranslationsTestRepo(repoPath)
 	repo, _ := repository(config)
 
 	type args struct {
 		repo     *git.Repository
 		path     string
+		document string
 		filename string
 	}
 	tests := []struct {
@@ -743,20 +749,20 @@ func Test_fileExists(t *testing.T) {
 	}{
 		{
 			name:       "Existing file",
-			args:       args{repo: repo, path: "documents", filename: "document_1.md"},
+			args:       args{repo: repo, path: "documents", document: "document_1", filename: "index.md"},
 			wantExists: true,
 		},
 		{
 			name:       "Non-existing file",
-			args:       args{repo: repo, path: "documents", filename: "document_1.de.md"},
+			args:       args{repo: repo, path: "documents", document: "document_1", filename: "index.de.md"},
 			wantExists: false,
 			wantErr:    true,
-			errMsg:     "the path 'document_1.de.md' does not exist in the given tree",
+			errMsg:     "the path 'index.de.md' does not exist in the given tree",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotExists, err := fileExists(tt.args.repo, tt.args.path, tt.args.filename)
+			gotExists, err := fileExists(tt.args.repo, tt.args.path, tt.args.document, tt.args.filename)
 
 			assert.Equal(t, tt.wantExists, gotExists)
 

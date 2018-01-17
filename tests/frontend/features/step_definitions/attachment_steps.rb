@@ -4,7 +4,7 @@ Given %r{^the document I'm working on already has an attachment$} do
 
   # explicitly call the RSpec matcher here as it clashes with Capybara's `all`
   expect([
-    FileTest.exist?(File.join(REPO_PATH, "documents", "document_2.md")),
+    FileTest.exist?(File.join(REPO_PATH, "documents", "document_2", "index.md")),
     FileTest.exist?(@image_path)
   ]).to RSpec::Matchers::BuiltIn::All.new(be true)
 end
@@ -23,7 +23,7 @@ end
 
 Given %r{^I am on the edit page for my document$} do
   steps %{
-    Given I am on the edit document page for "document_2.md"
+    Given I am on the edit document page for "document_2"
   }
 end
 

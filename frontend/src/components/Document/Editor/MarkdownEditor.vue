@@ -89,9 +89,7 @@
 
 				simpleMDE.codemirror.on('drop', async (editor, dropEvent) => {
 
-
 					this.count++;
-
 
 					for (let type of event.dataTransfer.types) {
 						console.debug("type:", type);

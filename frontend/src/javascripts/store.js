@@ -77,11 +77,11 @@ const actions = {
 	},
 	getDocument(context, args) {
 		// set activeDocument to compiled doc from API
-		return CMSFile.find(args.directory, args.filename);
+		return CMSFile.find(args.directory, args.document, args.filename);
 	},
 	editDocument(context, args) {
 		// set activeDocument to raw doc from API
-		return CMSFile.find(args.directory, args.filename, true);
+		return CMSFile.find(args.directory, args.document, args.filename, true);
 	},
 	getDirectory(context, name) {
 		// get and set activeDirectory by name

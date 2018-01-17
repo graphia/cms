@@ -1,9 +1,9 @@
 ---
-title: document 1
-slug: document_1
+title: document 2
+author: Troy McClure
 ---
 
-# Document 1
+# Document 2
 
 Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo
 ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis

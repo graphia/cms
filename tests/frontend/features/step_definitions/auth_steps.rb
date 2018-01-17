@@ -20,7 +20,7 @@ When %r{^I am prompted for my credentials$} do
 end
 
 When %r{^I try to manually make an unauthenticated HTTP request to the API$} do
-  uri = URI('http://127.0.0.1:9095/api/directories/documents/files')
+  uri = URI('http://127.0.0.1:9095/api/directories/documents/documents')
   req = Net::HTTP::Get.new(uri, "Content-Type" => "application/json")
   @res = Net::HTTP.start(uri.hostname, uri.port) do |http|
     http.request(req)
@@ -29,7 +29,7 @@ end
 
 When %r{^I try to manually make an authenticated HTTP request to the API$} do
   token = evaluate_script("localStorage.token")
-  uri = URI('http://127.0.0.1:9095/api/directories/documents/files')
+  uri = URI('http://127.0.0.1:9095/api/directories/documents/documents')
   req = Net::HTTP::Get.new(
     uri,
     "Content-Type" => "application/json",

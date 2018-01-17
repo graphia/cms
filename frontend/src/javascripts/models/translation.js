@@ -1,24 +1,30 @@
 import store from '../store.js';
 import config from '../config.js';
+import checkResponse from '../response.js';
 
 export default class CMSTranslation {
 
-	constructor(path, sourceFilename, code) {
+	constructor(path, document, sourceFilename, code) {
 		this.path = path;
+		this.document = document;
 		this.sourceFilename = sourceFilename;
 		this.code = code;
 	};
 
 	async create() {
-		let path = `${config.api}/directories/${this.path}/files/${this.sourceFilename}/translate`
+		let path = `${config.api}/directories/${this.path}/documents/${this.document}/files/${this.sourceFilename}/translate`;
 
 		try {
 			let response = await fetch(path, {
 				mode: "cors",
 				method: "POST",
 				headers: store.state.auth.authHeader(),
-				body: this.toJSON()
+				body: this.prepareJSON()
 			});
+
+			if (!checkResponse(response.status)) {
+				throw(response);
+			};
 
 			return response;
 		}
@@ -27,10 +33,11 @@ export default class CMSTranslation {
 		};
 	};
 
-	toJSON() {
+	prepareJSON() {
 		let obj = {
 			source_filename: this.sourceFilename,
 			path: this.path,
+			source_document: this.document,
 			language_code: this.code,
 			repository_info: {
 				latest_revision: store.state.latestRevision

@@ -76,11 +76,11 @@
 				return `${this.document.title}: History`;
 			},
 			breadcrumbs() {
-				let directory_title, filename;
+				let directory_title, doc;
 
 				if (this.document.directory_info) {
 					directory_title = this.document.directory_info.title;
-					filename = this.document.title;
+					doc = this.document.title;
 				};
 
 				return [
@@ -91,14 +91,14 @@
 						{directory: this.directory}
 					),
 					new CMSBreadcrumb(
-						filename || this.filename,
+						doc || this.params.document,
 						"document_show",
-						{directory: this.document.path, document: this.document.filename}
+						{directory: this.params.directory, document: this.params.document}
 					),
 					new CMSBreadcrumb(
 						"History",
 						"document_history",
-						{directory: this.directory, document: (filename || this.filename)}
+						{directory: this.params.directory, document: doc}
 					)
 				];
 			}
@@ -106,13 +106,19 @@
 
 		async created() {
 
-			var directory = this.directory;
-			var filename = this.filename;
+			let filename = "index.md";
+
+			if (this.params.language_code) {
+				filename = `index.${this.params.language_code}.md`;
+			};
+
+			var directory = this.params.directory;
+			var document = this.params.document;
 
 			try {
 
 				if (!this.$store.state.activeDocument.populated()) {
-					await this.$store.dispatch("getDocument", {directory, filename});
+					await this.$store.dispatch("getDocument", {directory, document, filename});
 				};
 
 				let response = await this.$store.state.activeDocument.log();

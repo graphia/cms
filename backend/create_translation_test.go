@@ -42,7 +42,8 @@ func Test_createTranslation(t *testing.T) {
 			args: args{
 				nt: NewTranslation{
 					Path:           "documents",
-					SourceFilename: "document_1.md",
+					SourceFilename: "index.md",
+					SourceDocument: "document_1",
 					LanguageCode:   "no",
 					RepositoryInfo: RepositoryInfo{LatestRevision: lr.String()},
 				},
@@ -56,7 +57,8 @@ func Test_createTranslation(t *testing.T) {
 			args: args{
 				nt: NewTranslation{
 					Path:           "documents",
-					SourceFilename: "document_1.md",
+					SourceFilename: "index.md",
+					SourceDocument: "document_1",
 					LanguageCode:   "fi",
 					RepositoryInfo: RepositoryInfo{LatestRevision: lr.String()},
 				},
@@ -69,7 +71,8 @@ func Test_createTranslation(t *testing.T) {
 			args: args{
 				nt: NewTranslation{
 					Path:           "documents",
-					SourceFilename: "document_1.md",
+					SourceFilename: "index.md",
+					SourceDocument: "document_1",
 					LanguageCode:   "fi",
 					RepositoryInfo: RepositoryInfo{LatestRevision: lr.String()},
 				},
@@ -101,7 +104,7 @@ func Test_createTranslation(t *testing.T) {
 			assert.Equal(t, fn, tfn)
 
 			// check target file exists
-			_, err = os.Stat(filepath.Join(repoPath, tt.args.nt.Path, tfn))
+			_, err = os.Stat(filepath.Join(repoPath, tt.args.nt.Path, tt.args.nt.SourceDocument, tfn))
 			assert.False(t, os.IsNotExist(err))
 
 			// check source and target are equal

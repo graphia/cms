@@ -1,15 +1,15 @@
 Given %r{^a document called '(.*?)' exists$} do |name|
-  expect(File.exist?(File.join(REPO_PATH, "appendices", name))).to be true
+  expect(File.exist?(File.join(REPO_PATH, "appendices", name, "index.md"))).to be true
 end
 
 When %r{^I navigate to that document's 'show' page$} do
-  path = "/cms/appendices/appendix_1.md"
+  path = "/cms/appendices/appendix_1"
   visit(path)
   expect(page.current_path).to eql(path)
 end
 
 Given %r{^I am on the show page for a document with metadata$} do
-  path = "/cms/documents/document_1.md"
+  path = "/cms/documents/document_1"
   visit(path)
   expect(page.current_path).to eql(path)
 end
@@ -24,8 +24,7 @@ Then %r{^I should see the correctly\-formatted document$} do
 end
 
 When %r{^the document has some frontmatter set up$} do
-  contents = File.readlines(File.join(REPO_PATH, "appendices", "appendix_1.md"))
-
+  contents = File.readlines(File.join(REPO_PATH, "appendices", "appendix_1", "index.md"))
 
   fm_range = contents
     .each
@@ -72,7 +71,7 @@ end
 
 Then %r{^I should be on the document's edit page$} do
   expect(page).to have_css('h1', text: "Appendix 1")
-  expect(page.current_path).to eql("/cms/appendices/appendix_1.md/edit")
+  expect(page.current_path).to eql("/cms/appendices/appendix_1/edit")
 end
 
 Then %r{^I should be on the directory's index page$} do
@@ -85,5 +84,5 @@ Then %r{^the document should have been deleted$} do
 end
 
 Then %r{^I should be on the document's history page$} do
-  expect(page.current_path).to eql("/cms/appendices/appendix_1.md/history")
+  expect(page.current_path).to eql("/cms/appendices/appendix_1/history")
 end

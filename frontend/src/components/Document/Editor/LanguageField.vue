@@ -19,11 +19,6 @@
 
 <script lang="babel">
 
-	/*
-	 *  TODO set default language to that which is set in the
-	 *  CMS's config file
-	 */
-
 	import Accessors from '../../Mixins/accessors';
 
 	export default {

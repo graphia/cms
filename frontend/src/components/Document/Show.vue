@@ -42,13 +42,13 @@
 
 						<div class="btn-toolbar" role="toolbar">
 
-							<router-link class="btn btn-primary mr-2" :to="{name: 'document_edit', params: {directory: this.directory, filename: this.filename}}">
+							<router-link class="btn btn-primary mr-2" :to="{name: 'document_edit', params: this.navigationParams}">
 								Edit
 							</router-link>
 
 							<Translation v-if="$store.state.translationEnabled"/>
 
-							<router-link class="btn btn-info mr-2" :to="{name: 'document_history', params: {directory: this.directory, filename: this.filename}}">
+							<router-link class="btn btn-info mr-2" :to="{name: 'document_history', params: this.navigationParams}">
 								History
 							</router-link>
 
@@ -80,7 +80,7 @@
 
 	import Breadcrumbs from '../Utilities/Breadcrumbs';
 	import Translation from './Translation';
-	import DocumentDelete from './Delete';
+	import DocumentDelete from './Buttons/Delete';
 	import CMSBreadcrumb from '../../javascripts/models/breadcrumb.js';
 	import Accessors from '../Mixins/accessors';
 
@@ -100,7 +100,7 @@
 			// correct resource
 			relativeHTML() {
 
-				let attachmentsDir = this.document.slug;
+				let attachmentsDir = this.document.document;
 				let html = $.parseHTML(this.document.html);
 
 				$(html)
@@ -115,20 +115,19 @@
 					});
 
 				return html
-						.map((e) => {return e.outerHTML})
-						.join("");
-
+					.map((e) => {return e.outerHTML})
+					.join("");
 
 			},
 			breadcrumbs() {
 
-				let directory_title, filename;
+				let directory_title, doc;
 
 				// if we have it, use the metadata provided directory and
 				// document title
 				if (this.document.directory_info) {
 					directory_title = this.document.directory_info.title;
-					filename = this.document.title;
+					doc = this.document.title;
 				};
 
 				return [
@@ -138,18 +137,38 @@
 						{directory: this.directory}
 					),
 					new CMSBreadcrumb(
-						filename || this.filename,
+						doc || this.params.document,
 						"document_show",
-						{directory: this.directory, document: (filename || this.filename)}
+						{directory: this.directory, document: doc}
 					)
 				];
+			},
+			navigationParams() {
+				let p = {
+					directory: this.params.directory,
+					document: this.params.document
+				};
+
+				if (this.document.isTranslation()) {
+					p.language_code = this.document.language;
+				};
+
+				return p;
 			}
 		},
 		methods: {
 			async getDocument() {
-				let filename = this.filename;
-				let directory = this.directory;
-				this.$store.dispatch("getDocument", {directory, filename});
+
+				let filename = "index.md";
+
+				if (this.params.language_code) {
+					filename = `index.${this.params.language_code}.md`;
+				};
+
+				let document = this.params.document;
+				let directory = this.params.directory;
+
+				this.$store.dispatch("getDocument", {directory, document, filename});
 			},
 			draftDescription() {
 				if (this.document.draft) {

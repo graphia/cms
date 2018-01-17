@@ -93,7 +93,8 @@ func TestCreateFileWhenExists(t *testing.T) {
 		Files: []NewCommitFile{
 			NewCommitFile{
 				Body:     "# The quick brown fox\n\njumped over the lazy dog",
-				Filename: "document_2.md",
+				Filename: "index.md",
+				Document: "document_2",
 				Path:     "documents",
 			},
 		},

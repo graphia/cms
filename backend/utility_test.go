@@ -183,12 +183,12 @@ func setupTestRepo(src, dest string) (oid *git.Oid, err error) {
 
 	err = idx.AddAll(
 		[]string{
-			filepath.Join("appendices", "*.md"),
-			filepath.Join("documents", "*.md"),
-			filepath.Join("documents", "*.json"),
-			filepath.Join("appendices", "*.json"),
-			filepath.Join("documents", "document_1", "*.*"),
-			filepath.Join("appendices", "appendix_1", "*.*"),
+			filepath.Join("appendices", "**/*.md"),
+			filepath.Join("documents", "**/*.md"),
+			filepath.Join("documents", "**/*.json"),
+			filepath.Join("appendices", "**/*.json"),
+			filepath.Join("documents", "document_1", "**/*.*"),
+			filepath.Join("appendices", "appendix_1", "**/*.*"),
 		},
 		git.IndexAddForce,
 		nil,

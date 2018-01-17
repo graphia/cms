@@ -71,7 +71,7 @@ func getFilesInDir(directory string) (files []FileItem, err error) {
 
 	defer tree.Free()
 
-	walkIterator := func(_ string, te *git.TreeEntry) int {
+	walkIterator := func(currentDir string, te *git.TreeEntry) int {
 		var fm FrontMatter
 		var blob *git.Blob
 
@@ -112,10 +112,10 @@ func getFilesInDir(directory string) (files []FileItem, err error) {
 			}
 
 			fi := FileItem{
-				AbsoluteFilename: fmt.Sprintf("%s/%s", directory, te.Name),
-				Filename:         te.Name,
-				Path:             directory,
-				FrontMatter:      fm,
+				Filename:    te.Name,
+				Document:    filepath.Clean(currentDir),
+				Path:        directory,
+				FrontMatter: fm,
 			}
 
 			files = append(files, fi)
@@ -147,7 +147,7 @@ func createFiles(nc NewCommit, user User) (oid *git.Oid, err error) {
 	// check none of the files already exist
 	for _, ncf := range nc.Files {
 
-		target := filepath.Join(ncf.Path, ncf.Filename)
+		target := filepath.Join(ncf.Path, ncf.Document, ncf.Filename)
 
 		//FIXME would it make more sense to switch this
 		//around and check for the error instead?
@@ -384,7 +384,7 @@ func createTranslation(nt NewTranslation, user User) (oid *git.Oid, target strin
 	repo, err := repository(config)
 	target = nt.TargetFilename()
 
-	exists, err := fileExists(repo, nt.Path, target)
+	exists, err := fileExists(repo, nt.Path, nt.SourceDocument, target)
 	if exists {
 		return oid, target, ErrFileAlreadyExists
 	}
@@ -403,7 +403,7 @@ func createTranslation(nt NewTranslation, user User) (oid *git.Oid, target strin
 	if err != nil {
 		return oid, target, err
 	}
-	source := filepath.Join(nt.Path, nt.SourceFilename)
+	source := filepath.Join(nt.Path, nt.SourceDocument, nt.SourceFilename)
 
 	entry, err := tree.EntryByPath(source)
 	if err != nil {
@@ -633,7 +633,7 @@ func deleteFiles(nc NewCommit, user User) (oid *git.Oid, err error) {
 
 	for _, ncf := range nc.Files {
 
-		target := filepath.Join(ncf.Path, ncf.Filename)
+		target := filepath.Join(ncf.Path, ncf.Document, ncf.Filename)
 
 		// ensure that the file exists before we try to delete it
 		file, err := ht.EntryByPath(target)
@@ -654,6 +654,9 @@ func deleteFiles(nc NewCommit, user User) (oid *git.Oid, err error) {
 
 	}
 
+	// FIXME moving to Bundles this will *also* delete the translations
+	// this is the correct behaviour but need to make it clear in the UI
+	//
 	// if we're deleting the accompanying attachment directories too
 	for _, ncd := range nc.Directories {
 
@@ -699,7 +702,7 @@ func sign(user User) *git.Signature {
 func buildIndexEntry(oid *git.Oid, ncf NewCommitFile) git.IndexEntry {
 	return git.IndexEntry{
 		Id:   oid,
-		Path: filepath.Join(ncf.Path, ncf.Filename),
+		Path: filepath.Join(ncf.Path, ncf.Document, ncf.Filename),
 		Size: uint32(len(ncf.Body)),
 
 		Ctime: git.IndexTime{},
@@ -727,7 +730,7 @@ func buildIndexEntryDirectory(oid *git.Oid, ncd NewCommitDirectory) git.IndexEnt
 func buildIndexEntryTranslation(oid *git.Oid, nt NewTranslation, size int) git.IndexEntry {
 	return git.IndexEntry{
 		Id:   oid,
-		Path: filepath.Join(nt.Path, nt.TargetFilename()),
+		Path: filepath.Join(nt.Path, nt.SourceDocument, nt.TargetFilename()),
 		Size: uint32(size),
 
 		Ctime: git.IndexTime{},
@@ -738,7 +741,7 @@ func buildIndexEntryTranslation(oid *git.Oid, nt NewTranslation, size int) git.I
 	}
 }
 
-func getFile(directory string, filename string, includeMd, includeHTML bool) (file *File, err error) {
+func getFile(directory, document, filename string, includeMd, includeHTML bool) (file *File, err error) {
 	var html, markdown *string = nil, nil
 	var fm FrontMatter
 
@@ -748,7 +751,7 @@ func getFile(directory string, filename string, includeMd, includeHTML bool) (fi
 	if err != nil {
 		return nil, err
 	}
-	target := filepath.Join(directory, filename)
+	target := filepath.Join(directory, document, filename)
 
 	entry, err := tree.EntryByPath(target)
 	if err != nil {
@@ -790,10 +793,11 @@ func getFile(directory string, filename string, includeMd, includeHTML bool) (fi
 		return nil, err
 	}
 
-	translations, err := getTranslations(repo, directory, filename)
+	translations, err := getTranslations(repo, directory, document, filename)
 
 	file = &File{
 		Filename:       filename,
+		Document:       document,
 		Path:           directory,
 		HTML:           html,
 		Markdown:       markdown,
@@ -806,7 +810,7 @@ func getFile(directory string, filename string, includeMd, includeHTML bool) (fi
 	return file, nil
 }
 
-func getTranslations(repo *git.Repository, directory, filename string) (langs []string, err error) {
+func getTranslations(repo *git.Repository, directory, document, filename string) (langs []string, err error) {
 
 	langs = []string{}
 	tree, err := headTree(repo)
@@ -817,7 +821,7 @@ func getTranslations(repo *git.Repository, directory, filename string) (langs []
 
 	for _, lc := range config.EnabledLanguages {
 
-		target := filepath.Join(directory, translationFilename(filename, lc))
+		target := filepath.Join(directory, document, translationFilename(filename, lc))
 
 		Debug.Println("checking for translation", target)
 
@@ -838,6 +842,9 @@ func getTranslations(repo *git.Repository, directory, filename string) (langs []
 }
 
 func getAttachments(directory string) (files []Attachment, err error) {
+
+	// Initialise the slice so [] is marshalled instead of null
+	files = make([]Attachment, 0)
 
 	repo, err := repository(config)
 	if err != nil {
@@ -892,12 +899,11 @@ func getAttachments(directory string) (files []Attachment, err error) {
 			data := blob.Contents()
 
 			attachment = Attachment{
-				Filename:         te.Name,
-				AbsoluteFilename: filepath.Join(directory, path, te.Name),
-				Extension:        ext,
-				Data:             base64.StdEncoding.EncodeToString(data),
-				Path:             filepath.Join(directory, path),
-				MediaType:        getMediaType(ext),
+				Filename:  te.Name,
+				Extension: ext,
+				Data:      base64.StdEncoding.EncodeToString(data),
+				Path:      filepath.Join(directory, path),
+				MediaType: getMediaType(ext),
 			}
 
 			files = append(files, attachment)
@@ -913,18 +919,18 @@ func getAttachments(directory string) (files []Attachment, err error) {
 
 }
 
-func getConvertedFile(directory, filename string) (file *File, err error) {
+func getConvertedFile(directory, document, filename string) (file *File, err error) {
 	Debug.Println("Getting converted file", directory, filename)
-	file, err = getFile(directory, filename, false, true)
+	file, err = getFile(directory, document, filename, false, true)
 	if err != nil {
 		return nil, err
 	}
 	return
 }
 
-func getRawFile(directory, filename string) (file *File, err error) {
+func getRawFile(directory, document, filename string) (file *File, err error) {
 	Debug.Println("Getting raw file", directory, filename)
-	file, err = getFile(directory, filename, true, false)
+	file, err = getFile(directory, document, filename, true, false)
 	if err != nil {
 		return nil, err
 	}
@@ -1022,11 +1028,13 @@ func writeTreeAndCommit(repo *git.Repository, index *git.Index, message string, 
 
 }
 
-func pathInFiles(directory, filename string, files *[]NewCommitFile) bool {
+func pathInFiles(directory, document, filename string, files *[]NewCommitFile) bool {
 
 	// check that at least one file in files matches the directory and filename
 	for _, file := range *files {
-		if file.Path == directory && file.Filename == filename {
+		if file.Path == directory &&
+			file.Document == document &&
+			file.Filename == filename {
 			return true
 		}
 	}
@@ -1244,14 +1252,14 @@ func translationFilename(fn, code string) (tfn string) {
 
 }
 
-func fileExists(repo *git.Repository, path, filename string) (exists bool, err error) {
+func fileExists(repo *git.Repository, path, document, filename string) (exists bool, err error) {
 
 	tree, err := headTree(repo)
 	if err != nil {
 		return false, err
 	}
 
-	_, err = tree.EntryByPath(filepath.Join(path, filename))
+	_, err = tree.EntryByPath(filepath.Join(path, document, filename))
 	if err != nil {
 		return false, err
 	}

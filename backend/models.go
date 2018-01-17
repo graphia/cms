@@ -23,6 +23,7 @@ type NewCommitDirectory struct {
 // NewCommitFile will replace RepoWrite's file attributes
 type NewCommitFile struct {
 	Filename      string      `json:"filename" validate:"required"`
+	Document      string      `json:"document" validate:"required"`
 	Path          string      `json:"path" validate:"required"`
 	Body          string      `json:"body"`
 	FrontMatter   FrontMatter `json:"frontmatter"`
@@ -32,6 +33,7 @@ type NewCommitFile struct {
 // NewTranslation creates a new copy of a file ready for translation
 type NewTranslation struct {
 	SourceFilename string `json:"source_filename" validate:"required"`
+	SourceDocument string `json:"source_document" validate:"required"`
 	Path           string `json:"path" validate:"required"`
 	LanguageCode   string `json:"language_code" validate:"required"`
 	RepositoryInfo `json:"repository_info"`
@@ -53,7 +55,6 @@ type FrontMatter struct {
 	Author   string   `json:"author"         yaml:"author"`
 	Date     string   `json:"date,omitempty" yaml:"date"`
 	Draft    bool     `json:"draft"          yaml:"draft"`
-	Slug     string   `json:"slug"           yaml:"slug"`
 	Synopsis string   `json:"synopsis"       yaml:"synopsis"`
 	Tags     []string `json:"tags"           yaml:"tags"`
 	Title    string   `json:"title"          yaml:"title"`
@@ -103,36 +104,35 @@ type Language struct {
 // FileItem contains enough file information for listing
 // HTML and raw Markdown content is omitted
 type FileItem struct {
-	AbsoluteFilename string      `json:"absolute_filename"`
-	Filename         string      `json:"filename"`
-	Path             string      `json:"path"`
-	Date             time.Time   `json:"updated_at"`
-	FrontMatter      FrontMatter `json:"frontmatter"`
+	Filename    string      `json:"filename"`
+	Path        string      `json:"path"`
+	Document    string      `json:"document"`
+	Date        time.Time   `json:"updated_at"`
+	FrontMatter FrontMatter `json:"frontmatter"`
 }
 
 // File represents a Markdown file and can be returned with
 // HTML or Markdown contents (or both if required)
 type File struct {
-	AbsoluteFilename string          `json:"absolute_filename"`
-	Filename         string          `json:"filename"`
-	Path             string          `json:"path"`
-	Language         string          `json:"language"`
-	HTML             *string         `json:"html"`
-	Markdown         *string         `json:"markdown"`
-	FrontMatter      FrontMatter     `json:"frontmatter"`
-	DirectoryInfo    *DirectoryInfo  `json:"directory_info,omitempty"`
-	RepositoryInfo   *RepositoryInfo `json:"repository_info,omitempty"`
-	Translations     []string        `json:"translations"`
+	Filename       string          `json:"filename"`
+	Path           string          `json:"path"`
+	Document       string          `json:"document"`
+	Language       string          `json:"language"`
+	HTML           *string         `json:"html"`
+	Markdown       *string         `json:"markdown"`
+	FrontMatter    FrontMatter     `json:"frontmatter"`
+	DirectoryInfo  *DirectoryInfo  `json:"directory_info,omitempty"`
+	RepositoryInfo *RepositoryInfo `json:"repository_info,omitempty"`
+	Translations   []string        `json:"translations"`
 }
 
 // Attachment belongs to a File, usually an image
 type Attachment struct {
-	Path             string `json:"path"`
-	Filename         string `json:"filename"`
-	AbsoluteFilename string `json:"absolute_filename"`
-	Extension        string `json:"extension"`
-	MediaType        string `json:"filetype"`
-	Data             string `json:"data"`
+	Path      string `json:"path"`
+	Filename  string `json:"filename"`
+	Extension string `json:"extension"`
+	MediaType string `json:"filetype"`
+	Data      string `json:"data"`
 }
 
 // Token holds a JSON Web Token

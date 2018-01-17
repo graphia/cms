@@ -1,14 +1,12 @@
 ---
-title: Document 2
-author: Marvin Monroe
-slug: document-2
-synopsis: >
-  Family bliss or double your money back
+title: Document 1
+author: Gil Gunderson
+synopsis: I brought that wall from home
 tags:
-  - therapy
-  - psychiatry
-
-There is no finishing frontmatter boundary, this isn't going to end well.
+  - ol'
+  - gil
+  - ol' gil
+---
 
 Vestibulum id ante quis magna consequat vulputate id non justo. Vestibulum
 laoreet libero ut malesuada interdum. Etiam eleifend aliquam imperdiet. Vivamus

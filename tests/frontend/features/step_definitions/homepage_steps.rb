@@ -27,16 +27,18 @@ Given %r{^there have been some recent commits$} do
   # Add some files
   Dir.glob(File.join(SAMPLES_PATH, "**/*.md")) do |file|
     filename = File.basename(file)
+    doc = File.dirname(file).split("/").last
     FileUtils.cp(file, File.join(REPO_PATH, "documents", filename))
     g.add(all: true)
-    g.commit_all("Added #{filename}")
+    g.commit_all("Added #{doc}")
   end
 
 end
 
 Then %r{^the recent changes summary should contain a list of commits$} do
+
   within(".recent-updates") do
-    ["Added a.md", "Added b.md", "Added c.md"].each do |message|
+    ["Added a", "Added b", "Added c"].each do |message|
       expect(page).to have_content(message)
     end
 
@@ -60,9 +62,8 @@ Then %r{^I should see a section for each directory$} do
 end
 
 Given %r{^the documents directory contains the following files:$} do |table|
-
-    %w{document_1.md document_2.md document_3.md}.each do |name|
-    expect(File.exist?(File.join(REPO_PATH, "documents", name))).to be true
+  table.transpose.raw.flatten.each do |doc|
+    expect(File.exist?(File.join(REPO_PATH, "documents", doc, "index.md"))).to be true
   end
 end
 

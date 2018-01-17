@@ -39,7 +39,7 @@
 						<router-link
 							v-for="(documents, base, j) in directory.contents"
 							:key="j"
-							:to="{name: 'document_show', params: {directory: directory.path, filename: primary(documents).filename}}"
+							:to="{name: 'document_show', params: {directory: directory.path, document: primary(documents).document, filename: primary(documents).filename}}"
 							:data-filename="base"
 							class="list-group-item list-group-item-action"
 						>
@@ -51,9 +51,9 @@
 							<div class="translations" v-if="translationEnabled">
 
 								<ul class="translations-list list-inline">
-									<li class="list-inline-item" v-for="(t, k) in translations(documents)" :key="k" :data-lang="t.language.name">
-										<router-link :to="{name: 'document_show', params: {directory: directory.path, filename: t.filename}}">
-											{{ (t.language && t.language.flag) || "missing" }}
+									<li class="list-inline-item" v-for="(t, k) in translations(documents)" :key="k" :data-lang="t.languageInfo.name">
+										<router-link :to="{name: 'document_show', params: {directory: directory.path, document: t.document, language_code: t.language}}">
+											{{ (t.languageInfo && t.languageInfo.flag) || "missing" }}
 										</router-link>
 									</li>
 								</ul>
@@ -141,7 +141,8 @@
 							.reduce((summary, doc) => {
 
 								// use the file's basename to group translations
-								let base = doc.filename.split(".")[0]
+								//let base = doc.filename.split(".")[0]
+								let base = doc.document;
 								let parsedDoc = new CMSFile(doc);
 
 								summary[base] ? summary[base].push(parsedDoc) : summary[base] = [parsedDoc];
@@ -194,8 +195,10 @@
 			},
 
 			translations(files) {
+
+				console.debug(files)
 				return files
-					.filter((file) => { return file.translation })
+					.filter((file) => { return file.isTranslation() })
 			}
 		},
 		components: {

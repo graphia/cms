@@ -63,10 +63,17 @@
 				try {
 					let code = sender.currentTarget.value;
 
+					let filename = "index.md";
+
+					if (this.params.language_code) {
+						filename = `index.${this.params.language_code}.md`;
+					};
+
 					let translation = new CMSTranslation(
-						this.directory,
-						this.filename,
-						code,
+						this.params.directory,
+						this.params.document,
+						filename,
+						code
 					);
 
 					let response = await translation.create();
@@ -80,7 +87,8 @@
 
 					// the new filename is returned in the 'meta' field of the
 					// response
-					this.redirectToShowDocument(this.directory, json.meta);
+					this.$store.commit("setLatestRevision", json.oid);
+					this.redirectToShowDocument(this.params.directory, this.params.document, code);
 
 					this.$store.state.broadcast.addMessage(
 						"success",
@@ -96,10 +104,10 @@
 
 
 			},
-			redirectToShowDocument(directory, filename) {
+			redirectToShowDocument(directory, doc, language_code) {
 				this.$router.push({
 					name: 'document_show',
-					params:{directory, filename}
+					params:{directory, doc, language_code}
 				});
 			}
 		},

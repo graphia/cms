@@ -1,17 +1,8 @@
 ---
-title: Appendix 1
-slug: appendix_1
-author: Arnold Pye
-synopsis: The first appendix is the best appendix
-date: 2016-04-05
-tags:
-  - Traffic News
-  - KBBL TV
-version: 1.1
-draft: true
+title: document 3
+author: Troy McClure
 ---
-
-# Appendix 1
+# Document 3
 
 Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo
 ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis

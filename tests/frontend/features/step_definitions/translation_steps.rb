@@ -55,7 +55,7 @@ Then %r{^I should be on the document's '(.*?)' translation$} do |lang|
     "Finnish" => "fi",
     "Swedish" => "sv"
   }
-  expect(page.current_path).to eql("/cms/documents/#{@document}.#{codes[lang]}.md")
+  expect(page.current_path).to eql("/cms/documents/#{@document}/#{codes[lang]}")
 end
 
 # Used on the document summary feature
@@ -69,7 +69,7 @@ When %r{^I click the 'Swedish' link$} do
 end
 
 Given %r{^I navigate to my document's 'show' page$} do
-  @document = "document_1.md"
+  @document = "document_1"
   path = "/cms/documents/#{@document}"
   visit(path)
   expect(page.current_path).to eql(path)
@@ -120,7 +120,7 @@ end
 
 Then %r{^I should be on the new 'Swedish' document$} do
   expect(page).to have_css(".alert.alert-success")
-  expect(page.current_path).to eql("/cms/documents/document_1.sv.md")
+  expect(page.current_path).to eql("/cms/documents/document_1/sv")
 end
 
 Then %r{^I should see my document listed under '(.*?)'$} do |dir|
@@ -136,15 +136,18 @@ Then %r{^it should have 'Finnish' and 'Swedish' flags$} do
   end
 end
 
-def write_translated_file(name, email, contents, code, message, filename="translated_doc")
+def write_translated_file(name, email, contents, code, message, doc="translated_doc")
   Git.open(REPO_PATH).tap do |g|
     g.config('user.name', name)
     g.config('user.email', email)
+
+    dir = File.join(REPO_PATH, "documents", doc)
+    Dir.mkdir(dir) unless Dir.exist?(dir)
+
     File.write(
       File.join(
-        REPO_PATH,
-        "documents",
-        [filename, code, "md"].compact.join(".")
+        dir,
+        ["index", code, "md"].compact.join(".")
       ),
       contents
     )
@@ -153,7 +156,7 @@ def write_translated_file(name, email, contents, code, message, filename="transl
   end
 end
 
-def write_english_file(filename="translated_doc")
+def write_english_file(doc="translated_doc")
   @english_title = "A noble spirit embiggens the smallest man."
   contents = <<~CONTENTS
     ---
@@ -172,11 +175,11 @@ def write_english_file(filename="translated_doc")
     contents,
     nil,
     "English file added",
-    filename
+    doc
   )
 end
 
-def write_finnish_file(filename="translated_doc")
+def write_finnish_file(doc="translated_doc")
   contents = <<~CONTENTS
     ---
     title: Finland's Culture (Model U.N. Club)
@@ -192,11 +195,11 @@ def write_finnish_file(filename="translated_doc")
     contents,
     "fi",
     "Finnish file added",
-    filename
+    doc
   )
 end
 
-def write_swedish_file(filename="translated_doc")
+def write_swedish_file(doc="translated_doc")
   contents = <<~CONTENTS
     ---
     title: Du gamla, Du fria, Du fjällhöga nord
@@ -212,6 +215,18 @@ def write_swedish_file(filename="translated_doc")
     contents,
     "sv",
     "Swedish file added",
-    filename
+    doc
   )
+end
+
+When %r{^I haven't changed the document's language$} do
+  # do nothing
+end
+
+Then %r{^the filename should be "(.*?)"$} do |filename|
+  # we need to extract the text and remove spaces because the
+  # language code is actually within a <span> tag, and the text
+  # method on the element returns spaces: "index .fi .md"
+  text = page.find("span.extension-indicator").text.gsub(" ", "")
+  expect(filename).to eql(text)
 end

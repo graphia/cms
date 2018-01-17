@@ -67,9 +67,10 @@ const routes = [
 	{path: '/cms/', component: Home, name: 'home'},
 	{path: '/cms/:directory', component: DocumentIndex, name: 'document_index'},
 	{path: '/cms/:directory/new', component: DocumentNew, name: 'document_new'},
-	{path: '/cms/:directory/:filename', component: DocumentShow, name: 'document_show'},
-	{path: '/cms/:directory/:filename/edit', component: DocumentEdit, name: 'document_edit'},
-	{path: '/cms/:directory/:filename/history', component: DocumentHistory, name: 'document_history'}
+
+	{path: '/cms/:directory/:document/:language_code?/edit', component: DocumentEdit, name: 'document_edit'},
+	{path: '/cms/:directory/:document/:language_code?/history', component: DocumentHistory, name: 'document_history'},
+	{path: '/cms/:directory/:document/:language_code?', component: DocumentShow, name: 'document_show'},
 
 ];
 

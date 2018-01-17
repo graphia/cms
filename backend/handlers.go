@@ -146,7 +146,7 @@ func apiLogoutHandler(w http.ResponseWriter, r *http.Request) {
 //
 func authRenewTokenHandler(w http.ResponseWriter, r *http.Request) {
 
-	token, err := request.ParseFromRequest(
+	ot, err := request.ParseFromRequest(
 		r,
 		request.AuthorizationHeaderExtractor,
 		func(token *jwt.Token) (interface{}, error) {
@@ -154,51 +154,36 @@ func authRenewTokenHandler(w http.ResponseWriter, r *http.Request) {
 		},
 	)
 
-	if err == nil {
-		if token.Valid {
-
-			Debug.Println("Token valid, issuing a new one")
-			// TODO print the claims?
-
-			claims := token.Claims.(jwt.MapClaims)
-			username := claims["sub"]
-			user, err := getUserByUsername("joey")
-			if err != nil {
-				panic(fmt.Errorf("Cannot find user %s, %s", username, err.Error()))
-			}
-
-			token, err := newToken(user)
-			if err != nil {
-				panic(err)
-			}
-
-			tokenString, err := newTokenString(token)
-			if err != nil {
-				panic(err)
-			}
-
-			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				fmt.Fprintln(w, "Error extracting the key")
-				panic(err)
-			}
-
-			response := Token{tokenString}
-			JSONResponse(response, http.StatusOK, w)
-
-		} else {
-			w.WriteHeader(http.StatusUnauthorized)
-			response := FailureResponse{Message: "Invalid credentials"}
-			json, err := json.Marshal(response)
-			if err != nil {
-				panic(err)
-			}
-			w.Write(json)
-		}
-	} else {
-		w.WriteHeader(http.StatusUnauthorized)
-		fmt.Fprint(w, "Unauthorized access to this resource")
+	if err != nil {
+		response := FailureResponse{Message: "Could not authorise user"}
+		JSONResponse(response, http.StatusUnauthorized, w)
+		return
 	}
+
+	if !ot.Valid {
+		response := FailureResponse{Message: "Token invalid"}
+		JSONResponse(response, http.StatusUnauthorized, w)
+		return
+	}
+
+	user := getCurrentUser(r.Context())
+
+	nt, err := newToken(user)
+	if err != nil {
+		response := FailureResponse{Message: "Could not create new token"}
+		JSONResponse(response, http.StatusBadRequest, w)
+		return
+	}
+
+	tokenString, err := newTokenString(nt)
+	if err != nil {
+		response := FailureResponse{Message: "Could not extract string from new token"}
+		JSONResponse(response, http.StatusBadRequest, w)
+		return
+	}
+
+	response := Token{tokenString}
+	JSONResponse(response, http.StatusOK, w)
 
 }
 
@@ -210,21 +195,19 @@ func authRenewTokenHandler(w http.ResponseWriter, r *http.Request) {
 // {"enabled": false}
 func setupAllowCreateInitialUserHandler(w http.ResponseWriter, r *http.Request) {
 	var zeroUsers bool
+	var so SetupOption
 
 	count, err := countUsers()
 	if err != nil {
-		panic(err)
+		response := FailureResponse{Message: "Could not perform user count"}
+		JSONResponse(response, http.StatusBadRequest, w)
+		return
 	}
 
 	zeroUsers = (count == 0)
 
-	output, err := json.Marshal(SetupOption{Enabled: zeroUsers})
-	if err != nil {
-		panic(err)
-	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Write(output)
+	so = SetupOption{Enabled: zeroUsers}
+	JSONResponse(so, http.StatusOK, w)
 }
 
 // setupAllowInitializeRepository will return true if a Git repository does not
@@ -595,15 +578,6 @@ func apiUpdateDirectoriesHandler(w http.ResponseWriter, r *http.Request) {
 //	 "name": "Martin Prince",
 //	 "email": "mp@springfield-elementary.gov",
 // }
-// DELETE /api/directories
-// {
-//	  "name": "Martin Prince",
-//	  "email": "mp@springfield-elementary.gov",
-//	  "message": "Added new directory called Bobbins",
-//	  "directories": [
-//	    {"path": "documents"}
-//	  ]
-// }
 //
 // returns a SuccessResponse containing the git commit hash or a FailureResponse
 // containing an error message
@@ -670,7 +644,7 @@ func apiDeleteDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 // apiListFilesInDirectoryHandler returns a JSON array containing
 // the all files belonging to :directory
 //
-// GET /api/directories/:directory/files
+// GET /api/directories/:directory/documents
 //
 // eg. when the documents directory contains Documents 1 and 2:
 //
@@ -686,16 +660,16 @@ func apiListFilesInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err == ErrDirectoryNotFound {
 		fr = FailureResponse{
-			Message: fmt.Sprintf("Could not get list of files in directory %s: %s", directory, err.Error()),
+			Message: ErrDirectoryNotFound.Error(),
 		}
 		JSONResponse(fr, http.StatusNotFound, w)
 		return
 
 	} else if err != nil {
 		fr = FailureResponse{
-			Message: ErrDirectoryNotFound.Error(),
+			Message: fmt.Sprintf("Could not get list of files in directory %s: %s", directory, err.Error()),
 		}
-		JSONResponse(fr, http.StatusBadRequest, w)
+		JSONResponse(fr, http.StatusNotFound, w)
 		return
 	}
 
@@ -764,7 +738,7 @@ func apiGetDirectoryMetadataHandler(w http.ResponseWriter, r *http.Request) {
 
 // apiCreateFileInDirectory creates a file the specified directory
 //
-// POST /api/directories/:directory/files
+// POST /api/directories/:directory/documents
 // {
 //	  "message": "Added document six"
 //	  "files": [
@@ -819,7 +793,7 @@ func apiCreateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 // apiUpdateFileInDirectory updates an existing file the specified
 // directory
 //
-// PATCH /api/directories/:directory/files/:filename
+// PATCH /api/directories/:directory/documents/:document/files/:filename
 // {
 //	  "message": "Added document six"
 //	  "files": [
@@ -827,13 +801,14 @@ func apiCreateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 //	  ]
 // }
 func apiUpdateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
-	var filename, directory string
+	var filename, document, directory string
 	var nc NewCommit
 	var fr FailureResponse
 	var sr SuccessResponse
 	var err error
 
 	filename = vestigo.Param(r, "file")
+	document = vestigo.Param(r, "document")
 	directory = vestigo.Param(r, "directory")
 
 	json.NewDecoder(r.Body).Decode(&nc)
@@ -853,7 +828,7 @@ func apiUpdateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !pathInFiles(directory, filename, &nc.Files) {
+	if !pathInFiles(directory, document, filename, &nc.Files) {
 		fr = FailureResponse{
 			Message: "No supplied file matches path",
 		}
@@ -895,14 +870,16 @@ func apiUpdateFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func apiTranslateFileHandler(w http.ResponseWriter, r *http.Request) {
-	var filename, directory string
+	var filename, document, directory string
 	var nt NewTranslation
 	var fr FailureResponse
 	var sr SuccessResponse
 	var err error
 
 	filename = vestigo.Param(r, "file")
+	document = vestigo.Param(r, "document")
 	directory = vestigo.Param(r, "directory")
+
 	user := getCurrentUser(r.Context())
 
 	json.NewDecoder(r.Body).Decode(&nt)
@@ -918,7 +895,7 @@ func apiTranslateFileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if filename != nt.SourceFilename {
+	if filename != nt.SourceFilename || document != nt.SourceDocument {
 		fr = FailureResponse{Message: "Filename does not match payload"}
 		Warning.Printf(
 			"Filename does not match contents, param: %s, payload: %s",
@@ -953,7 +930,7 @@ func apiTranslateFileHandler(w http.ResponseWriter, r *http.Request) {
 // apiDeleteFileFromDirectoryHandler deletes a file from the specified
 // directory
 //
-// DELETE /api/directories/:directory/files/:filename
+// DELETE /api/directories/:directory/documents/:document/files/:filename
 // {
 //	  "message": "Deleted document 6 as it's no longer required",
 //	  "files": [
@@ -961,12 +938,13 @@ func apiTranslateFileHandler(w http.ResponseWriter, r *http.Request) {
 //	  ]
 // }
 func apiDeleteFileFromDirectoryHandler(w http.ResponseWriter, r *http.Request) {
-	var filename, directory string
+	var filename, document, directory string
 	var nc NewCommit
 	var fr FailureResponse
 	var sr SuccessResponse
 
 	filename = vestigo.Param(r, "file")
+	document = vestigo.Param(r, "document")
 	directory = vestigo.Param(r, "directory")
 
 	json.NewDecoder(r.Body).Decode(&nc)
@@ -979,7 +957,7 @@ func apiDeleteFileFromDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !pathInFiles(directory, filename, &nc.Files) {
+	if !pathInFiles(directory, document, filename, &nc.Files) {
 		fr = FailureResponse{
 			Message: "No supplied file matches path",
 		}
@@ -992,7 +970,7 @@ func apiDeleteFileFromDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 	// in the message rather than just the one specified by the URL
 	// UI only offers one at a time so far so not vital.
 	if nc.Message == "" {
-		nc.Message = fmt.Sprintf("File deleted %s/%s", directory, filename)
+		nc.Message = fmt.Sprintf("File deleted %s/%s/%s", directory, document, filename)
 	}
 
 	user := getCurrentUser(r.Context())
@@ -1030,7 +1008,7 @@ func apiDeleteFileFromDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 // specified file to be displayed in a web page; the raw Markdown is not
 // sent but the compiled HTML is.
 //
-// GET /api/directories/:directory/files/:filename
+// GET /api/directories/:directory/documents/:document/files/:filename
 //
 // returns
 //
@@ -1046,12 +1024,13 @@ func apiGetFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 	var fr FailureResponse
 
 	directory := vestigo.Param(r, "directory")
+	document := vestigo.Param(r, "document")
 	filename := vestigo.Param(r, "file")
 
-	file, err := getConvertedFile(directory, filename)
+	file, err := getConvertedFile(directory, document, filename)
 	if err != nil {
 
-		Error.Println("Could not find converted file", directory, filename, err.Error())
+		Error.Println("Could not find converted file", directory, document, filename, err.Error())
 
 		fr = FailureResponse{
 			Message: fmt.Sprintf("Failed to get converted file: %s", err.Error()),
@@ -1068,11 +1047,12 @@ func apiGetFileAttachmentsHandler(w http.ResponseWriter, r *http.Request) {
 	var fr FailureResponse
 
 	directory := vestigo.Param(r, "directory")
-	filename := vestigo.Param(r, "filename")
+	document := vestigo.Param(r, "document")
 
-	path := fmt.Sprintf("%s/%s", directory, filename)
+	path := fmt.Sprintf("%s/%s", directory, document)
 
 	files, err := getAttachments(path)
+
 	if err != nil {
 
 		Warning.Println("No attachments dir found for path", path)
@@ -1090,10 +1070,8 @@ func apiGetFileAttachmentsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func apiGetFileAttachmentHandler(w http.ResponseWriter, r *http.Request) {
-
-	Debug.Println("***** HANDLING ATTACHMENT!")
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("ok"))
+	w.Write([]byte("Not implemented yet"))
 }
 
 // apiEditFileInDirectoryHandler returns a File object representing the
@@ -1101,7 +1079,7 @@ func apiGetFileAttachmentHandler(w http.ResponseWriter, r *http.Request) {
 // server-renedered preview isn't shown, so we don't generate HTML but
 // just send the raw Markdown
 //
-// GET /api/directories/:directory/files/:filename/edit
+// GET /api/directories/:directory/documents/:document/files/:filename/edit
 //
 // returns
 //
@@ -1117,9 +1095,11 @@ func apiEditFileInDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 	var fr FailureResponse
 
 	directory := vestigo.Param(r, "directory")
+	document := vestigo.Param(r, "document")
 	filename := vestigo.Param(r, "file")
 
-	file, err := getRawFile(directory, filename)
+	file, err := getRawFile(directory, document, filename)
+
 	if err != nil {
 		Error.Println("Could not update file", err.Error())
 
@@ -1302,9 +1282,6 @@ func apiUserListPublicKeysHandler(w http.ResponseWriter, r *http.Request) {
 		Name        string `json:"name"`
 	}
 
-	// properly initialise the slice so if empty,
-	// marshalled JSON is a empty array instead of null
-
 	upks, err := user.keys()
 	if err != nil {
 		Debug.Println("error", err.Error())
@@ -1314,6 +1291,8 @@ func apiUserListPublicKeysHandler(w http.ResponseWriter, r *http.Request) {
 		JSONResponse(fr, http.StatusBadRequest, w)
 	}
 
+	// properly initialise the slice so if empty,
+	// marshalled JSON is a empty array instead of null
 	var keys []rk
 	keys = make([]rk, 0)
 
@@ -1576,7 +1555,7 @@ func apiGetCommitHandler(w http.ResponseWriter, r *http.Request) {
 	JSONResponse(cs, http.StatusOK, w)
 }
 
-// GET /api/directories/:directory/files/:filename/history
+// GET /api/directories/:directory/documents/:document/files/:filename/history
 //
 // returns the basic commit information for every commit that has
 // affected the specified file
@@ -1594,9 +1573,10 @@ func apiGetFileHistoryHandler(w http.ResponseWriter, r *http.Request) {
 	var fr FailureResponse
 
 	directory := vestigo.Param(r, "directory")
+	document := vestigo.Param(r, "document")
 	filename := vestigo.Param(r, "file")
 
-	path := fmt.Sprintf("%s/%s", directory, filename)
+	path := filepath.Join(directory, document, filename)
 
 	history, err := getFileHistory(path, 10)
 	if err != nil {

@@ -209,7 +209,7 @@ func TestProtectedMiddlewareWithToken(t *testing.T) {
 	tokenString, _ := newTokenString(token)
 	cookieKwan.setToken(tokenString)
 
-	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/files/document_1.md")
+	target := fmt.Sprintf("%s/%s", server.URL, "api/directories/documents/documents/document_1/files/index.md")
 
 	//	Debug.Println(token)
 	client := &http.Client{}
@@ -228,7 +228,8 @@ func TestProtectedMiddlewareWithToken(t *testing.T) {
 	json.NewDecoder(resp.Body).Decode(&file)
 
 	// ensure the file 'looks' correct
-	assert.Contains(t, file.Filename, "document_1.md")
+	assert.Contains(t, file.Filename, "index.md")
+	assert.Contains(t, file.Document, "document_1")
 	assert.Contains(t, file.Path, "documents")
 }
 

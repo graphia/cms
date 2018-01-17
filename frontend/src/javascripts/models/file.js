@@ -23,8 +23,7 @@ export default class CMSFile {
 			this.initializing    = file.initializing;
 
 			this.path            = file.path;
-			this.filename        = "";
-			this.slug            = "";
+			this.document        = "";
 			this.html            = "";
 			this.markdown        = "";
 			this.title           = "";
@@ -36,6 +35,7 @@ export default class CMSFile {
 			this.attachments     = [];
 			this.translations    = [];
 			this.initialMarkdown = "";
+			this.language        = store.state.defaultLanguage;
 			this.date            = this.todayString();
 			this.draft           = true;
 
@@ -44,8 +44,9 @@ export default class CMSFile {
 			this.initializing          = false;
 
 			// TODO this is a bit long and ugly; can it be neatened up?
+			this._filename             = file.filename;
 			this.path                  = file.path;
-			this.filename              = file.filename;
+			this.document              = file.document;
 			this.html                  = file.html;
 			this.markdown              = file.markdown;
 			this.translations          = file.translations;
@@ -55,7 +56,6 @@ export default class CMSFile {
 			this.author                = file.frontmatter.author;
 			this.synopsis              = file.frontmatter.synopsis;
 			this.tags                  = file.frontmatter.tags;
-			this.slug                  = file.frontmatter.slug;
 			this.version               = file.frontmatter.version;
 			this.draft                 = file.frontmatter.draft;
 			this.date                  = file.frontmatter.date || this.todayString();
@@ -74,6 +74,9 @@ export default class CMSFile {
 			// History andattachments are arrays which may be populated later
 			this.history = [];     // historic commits
 			this.attachments = []; // related files from the directory named after file
+
+			// set the language by extracting the code from the filename
+			this.language = this._filenameLanguage();
 
 			// finally save the initial markdown value so we can detect changes
 			// and display a diff if necessary
@@ -104,36 +107,76 @@ export default class CMSFile {
 		return this._tags;
 	};
 
-	get translation() {
+	isTranslation() {
 
-		return this.translationRegex.test(this.filename)
+		if (this.language) {
+			return (this.language != store.state.defaultLanguage);
+		} else {
+			return this.translationRegex.test(this._filename);
+		};
+
+		console.warn("Couldn't determine translation status for", this);
+
 	};
 
-	get language() {
-		let code = this.translationRegex.exec(this.filename)
+	_filenameLanguage() {
+		let code = this.translationRegex.exec(this.filename);
 
 		if (!code) {
 			return store.state.defaultLanguage;
 		};
 
-		return store.state.languages.find(x => x.code === code[1]);
+		return code[1];
+	};
+
+	set filename(value) {
+		console.warn("filename cannot be set manually");
+		return false;
+	};
+
+	get filename() {
+
+		// if there is a filename value already set, use it
+		if (this._filename) {
+			return this._filename;
+		};
+
+		// if there's not, construct one. the format will be:
+		// index.md      (for the default language)
+		// index.code.md (for all other languages)
+		let addLanguageCode = (store.state.translationEnabled && this.isTranslation());
+
+		return [
+			"index",
+			(addLanguageCode && this.language),
+			"md"
+		].filter(Boolean).join(".");
+
+	};
+
+	get languageInfo() {
+		return store.state.languages.find(x => x.code === this.language);
 	};
 
 	get attachmentsDir() {
-		if (!this.path || !this.slug) {
+		if (!this.path || !this.document) {
 			return null;
 		};
-		return [this.path, this.slug].join("/");
+		return [this.path, this.document].join("/");
 	};
 
-	// make the file usable by a commit
+	// Make the file usable by a commit. When deleting, we will remove
+	// the entire attachments directory rather than individual attachments,
+	// so includeAttachments can be set to false. In other situations, we
+	// usually want to include them hence the default
 	prepareJSON(includeAttachments=true) {
-		let a = [];
 
+		let a = [];
 		let f = [
 			{
 				path: this.path,
 				filename: this.filename,
+				document: this.document,
 				body: this.markdown,
 
 				// and the frontmatter
@@ -143,7 +186,6 @@ export default class CMSFile {
 					tags: this.tags,
 					synopsis: this.synopsis,
 					version: this.version,
-					slug: this.slug,
 					draft: this.draft,
 					date: this.date
 				}
@@ -155,17 +197,15 @@ export default class CMSFile {
 				.filter(attachment => attachment.isNew())
 				.map((attachment) => {
 					return {
-						path: [this.path, this.slug, "images"].join("/"),
+						path: [this.path, this.document, "images"].join("/"),
 						filename: attachment.name,
 						base_64_encoded: attachment.options.base64Encoded,
 						body: attachment.contents()
 					};
 				});
-
 		};
 
 		return [...f, ...a];
-
 	};
 
 	todayString() {
@@ -182,7 +222,7 @@ export default class CMSFile {
 	 */
 	static async all(directory) {
 
-		let path = `${config.api}/directories/${directory}/files`;
+		let path = `${config.api}/directories/${directory}/documents`;
 
 		try {
 
@@ -235,8 +275,9 @@ export default class CMSFile {
 	 *    filename [string]: the file's filename
 	 *    edit [boolean]: when true returns markdown from the API, when false HTML
 	 */
-	static async find(directory, filename, edit = false) {
-		let path = `${config.api}/directories/${directory}/files/${filename}`
+	static async find(directory, document, filename, edit = false) {
+
+		let path = `${config.api}/directories/${directory}/documents/${document}/files/${filename}`
 
 		// if we need the uncompiled markdown (for loading the editor), amend '/edit' to the path
 		if (edit) {
@@ -246,13 +287,16 @@ export default class CMSFile {
 		let response = await fetch(path, {mode: "cors", headers: store.state.auth.authHeader()})
 
 		if (!checkResponse(response.status)) {
-			return
+			console.error("Document cannot be retrieved", response);
+			return;
 		}
 
 		let file = await response.json()
 		let doc = new CMSFile(file);
 		store.state.activeDocument = doc;
-		store.state.latestRevision = file.repository_info.latest_revision;
+
+		console.debug("setting latest revision to", file.repository_info.latest_revision)
+		await store.commit("setLatestRevision", file.repository_info.latest_revision);
 
 		doc.fetchAttachments();
 		return doc;
@@ -260,7 +304,7 @@ export default class CMSFile {
 	};
 
 	populated() {
-		return (this.path || this.filename);
+		return (this.path || this.document);
 	};
 
 	// instance methods
@@ -274,7 +318,7 @@ export default class CMSFile {
 			console.warn("Update called but content hasn't changed");
 		}
 
-		let path = `${config.api}/directories/${this.path}/files`
+		let path = `${config.api}/directories/${this.path}/documents`
 
 		try {
 			let response = await fetch(path, {
@@ -292,100 +336,83 @@ export default class CMSFile {
 	};
 
 	async update(commit) {
-		// create a commit object containing relevant info
-		// and despatch it
 
 		if (!this.changed) {
 			console.warn("Update called but content hasn't changed");
 		}
 
-		var path = `${config.api}/directories/${this.path}/files/${this.filename}`
+		var path = `${config.api}/directories/${this.path}/documents/${this.document}/files/${this.filename}`;
 
-		try {
-			let response = await fetch(path, {
-				mode: "cors",
-				method: "PATCH",
-				headers: store.state.auth.authHeader(),
-				body: JSON.stringify(commit.prepareJSON())
-			});
+		let response = await fetch(path, {
+			mode: "cors",
+			method: "PATCH",
+			headers: store.state.auth.authHeader(),
+			body: JSON.stringify(commit.prepareJSON())
+		});
 
-			return response;
-		}
-		catch(err) {
-			console.error(`There was a problem updating document ${this.filename} in ${this.directory}, ${err}`);
-		}
+		return response;
+
 	};
 
-	async destroy(commit, deleteAttachments=false) {
+	async destroy(commit) {
 
-		var path = `${config.api}/directories/${this.path}/files/${this.filename}`;
+		var path = `${config.api}/directories/${this.path}/documents/${this.document}/files/${this.filename}`;
 
-		try {
-			let response = await fetch(path, {
-				mode: "cors",
-				method: "DELETE",
-				headers: store.state.auth.authHeader(),
-				body: JSON.stringify(commit.prepareJSON(deleteAttachments))
-			});
+		let response = await fetch(path, {
+			method: "DELETE",
+			headers: store.state.auth.authHeader(),
+			body: JSON.stringify(commit.prepareJSON(false))
+		});
 
-			return response;
-		}
-		catch(err) {
-			console.error(`There was a problem deleting document ${this.filename} from ${this.path}, ${err}`);
-		}
+		return response;
 
 	};
 
 	async log() {
-		let path = `${config.api}/directories/${this.path}/files/${this.filename}/history`
 
-		try {
-			let response = await fetch(path, {
-				mode: "cors",
-				method: "GET",
-				headers: store.state.auth.authHeader()
-			});
+		let path = `${config.api}/directories/${this.path}/documents/${this.document}/files/${this.filename}/history`;
 
-			return response;
-		}
-		catch(err) {
-			console.error(`There was a problem retrieving log for ${filename} in ${directory}, ${err}`);
-		}
+		let response = await fetch(path,
+			{headers: store.state.auth.authHeader()}
+		);
+
+		return response;
 
 	};
 
 	async fetchAttachments() {
 
-		if (!this.path || !this.slug) {
-			console.warn("Missing params, cannot retrieve attachments", this.path, this.slug);
+		// abort unless path and slug are present
+		if (!this.path || !this.document) {
+			console.warn("Missing params, cannot retrieve attachments", this.path, this.document);
 			return;
-		}
-
-		let path = `${config.api}/directories/${this.path}/files/${this.slug}/attachments`
-
-		try {
-			let response = await fetch(path, {
-				mode: "cors",
-				method: "GET",
-				headers: store.state.auth.authHeader()
-			});
-
-			if (response.status == 404) {
-				throw("no attachments found")
-			};
-
-			let data = await response.json();
-
-			this.attachments = data.map((att) => {
-				return CMSFileAttachment.fromData(att);
-			});
-
-			return;
-
-		}
-		catch(err) {
-			console.warn(err);
 		};
+
+		let path = `${config.api}/directories/${this.path}/documents/${this.document}/attachments`;
+
+		let response = await fetch(path, {
+			mode: "cors",
+			method: "GET",
+			headers: store.state.auth.authHeader()
+		});
+
+		if (response.status == 404) {
+			console.error(`no attachments directory found for ${this.document}`);
+			return;
+		};
+
+		let data = await response.json();
+
+		if (data.length === 0) {
+			console.warn(`no attachments found for ${this.document}`);
+		};
+
+		this.attachments = data.map((att) => {
+			return CMSFileAttachment.fromData(att);
+		});
+
+		return;
+
 	};
 
 	addAttachment(attachment) {
