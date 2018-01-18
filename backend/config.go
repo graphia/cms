@@ -11,7 +11,12 @@ import (
 
 // Config holds configuration options stored in a yaml file
 type Config struct {
-	Port               string
+	Host               string
+	HTTPSEnabled       bool   `yaml:"https_enabled"`
+	HTTPSListenPort    string `yaml:"https_listen_port"`
+	HTTPSCert          string `yaml:"https_cert"`
+	HTTPSKey           string `yaml:"https_key"`
+	HTTPListenPort     string `yaml:"http_listen_port"`
 	Repository         string
 	Logfile            string
 	CORSEnabled        bool
@@ -36,6 +41,18 @@ type Config struct {
 		Name string `yaml:"name"`
 		Flag string `yaml:"flag"`
 	} `yaml:"all_languages"`
+}
+
+// HTTPListenPortWithColon returns the HTTPListenPort with a
+// colon prefix, useful for listening on localhost
+func (c Config) HTTPListenPortWithColon() string {
+	return fmt.Sprintf(":%s", c.HTTPListenPort)
+}
+
+// HTTPSListenPortWithColon returns the HTTPSListenPort with
+// a colon prefix, useful for listening on localhost
+func (c Config) HTTPSListenPortWithColon() string {
+	return fmt.Sprintf(":%s", c.HTTPSListenPort)
 }
 
 func loadConfig(path *string) (Config, error) {

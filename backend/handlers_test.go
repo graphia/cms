@@ -23,6 +23,39 @@ var (
 	server *httptest.Server
 )
 
+func Test_redirectToHTTPS(t *testing.T) {
+	config.Host = "localhost"
+	config.HTTPListenPort = "8090"
+	config.HTTPSListenPort = "444"
+	path := "cms/characters/apu"
+
+	server = httptest.NewServer(http.HandlerFunc(redirectToHTTPS))
+
+	// don't follow redirects
+	client := &http.Client{
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
+
+	target := fmt.Sprintf("%s/%s", server.URL, path)
+	req, _ := http.NewRequest("GET", target, nil)
+	resp, _ := client.Do(req)
+	loc, _ := resp.Location()
+
+	assert.Equal(t, http.StatusMovedPermanently, resp.StatusCode)
+	assert.Contains(
+		t,
+		loc.String(),
+		fmt.Sprintf(
+			"https://%s:%s/%s",
+			config.Host,
+			config.HTTPSListenPort,
+			path,
+		),
+	)
+}
+
 // API Tests
 
 func TestApiListDirectoriesHandler(t *testing.T) {

@@ -1,4 +1,5 @@
-port: 9095
+http_listen_port: 9095
+https_enabled: false
 repository: ../../tests/tmp/repositories/cucumber
 logfile: ../../logs/cucumber-server.log
 corsenabled: false
@@ -7,8 +8,8 @@ database: ../../db/cucumber.db
 static: ../../dist
 hugo_config_file: ../../config/hugo.development.yml
 hugo_bin: /usr/local/bin/hugo
-private_key_path: ../../tests/backend/keys/app.test.rsa
-public_key_path: ../../tests/backend/keys/app.test.rsa.pub
+private_key_path: ../../tests/backend/keys/passwords/app.test.rsa
+public_key_path: ../../tests/backend/keys/passwords/app.test.rsa.pub
 file_categories:
   documents:
     - .md

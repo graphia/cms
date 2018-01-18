@@ -20,6 +20,6 @@ func TestCustomConfig(t *testing.T) {
 		panic(err)
 	}
 
-	assert.Equal(t, c.Port, "8081")
+	assert.Equal(t, c.HTTPListenPort, "8081")
 	assert.Equal(t, c.Repository, "../tests/backend/repositories/small")
 }

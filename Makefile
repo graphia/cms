@@ -3,8 +3,10 @@ ALL := $(wildcard backend/*.go)
 DEVELOPMENT_CONFIG = "config/development.yml"
 TEST_CONFIG = "../config/test.yml"
 HUGO_CONFIG = "./config/hugo.development.yml"
-PRIVATE_KEY_PATH = "./keys/app.rsa"
-PUBLIC_KEY_PATH = "./keys/app.rsa.pub"
+PRIVATE_KEY_PATH = "./keys/passwords/app.rsa"
+PUBLIC_KEY_PATH = "./keys/passwords/app.rsa.pub"
+SSL_CERT_PATH = "./keys/ssl/server.crt"
+SSL_KEY_PATH = "./keys/ssl/server.key"
 
 build:
 	rm -rf dist
@@ -51,6 +53,17 @@ run-frontend:
 cleanup:
 	rm -rf tests/tmp/**/*
 
-generate-keys:
+generate-password-keys:
 	openssl genrsa -out ${PRIVATE_KEY_PATH} 1024
 	openssl rsa -in ${PRIVATE_KEY_PATH} -pubout > ${PUBLIC_KEY_PATH}
+
+generate-ssl-keys:
+	openssl req \
+		-new \
+		-newkey rsa:4096 \
+		-days 365 \
+		-nodes \
+		-x509 \
+		-subj "/C=GB/ST=England/L=Manchester/O=Graphia Ltd./OU=dev/CN=localhost" \
+		-keyout ${SSL_KEY_PATH} \
+		-out ${SSL_CERT_PATH}

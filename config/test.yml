@@ -1,4 +1,6 @@
-port: 8085
+host: localhost
+http_listen_port: 8085
+https_enabled: false
 repository: repo
 logfile: ../logs/test.log
 corsenabled: false
