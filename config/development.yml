@@ -6,8 +6,8 @@ http_listen_port: 8080
 # HTTPS settings
 https_enabled: true
 https_listen_port: 4443
-https_key: keys/ssl/server.cert
-https_cert: keys/ssl/server.key
+https_key: keys/ssl/server.key
+https_cert: keys/ssl/server.cert
 
 repository: hugo/content
 logfile: logs/development.log
@@ -17,8 +17,8 @@ database: db/development.db
 static: ./frontend/public
 hugo_config_file: config/hugo.development.yml
 hugo_bin: /usr/local/bin/hugo
-private_key_path: keys/passwords/passwords/app.rsa
-public_key_path: keys/passwords/passwords/app.rsa.pub
+private_key_path: keys/passwords/app.rsa
+public_key_path: keys/passwords/app.rsa.pub
 ssh_enabled: true
 ssh_listen_port: 2222
 git_bin_path: /usr/local/bin/

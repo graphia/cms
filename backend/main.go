@@ -110,8 +110,8 @@ func main() {
 
 			err = http.ListenAndServeTLS(
 				config.HTTPSListenPortWithColon(),
-				config.HTTPSKey,
 				config.HTTPSCert,
+				config.HTTPSKey,
 				n,
 			)
 
