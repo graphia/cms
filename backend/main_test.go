@@ -21,5 +21,5 @@ func TestCustomConfig(t *testing.T) {
 	}
 
 	assert.Equal(t, c.HTTPListenPort, "8081")
-	assert.Equal(t, c.Repository, "../tests/backend/repositories/small")
+	assert.Equal(t, c.Repository, "../tests/data/repositories/small")
 }

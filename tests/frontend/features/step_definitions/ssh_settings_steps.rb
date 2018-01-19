@@ -30,7 +30,7 @@ Then %r{^I should see an alert informing me why I might want to add one$} do
 end
 
 Given %r{^I paste my public SSH key into the 'ssh\-key' text area$} do
-  key = File.read("../backend/certificates/valid.pub").strip
+  key = File.read("../data/certificates/valid.pub").strip
   # fill_in "ssh-key", with: key
 
   # it turns out that using fill_in and triggering a .change() doesn't update Vue,

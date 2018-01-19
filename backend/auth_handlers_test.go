@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	testPrivKeyPath = "../tests/backend/keys/passwords/app.test.rsa"
-	testPubKeyPath  = "../tests/backend/keys/passwords/app.test.rsa.pub"
+	testPrivKeyPath = "../tests/data/keys/passwords/app.test.rsa"
+	testPubKeyPath  = "../tests/data/keys/passwords/app.test.rsa.pub"
 )
 
 type TokenAttributes struct {
