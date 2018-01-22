@@ -99,7 +99,7 @@
 				let path = `${config.api}/recent_commits`;
 
 				try {
-					let response = await fetch(path, {mode: "cors", headers: this.$store.state.auth.authHeader()});
+					let response = await fetch(path, {headers: this.$store.state.auth.authHeader()});
 
 					if (!checkResponse(response.status)) {
 						throw("Could not retrieve recent commit sumamry");

@@ -226,7 +226,7 @@ export default class CMSFile {
 
 		try {
 
-			let response = await fetch(path, {mode: "cors", headers: store.state.auth.authHeader()});
+			let response = await fetch(path, {headers: store.state.auth.authHeader()});
 
 			// if the api responds with a 404 we'll display a special
 			// error page so handle that separately
@@ -284,7 +284,7 @@ export default class CMSFile {
 			path = [path, "edit"].join("/");
 		};
 
-		let response = await fetch(path, {mode: "cors", headers: store.state.auth.authHeader()})
+		let response = await fetch(path, {headers: store.state.auth.authHeader()})
 
 		if (!checkResponse(response.status)) {
 			console.error("Document cannot be retrieved", response);
@@ -322,7 +322,6 @@ export default class CMSFile {
 
 		try {
 			let response = await fetch(path, {
-				mode: "cors",
 				method: "POST",
 				headers: store.state.auth.authHeader(),
 				body: JSON.stringify(commit.prepareJSON())
@@ -344,7 +343,6 @@ export default class CMSFile {
 		var path = `${config.api}/directories/${this.path}/documents/${this.document}/files/${this.filename}`;
 
 		let response = await fetch(path, {
-			mode: "cors",
 			method: "PATCH",
 			headers: store.state.auth.authHeader(),
 			body: JSON.stringify(commit.prepareJSON())
@@ -391,7 +389,6 @@ export default class CMSFile {
 		let path = `${config.api}/directories/${this.path}/documents/${this.document}/attachments`;
 
 		let response = await fetch(path, {
-			mode: "cors",
 			method: "GET",
 			headers: store.state.auth.authHeader()
 		});

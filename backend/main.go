@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/asdine/storm"
 	"github.com/dgrijalva/jwt-go"
@@ -190,20 +189,7 @@ func unprotectedRouter() (r *vestigo.Router) {
 	// serve everything in build by default
 	r.Handle("/*", http.FileServer(http.Dir(config.Static)))
 
-	if config.CORSEnabled {
-
-		Warning.Println("CORS:", config.CORSEnabled)
-		Warning.Println("CORS origin:", config.CORSOrigin)
-
-		r.SetGlobalCors(&vestigo.CorsAccessControl{
-			AllowOrigin:      []string{"*", config.CORSOrigin},
-			AllowHeaders:     []string{"Authorization"},
-			AllowCredentials: true,
-			MaxAge:           3600 * time.Second,
-		})
-	}
-
-	return r
+	return
 }
 
 // These routes are proteced 👮

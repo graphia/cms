@@ -13,7 +13,6 @@ export default class CMSServer {
 
 		try {
 			let response = await fetch(path, {
-				mode: "cors",
 				method: "GET",
 				headers: store.state.auth.authHeader()
 			});
@@ -39,7 +38,6 @@ export default class CMSServer {
 		let path = `${config.api}/translation_info`;
 
 		let response = await fetch(path, {
-			mode: "cors",
 			method: "GET",
 			headers: store.state.auth.authHeader()
 		});

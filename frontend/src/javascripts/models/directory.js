@@ -33,7 +33,7 @@ export default class CMSDirectory {
 		let path = `${config.api}/directories`
 
 		try {
-			let response = await fetch(path, {method: "GET", mode: "cors", headers: store.state.auth.authHeader()});
+			let response = await fetch(path, {method: "GET", headers: store.state.auth.authHeader()});
 
 			let json = await response.json();
 
@@ -79,7 +79,6 @@ export default class CMSDirectory {
 		try {
 
 			let response = await fetch(path, {
-				mode: "cors",
 				method: "POST",
 				headers: store.state.auth.authHeader(),
 				body: JSON.stringify(commit.prepareJSON())

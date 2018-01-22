@@ -19,8 +19,6 @@ type Config struct {
 	HTTPListenPort     string `yaml:"http_listen_port"`
 	Repository         string
 	Logfile            string
-	CORSEnabled        bool
-	CORSOrigin         string
 	Database           string // file path for BoltDB file
 	Static             string
 	HugoConfigFile     string              `yaml:"hugo_config_file"`

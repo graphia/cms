@@ -74,8 +74,8 @@ export default class CMSAuth {
 			!this.tokenExpired() &&                          // that's not expired
 			((Date.now - this.tokenExpiry()) < (60 * 20))) { // but expires in the next 20 mins
 				// renew the token
-				let response = await fetch(`${config.api}/renew`,
-				{mode: "cors", method: "POST", headers: this.authHeader()}
+				let path = `${config.api}/renew`;
+				let response = await fetch(path, {method: "POST", headers: this.authHeader()}
 			)};
 	}
 
@@ -83,7 +83,6 @@ export default class CMSAuth {
 
 		let response = await fetch(`${config.auth}/login`, {
 			method: "POST",
-			mode: "cors",
 			body: JSON.stringify({username, password})
 		});
 
@@ -148,11 +147,7 @@ export default class CMSAuth {
 
 		try {
 
-			let response = await fetch(path, {
-				method: "POST",
-				mode: "cors",
-				body: JSON.stringify(user)
-			});
+			let response = await fetch(path, {method: "POST",body: JSON.stringify(user)});
 
 			if (!checkResponse(response.status)) {
 				throw "request failed";

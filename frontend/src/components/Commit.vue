@@ -98,7 +98,7 @@
 
 				let path = `${config.api}/commits/${this.hash}`;
 
-				let response = await fetch(path, {mode: "cors", headers: store.state.auth.authHeader()});
+				let response = await fetch(path, {headers: store.state.auth.authHeader()});
 
 				if (!checkResponse(response.status)) {
 					throw("Could not retrieve changeset");

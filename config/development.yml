@@ -11,8 +11,6 @@ https_cert: keys/ssl/server.cert
 
 repository: hugo/content
 logfile: logs/development.log
-corsenabled: true
-corsorigin: localhost:8080
 database: db/development.db
 static: ./frontend/public
 hugo_config_file: config/hugo.development.yml

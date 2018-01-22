@@ -17,7 +17,6 @@ export default class CMSPublisher {
 
 		let response = await fetch(`${config.api}/publish`, {
 			method: "POST",
-			mode: "cors",
 			headers: store.state.auth.authHeader()
 		});
 

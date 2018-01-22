@@ -167,7 +167,6 @@
 
 				try {
 					let response = await fetch(path, {
-						mode: "cors",
 						method: "GET",
 						headers: this.$store.state.auth.authHeader()
 					});
