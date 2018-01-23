@@ -17,7 +17,7 @@ import (
 	"gopkg.in/libgit2/git2go.v25"
 )
 
-const certsPath = "../tests/backend/certificates"
+const certsPath = "../tests/data/certificates"
 
 // CopyFile copies the contents of the file named src to the file named
 // by dst. The file will be created if it does not already exist. If the
@@ -122,31 +122,31 @@ func CopyDir(src string, dst string) (err error) {
 }
 
 func setupSmallTestRepo(dest string) (oid *git.Oid, err error) {
-	src := "../tests/backend/repositories/small"
+	src := "../tests/data/repositories/small"
 	oid, err = setupTestRepo(src, dest)
 	return
 }
 
 func setupSubdirsTestRepo(dest string) (oid *git.Oid, err error) {
-	src := "../tests/backend/repositories/subdirs"
+	src := "../tests/data/repositories/subdirs"
 	oid, err = setupTestRepo(src, dest)
 	return
 }
 
 func setupMultipleFiletypesTestRepo(dest string) (oid *git.Oid, err error) {
-	src := "../tests/backend/repositories/multiple_filetypes"
+	src := "../tests/data/repositories/multiple_filetypes"
 	oid, err = setupTestRepo(src, dest)
 	return
 }
 
 func setupMissingFrontmatterTestRepo(dest string) (oid *git.Oid, err error) {
-	src := "../tests/backend/repositories/missing_frontmatter"
+	src := "../tests/data/repositories/missing_frontmatter"
 	oid, err = setupTestRepo(src, dest)
 	return
 }
 
 func setupTranslationsTestRepo(dest string) (oid *git.Oid, err error) {
-	src := "../tests/backend/repositories/translations"
+	src := "../tests/data/repositories/translations"
 	oid, err = setupTestRepo(src, dest)
 	return
 }

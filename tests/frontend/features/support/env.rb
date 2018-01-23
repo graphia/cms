@@ -12,10 +12,10 @@ require 'selenium-webdriver'
 require 'open3'
 
 REPO_PATH = '../tmp/repositories/cucumber'
-REPO_TEMPLATE_PATH = '../backend/repositories/multiple_filetypes'
+REPO_TEMPLATE_PATH = '../data/repositories/multiple_filetypes'
 PID_PATH = '../tmp/cucumber-browser.pid'
 DB_PATH = '../../db/cucumber.db'
-SAMPLES_PATH = '../backend/samples'
+SAMPLES_PATH = '../data/samples'
 WEB_SERVER_START_ATTEMPTS = 10 # number of 0.1 second delays to wait for server
 DOWNLOAD_DIR = "/tmp/downloads" # needs to be in /tmp because permissions 🚨
 

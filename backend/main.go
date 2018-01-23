@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/asdine/storm"
 	"github.com/dgrijalva/jwt-go"
@@ -77,13 +76,62 @@ func main() {
 	Debug.Println("Router and Middleware set up")
 
 	if config.SSHEnabled {
-		Debug.Println("SSH is enabled")
+		Debug.Println("SSH is enabled, listening on port", config.SSHListenPort)
 		setupSSH()
 	} else {
 		Debug.Println("SSH not enabled :(")
 	}
 
-	n.Run(fmt.Sprintf(":%s", config.Port))
+	var err error
+
+	if config.HTTPSEnabled {
+
+		errors := make(chan error, 0)
+
+		go func() {
+
+			Info.Println("Redirecting HTTP to HTTPS", config.HTTPListenPort)
+
+			err = http.ListenAndServe(
+				config.HTTPListenPortWithColon(),
+				http.HandlerFunc(redirectToHTTPS),
+			)
+
+			if err != nil {
+				errors <- err
+			}
+
+		}()
+
+		go func() {
+
+			Info.Println("Listening for SSL connections on", config.HTTPSListenPort)
+
+			err = http.ListenAndServeTLS(
+				config.HTTPSListenPortWithColon(),
+				config.HTTPSCert,
+				config.HTTPSKey,
+				n,
+			)
+
+			if err != nil {
+				errors <- err
+			}
+
+		}()
+
+		err = <-errors
+
+		if err != nil {
+			panic(err)
+		}
+
+	} else {
+
+		// Only listening on HTTP, aka 'dev mode'
+		Info.Println("HTTPS is not enabled, listening on", config.HTTPListenPort)
+		http.ListenAndServe(config.HTTPListenPortWithColon(), n)
+	}
 }
 
 func setupKeys() {
@@ -141,20 +189,7 @@ func unprotectedRouter() (r *vestigo.Router) {
 	// serve everything in build by default
 	r.Handle("/*", http.FileServer(http.Dir(config.Static)))
 
-	if config.CORSEnabled {
-
-		Warning.Println("CORS:", config.CORSEnabled)
-		Warning.Println("CORS origin:", config.CORSOrigin)
-
-		r.SetGlobalCors(&vestigo.CorsAccessControl{
-			AllowOrigin:      []string{"*", config.CORSOrigin},
-			AllowHeaders:     []string{"Authorization"},
-			AllowCredentials: true,
-			MaxAge:           3600 * time.Second,
-		})
-	}
-
-	return r
+	return
 }
 
 // These routes are proteced 👮

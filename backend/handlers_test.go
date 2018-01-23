@@ -23,6 +23,39 @@ var (
 	server *httptest.Server
 )
 
+func Test_redirectToHTTPS(t *testing.T) {
+	config.Host = "localhost"
+	config.HTTPListenPort = "8090"
+	config.HTTPSListenPort = "444"
+	path := "cms/characters/apu"
+
+	server = httptest.NewServer(http.HandlerFunc(redirectToHTTPS))
+
+	// don't follow redirects
+	client := &http.Client{
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
+
+	target := fmt.Sprintf("%s/%s", server.URL, path)
+	req, _ := http.NewRequest("GET", target, nil)
+	resp, _ := client.Do(req)
+	loc, _ := resp.Location()
+
+	assert.Equal(t, http.StatusMovedPermanently, resp.StatusCode)
+	assert.Contains(
+		t,
+		loc.String(),
+		fmt.Sprintf(
+			"https://%s:%s/%s",
+			config.Host,
+			config.HTTPSListenPort,
+			path,
+		),
+	)
+}
+
 // API Tests
 
 func TestApiListDirectoriesHandler(t *testing.T) {
@@ -88,7 +121,7 @@ func TestApiListDirectoriesHandlerNoGit(t *testing.T) {
 
 	// copy the repo template to the expected location
 	// but don't initialise the git repo
-	template := "../tests/backend/repositories/small"
+	template := "../tests/data/repositories/small"
 
 	_ = CopyDir(template, repoPath)
 
@@ -1619,7 +1652,7 @@ func Test_setupAllowInitializeRepository_Success(t *testing.T) {
 
 	fullDirPath := "../tests/tmp/repositories/full"
 	os.RemoveAll(fullDirPath)
-	CopyDir("../tests/backend/repositories/small", fullDirPath)
+	CopyDir("../tests/data/repositories/small", fullDirPath)
 
 	config.Repository = fullDirPath
 
@@ -1664,7 +1697,7 @@ func Test_setupInitializeRepository_Success(t *testing.T) {
 
 	newDir := "../tests/tmp/repositories/full"
 	os.RemoveAll(newDir)
-	CopyDir("../tests/backend/repositories/small", newDir)
+	CopyDir("../tests/data/repositories/small", newDir)
 
 	config.Repository = newDir
 
@@ -1742,7 +1775,7 @@ func Test_apiGetRepositoryInformationHandler(t *testing.T) {
 
 func Test_apiGetLanguageInformationHandlerTranslationDisabled(t *testing.T) {
 
-	var translationDisabled = "../tests/backend/config/translation-disabled.yml"
+	var translationDisabled = "../tests/data/config/translation-disabled.yml"
 
 	server = createTestServerWithConfig(translationDisabled, false)
 	target := fmt.Sprintf("%s/%s", server.URL, "api/translation_info")
@@ -1765,7 +1798,7 @@ func Test_apiGetLanguageInformationHandlerTranslationDisabled(t *testing.T) {
 
 func Test_apiGetLanguageInformationHandlerTranslationEnabled(t *testing.T) {
 
-	var translationEnabled = "../tests/backend/config/translation-enabled.yml"
+	var translationEnabled = "../tests/data/config/translation-enabled.yml"
 
 	server = createTestServerWithConfig(translationEnabled, false)
 	target := fmt.Sprintf("%s/%s", server.URL, "api/translation_info")
@@ -1887,7 +1920,7 @@ func Test_apiTranslateFileHandler(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var translationEnabled = "../tests/backend/config/translation-enabled.yml"
+			var translationEnabled = "../tests/data/config/translation-enabled.yml"
 
 			repoPath := "../tests/tmp/repositories/translation_handler"
 			lr, _ := setupSmallTestRepo(repoPath)

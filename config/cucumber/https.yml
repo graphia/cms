@@ -1,0 +1,14 @@
+http_listen_port: 9095
+
+host: "localhost"
+https_enabled: true
+https_listen_port: 9096
+https_cert: ../../tests/data/keys/ssl/server.test.crt
+https_key: ../../tests/data/keys/ssl/server.test.key
+
+repository: ../../tests/tmp/repositories/cucumber
+logfile: ../../logs/cucumber-server.log
+database: ../../db/cucumber.db
+static: ../../dist
+private_key_path: ../../tests/data/keys/passwords/app.test.rsa
+public_key_path: ../../tests/data/keys/passwords/app.test.rsa.pub

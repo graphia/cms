@@ -16,7 +16,6 @@ export default class CMSTranslation {
 
 		try {
 			let response = await fetch(path, {
-				mode: "cors",
 				method: "POST",
 				headers: store.state.auth.authHeader(),
 				body: this.prepareJSON()

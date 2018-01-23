@@ -29,6 +29,24 @@ type FailureResponse struct {
 	Meta    string `json:"meta,omitempty"`
 }
 
+// HTTPS Redirect 👉
+func redirectToHTTPS(w http.ResponseWriter, r *http.Request) {
+
+	if config.Host == "" {
+		Error.Println("Host not configured in config, cannot redirect ot HTTPS")
+	}
+
+	target := fmt.Sprintf(
+		"https://%s:%s%s",
+		config.Host,
+		config.HTTPSListenPort,
+		r.RequestURI,
+	)
+
+	Debug.Println("redirecting to HTTPS", target)
+	http.Redirect(w, r, target, http.StatusMovedPermanently)
+}
+
 // Authentication functionality 🔑
 
 // authLoginHandler checks the supplied UserCredentials and, if a user

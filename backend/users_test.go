@@ -233,7 +233,7 @@ func TestUser_addPublicKey(t *testing.T) {
 	db.Drop("PublicKey")
 
 	_ = createUser(ds)
-	certsPath := "../tests/backend/certificates"
+	certsPath := "../tests/data/certificates"
 
 	validPub, _ := ioutil.ReadFile(filepath.Join(certsPath, "valid.pub"))
 	validPubParsed, _, _, _, _ := ssh.ParseAuthorizedKey(validPub)
@@ -319,7 +319,7 @@ func Test_getUserByFingerprint(t *testing.T) {
 	db.Drop("User")
 	db.Drop("PublicKey")
 
-	certsPath := "../tests/backend/certificates"
+	certsPath := "../tests/data/certificates"
 
 	validPub, _ := ioutil.ReadFile(filepath.Join(certsPath, "valid.pub"))
 	parsedValidPub, _, _, _, _ := gossh.ParseAuthorizedKey(validPub)

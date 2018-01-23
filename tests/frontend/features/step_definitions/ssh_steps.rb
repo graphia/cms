@@ -60,8 +60,8 @@ When %r{^I try to clone the repository "(.*?)"$} do |name|
   expect(Dir.exists?(@clone_location)).to be false
 
   Dir.chdir("../tmp/ssh") do
-    cert_path = "../../backend/certificates/valid"
-    config_path = "../../backend/ssh/config"
+    cert_path = "../../data/certificates/valid"
+    config_path = "../../data/ssh/config"
     command = "git clone git@127.0.0.1:#{name}"
     full_command = %{GIT_SSH_COMMAND='ssh -F #{config_path} -i #{cert_path}' #{command} #{@clone_dir}}
 
@@ -119,11 +119,11 @@ end
 
 
 def valid_key
-  "../backend/certificates/valid".tap do |path|
+  "../data/certificates/valid".tap do |path|
     File.chmod(0600, path)
   end
 end
 
 def invalid_key
-  "../backend/certificates/missing"
+  "../data/certificates/missing"
 end

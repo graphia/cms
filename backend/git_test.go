@@ -24,7 +24,7 @@ func TestCorrectRepo(t *testing.T) {
 		panic(err)
 	}
 
-	assert.Equal(t, "../tests/backend/repositories/small", testConfig.Repository)
+	assert.Equal(t, "../tests/data/repositories/small", testConfig.Repository)
 }
 
 func TestInvalidRepo(t *testing.T) {
@@ -545,7 +545,7 @@ func Test_canInitializeGitRepository(t *testing.T) {
 	// setup full dir
 	fullDirPath := "../tests/tmp/repositories/full"
 	os.RemoveAll(fullDirPath)
-	CopyDir("../tests/backend/repositories/small", fullDirPath)
+	CopyDir("../tests/data/repositories/small", fullDirPath)
 
 	// setup file
 	filePath := "../tests/tmp/repositories/file"
@@ -623,7 +623,7 @@ func Test_initializeGitRepository(t *testing.T) {
 	// setup full dir
 	fullDirPath := "../tests/tmp/repositories/full"
 	os.RemoveAll(fullDirPath)
-	CopyDir("../tests/backend/repositories/small", fullDirPath)
+	CopyDir("../tests/data/repositories/small", fullDirPath)
 
 	// setup file
 	filePath := "../tests/tmp/repositories/file"

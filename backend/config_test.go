@@ -12,11 +12,11 @@ func Test_loadConfig(t *testing.T) {
 	}
 
 	var (
-		translationOK         = "../tests/backend/config/translation-ok.yml"
-		translationBadCode    = "../tests/backend/config/translation-bad-code.yml"
-		translationBadDefault = "../tests/backend/config/translation-bad-default.yml"
-		translationNoDefault  = "../tests/backend/config/translation-no-default.yml"
-		translationNoEnabled  = "../tests/backend/config/translation-no-enabled.yml"
+		translationOK         = "../tests/data/config/translation-ok.yml"
+		translationBadCode    = "../tests/data/config/translation-bad-code.yml"
+		translationBadDefault = "../tests/data/config/translation-bad-default.yml"
+		translationNoDefault  = "../tests/data/config/translation-no-default.yml"
+		translationNoEnabled  = "../tests/data/config/translation-no-enabled.yml"
 	)
 
 	tests := []struct {
