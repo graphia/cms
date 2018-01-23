@@ -39,11 +39,10 @@ export default class CMSTranslation {
 			source_document: this.document,
 			language_code: this.code,
 			repository_info: {
-				latest_revision: store.state.latestRevision
+				latest_revision: store.state.server.repositoryInfo.latestRevision
 			}
 		};
 		return JSON.stringify(obj);
 	};
-
 
 }

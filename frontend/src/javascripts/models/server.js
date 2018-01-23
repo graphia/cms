@@ -83,38 +83,40 @@ class CMSTranslationInfo {
 
 };
 
+class CMSRepositoryInfo {
+
+	constructor() {
+		this.latestRevision = null;
+	}
+
+	async refresh() {
+		let path = `${config.api}/repository_info`;
+
+		let response = await fetch(path, {
+			method: "GET",
+			headers: store.state.auth.authHeader()
+		});
+
+		if (!checkResponse(response.status)) {
+			console.error(response);
+		};
+
+		let ri = await response.json();
+
+		this.latestRevision = ri.latest_revision;
+
+		return response;
+
+	};
+
+}
+
 export default class CMSServer {
 
 	constructor() {
 		this.serverInfo = new CMSServerInfo;
 		this.translationInfo = new CMSTranslationInfo;
-	};
-
-	static async getLatestRevision() {
-		let path = `${config.api}/repository_info`;
-
-		try {
-			let response = await fetch(path, {
-				method: "GET",
-				headers: store.state.auth.authHeader()
-			});
-
-			if (!checkResponse(response.status)) {
-				console.error(response);
-				throw response;
-			};
-
-			let ri = await response.json();
-			store.commit("setLatestRevision", ri.latest_revision);
-			//this.repositoryInfo.latestRevision = ri.latest_revision;
-
-			return response;
-
-		}
-		catch(err) {
-			console.error("There was a problem retrieving repository information", err);
-		};
-
+		this.repositoryInfo = new CMSRepositoryInfo;
 	};
 
 }

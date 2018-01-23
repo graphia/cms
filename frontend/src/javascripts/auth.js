@@ -96,12 +96,12 @@ export default class CMSAuth {
 		// store the token and the time at which it was written
 		this.token = json.jwt.token;
 
-		["getLatestRevision", "getTopLevelDirectories"]
+		["getTopLevelDirectories"]
 			.map(func => {
 				store.dispatch(func);
 			});
 
-		["refreshTranslationInfo"]
+		["refreshTranslationInfo", "refreshRepositoryInfo"]
 			.map(func => {
 				store.commit(func);
 			});

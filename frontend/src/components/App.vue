@@ -81,12 +81,12 @@
 				console.info("token is present and has not expired, renewing");
 				this.$store.state.auth.renew();
 
-				["getLatestRevision", "getTopLevelDirectories"]
+				["getTopLevelDirectories"]
 					.map(func => {
 						this.$store.dispatch(func);
 					});
 
-				["refreshTranslationInfo"]
+				["refreshTranslationInfo", "refreshRepositoryInfo"]
 					.map(func => {
 						store.commit(func);
 					});
