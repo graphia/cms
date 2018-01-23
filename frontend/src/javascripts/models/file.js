@@ -37,7 +37,7 @@ export default class CMSFile {
 			this.attachments     = [];
 			this.translations    = [];
 			this.initialMarkdown = "";
-			this.language        = store.state.defaultLanguage;
+			this.language        = store.state.server.translationInfo.defaultLanguage;
 			this.date            = this.todayString();
 			this.draft           = true;
 
@@ -112,7 +112,7 @@ export default class CMSFile {
 	isTranslation() {
 
 		if (this.language) {
-			return (this.language != store.state.defaultLanguage);
+			return (this.language != store.state.server.translationInfo.defaultLanguage);
 		} else {
 			return this.translationRegex.test(this._filename);
 		};
@@ -125,7 +125,7 @@ export default class CMSFile {
 		let code = this.translationRegex.exec(this.filename);
 
 		if (!code) {
-			return store.state.defaultLanguage;
+			return store.state.server.translationInfo.defaultLanguage;
 		};
 
 		return code[1];
@@ -146,7 +146,7 @@ export default class CMSFile {
 		// if there's not, construct one. the format will be:
 		// index.md      (for the default language)
 		// index.code.md (for all other languages)
-		let addLanguageCode = (store.state.translationEnabled && this.isTranslation());
+		let addLanguageCode = (store.state.server.translationInfo.translationEnabled && this.isTranslation());
 
 		return [
 			"index",
@@ -157,7 +157,7 @@ export default class CMSFile {
 	};
 
 	get languageInfo() {
-		return store.state.languages.find(x => x.code === this.language);
+		return store.state.server.translationInfo.languages.find(x => x.code === this.language);
 	};
 
 	get attachmentsDir() {

@@ -81,9 +81,14 @@
 				console.info("token is present and has not expired, renewing");
 				this.$store.state.auth.renew();
 
-				["getLatestRevision", "getTranslationInfo", "getTopLevelDirectories"]
+				["getLatestRevision", "getTopLevelDirectories"]
 					.map(func => {
 						this.$store.dispatch(func);
+					});
+
+				["refreshTranslationInfo"]
+					.map(func => {
+						store.commit(func);
 					});
 
 				// load user data if it's not present from a fresh login

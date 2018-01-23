@@ -5,8 +5,6 @@
 
 		<h1>Dashboard</h1>
 
-		<DirectorySummary class="directories"/>
-
 		<div class="row mt-4">
 
 			<div class="col col-md-4">
@@ -53,6 +51,8 @@
 				</div>
 			</div>
 		</div>
+
+		<DirectorySummary class="directories"/>
 
 	</div>
 </template>

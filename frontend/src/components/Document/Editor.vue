@@ -97,7 +97,7 @@
 		},
 		computed: {
 			translationEnabled() {
-				return this.$store.state.translationEnabled;
+				return this.$store.state.server.translationInfo.translationEnabled;
 			}
 		},
 		props: [

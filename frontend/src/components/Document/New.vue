@@ -116,8 +116,8 @@
 			redirectToShowDocument(directory, document, language_code) {
 
 				let params = {directory, document};
-				let enabled = this.$store.state.translationEnabled;
-				let isDefault = (language_code !== this.$store.state.defaultLanguage)
+				let enabled = this.$store.state.server.translationInfo.translationEnabled;
+				let isDefault = (language_code !== this.$store.state.server.translationInfo.defaultLanguage)
 
 				if (enabled && isDefault) {
 					params.language_code = language_code;

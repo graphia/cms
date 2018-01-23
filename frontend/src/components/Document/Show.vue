@@ -46,7 +46,7 @@
 								Edit
 							</router-link>
 
-							<Translation v-if="$store.state.translationEnabled"/>
+							<Translation v-if="$store.state.server.translationInfo.translationEnabled"/>
 
 							<router-link class="btn btn-info mr-2" :to="{name: 'document_history', params: this.navigationParams}">
 								History
@@ -80,6 +80,7 @@
 </style>
 
 <script lang="babel">
+
 
 	import Breadcrumbs from '../Utilities/Breadcrumbs';
 	import Translation from './Translation';

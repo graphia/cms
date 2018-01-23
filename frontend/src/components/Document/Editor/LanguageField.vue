@@ -26,7 +26,7 @@
 		mixins: [Accessors],
 		computed: {
 			languages() {
-				return this.$store.state.languages;
+				return this.$store.state.server.translationInfo.languages;
 			}
 		}
 	};

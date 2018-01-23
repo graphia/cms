@@ -21,11 +21,9 @@ const state = {
 	auth: new CMSAuth,
 	broadcast: new CMSBroadcast,
 	latestRevision: null,
-	defaultLanguage: "en",
-	languages: [],
-	translationEnabled: false,
 	user: null,
-	directories: []
+	directories: [],
+	server: new CMSServer
 };
 
 const mutations = {
@@ -61,6 +59,12 @@ const mutations = {
 	},
 	async saveUser(context, user) {
 		return user.save();
+	},
+	async refreshServerInfo(context) {
+		state.server.serverInfo.refresh();
+	},
+	async refreshTranslationInfo(context) {
+		state.server.translationInfo.refresh();
 	}
 };
 const getters = {};
@@ -89,9 +93,6 @@ const actions = {
 	},
 	getLatestRevision(context) {
 		return CMSServer.getLatestRevision();
-	},
-	getTranslationInfo(context) {
-		return CMSServer.getTranslationInfo();
 	}
 };
 

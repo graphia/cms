@@ -118,6 +118,7 @@
 		},
 		created() {
 			this.fetchDirectorySummary();
+			this.$store.commit("refreshServerInfo");
 		},
 		computed: {
 			numberOfDirectories() {
@@ -125,7 +126,7 @@
 				return count;
 			},
 			translationEnabled() {
-				return this.$store.state.translationEnabled;
+				return this.$store.state.server.translationInfo.translationEnabled;
 			},
 			directoriesWithGroupedTranslations() {
 
@@ -194,8 +195,6 @@
 			},
 
 			translations(files) {
-
-				console.debug(files)
 				return files
 					.filter((file) => { return file.isTranslation() })
 			}
