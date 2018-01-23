@@ -88,6 +88,7 @@
 	import CMSBreadcrumb from '../../javascripts/models/breadcrumb.js';
 	import Accessors from '../Mixins/accessors';
 
+	import config from '../../javascripts/config.js';
 	import checkResponse from "../../javascripts/response.js";
 
 	export default {
@@ -104,8 +105,10 @@
 			// correct resource
 			relativeHTML() {
 
-				let attachmentsDir = this.document.document;
+				let ad = this.document.document;
 				let html = $.parseHTML(this.document.html);
+				let dir = this.params.directory;
+				let doc = this.params.doc;
 
 				$(html)
 					.find('img')
@@ -114,7 +117,10 @@
 							.attr('src')
 							.startsWith("images")) {
 								let src = $(image).attr('src');
-								$(image).attr('src', [attachmentsDir, src].join("/"));
+
+								// use the absolute path so we don't need to worry about
+								// translations which now have the path in the /cms/dir/doc/en style
+								$(image).attr('src', [config.cms, dir, doc, ad, src].join("/"));
 						};
 					});
 
