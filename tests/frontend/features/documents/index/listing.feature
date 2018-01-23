@@ -48,6 +48,7 @@ Feature: Listing documents
 		Given there is no directory called "operating-procedures"
 		When I am on the "operating-procedures" index page
 		Then the main heading should be "404"
+		And the page's title should be "Not found"
 		And there should be an alert with the message "The item you were looking for cannot be found"
 
 	Scenario: Breadcrumbs

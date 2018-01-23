@@ -68,3 +68,9 @@ Feature: Displaying documents
 			| Dashboard           | /cms                |
 			| Important Documents | /cms/documents      |
 			| document 1          | None                |
+
+	Scenario: Document not found
+		Given I am on the show page for a non-existant document
+		Then the main heading should be "404"
+		And the page's title should be "Not found"
+		And there should be an alert with the message "The item you were looking for cannot be found"

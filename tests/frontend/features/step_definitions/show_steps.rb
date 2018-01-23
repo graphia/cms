@@ -2,6 +2,13 @@ Given %r{^a document called '(.*?)' exists$} do |name|
   expect(File.exist?(File.join(REPO_PATH, "appendices", name, "index.md"))).to be true
 end
 
+
+Given %r{^I am on the show page for a non\-existant document$} do
+  path = "/cms/appendices/does-not-exist"
+  visit(path)
+  expect(page.current_path).to eql(path)
+end
+
 When %r{^I navigate to that document's 'show' page$} do
   path = "/cms/appendices/appendix_1"
   visit(path)

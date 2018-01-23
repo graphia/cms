@@ -20,6 +20,8 @@ export default class CMSFile {
 
 		if (file && file.initialzing) {
 
+			// initializing is true if we're creating a new file,
+			// otherwise false
 			this.initializing    = file.initializing;
 
 			this.path            = file.path;
