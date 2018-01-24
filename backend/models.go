@@ -96,10 +96,9 @@ type RepositoryInfo struct {
 
 // ServerInfo holds basic details/counts displayed on the dashboard
 type ServerInfo struct {
-	Users       int
-	Commits     int
-	Documents   int
-	Attachments int
+	Users   int            `json:"users"`
+	Commits int            `json:"commits"`
+	Counts  map[string]int `json:"files"`
 }
 
 // Language contains a language's name and code for localisation

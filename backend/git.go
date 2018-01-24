@@ -161,6 +161,37 @@ func allCommits(repo *git.Repository, qty int) (commits []Commit, err error) {
 	return commits, nil
 }
 
+func countCommits() (qty int, err error) {
+	repo, err := repository(config)
+	if err != nil {
+		return qty, err
+	}
+	qty, err = getCommitsCount(repo)
+	return qty, err
+}
+
+func getCommitsCount(repo *git.Repository) (qty int, err error) {
+	hc, err := headCommit(repo)
+	if err != nil {
+		return qty, err
+	}
+
+	revWalk, err := repo.Walk()
+	if err != nil {
+		return qty, err
+	}
+	err = revWalk.Push(hc.Id())
+
+	revWalkIterator := func(c *git.Commit) bool {
+		qty++
+		return true
+	}
+
+	err = revWalk.Iterate(revWalkIterator)
+
+	return qty, err
+}
+
 func diffForCommit(hash string) (cs Changeset, err error) {
 	repo, err := repository(config)
 
