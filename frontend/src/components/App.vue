@@ -57,7 +57,6 @@
 </template>
 
 <script lang="babel">
-	import store from '../javascripts/store.js';
 	import config from '../javascripts/config.js';
 
 	import checkResponse from '../javascripts/response.js';
@@ -86,9 +85,9 @@
 						this.$store.dispatch(func);
 					});
 
-				["refreshTranslationInfo", "refreshRepositoryInfo"]
+				["refreshTranslationInfo", "refreshRepositoryInfo", "refreshServerInfo"]
 					.map(func => {
-						store.commit(func);
+						this.$store.commit(func);
 					});
 
 				// load user data if it's not present from a fresh login

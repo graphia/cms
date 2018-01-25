@@ -248,6 +248,9 @@ func protectedRouter() (r *vestigo.Router) {
 	r.Post("/api/settings/ssh", apiUserAddPublicKeyHandler)
 	r.Delete("/api/settings/ssh/:id", apiUserDeletePublicKeyHandler)
 
+	// stats endpoints
+	r.Get("/api/server_info", apiGetServerInformationHandler)
+
 	// repo endpoints
 	r.Get("/api/repository_info", apiGetRepositoryInformationHandler)
 	r.Get("/api/recent_commits", apiGetCommitsHandler)

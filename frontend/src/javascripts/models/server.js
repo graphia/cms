@@ -6,48 +6,31 @@ class CMSServerInfo {
 	constructor() {
 		this.users = null;
 		this.commits = null;
-		this.documents = null;
-		this.attachments = null;
+		this.files = {};
 	};
 
 	async refresh() {
 
 		let path = `${config.api}/server_info`;
 
-		try {
-			// let response = await fetch(path, {
-			// 	method: "GET",
-			// 	headers: store.state.auth.authHeader()
-			// });
+		let response = await fetch(path, {
+			method: "GET",
+			headers: store.state.auth.authHeader()
+		});
 
-			// if (!checkResponse(response.status)) {
-			// 	console.error(response);
-			// 	throw response;
-			// };
-
-			// let si = await response.json();
-
-
-			// FIXME hardcoding the response for the moment, remove
-
-			let si = {
-				commits: 5,
-				users: 3,
-				documents: 20,
-				attachments: 15
-			};
-
-			this.commits = si.commits;
-			this.users = si.users;
-			this.documents = si.documents;
-			this.attachments = si.attachments;
-
-			// return response;
-
-		}
-		catch(err) {
-			console.error("There was a problem retrieving repository information", err);
+		if (!checkResponse(response.status)) {
+			console.error(response);
+			throw response;
 		};
+
+		let si = await response.json();
+
+		this.commits = si.commits;
+		this.users = si.users;
+		this.files = si.files;
+
+		return response;
+
 	};
 
 };

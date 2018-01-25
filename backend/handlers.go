@@ -1532,6 +1532,55 @@ func apiGetRepositoryInformationHandler(w http.ResponseWriter, r *http.Request) 
 
 }
 
+func apiGetServerInformationHandler(w http.ResponseWriter, r *http.Request) {
+	var fr FailureResponse
+	var si ServerInfo
+	var err error
+
+	fc, err := countFiles()
+	if err != nil {
+		fr = FailureResponse{
+			Message: fmt.Sprintln("Failed to get file count", err.Error()),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	uc, err := countUsers()
+	if err != nil {
+		fr = FailureResponse{
+			Message: fmt.Sprintln("Failed to get user count", err.Error()),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	cc, err := countCommits()
+	if err != nil {
+		fr = FailureResponse{
+			Message: fmt.Sprintln("Failed to get commits count", err.Error()),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	si = ServerInfo{
+		Users:   uc,
+		Counts:  fc,
+		Commits: cc,
+	}
+
+	if err != nil {
+		fr = FailureResponse{
+			Message: fmt.Sprintln("Failed to retrieve server info", err.Error()),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	JSONResponse(si, http.StatusOK, w)
+}
+
 // GET /api/commits/:commit_hash
 //
 // returns a single commit containing relevant info plus the list of files

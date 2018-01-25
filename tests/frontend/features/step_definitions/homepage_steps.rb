@@ -115,3 +115,24 @@ end
 Then %r{^I should see the custom title$} do
   expect(page).to have_css("h4.card-header", text: "Important Documents")
 end
+
+Then %r{^I should see a "(.*?)" section$} do |name|
+  expect(page).to have_css(".card.#{name.downcase}", text: name.capitalize)
+end
+
+Given %r{^there is one user$} do
+  # Do nothing, there's only one user set up by default
+end
+
+Then %r{^the statistics panel's "(.*?)" count should equal "(.*?)"$} do |stat, count|
+  within(".card.statistics") do
+    expect(page).to have_css(".#{stat}-count", text: count)
+  end
+end
+
+Then %r{^I should see "(.*?)" files of type "(.*?)"$} do |count, label|
+  within(".card.statistics table.file-statistics > tbody") do
+    expect(page).to have_css("tr[data-count-type='#{label.downcase}'] > td", text: label)
+    expect(page).to have_css("tr[data-count-type='#{label.downcase}'] > td", text: count)
+  end
+end

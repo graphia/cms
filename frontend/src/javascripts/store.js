@@ -65,6 +65,9 @@ const mutations = {
 	async refreshRepositoryInfo(context) {
 		state.server.repositoryInfo.refresh();
 	},
+	async refreshServerInfo(context) {
+		state.server.serverInfo.refresh();
+	},
 	async setLatestRevision(context, hash) {
 		state.server.repositoryInfo.latestRevision = hash;
 	}

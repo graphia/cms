@@ -4,7 +4,7 @@ host: localhost
 http_listen_port: 8080
 
 # HTTPS settings
-https_enabled: true
+https_enabled: false
 https_listen_port: 4443
 https_key: keys/ssl/server.key
 https_cert: keys/ssl/server.cert

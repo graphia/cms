@@ -29,27 +29,7 @@
 					</ol>
 				</div>
 			</div>
-
-			<div class="col-md-3">
-				<div class="card statistics">
-					<div class="card-body">
-						<h4 class="card-title">Statistics</h4>
-
-						<dl class="row">
-							<dt class="col-sm-9">Users</dt>
-							<dd class="col-sm-3">4</dd>
-
-							<dt class="col-sm-9">Commits</dt>
-							<dd class="col-sm-3">38</dd>
-
-							<dt class="col-sm-9">Files</dt>
-							<dd class="col-sm-3">12</dd>
-						</dl>
-
-					</div>
-
-				</div>
-			</div>
+			<Stats/>
 		</div>
 
 		<DirectorySummary class="directories"/>
@@ -62,6 +42,7 @@
 	import DirectorySummary from './Directory/Summary';
 	import Breadcrumbs from './Utilities/Breadcrumbs';
 	import Publisher from './Home/Publisher';
+	import Stats from './Home/Stats';
 
 	import CMSBreadcrumb from '../javascripts/models/breadcrumb.js';
 	import config from '../javascripts/config.js';
@@ -84,7 +65,8 @@
 		components: {
 			DirectorySummary,
 			Breadcrumbs,
-			Publisher
+			Publisher,
+			Stats
 		},
 
 		computed: {
