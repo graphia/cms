@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/base64"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -242,7 +243,7 @@ func diffForCommit(hash string) (cs Changeset, err error) {
 	var files map[string]ChangesetFiles
 
 	files = make(map[string]ChangesetFiles)
-	var changesetFiles ChangesetFiles
+	var csf ChangesetFiles
 
 	err = gitDiff.ForEach(func(file git.DiffDelta, progress float64) (git.DiffForEachHunkCallback, error) {
 
@@ -280,12 +281,21 @@ func diffForCommit(hash string) (cs Changeset, err error) {
 			return nil, err
 		}
 
-		changesetFiles = ChangesetFiles{
-			Old: string(old),
-			New: string(new),
+		csf = ChangesetFiles{}
+
+		if hasImageExt(file.OldFile.Path) {
+			csf.Old = base64.StdEncoding.EncodeToString(old)
+		} else {
+			csf.Old = string(old)
 		}
 
-		files[file.NewFile.Path] = changesetFiles
+		if hasImageExt(file.NewFile.Path) {
+			csf.New = base64.StdEncoding.EncodeToString(new)
+		} else {
+			csf.New = string(new)
+		}
+
+		files[file.NewFile.Path] = csf
 
 		return func(hunk git.DiffHunk) (git.DiffForEachLineCallback, error) {
 			return func(line git.DiffLine) error {

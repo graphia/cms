@@ -24,7 +24,7 @@
 			</dl>
 
 			<ol class="files">
-				<li v-for="(item, key, index) in files" :key="key">
+				<li v-for="(item, key) in files" :key="key">
 					<CommitFile :path='key' :files='item'/>
 				</li>
 			</ol>

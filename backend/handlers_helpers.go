@@ -20,7 +20,7 @@ func JSONResponse(response interface{}, status int, w http.ResponseWriter) {
 	w.Write(json)
 }
 
-func isImageURI(uri string) bool {
+func hasImageExt(uri string) bool {
 
 	for _, extension := range config.FileCategories["images"] {
 		if strings.HasSuffix(uri, extension) {

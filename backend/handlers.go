@@ -353,7 +353,7 @@ func cmsGeneralHandler(w http.ResponseWriter, r *http.Request) {
 
 	uri = r.RequestURI
 
-	if isImageURI(uri) {
+	if hasImageExt(uri) {
 		// if we're dealing with an image we *don't* necessarily know from
 		// where we'll be serving it; it could be from the preview or the
 		// editor but as far as the actual document is concerned the path
