@@ -10,11 +10,12 @@ export default class CMSDirectory {
 		return dir;
 	};
 
-	constructor(path, title, description, body) {
+	constructor(path, title, description, body, contents = []) {
 		this.path        = path        || "";
 		this.title       = title       || "";
 		this.description = description || "";
 		this.body        = body        || "";
+		this.contents    = contents;
 	};
 
 	prepareJSON() {

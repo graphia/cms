@@ -51,7 +51,7 @@ run-frontend:
 	cd frontend && brunch watch --env development
 
 cleanup:
-	rm -rf tests/tmp/**/*
+	rm -rf tests/tmp/**/* frontend/public/**/*
 
 generate-password-keys:
 	openssl genrsa -out ${PRIVATE_KEY_PATH} 1024

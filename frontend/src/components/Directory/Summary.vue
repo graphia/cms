@@ -7,7 +7,7 @@
 			</div>
 		</div>
 
-		<div class="col col-md-6" v-else-if="numberOfDirectories == 0">
+		<div class="col col-md-6" v-else-if="directories.length == 0">
 			<div class="jumbotron">
 				{{ directories.length }}
 				<p>No directories</p>
@@ -16,83 +16,28 @@
 			</div>
 		</div>
 
-		<!-- listing directories -->
-		<div class="row" v-else-if="numberOfDirectories > 0">
+		<div v-else>
 
-			<div class="col-lg-4 mt-4" v-for="(directory, i) in directoriesWithGroupedTranslations" :key="i">
-
-				<div class="card" :class="directory.path" :data-directory="directory.path">
-
-					<h4 class="card-header">
+			<!-- listing directories -->
+				<div :data-directory="directory.path" :class="directory.path" v-for="(directory, i) in directories" :key="i">
+					<h4>
 						<router-link :to="{name: 'document_index', params: {directory: directory.path}}">
-							{{ (directory.info.title || directory.path) | capitalize }}
+							{{ (directory.title || directory.path) | capitalize }}
 						</router-link>
 					</h4>
 
-					<div class="card-body">
-						{{ directory.info.description }}
-					</div>
+					<p class="directory-description">{{ directory.description }}</p>
 
-					<!-- listing documents inside a directory -->
-					<div class="list-group list-group-flush" v-if="Object.keys(directory.contents).length > 0">
-
-						<router-link
-							v-for="(documents, base, j) in directory.contents"
-							:key="j"
-							:to="{name: 'document_show', params: {directory: directory.path, document: primary(documents).document, filename: primary(documents).filename}}"
-							:data-filename="base"
-							class="list-group-item list-group-item-action"
-						>
-
-							<h5>{{ primary(documents).title || primary(documents).filename }}</h5>
-
-							<p class="text-muted">{{ primary(documents).synopsis || "No synopsis has been added" }}</p>
-
-							<div class="translations" v-if="translationEnabled">
-
-								<ul class="translations-list list-inline">
-									<li class="list-inline-item" v-for="(t, k) in translations(documents)" :key="k" :data-lang="t.languageInfo.name">
-										<router-link :to="{name: 'document_show', params: {directory: directory.path, document: t.document, language_code: t.language}}">
-											{{ (t.languageInfo && t.languageInfo.flag) || "missing" }}
-										</router-link>
-									</li>
-								</ul>
-
-							</div>
-
-						</router-link>
-
-						<div class="card-body">
-							<router-link class="btn btn-sm btn-primary" :to="{name: 'document_new', params: {directory: directory.path}}">
-								Create a document
-							</router-link>
-						</div>
-
-
-					</div>
-					<!-- /listing documents inside a directory -->
-
-					<div class="card-body" v-else>
-
-						<div class="alert alert-info">
-							There's nothing here yet
-						</div>
-
-						<router-link class="btn btn-sm btn-primary" :to="{name: 'document_new', params: {directory: directory.path}}">
-							Create a document
-						</router-link>
-
-					</div>
+					<IndexList :documents="directory.contents" :includeNewButton="true"/>
 
 				</div>
-			</div>
 
-			<div class="col-lg-4 mt-4">
-				<DirectoryNewButton/>
-			</div>
+				<div class="col-lg-4 mt-4">
+					<DirectoryNewButton/>
+				</div>
 
+			<!-- /listing directories -->
 		</div>
-		<!-- /listing directories -->
 
 	</div>
 </template>
@@ -105,6 +50,7 @@
 	import config from '../../javascripts/config.js';
 	import CMSFile from '../../javascripts/models/file.js';
 	import CMSDirectory from '../../javascripts/models/directory.js';
+	import IndexList from '../Document/Index/List';
 
 	import DirectoryNewButton from './NewButton';
 
@@ -124,41 +70,6 @@
 			numberOfDirectories() {
 				let count = Object.keys(this.directories).length;
 				return count;
-			},
-			translationEnabled() {
-				return this.$store.state.server.translationInfo.translationEnabled;
-			},
-			directoriesWithGroupedTranslations() {
-
-				return this.directories
-					.map((dir) => {
-
-						let groupedTranslations = dir
-							.contents
-							.sort((a,b) => {
-								// default language files first
-								return (a.filename.split(".").length - b.filename.split(".").length)
-							})
-							.reduce((summary, doc) => {
-
-								// use the file's basename to group translations
-								//let base = doc.filename.split(".")[0]
-								let base = doc.document;
-								let parsedDoc = new CMSFile(doc);
-
-								summary[base] ? summary[base].push(parsedDoc) : summary[base] = [parsedDoc];
-
-								return summary;
-							}, {});
-
-						return {
-							path: dir.path,
-							info: dir.info,
-							contents: groupedTranslations
-						};
-
-					});
-
 			}
 		},
 		methods: {
@@ -166,41 +77,38 @@
 
 				let path = `${config.api}/summary`
 
-				try {
-					let response = await fetch(path, {
-						method: "GET",
-						headers: this.$store.state.auth.authHeader()
-					});
+				let response = await fetch(path, {
+					method: "GET",
+					headers: this.$store.state.auth.authHeader()
+				});
 
-					if (!checkResponse(response.status)) {
-						console.error(response);
-						return;
-					}
-
-					let json = await response.json();
-
-					this.loading = false;
-
-					// TODO map the directories into CMSFile objects
-					this.directories = json;
-
+				if (!checkResponse(response.status)) {
+					console.error(response);
+					return;
 				}
-				catch(error) {
-					console.error(error);
-				};
 
-			},
-			primary(files) {
-				return files[0];
-			},
+				let json = await response.json();
 
-			translations(files) {
-				return files
-					.filter((file) => { return file.isTranslation() })
+				this.directories = json.map((dir) => {
+
+					return new CMSDirectory(
+						dir.path,
+						dir.info.title,
+						dir.info.description,
+						dir.info.body,
+						dir.contents.map((file) => {
+							return new CMSFile(file);
+						})
+					);
+				});
+
+				this.loading = false;
+
 			}
 		},
 		components: {
-			DirectoryNewButton
+			DirectoryNewButton,
+			IndexList
 		}
 	}
 </script>
