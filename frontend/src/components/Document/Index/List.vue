@@ -3,15 +3,10 @@
 	<div>
 
 		<div v-if="this.documents.length == 0">
-
 			<div class="alert alert-info">
-					There's nothing here yet
+				There's nothing here yet
 			</div>
-
-			<NewButton/>
-
 		</div>
-
 
 		<div v-else class="row document-list">
 
@@ -21,7 +16,7 @@
 
 					<div class="card-header">
 
-						<router-link :data-filename="primary(d).document" :to="{name: 'document_show', params: {document: primary(d).document}}">
+						<router-link :data-filename="primary(d).document" :to="{name: 'document_show', params: {directory: directoryPath, document: primary(d).document}}">
 							{{ primary(d).title || primary(d).filename }}
 						</router-link>
 
@@ -50,7 +45,6 @@
 
 			</div>
 
-			<NewButton v-if="includeNewButton"/>
 		</div>
 
 	</div>
@@ -64,7 +58,7 @@
 
 	export default {
 		name: "IndexList",
-		props: ["documents", "includeNewButton"],
+		props: ["documents", "includeNewButton", "directoryPath"],
 		components: {NewButton},
 		computed: {
 			groupedTranslations() {

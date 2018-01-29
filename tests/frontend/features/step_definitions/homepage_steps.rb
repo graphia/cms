@@ -75,9 +75,9 @@ Then %r{^I should see all three documents listed$} do
   end
 end
 
-Then %r{^there should be a 'new file' button$} do
+Then %r{^there should be a '(.*?)' button$} do |text|
   within(".documents") do
-    expect(page).to have_css("a.btn", text: "Create a new document")
+    expect(page).to have_css("a.btn", text: text)
   end
 end
 

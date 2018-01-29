@@ -8,7 +8,9 @@
 		<div class="row mt-4">
 
 			<div class="col col-md-4">
-				<Publisher/>
+				<Publisher class="publisher-card"/>
+
+				<DirectoryNewButton class="new-directory-card mt-4"/>
 			</div>
 
 			<div class="col-md-5">
@@ -30,6 +32,7 @@
 				</div>
 			</div>
 			<Stats/>
+
 		</div>
 
 		<DirectorySummary class="directories"/>
@@ -40,6 +43,7 @@
 <script lang="babel">
 	import Broadcast from './Broadcast';
 	import DirectorySummary from './Directory/Summary';
+	import DirectoryNewButton from './Directory/NewButton';
 	import Breadcrumbs from './Utilities/Breadcrumbs';
 	import Publisher from './Home/Publisher';
 	import Stats from './Home/Stats';
@@ -63,6 +67,7 @@
 		},
 
 		components: {
+			DirectoryNewButton,
 			DirectorySummary,
 			Breadcrumbs,
 			Publisher,

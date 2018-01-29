@@ -1,13 +1,13 @@
 <template>
 	<div>
 
-		<div class="col col-md-6" v-if="loading">
+		<div class="col col-md-8" v-if="loading">
 			<div class="alert alert-warning mx-auto">
 				Loading...
 			</div>
 		</div>
 
-		<div class="col col-md-6" v-else-if="directories.length == 0">
+		<div class="col col-md-4" v-else-if="directories.length == 0">
 			<div class="jumbotron">
 				{{ directories.length }}
 				<p>No directories</p>
@@ -16,24 +16,27 @@
 			</div>
 		</div>
 
-		<div v-else>
+		<div class="col col-md-12" v-else>
 
 			<!-- listing directories -->
-				<div :data-directory="directory.path" :class="directory.path" v-for="(directory, i) in directories" :key="i">
-					<h4>
-						<router-link :to="{name: 'document_index', params: {directory: directory.path}}">
-							{{ (directory.title || directory.path) | capitalize }}
-						</router-link>
-					</h4>
+				<div class="border rounded p-4 mb-4 bg-white" :data-directory="directory.path" :class="directory.path" v-for="(directory, i) in directories" :key="i">
 
-					<p class="directory-description">{{ directory.description }}</p>
+					<div class="row">
+						<h4 class="col col-md-6">
+							<router-link :to="{name: 'document_index', params: {directory: directory.path}}">
+								{{ (directory.title || directory.path) | capitalize }}
+							</router-link>
+						</h4>
 
-					<IndexList :documents="directory.contents" :includeNewButton="true"/>
+						<div class="col col-md-6 text-right">
+							<DocumentNewButton :directoryPath="directory.path"/>
+						</div>
+					</div>
 
-				</div>
+					<p class="mt-4 mb-4 directory-description">{{ directory.description }}</p>
 
-				<div class="col-lg-4 mt-4">
-					<DirectoryNewButton/>
+					<IndexList :documents="directory.contents" :directoryPath="directory.path"/>
+
 				</div>
 
 			<!-- /listing directories -->
@@ -51,8 +54,7 @@
 	import CMSFile from '../../javascripts/models/file.js';
 	import CMSDirectory from '../../javascripts/models/directory.js';
 	import IndexList from '../Document/Index/List';
-
-	import DirectoryNewButton from './NewButton';
+	import DocumentNewButton from '../Document/Buttons/New';
 
 	export default {
 		name: "DirectorySummary",
@@ -107,8 +109,8 @@
 			}
 		},
 		components: {
-			DirectoryNewButton,
-			IndexList
+			IndexList,
+			DocumentNewButton
 		}
 	}
 </script>

@@ -1,26 +1,7 @@
 <template>
-	<div class="col-md-4">
-
-		<div class="card bg-light m-1">
-
-			<div class="card-body">
-
-				<p>
-					Creating a new document will add a new file to this directory. By default, it will be in <em>draft</em> mode,
-					and will not be published. Once you are happy with the contents and have removed the <em>draft</em> flag the document
-					will be published in the standard manner. All navigation links will be updated automatically.
-				</p>
-
-				<router-link :to="{name: 'document_new', params: {directory: this.$route.params.directory}}" class="btn m1 btn-primary">
-					Create a new document
-				</router-link>
-
-			</div>
-
-
-		</div>
-
-	</div>
+	<router-link :to="{name: 'document_new', params: {directory: directoryPath}}" class="btn btn-sm btn-secondary">
+		New document
+	</router-link>
 </template>
 
 <script lang="babel">
@@ -29,7 +10,8 @@
 
 	export default {
 		name: "NewDocumentButton",
-		mixins: [Accessors]
+		mixins: [Accessors],
+		props: ["directoryPath"]
 	};
 
 </script>
