@@ -6,7 +6,7 @@
 			<Breadcrumbs :levels="breadcrumbs"/>
 
 			<div class="row document-info">
-				<div class="col-md-12">
+				<div class="col-md-8">
 
 					<!-- document index header -->
 					<h2 v-if="activeDirectory.title">
@@ -20,9 +20,13 @@
 					<p>{{ activeDirectory.description }}</p>
 
 				</div>
+
+				<div class="col col-md-4 text-right">
+					<DocumentNewButton :directoryPath="directory"/>
+				</div>
 			</div>
 
-			<IndexList :documents="documents" :includeNewButton="true"/>
+			<IndexList :documents="documents" :directoryPath="directory"/>
 
 		</div>
 
@@ -62,6 +66,8 @@
 	import Error from '../Errors/Error';
 	import CMSBreadcrumb from '../../javascripts/models/breadcrumb.js';
 	import Accessors from '../Mixins/accessors';
+	import DocumentNewButton from '../Document/Buttons/New';
+
 
 	export default {
 		name: "DocumentIndex",
@@ -111,7 +117,8 @@
 		components: {
 			Breadcrumbs,
 			Error,
-			IndexList
+			IndexList,
+			DocumentNewButton
 		}
 	}
 </script>

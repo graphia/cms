@@ -80,3 +80,11 @@ Then %r{^the draft document should be highlighted$} do
     expect(page).to have_css(matcher)
   end
 end
+
+When %r{^I click the link to "(.*)"$} do |name|
+  within(".document-list") { click_link name }
+end
+
+Then %r{^I should be on the "([^"]*)" show page$} do |arg1|
+  expect(page.current_path).to eql("/cms/documents/document_1")
+end

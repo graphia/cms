@@ -58,7 +58,7 @@
 
 	export default {
 		name: "IndexList",
-		props: ["documents", "includeNewButton", "directoryPath"],
+		props: ["documents", "directoryPath"],
 		components: {NewButton},
 		computed: {
 			groupedTranslations() {

@@ -19,6 +19,16 @@ Feature: Listing documents
 		When I navigate to the "documents" index page
 		Then I should see a list containing the contents of the "documents" directory
 
+	Scenario: Navigating to a document's show page
+		Given I am on the "documents" index page
+		When I click the link to "document 1"
+		Then I should be on the "document 1" show page
+
+	Scenario: Creating a new document
+		Given I am on the "documents" index page
+		When I click the "New document" button
+		Then I should be on the new document page for the 'documents' directory
+
 	Scenario: Documents are visible on the documents page
 		Given I am on the "documents" index page
 		When I click the "Appendices" navigation link
