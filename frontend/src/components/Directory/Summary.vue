@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<div class="mt-4">
 
 		<div class="col col-md-8" v-if="loading">
 			<div class="alert alert-warning mx-auto">

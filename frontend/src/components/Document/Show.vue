@@ -96,9 +96,10 @@
 		name: "DocumentShow",
 		created() {
 			// populate $store.state.documents with docs from api
-
 			this.getDocument();
-
+		},
+		mounted() {
+			this.getDocument();
 		},
 		computed: {
 
@@ -106,10 +107,9 @@
 			// correct resource
 			relativeHTML() {
 
-				let ad = this.document.document;
 				let html = $.parseHTML(this.document.html);
 				let dir = this.params.directory;
-				let doc = this.params.doc;
+				let doc = this.params.document;
 
 				$(html)
 					.find('img')
@@ -121,7 +121,7 @@
 
 								// use the absolute path so we don't need to worry about
 								// translations which now have the path in the /cms/dir/doc/en style
-								$(image).attr('src', [config.cms, dir, doc, ad, src].join("/"));
+								$(image).attr('src', [config.cms, dir, doc, src].join("/"));
 						};
 					});
 

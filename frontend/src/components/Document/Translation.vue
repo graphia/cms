@@ -80,8 +80,8 @@
 
 					if (!checkResponse(response.status)) {
 						throw "invalid request", response;
-						return
-					}
+						return;
+					};
 
 					let json = await response.json();
 
