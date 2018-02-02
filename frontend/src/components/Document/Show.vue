@@ -1,8 +1,8 @@
 <template>
-	<div v-title="document.title">
+	<div v-title="document.title || 'Not found'">
 		<Breadcrumbs :levels="breadcrumbs"/>
 
-		<section class="row">
+		<section class="row" v-if="this.document && !this.document.initializing">
 
 			<article id="document-content" class="col-md-8">
 				<div class="content" v-html="relativeHTML"/>
@@ -46,7 +46,7 @@
 								Edit
 							</router-link>
 
-							<Translation v-if="$store.state.translationEnabled"/>
+							<Translation v-if="$store.state.server.translationInfo.translationEnabled"/>
 
 							<router-link class="btn btn-info mr-2" :to="{name: 'document_history', params: this.navigationParams}">
 								History
@@ -61,6 +61,9 @@
 				</div>
 			</aside>
 		</section>
+		<div v-else>
+			<Error :code="404"/>
+		</div>
 	</div>
 </template>
 
@@ -78,21 +81,25 @@
 
 <script lang="babel">
 
+
 	import Breadcrumbs from '../Utilities/Breadcrumbs';
 	import Translation from './Translation';
+	import Error from '../Errors/Error';
 	import DocumentDelete from './Buttons/Delete';
 	import CMSBreadcrumb from '../../javascripts/models/breadcrumb.js';
 	import Accessors from '../Mixins/accessors';
 
+	import config from '../../javascripts/config.js';
 	import checkResponse from "../../javascripts/response.js";
 
 	export default {
 		name: "DocumentShow",
 		created() {
 			// populate $store.state.documents with docs from api
-
 			this.getDocument();
-
+		},
+		mounted() {
+			this.getDocument();
 		},
 		computed: {
 
@@ -100,8 +107,9 @@
 			// correct resource
 			relativeHTML() {
 
-				let attachmentsDir = this.document.document;
 				let html = $.parseHTML(this.document.html);
+				let dir = this.params.directory;
+				let doc = this.params.document;
 
 				$(html)
 					.find('img')
@@ -110,7 +118,10 @@
 							.attr('src')
 							.startsWith("images")) {
 								let src = $(image).attr('src');
-								$(image).attr('src', [attachmentsDir, src].join("/"));
+
+								// use the absolute path so we don't need to worry about
+								// translations which now have the path in the /cms/dir/doc/en style
+								$(image).attr('src', [config.cms, dir, doc, src].join("/"));
 						};
 					});
 
@@ -132,7 +143,7 @@
 
 				return [
 					new CMSBreadcrumb(
-						directory_title || this.directory,
+						directory_title || this.params.directory,
 						"document_index",
 						{directory: this.directory}
 					),
@@ -169,6 +180,7 @@
 				let directory = this.params.directory;
 
 				this.$store.dispatch("getDocument", {directory, document, filename});
+
 			},
 			draftDescription() {
 				if (this.document.draft) {
@@ -181,7 +193,8 @@
 		components: {
 			Breadcrumbs,
 			Translation,
-			DocumentDelete
+			DocumentDelete,
+			Error
 		}
 	}
 </script>

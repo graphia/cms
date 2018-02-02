@@ -57,7 +57,6 @@
 </template>
 
 <script lang="babel">
-	import store from '../javascripts/store.js';
 	import config from '../javascripts/config.js';
 
 	import checkResponse from '../javascripts/response.js';
@@ -81,9 +80,14 @@
 				console.info("token is present and has not expired, renewing");
 				this.$store.state.auth.renew();
 
-				["getLatestRevision", "getTranslationInfo", "getTopLevelDirectories"]
+				["getTopLevelDirectories"]
 					.map(func => {
 						this.$store.dispatch(func);
+					});
+
+				["refreshTranslationInfo", "refreshRepositoryInfo", "refreshServerInfo"]
+					.map(func => {
+						this.$store.commit(func);
 					});
 
 				// load user data if it's not present from a fresh login
@@ -130,6 +134,6 @@
 	}
 
 	.fade-enter, .fade-leave-active {
-		opacity: 0
+		opacity: 0;
 	}
 </style>

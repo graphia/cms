@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_isImageURI(t *testing.T) {
+func Test_hasImageExt(t *testing.T) {
 	type args struct {
 		uri string
 	}
@@ -28,7 +28,7 @@ func Test_isImageURI(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.want, isImageURI(tt.args.uri))
+			assert.Equal(t, tt.want, hasImageExt(tt.args.uri))
 		})
 	}
 }

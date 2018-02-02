@@ -51,13 +51,13 @@ Feature: Home page contents
 			| document_3 |
 		When I am on the homepage
 		Then I should see all three documents listed
-		And there should be a 'new file' button
+		And there should be a 'New document' button
 
 	Scenario: When a directory is empty
 		Given the 'empty' directory contains no files
 		When I am on the homepage
 		Then I see a 'no files' alert in the empty section
-		And there should be a 'new file' button
+		And there should be a 'New document' button
 
 	Scenario: When a directory has metadata
 		Given the 'documents' directory has title and description metadata

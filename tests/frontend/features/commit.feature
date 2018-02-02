@@ -52,3 +52,10 @@ Feature: Commits
 			| Text      | Reference |
 			| Dashboard | /cms      |
 			| Commit    | None      |
+
+	Scenario: Modified images
+		Given I have added, deleted and modified images in one commit
+		When I navigate to the commit's details page
+		Then I should see the added file displayed in a green box
+		And I should see the removed file displayed in a red box
+		And I should see the modified file in a green box next to the old version in a red box

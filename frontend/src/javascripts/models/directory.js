@@ -10,11 +10,12 @@ export default class CMSDirectory {
 		return dir;
 	};
 
-	constructor(path, title, description, body) {
+	constructor(path, title, description, body, contents = []) {
 		this.path        = path        || "";
 		this.title       = title       || "";
 		this.description = description || "";
 		this.body        = body        || "";
+		this.contents    = contents;
 	};
 
 	prepareJSON() {
@@ -39,7 +40,7 @@ export default class CMSDirectory {
 
 			if (response.status == 404 && json.message == "No repository found") {
 				console.warn("No repository found, redirect to create", 404)
-				// FXIME redirect to create repo
+				// FIXME redirect to create repo
 			};
 
 			if (response.status == 400 && json.message == "Not a git repository") {

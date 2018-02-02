@@ -145,3 +145,54 @@ end
 Then %r{^the commits's page title should contain "(.*?)" and the short hash$} do |title|
   expect(page).to have_title("#{title} #{@hash.slice(0..6)}")
 end
+
+Given %r{^I have added, deleted and modified images in one commit$} do
+
+  g = Git.open(REPO_PATH)
+
+  # Add a file
+  FileUtils.cp(
+    File.join(IMAGES_PATH, "bart.png"),
+    File.join(REPO_PATH, "documents", "document_1", "images", "bart.png")
+  )
+
+  # Delete a file
+  FileUtils.rm(File.join(REPO_PATH, "appendices", "appendix_1", "images", "image_1.png"))
+
+  # Modify a file
+  FileUtils.cp(
+    File.join(IMAGES_PATH, "lisa.jpg"),
+    File.join(REPO_PATH, "documents", "document_2", "images", "image_1.jpg")
+  )
+
+  g.add(all: true)
+  g.commit("Various changes")
+  @hash = g.log.first.to_s
+
+end
+
+Then %r{^I should see the added file displayed in a green box$} do
+  within(".card.file-created") do
+    img = page.find("div.bg-success > img")
+    expect(img['src']).to start_with("data:image/png;base64,")
+  end
+end
+
+Then %r{^I should see the removed file displayed in a red box$} do
+  within(".card.file-deleted") do
+    img = page.find("div.bg-danger > img")
+    expect(img['src']).to start_with("data:image/png;base64,")
+  end
+end
+
+Then %r{^I should see the modified file in a green box next to the old version in a red box$} do
+  within(".card.file-updated") do
+
+    of = page.find("div.bg-danger > img")
+    expect(of['src']).to start_with("data:image/png;base64,")
+
+    nf = page.find("div.bg-success > img")
+    expect(nf['src']).to start_with("data:image/png;base64,")
+
+  end
+end

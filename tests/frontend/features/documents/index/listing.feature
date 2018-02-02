@@ -19,6 +19,16 @@ Feature: Listing documents
 		When I navigate to the "documents" index page
 		Then I should see a list containing the contents of the "documents" directory
 
+	Scenario: Navigating to a document's show page
+		Given I am on the "documents" index page
+		When I click the link to "document 1"
+		Then I should be on the "document 1" show page
+
+	Scenario: Creating a new document
+		Given I am on the "documents" index page
+		When I click the "New document" button
+		Then I should be on the new document page for the 'documents' directory
+
 	Scenario: Documents are visible on the documents page
 		Given I am on the "documents" index page
 		When I click the "Appendices" navigation link
@@ -48,6 +58,7 @@ Feature: Listing documents
 		Given there is no directory called "operating-procedures"
 		When I am on the "operating-procedures" index page
 		Then the main heading should be "404"
+		And the page's title should be "Not found"
 		And there should be an alert with the message "The item you were looking for cannot be found"
 
 	Scenario: Breadcrumbs

@@ -37,7 +37,7 @@ export default class CMSCommit {
 		return {
 			message: this.message,
 			repository_info: {
-				latest_revision: store.state.latestRevision
+				latest_revision: store.state.server.repositoryInfo.latestRevision
 			},
 			files: this.files
 				.map((f) => {return f.prepareJSON()})

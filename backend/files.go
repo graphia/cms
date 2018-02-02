@@ -937,11 +937,17 @@ func getRawFile(directory, document, filename string) (file *File, err error) {
 	return
 }
 
-func countFiles() (counter map[string]int, err error) {
+func countFiles() (counts map[string]int, err error) {
 	repo, err := repository(config)
 	if err != nil {
-		return counter, err
+		return counts, err
 	}
+
+	counts, err = getFileCounts(repo)
+	return counts, err
+}
+
+func getFileCounts(repo *git.Repository) (counter map[string]int, err error) {
 
 	ht, err := headTree(repo)
 	if err != nil {

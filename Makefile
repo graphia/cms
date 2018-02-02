@@ -31,7 +31,7 @@ test:
 	go test -v ${ALL} -log-to-file=true -config=${TEST_CONFIG}
 
 cucumber: build-dev
-	cd tests/frontend && cucumber
+	cd tests/frontend && bundle exec cucumber
 
 keep-testing:
 	ls backend/*.go | entr -r go test -v ${ALL} -log-to-file=true -config=${TEST_CONFIG}
@@ -51,7 +51,7 @@ run-frontend:
 	cd frontend && brunch watch --env development
 
 cleanup:
-	rm -rf tests/tmp/**/*
+	rm -rf tests/tmp/**/* frontend/public/**/*
 
 generate-password-keys:
 	openssl genrsa -out ${PRIVATE_KEY_PATH} 1024

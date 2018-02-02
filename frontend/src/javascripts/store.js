@@ -20,12 +20,9 @@ const state = {
 	commit: null,
 	auth: new CMSAuth,
 	broadcast: new CMSBroadcast,
-	latestRevision: null,
-	defaultLanguage: "en",
-	languages: [],
-	translationEnabled: false,
 	user: null,
-	directories: []
+	directories: [],
+	server: new CMSServer
 };
 
 const mutations = {
@@ -45,9 +42,6 @@ const mutations = {
 	setActiveDirectory(context, directory) {
 		state.activeDirectory = directory;
 	},
-	async setLatestRevision(context, hash) {
-		state.latestRevision = hash;
-	},
 	async loadUser(context) {
 		let u = await CMSUser.fetchUser();
 		state.user = u;
@@ -61,6 +55,21 @@ const mutations = {
 	},
 	async saveUser(context, user) {
 		return user.save();
+	},
+	async refreshServerInfo(context) {
+		state.server.serverInfo.refresh();
+	},
+	async refreshTranslationInfo(context) {
+		state.server.translationInfo.refresh();
+	},
+	async refreshRepositoryInfo(context) {
+		state.server.repositoryInfo.refresh();
+	},
+	async refreshServerInfo(context) {
+		state.server.serverInfo.refresh();
+	},
+	async setLatestRevision(context, hash) {
+		state.server.repositoryInfo.latestRevision = hash;
 	}
 };
 const getters = {};
@@ -86,12 +95,6 @@ const actions = {
 	getDirectory(context, name) {
 		// get and set activeDirectory by name
 		return CMSDirectory.get(name);
-	},
-	getLatestRevision(context) {
-		return CMSServer.getLatestRevision();
-	},
-	getTranslationInfo(context) {
-		return CMSServer.getTranslationInfo();
 	}
 };
 

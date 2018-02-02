@@ -34,7 +34,7 @@
 		name: "Translation",
 		computed: {
 			languages() {
-				return this.$store.state.languages;
+				return this.$store.state.server.translationInfo.languages;
 			},
 			availableLanguages() {
 
@@ -80,8 +80,8 @@
 
 					if (!checkResponse(response.status)) {
 						throw "invalid request", response;
-						return
-					}
+						return;
+					};
 
 					let json = await response.json();
 

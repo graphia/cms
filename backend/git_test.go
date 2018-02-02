@@ -751,3 +751,46 @@ func Test_checkLatestRevision(t *testing.T) {
 		})
 	}
 }
+
+func Test_getCommitsCount(t *testing.T) {
+
+	gitRepoPath := "../tests/tmp/repositories/repo_info"
+	_, _ = setupSmallTestRepo(gitRepoPath)
+
+	tests := []struct {
+		name    string
+		wantQty int
+		wantErr bool
+	}{
+		{
+			name:    "One extra commit",
+			wantQty: 2,
+		},
+		{
+			name:    "Three extra commits",
+			wantQty: 4,
+		},
+		{
+			name:    "Five extra commits",
+			wantQty: 6,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			repo, _ := repository(config)
+
+			for i := 1; i < tt.wantQty; i++ {
+				createRandomFile(
+					repo,
+					fmt.Sprintf("%d.md", i),
+					fmt.Sprintf("Added file %d", i),
+				)
+			}
+
+			actualQty, _ := getCommitsCount(repo)
+			assert.Equal(t, tt.wantQty, actualQty)
+
+		})
+	}
+}

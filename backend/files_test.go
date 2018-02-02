@@ -268,10 +268,11 @@ func TestRootDirectorySummary(t *testing.T) {
 	assert.Equal(t, expectedSummary, summary)
 }
 
-func TestCountFiles(t *testing.T) {
+func Test_getFileCounts(t *testing.T) {
 	repoPath := "../tests/tmp/repositories/count_files"
 	setupMultipleFiletypesTestRepo(repoPath)
-	cf, _ := countFiles()
+	repo, _ := repository(config)
+	cf, _ := getFileCounts(repo)
 
 	expectedCounts := map[string]int{
 		"images":          3,

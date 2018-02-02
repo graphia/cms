@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/base64"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -161,6 +162,37 @@ func allCommits(repo *git.Repository, qty int) (commits []Commit, err error) {
 	return commits, nil
 }
 
+func countCommits() (qty int, err error) {
+	repo, err := repository(config)
+	if err != nil {
+		return qty, err
+	}
+	qty, err = getCommitsCount(repo)
+	return qty, err
+}
+
+func getCommitsCount(repo *git.Repository) (qty int, err error) {
+	hc, err := headCommit(repo)
+	if err != nil {
+		return qty, err
+	}
+
+	revWalk, err := repo.Walk()
+	if err != nil {
+		return qty, err
+	}
+	err = revWalk.Push(hc.Id())
+
+	revWalkIterator := func(c *git.Commit) bool {
+		qty++
+		return true
+	}
+
+	err = revWalk.Iterate(revWalkIterator)
+
+	return qty, err
+}
+
 func diffForCommit(hash string) (cs Changeset, err error) {
 	repo, err := repository(config)
 
@@ -211,7 +243,7 @@ func diffForCommit(hash string) (cs Changeset, err error) {
 	var files map[string]ChangesetFiles
 
 	files = make(map[string]ChangesetFiles)
-	var changesetFiles ChangesetFiles
+	var csf ChangesetFiles
 
 	err = gitDiff.ForEach(func(file git.DiffDelta, progress float64) (git.DiffForEachHunkCallback, error) {
 
@@ -249,12 +281,21 @@ func diffForCommit(hash string) (cs Changeset, err error) {
 			return nil, err
 		}
 
-		changesetFiles = ChangesetFiles{
-			Old: string(old),
-			New: string(new),
+		csf = ChangesetFiles{}
+
+		if hasImageExt(file.OldFile.Path) {
+			csf.Old = base64.StdEncoding.EncodeToString(old)
+		} else {
+			csf.Old = string(old)
 		}
 
-		files[file.NewFile.Path] = changesetFiles
+		if hasImageExt(file.NewFile.Path) {
+			csf.New = base64.StdEncoding.EncodeToString(new)
+		} else {
+			csf.New = string(new)
+		}
+
+		files[file.NewFile.Path] = csf
 
 		return func(hunk git.DiffHunk) (git.DiffForEachLineCallback, error) {
 			return func(line git.DiffLine) error {

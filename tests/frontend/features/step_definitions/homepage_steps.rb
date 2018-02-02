@@ -57,7 +57,7 @@ end
 
 Then %r{^I should see a section for each directory$} do
   ["Appendices", "Important Documents"].each do |name|
-    expect(page).to have_css("h4.card-header", text: name)
+    expect(page).to have_css("h4 > a", text: name)
   end
 end
 
@@ -68,16 +68,16 @@ Given %r{^the documents directory contains the following files:$} do |table|
 end
 
 Then %r{^I should see all three documents listed$} do
-  within(".card.documents") do
+  within(".documents") do
     ["document 1", "document 2", "document 3"].each do |title|
       expect(page).to have_css("a[data-filename='#{title.gsub(' ', '_')}']", text: title)
     end
   end
 end
 
-Then %r{^there should be a 'new file' button$} do
-  within(".card.documents") do
-    expect(page).to have_css("a.btn", text: "Create a document")
+Then %r{^there should be a '(.*?)' button$} do |text|
+  within(".documents") do
+    expect(page).to have_css("a.btn", text: text)
   end
 end
 
@@ -88,7 +88,7 @@ Given %r{^the '(.*?)' directory contains no files$} do |dir|
 end
 
 Then %r{^I see a 'no files' alert in the empty section$} do
-  within(".card.empty") do
+  within(".empty") do
     expect(page).to have_css("div.alert", text: "There's nothing here yet")
   end
 end
@@ -107,11 +107,32 @@ Given %r{^the 'documents' directory has title and description metadata$} do
 end
 
 Then %r{^I should see the custom description$} do
-  within(".card.documents") do
-    expect(page).to have_css(".card-body", text: "Documents go here")
+  within(".documents") do
+    expect(page).to have_css(".directory-description", text: "Documents go here")
   end
 end
 
 Then %r{^I should see the custom title$} do
-  expect(page).to have_css("h4.card-header", text: "Important Documents")
+  expect(page).to have_css("h4", text: "Important Documents")
+end
+
+Then %r{^I should see a "(.*?)" section$} do |name|
+  expect(page).to have_css(".#{name.downcase}", text: name.capitalize)
+end
+
+Given %r{^there is one user$} do
+  # Do nothing, there's only one user set up by default
+end
+
+Then %r{^the statistics panel's "(.*?)" count should equal "(.*?)"$} do |stat, count|
+  within(".card.statistics") do
+    expect(page).to have_css(".#{stat}-count", text: count)
+  end
+end
+
+Then %r{^I should see "(.*?)" files of type "(.*?)"$} do |count, label|
+  within(".card.statistics table.file-statistics > tbody") do
+    expect(page).to have_css("tr[data-count-type='#{label.downcase}'] > td", text: label)
+    expect(page).to have_css("tr[data-count-type='#{label.downcase}'] > td", text: count)
+  end
 end

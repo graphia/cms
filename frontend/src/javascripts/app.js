@@ -77,7 +77,10 @@ const routes = [
 const router = new VueRouter({
 	routes,
 	mode: 'history',
-	linkActiveClass: 'active'
+	linkActiveClass: 'active',
+	scrollBehavior (to, from, savedPosition) {
+		return !savedPosition ? { x: 0, y: 0 } : savedPosition
+	}
 });
 
 export {router};
@@ -104,11 +107,6 @@ router.beforeEach((to, from, next) => {
 		};
 	}
 
-});
-
-router.afterEach(() => {
-	// scroll to the top of the page
-	window.scrollTo(0, 0);
 });
 
 router.onError((err) => {

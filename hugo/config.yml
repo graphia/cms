@@ -1,6 +1,7 @@
 languageCode: "en-gb"
 
-baseURL: "http://localhost:1313"
+# baseURL: "http://localhost:1313"
+title: "Burns Slant Drilling Co."
 buildDrafts: true
 theme: ../../../graphia-minimal-theme
 relativeURLs: true
@@ -15,20 +16,20 @@ defaultContentLanguageInSubdir: false
 
 Languages:
   en:
-    title: "English"
+    name: "English"
     weight: 0
     flag: 🇬🇧
 
   fr:
-    title: "French"
+    name: "French"
     weight: 1
     flag: 🇫🇷
 
   de:
-    title: "German"
+    name: "German"
     weight: 1
     flag: 🇩🇪
   es:
-    title: "Spanish"
+    name: "Spanish"
     weight: 1
     flag: 🇪🇸

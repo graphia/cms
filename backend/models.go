@@ -94,6 +94,13 @@ type RepositoryInfo struct {
 	LatestRevision string `json:"latest_revision" validate:"required"`
 }
 
+// ServerInfo holds basic details/counts displayed on the dashboard
+type ServerInfo struct {
+	Users   int            `json:"users"`
+	Commits int            `json:"commits"`
+	Counts  map[string]int `json:"files"`
+}
+
 // Language contains a language's name and code for localisation
 type Language struct {
 	Code string `json:"code"`

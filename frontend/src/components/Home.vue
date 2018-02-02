@@ -5,12 +5,12 @@
 
 		<h1>Dashboard</h1>
 
-		<DirectorySummary class="directories"/>
-
 		<div class="row mt-4">
 
 			<div class="col col-md-4">
-				<Publisher/>
+				<Publisher class="publisher-card"/>
+
+				<DirectoryNewButton class="new-directory-card mt-4"/>
 			</div>
 
 			<div class="col-md-5">
@@ -31,28 +31,11 @@
 					</ol>
 				</div>
 			</div>
+			<Stats/>
 
-			<div class="col-md-3">
-				<div class="card statistics">
-					<div class="card-body">
-						<h4 class="card-title">Statistics</h4>
-
-						<dl class="row">
-							<dt class="col-sm-9">Users</dt>
-							<dd class="col-sm-3">4</dd>
-
-							<dt class="col-sm-9">Commits</dt>
-							<dd class="col-sm-3">38</dd>
-
-							<dt class="col-sm-9">Files</dt>
-							<dd class="col-sm-3">12</dd>
-						</dl>
-
-					</div>
-
-				</div>
-			</div>
 		</div>
+
+		<DirectorySummary class="directories"/>
 
 	</div>
 </template>
@@ -60,8 +43,10 @@
 <script lang="babel">
 	import Broadcast from './Broadcast';
 	import DirectorySummary from './Directory/Summary';
+	import DirectoryNewButton from './Directory/NewButton';
 	import Breadcrumbs from './Utilities/Breadcrumbs';
 	import Publisher from './Home/Publisher';
+	import Stats from './Home/Stats';
 
 	import CMSBreadcrumb from '../javascripts/models/breadcrumb.js';
 	import config from '../javascripts/config.js';
@@ -82,9 +67,11 @@
 		},
 
 		components: {
+			DirectoryNewButton,
 			DirectorySummary,
 			Breadcrumbs,
-			Publisher
+			Publisher,
+			Stats
 		},
 
 		computed: {

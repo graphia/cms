@@ -60,8 +60,7 @@ end
 
 # Used on the document summary feature
 When %r{^I click the 'Swedish' link$} do
-
-  within("a[data-filename='#{@document}'] li[data-lang='Swedish']") do
+  within("div[data-filename='#{@document}'] li[data-lang='Swedish']") do
     link = page.find("a")
     scroll_into_view(link)
     link.click
@@ -130,7 +129,7 @@ Then %r{^I should see my document listed under '(.*?)'$} do |dir|
 end
 
 Then %r{^it should have 'Finnish' and 'Swedish' flags$} do
-  within("a[data-filename='#{@document}']") do
+  within("div[data-filename='#{@document}']") do
     expect(page).to have_css("li[data-lang='Finnish']", text: "🇫🇮")
     expect(page).to have_css("li[data-lang='Swedish']", text: "🇸🇪")
   end

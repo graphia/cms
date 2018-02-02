@@ -16,6 +16,7 @@ REPO_TEMPLATE_PATH = '../data/repositories/multiple_filetypes'
 PID_PATH = '../tmp/cucumber-browser.pid'
 DB_PATH = '../../db/cucumber.db'
 SAMPLES_PATH = '../data/samples'
+IMAGES_PATH = '../data/images'
 WEB_SERVER_START_ATTEMPTS = 10 # number of 0.1 second delays to wait for server
 DOWNLOAD_DIR = "/tmp/downloads" # needs to be in /tmp because permissions 🚨
 

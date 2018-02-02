@@ -1,5 +1,5 @@
 <template>
-    <svg :height="height" :class="cssClasses" :viewBox="viewBox" version="1.1" aria-hidden="true" role="presentation" :width="width" :icon-name="iconName" v-html="iconPath">
+    <svg :height="height" class="octicon" :class="cssClasses" :viewBox="viewBox" version="1.1" aria-hidden="true" role="presentation" :width="width" :icon-name="iconName" v-html="iconPath">
     </svg>
 </template>
 
@@ -78,6 +78,7 @@
         display: inline-block;
         vertical-align: middle;
         fill: currentColor;
+		padding-right: 0.4rem;
     }
 
     .h1 .octicon, .h2 .octicon, .h3 .octicon, .h4 .octicon, .h5 .octicon, .h6 .octicon,

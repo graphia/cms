@@ -2,39 +2,47 @@ import config from '../config.js';
 import checkResponse from '../response.js';
 import store from '../store.js';
 
-export default class CMSServer {
-
+class CMSServerInfo {
 	constructor() {
-		this.repositoryInfo = null;
-	}
+		this.users = null;
+		this.commits = null;
+		this.files = {};
+	};
 
-	static async getLatestRevision() {
-		let path = `${config.api}/repository_info`;
+	async refresh() {
 
-		try {
-			let response = await fetch(path, {
-				method: "GET",
-				headers: store.state.auth.authHeader()
-			});
+		let path = `${config.api}/server_info`;
 
-			if (!checkResponse(response.status)) {
-				console.error(response);
-				throw response;
-			};
+		let response = await fetch(path, {
+			method: "GET",
+			headers: store.state.auth.authHeader()
+		});
 
-			let ri = await response.json();
-			store.commit("setLatestRevision", ri.latest_revision);
-
-			return response;
-
-		}
-		catch(err) {
-			console.error("There was a problem retrieving repository information", err);
+		if (!checkResponse(response.status)) {
+			console.error(response);
+			throw response;
 		};
+
+		let si = await response.json();
+
+		this.commits = si.commits;
+		this.users = si.users;
+		this.files = si.files;
+
+		return response;
 
 	};
 
-	static async getTranslationInfo() {
+};
+
+class CMSTranslationInfo {
+	constructor() {
+		this.defaultLanguage = "en";
+		this.languages = [];
+		this.translationEnabled = false;
+	};
+
+	async refresh() {
 		let path = `${config.api}/translation_info`;
 
 		let response = await fetch(path, {
@@ -42,26 +50,56 @@ export default class CMSServer {
 			headers: store.state.auth.authHeader()
 		});
 
-		try {
-
-			if (!checkResponse(response.status)) {
-				console.error(response);
-				throw response;
-			};
-
-			let translationInfo = await response.json();
-
-			store.state.defaultLanguage = translationInfo.default_language;
-			store.state.languages = translationInfo.languages;
-			store.state.translationEnabled = translationInfo.translation_enabled;
-
-			return response;
-		}
-		catch(err) {
-			console.error("Could not retreive language information", err);
+		if (!checkResponse(response.status)) {
+			console.error(response);
 		};
 
+		let ti = await response.json();
+
+		this.defaultLanguage = ti.default_language;
+		this.languages = ti.languages;
+		this.translationEnabled = ti.translation_enabled;
+
 		return response;
+
+	};
+
+};
+
+class CMSRepositoryInfo {
+
+	constructor() {
+		this.latestRevision = null;
+	}
+
+	async refresh() {
+		let path = `${config.api}/repository_info`;
+
+		let response = await fetch(path, {
+			method: "GET",
+			headers: store.state.auth.authHeader()
+		});
+
+		if (!checkResponse(response.status)) {
+			console.error(response);
+		};
+
+		let ri = await response.json();
+
+		this.latestRevision = ri.latest_revision;
+
+		return response;
+
+	};
+
+}
+
+export default class CMSServer {
+
+	constructor() {
+		this.serverInfo = new CMSServerInfo;
+		this.translationInfo = new CMSTranslationInfo;
+		this.repositoryInfo = new CMSRepositoryInfo;
 	};
 
 }
