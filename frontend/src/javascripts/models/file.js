@@ -297,7 +297,6 @@ export default class CMSFile {
 		let doc = new CMSFile(file);
 		store.state.activeDocument = doc;
 
-		console.debug("setting latest revision to", file.repository_info.latest_revision)
 		await store.commit("setLatestRevision", file.repository_info.latest_revision);
 
 		doc.fetchAttachments();
