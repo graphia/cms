@@ -413,7 +413,7 @@ func createTranslation(nt NewTranslation, user User) (oid *git.Oid, target strin
 
 	// set the new translation to draft
 	sf.FrontMatter.Draft = true
-	contents := sf.ToMarkdown(*sf.Markdown, sf.FrontMatter)
+	contents := sf.ToMarkdown()
 
 	boid, err := repo.CreateBlobFromBuffer(contents)
 	if err != nil {
@@ -1096,11 +1096,7 @@ func extractContents(ncf NewCommitFile) (contents []byte, err error) {
 
 	} else if filepath.Ext(ncf.Filename) == ".md" {
 
-		return []byte(
-			particle.YAMLEncoding.EncodeToString(
-				[]byte(ncf.Body), &ncf.FrontMatter,
-			),
-		), err
+		return ncf.ToMarkdown(), err
 
 	} else {
 		return []byte(ncf.Body), err

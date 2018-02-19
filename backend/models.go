@@ -32,6 +32,14 @@ type NewCommitFile struct {
 	Base64Encoded bool        `json:"base_64_encoded"`
 }
 
+// ToMarkdown returns the file's actual contents, frontmatter and document body
+func (ncf NewCommitFile) ToMarkdown() (b []byte) {
+	md := []byte(ncf.Body)
+	b = make([]byte, particle.YAMLEncoding.EncodeLen(md, ncf.FrontMatter))
+	particle.YAMLEncoding.Encode(b, md, ncf.FrontMatter)
+	return b
+}
+
 // NewTranslation creates a new copy of a file ready for translation
 type NewTranslation struct {
 	SourceFilename string `json:"source_filename" validate:"required"`
@@ -140,9 +148,12 @@ func (f File) FullPath() string {
 	return filepath.Join(f.Path, f.Document, f.Filename)
 }
 
-// ToMarkdown returns
-func (f File) ToMarkdown(body string, fm FrontMatter) []byte {
-	return []byte(particle.YAMLEncoding.EncodeToString([]byte(body), &fm))
+// ToMarkdown returns the file's actual contents, frontmatter and document body
+func (f File) ToMarkdown() (b []byte) {
+	md := []byte(*f.Markdown)
+	b = make([]byte, particle.YAMLEncoding.EncodeLen(md, f.FrontMatter))
+	particle.YAMLEncoding.Encode(b, md, f.FrontMatter)
+	return b
 }
 
 // Attachment belongs to a File, usually an image
