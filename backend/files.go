@@ -399,22 +399,10 @@ func createTranslation(nt NewTranslation, user User) (oid *git.Oid, target strin
 		return oid, target, err
 	}
 
-	tree, err := headTree(repo)
+	sf, err := getFile(nt.Path, nt.SourceDocument, nt.SourceFilename, true, true)
 	if err != nil {
 		return oid, target, err
 	}
-	source := filepath.Join(nt.Path, nt.SourceDocument, nt.SourceFilename)
-
-	entry, err := tree.EntryByPath(source)
-	if err != nil {
-		return oid, target, err
-	}
-
-	blob, err := repo.LookupBlob(entry.Id)
-	if err != nil {
-		return oid, target, err
-	}
-	defer blob.Free()
 
 	index, err := repo.Index()
 	if err != nil {
@@ -423,12 +411,16 @@ func createTranslation(nt NewTranslation, user User) (oid *git.Oid, target strin
 	}
 	defer index.Free()
 
-	boid, err := repo.CreateBlobFromBuffer(blob.Contents())
+	// set the new translation to draft
+	sf.FrontMatter.Draft = true
+	contents := sf.ToMarkdown(*sf.Markdown, sf.FrontMatter)
+
+	boid, err := repo.CreateBlobFromBuffer(contents)
 	if err != nil {
 		return oid, target, err
 	}
 
-	ie := buildIndexEntryTranslation(boid, nt, len(blob.Contents()))
+	ie := buildIndexEntryTranslation(boid, nt, len(contents))
 
 	err = index.Add(&ie)
 	if err != nil {

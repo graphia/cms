@@ -99,7 +99,8 @@ func createRandomFile(repo *git.Repository, document, lc, msg string) (*git.Oid,
 		Files: []NewCommitFile{
 			NewCommitFile{
 				Body:     "# The quick brown fox\n\njumped over the lazy dog",
-				Filename: filename,
+				Filename: fn,
+				Document: document,
 				Path:     "documents",
 				FrontMatter: FrontMatter{
 					Title:  "Document Twelve",

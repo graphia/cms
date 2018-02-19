@@ -1,8 +1,10 @@
 package main
 
 import (
+	"path/filepath"
 	"time"
 
+	"github.com/graphia/particle"
 	"gopkg.in/libgit2/git2go.v25"
 )
 
@@ -131,6 +133,16 @@ type File struct {
 	DirectoryInfo  *DirectoryInfo  `json:"directory_info,omitempty"`
 	RepositoryInfo *RepositoryInfo `json:"repository_info,omitempty"`
 	Translations   []string        `json:"translations"`
+}
+
+// FullPath constructs the absolute path using the path, document and filename
+func (f File) FullPath() string {
+	return filepath.Join(f.Path, f.Document, f.Filename)
+}
+
+// ToMarkdown returns
+func (f File) ToMarkdown(body string, fm FrontMatter) []byte {
+	return []byte(particle.YAMLEncoding.EncodeToString([]byte(body), &fm))
 }
 
 // Attachment belongs to a File, usually an image

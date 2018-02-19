@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -22,7 +21,7 @@ func Test_createTranslation(t *testing.T) {
 	// loadConfig overwrites repo config written by
 	// setupSmallTestRepo, so manually set it back to
 	// repoPath
-	config.Repository = filepath.Join(repoPath)
+	config.Repository = repoPath
 
 	type args struct {
 		nt   NewTranslation
@@ -94,6 +93,7 @@ func Test_createTranslation(t *testing.T) {
 			oid, fn, err := createTranslation(tt.args.nt, tt.args.user)
 
 			if tt.wantErr {
+				Debug.Println("returning!")
 				assert.Equal(t, tt.errMsg, err.Error())
 				return
 			}
@@ -107,10 +107,16 @@ func Test_createTranslation(t *testing.T) {
 			_, err = os.Stat(filepath.Join(repoPath, tt.args.nt.Path, tt.args.nt.SourceDocument, tfn))
 			assert.False(t, os.IsNotExist(err))
 
-			// check source and target are equal
-			source, _ := ioutil.ReadFile(filepath.Join(repoPath, tt.args.nt.Path, tt.args.nt.SourceFilename))
-			target, _ := ioutil.ReadFile(filepath.Join(repoPath, tt.args.nt.Path, tfn))
-			assert.Equal(t, source, target)
+			source, _ := getFile(tt.args.nt.Path, tt.args.nt.SourceDocument, tt.args.nt.SourceFilename, true, false)
+			target, _ := getFile(tt.args.nt.Path, tt.args.nt.SourceDocument, tfn, true, false)
+
+			// check source and target markdown hasn't changed and source was not in Draft mode
+			assert.Equal(t, source.Markdown, target.Markdown)
+			assert.False(t, source.FrontMatter.Draft, false)
+
+			// check that the target has been set to draft
+			assert.NotEqual(t, source, target)
+			assert.True(t, target.FrontMatter.Draft)
 
 			// check the commit message is correct
 			repo, _ := repository(config)
