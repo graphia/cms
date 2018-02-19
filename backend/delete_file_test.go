@@ -166,7 +166,7 @@ func TestDeleteFilesRepoOutOfDate(t *testing.T) {
 	repo, _ := repository(config)
 
 	// importantly, add another file to outdate the repo
-	_, _ = createRandomFile(repo, "document_5.md", "whoosh")
+	_, _ = createRandomFile(repo, "document_5", "en", "whoosh")
 
 	_, err := deleteFiles(nc, user)
 

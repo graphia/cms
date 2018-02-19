@@ -531,7 +531,7 @@ func TestApiCreateFileInDirectoryRepoOutOfDate(t *testing.T) {
 	}
 
 	// Insert another commit so firstCommit is no longer current
-	_, _ = createRandomFile(repo, "document_5.md", "whoosh")
+	_, _ = createRandomFile(repo, "document_5", "en", "whoosh")
 
 	payload, err := json.Marshal(nc)
 	if err != nil {
@@ -760,7 +760,7 @@ func TestApiUpdateFileInDirectoryRepoOutOfDate(t *testing.T) {
 	}
 
 	// Insert another commit so firstCommit is no longer current
-	_, _ = createRandomFile(repo, "document_5.md", "whoosh")
+	_, _ = createRandomFile(repo, "document_5", "en", "whoosh")
 
 	payload, _ := json.Marshal(nc)
 
@@ -1180,7 +1180,7 @@ func TestApiDeleteDirectoryRepoOutOfDate(t *testing.T) {
 		RepositoryInfo: RepositoryInfo{LatestRevision: firstCommit.String()},
 	}
 
-	_, _ = createRandomFile(repo, "document_5.md", "whoosh")
+	_, _ = createRandomFile(repo, "document_5", "en", "whoosh")
 
 	target := fmt.Sprintf("%s/%s/%s", server.URL, "api/directories", ncd.Path)
 
@@ -1946,7 +1946,7 @@ func Test_apiTranslateFileHandler(t *testing.T) {
 
 			if tt.doPriorUpdate {
 				repo, _ := repository(config)
-				_, _ = createRandomFile(repo, "document_12.md", "whoosh")
+				_, _ = createRandomFile(repo, "document_12", "en", "whoosh")
 			}
 
 			resp, _ := client.Do(req)

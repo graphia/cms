@@ -77,7 +77,7 @@ func TestHeadCommit(t *testing.T) {
 	assert.Equal(t, hc.Id(), oid)
 }
 
-func createRandomFile(repo *git.Repository, filename, msg string) (*git.Oid, error) {
+func createRandomFile(repo *git.Repository, document, lc, msg string) (*git.Oid, error) {
 
 	user := User{
 		Name:  "Barney Gumble",
@@ -85,6 +85,12 @@ func createRandomFile(repo *git.Repository, filename, msg string) (*git.Oid, err
 	}
 
 	ri, _ := getRepositoryInfo()
+
+	fn := "index.md"
+
+	if lc != "en" {
+		fn = fmt.Sprintf("index.%s.md", lc)
+	}
 
 	nc := NewCommit{
 		Message:        msg,
@@ -114,7 +120,7 @@ func TestAllCommits(t *testing.T) {
 
 	msg := "Well well, if it isn't Mr Plow"
 
-	_, err := createRandomFile(repo, "document_12.md", msg)
+	_, err := createRandomFile(repo, "document_12.md", "en", msg)
 	if err != nil {
 		panic(err)
 	}
@@ -142,6 +148,7 @@ func TestAllCommitsWithLimitOf3(t *testing.T) {
 		_, err := createRandomFile(
 			repo,
 			fmt.Sprintf("document_%d.md", i),
+			"en",
 			fmt.Sprintf("Commit Message %d", i),
 		)
 
@@ -722,7 +729,7 @@ func Test_checkLatestRevision(t *testing.T) {
 	firstOid, _ := setupSmallTestRepo(gitRepoPath)
 	repo, _ := repository(config)
 
-	secondOid, _ := createRandomFile(repo, "document_6.md", "Second commit!")
+	secondOid, _ := createRandomFile(repo, "document_6", "en", "Second commit!")
 
 	type args struct {
 		repo *git.Repository
@@ -784,6 +791,7 @@ func Test_getCommitsCount(t *testing.T) {
 				createRandomFile(
 					repo,
 					fmt.Sprintf("%d.md", i),
+					"en",
 					fmt.Sprintf("Added file %d", i),
 				)
 			}

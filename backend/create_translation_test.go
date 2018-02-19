@@ -88,7 +88,7 @@ func Test_createTranslation(t *testing.T) {
 
 			if tt.createDuplicate {
 				repo, _ := repository(config)
-				_, _ = createRandomFile(repo, "document_1.fi.md", "Whoosh")
+				_, _ = createRandomFile(repo, "document_1", "fi", "Whoosh")
 			}
 
 			oid, fn, err := createTranslation(tt.args.nt, tt.args.user)
