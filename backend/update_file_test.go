@@ -118,7 +118,7 @@ func TestUpdateFilesRepoOutOfDate(t *testing.T) {
 	}
 
 	repo, _ := repository(config)
-	_, _ = createRandomFile(repo, "document_5.md", "whoosh")
+	_, _ = createRandomFile(repo, "document_5.md", "en", "whoosh")
 
 	oid, err := updateFiles(nc, user)
 

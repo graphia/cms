@@ -1,5 +1,6 @@
 ---
 title: document 1
+draft: false
 ---
 # Document 1
 

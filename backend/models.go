@@ -1,8 +1,10 @@
 package main
 
 import (
+	"path/filepath"
 	"time"
 
+	"github.com/graphia/particle"
 	"gopkg.in/libgit2/git2go.v25"
 )
 
@@ -28,6 +30,14 @@ type NewCommitFile struct {
 	Body          string      `json:"body"`
 	FrontMatter   FrontMatter `json:"frontmatter"`
 	Base64Encoded bool        `json:"base_64_encoded"`
+}
+
+// ToMarkdown returns the file's actual contents, frontmatter and document body
+func (ncf NewCommitFile) ToMarkdown() (b []byte) {
+	md := []byte(ncf.Body)
+	b = make([]byte, particle.YAMLEncoding.EncodeLen(md, ncf.FrontMatter))
+	particle.YAMLEncoding.Encode(b, md, ncf.FrontMatter)
+	return b
 }
 
 // NewTranslation creates a new copy of a file ready for translation
@@ -131,6 +141,19 @@ type File struct {
 	DirectoryInfo  *DirectoryInfo  `json:"directory_info,omitempty"`
 	RepositoryInfo *RepositoryInfo `json:"repository_info,omitempty"`
 	Translations   []string        `json:"translations"`
+}
+
+// FullPath constructs the absolute path using the path, document and filename
+func (f File) FullPath() string {
+	return filepath.Join(f.Path, f.Document, f.Filename)
+}
+
+// ToMarkdown returns the file's actual contents, frontmatter and document body
+func (f File) ToMarkdown() (b []byte) {
+	md := []byte(*f.Markdown)
+	b = make([]byte, particle.YAMLEncoding.EncodeLen(md, f.FrontMatter))
+	particle.YAMLEncoding.Encode(b, md, f.FrontMatter)
+	return b
 }
 
 // Attachment belongs to a File, usually an image
