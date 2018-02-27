@@ -328,6 +328,8 @@ func listRootDirectories() (directories []Directory, err error) {
 
 func listRootDirectorySummary() (summary []DirectorySummary, err error) {
 
+	// Initialise the slice so we get an empty array instead of null
+	summary = []DirectorySummary{}
 	var contents []FileItem
 
 	repo, err := repository(config)

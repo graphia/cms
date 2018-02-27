@@ -339,7 +339,7 @@ export default class CMSFile {
 
 		if (!this.changed) {
 			console.warn("Update called but content hasn't changed");
-		}
+		};
 
 		var path = `${config.api}/directories/${this.path}/documents/${this.document}/files/${this.filename}`;
 

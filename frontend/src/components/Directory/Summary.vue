@@ -8,11 +8,9 @@
 		</div>
 
 		<div class="col col-md-4" v-else-if="directories.length == 0">
-			<div class="jumbotron">
-				{{ directories.length }}
-				<p>No directories</p>
-
-				<DirectoryNewButton/>
+			<div class="alert alert-info">
+				Your repository is still empty! Once created, your documents
+				will appear here!
 			</div>
 		</div>
 

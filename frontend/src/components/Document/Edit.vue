@@ -134,6 +134,13 @@
 					return;
 				};
 
+				let json = await response.json();
+
+				await this.$store.commit(
+					"setLatestRevision",
+					json.latest_revision
+				);
+
 				this.redirectToShowDocument(this.document.path, this.document.filename);
 
 			},

@@ -1,0 +1,35 @@
+languageCode: "en-gb"
+title: "Graphia CMS"
+buildDrafts: false
+theme: graphia-minimal-theme
+themesDir: /var/graphia/hugo/themes
+contentDir: /var/graphia/hugo/content
+relativeURLs: true
+publishDir: /var/graphia/public
+
+pygmentsCodeFences: true
+pygmentsUseClasses: true
+
+defaultContentLanguage: "en"
+defaultContentLanguageInSubdir: false
+
+Languages:
+  en:
+    title: "English"
+    weight: 0
+    flag: 🇬🇧
+
+  fr:
+    title: "French"
+    weight: 1
+    flag: 🇫🇷
+
+  de:
+    title: "German"
+    weight: 1
+    flag: 🇩🇪
+
+  es:
+    title: "Spanish"
+    weight: 1
+    flag: 🇪🇸
