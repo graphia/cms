@@ -19,7 +19,7 @@ func TestDeleteDirectories(t *testing.T) {
 		Email: "moe@moes.com",
 	}
 
-	ncd := NewCommitDirectory{Path: "appendices"}
+	ncd := NewCommitDirectory{Path: "documents"}
 
 	nc := NewCommit{
 		Message:        "Deleted directories",

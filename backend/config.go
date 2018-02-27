@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"gopkg.in/yaml.v2"
 )
@@ -55,16 +56,23 @@ func (c Config) HTTPSListenPortWithColon() string {
 
 func loadConfig(path *string) (Config, error) {
 
+	var configFile []byte
+
 	// get the current working directory
 	wd, err := os.Getwd()
 
-	// if the file isn't found or can't be accessed
+	// if the wd isn't found or can't be accessed
 	if err != nil {
 		return config, err
 	}
 
-	// read the config file
-	configFile, err := ioutil.ReadFile(filepath.Join(wd, *path))
+	// read the config file, directly if absolute otherwise
+	// from the current working dir
+	if strings.HasPrefix(*path, "/") {
+		configFile, err = ioutil.ReadFile(*path)
+	} else {
+		configFile, err = ioutil.ReadFile(filepath.Join(wd, *path))
+	}
 
 	if err != nil {
 		return config, err

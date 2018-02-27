@@ -34,7 +34,7 @@ func TestInvalidRepo(t *testing.T) {
 	_, err := repository(invalidConfig)
 
 	msg := fmt.Sprintf(
-		"Failed to resolve path '%s': No such file or directory",
+		"failed to resolve path '%s': No such file or directory",
 		filepath.Join(wd, invalidConfig.Repository),
 	)
 

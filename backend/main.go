@@ -22,7 +22,7 @@ var (
 	// see, https://github.com/Microsoft/vscode-go/issues/1134 so for ease now set it to the
 	// location of the test config
 	//
-	argConfigPath = flag.String("config", "/etc/graphia.yml", "the config file")
+	argConfigPath = flag.String("config", "/etc/graphia/cms.yml", "the config file")
 	logEnabled    = flag.Bool("log-to-file", false, "enable logging")
 	verifyKey     *rsa.PublicKey
 	signKey       *rsa.PrivateKey
