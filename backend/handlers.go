@@ -406,7 +406,7 @@ func apiListDirectoriesHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 
-		var msg = err.Error()
+		var msg = strings.ToLower(err.Error())
 
 		// no directory found 404
 		if strings.HasPrefix(msg, "failed to resolve path") {
