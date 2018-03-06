@@ -11,7 +11,7 @@ https_cert: /etc/graphia/keys/ssl/server.cert
 
 repository: /var/graphia/hugo/content
 logfile: /var/log/graphia/prod.log
-database: /var/graphia/users.db
+database: /var/graphia/db/users.db
 static: /var/graphia/public
 hugo_config_file: /etc/graphia/hugo.yml
 hugo_bin: /usr/local/bin/hugo
