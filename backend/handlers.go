@@ -320,6 +320,7 @@ func setupCreateInitialUserHandler(w http.ResponseWriter, r *http.Request) {
 	user := User{}
 	json.NewDecoder(r.Body).Decode(&user)
 	user.Active = true
+	user.Admin = true
 
 	// create the user
 	err = createUser(user)

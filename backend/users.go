@@ -31,6 +31,7 @@ type User struct {
 	Password    string `json:"password" validate:"required,min=6"`
 	Email       string `json:"email" storm:"unique" validate:"email,required"`
 	Active      bool   `json:"active"`
+	Admin       bool   `json:"admin"`
 	TokenString string `json:"token_string" storm:"unique"`
 }
 
