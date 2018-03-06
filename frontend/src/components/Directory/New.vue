@@ -96,7 +96,11 @@
 				if (!checkResponse(response.status)) {
 					console.error(response.status);
 					return;
-				}
+				};
+
+				let json = await response.json();
+
+				await this.$store.commit("setLatestRevision", json.oid);
 
 				// new directory created successfully, show a message
 				this.$store.state.broadcast.addMessage(

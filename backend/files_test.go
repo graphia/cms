@@ -408,7 +408,7 @@ func TestExtractContents(t *testing.T) {
 			// Multiline string so any leading whitespace remains 😒
 			wantContents: []byte(`---
 author: Bernice Hibbert
-date: 2016-04-05
+date: "2016-04-05"
 draft: true
 synopsis: Use all of the characters
 tags: []
@@ -483,7 +483,7 @@ the quick *brown* fox jumped over the **lazy** dog`,
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			contents, _ := extractContents(tt.args.ncf)
-			assert.Equal(t, tt.wantContents, contents)
+			assert.Equal(t, string(tt.wantContents), string(contents))
 		})
 	}
 }

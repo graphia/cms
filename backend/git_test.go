@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 	"testing"
 	"time"
 
@@ -34,11 +35,11 @@ func TestInvalidRepo(t *testing.T) {
 	_, err := repository(invalidConfig)
 
 	msg := fmt.Sprintf(
-		"Failed to resolve path '%s': No such file or directory",
+		"failed to resolve path '%s': no such file or directory",
 		filepath.Join(wd, invalidConfig.Repository),
 	)
 
-	assert.Contains(t, err.Error(), msg)
+	assert.Contains(t, strings.ToLower(err.Error()), strings.ToLower(msg))
 }
 
 // headCommit

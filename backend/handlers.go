@@ -406,10 +406,10 @@ func apiListDirectoriesHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 
-		var msg = err.Error()
+		var msg = strings.ToLower(err.Error())
 
 		// no directory found 404
-		if strings.HasPrefix(msg, "Failed to resolve path") {
+		if strings.HasPrefix(msg, "failed to resolve path") {
 			fr = FailureResponse{
 				Message: fmt.Sprintf("No repository found"),
 			}
@@ -418,7 +418,7 @@ func apiListDirectoriesHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// directory found but not git-controlled 400
-		if strings.HasPrefix(msg, "Could not find repository") {
+		if strings.HasPrefix(msg, "could not find repository") {
 			fr = FailureResponse{
 				Message: fmt.Sprintf("Not a git repository"),
 			}
@@ -430,6 +430,7 @@ func apiListDirectoriesHandler(w http.ResponseWriter, r *http.Request) {
 		fr = FailureResponse{
 			Message: fmt.Sprintf("Could not retrieve directories: %s", msg),
 		}
+
 		JSONResponse(fr, http.StatusBadRequest, w)
 		return
 

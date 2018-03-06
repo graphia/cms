@@ -1,0 +1,83 @@
+host: localhost
+
+# HTTP settings
+http_listen_port: 80
+
+# HTTPS settings
+https_enabled: true
+https_listen_port: 443
+https_key: /etc/graphia/keys/ssl/server.key
+https_cert: /etc/graphia/keys/ssl/server.cert
+
+repository: /var/graphia/hugo/content
+logfile: /var/log/graphia/prod.log
+database: /var/graphia/db/users.db
+static: /var/graphia/public
+hugo_config_file: /etc/graphia/hugo.yml
+hugo_bin: /usr/local/bin/hugo
+private_key_path: /etc/graphia/keys/passwords/app.rsa
+public_key_path: /etc/graphia/keys/passwords/app.rsa.pub
+ssh_enabled: true
+ssh_listen_port: 22
+git_bin_path: /usr/bin/
+git_repo_path: ./hugo
+git_user: git
+file_categories:
+  documents:
+    - .md
+  images:
+    - .png
+    - .jpg
+    - .jpeg
+    - .gif
+  structured data:
+    - .xml
+    - .json
+  tabular data:
+    - .csv
+media_types:
+
+    # image types
+    bmp: image/bmp
+    gif: image/gif
+    jpe: image/jpeg
+    jpeg: image/jpeg
+    jpg: image/jpeg
+    png: image/png
+    pnz: image/png
+    tif: image/tiff
+    tiff: image/tiff
+    webp: image/webp
+
+    # structured data types
+    xml: text/xml
+    json: text/json
+
+    # tabular data types
+    csv: text/csv
+
+translation_enabled: true
+
+default_language: en
+enabled_languages:
+  - en
+  - es
+  - de
+  - fr
+
+all_languages:
+  en:
+    name: English
+    flag: 🇬🇧
+  es:
+    name: Spanish
+    flag: 🇪🇸
+  fr:
+    name: French
+    flag: 🇫🇷
+  de:
+    name: German
+    flag: 🇩🇪
+  it:
+    name: Italian
+    flag: 🇮🇹

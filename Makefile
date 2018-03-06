@@ -2,24 +2,22 @@ SRC := $(filter-out backend/%_test.go,$(wildcard backend/*.go))
 ALL := $(wildcard backend/*.go)
 DEVELOPMENT_CONFIG = "config/development.yml"
 TEST_CONFIG = "../config/test.yml"
-HUGO_CONFIG = "./config/hugo.development.yml"
 PRIVATE_KEY_PATH = "./keys/passwords/app.rsa"
 PUBLIC_KEY_PATH = "./keys/passwords/app.rsa.pub"
 SSL_CERT_PATH = "./keys/ssl/server.crt"
 SSL_KEY_PATH = "./keys/ssl/server.key"
 
-build:
+refresh-dist:
 	rm -rf dist
 	mkdir dist
+
+build: refresh-dist
 	cd frontend && NODE_ENV=production brunch build --production
 	cp -R frontend/public/cms dist/cms
 	go build -o graphia-cms ${ALL}
-	hugo --config ${HUGO_CONFIG}
 
 # Faster for working with cucumber
-build-dev:
-	rm -rf dist
-	mkdir dist
+build-dev: refresh-dist
 	cd frontend && brunch build
 	cp -R frontend/public/cms dist/cms
 	go build -o graphia-cms ${ALL}

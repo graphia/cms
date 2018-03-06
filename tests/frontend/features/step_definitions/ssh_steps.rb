@@ -53,6 +53,8 @@ end
 
 When %r{^I try to clone the repository "(.*?)"$} do |name|
 
+  Dir.mkdir("../tmp/ssh") unless Dir.exists?("../tmp/ssh")
+
   # First make sure the target dir doesn't exist
   @clone_dir = "content"
   @clone_location = "../tmp/ssh/#{@clone_dir}"
