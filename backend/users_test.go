@@ -21,6 +21,7 @@ var (
 		Name:     "Elizabeth Hoover",
 		Password: "SuperSecret123",
 		Active:   true,
+		Admin:    false,
 	}
 
 	ck = User{
@@ -30,6 +31,7 @@ var (
 		Name:     "Cookie Kwan",
 		Password: "P@ssword!",
 		Active:   true,
+		Admin:    true,
 	}
 
 	ds = User{
@@ -39,6 +41,7 @@ var (
 		Name:     "Dolph Starbeam",
 		Password: "mightypig",
 		Active:   false,
+		Admin:    false,
 	}
 
 	sb = User{
@@ -48,6 +51,7 @@ var (
 		Name:     "Selma Bouvier",
 		Password: "ilubjubjub",
 		Active:   false,
+		Admin:    false,
 	}
 )
 

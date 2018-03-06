@@ -64,13 +64,14 @@ func main() {
 
 	Debug.Println("Initialised with config:", config)
 
-	var r, pr *vestigo.Router
+	var r, pr, ar *vestigo.Router
 	var n *negroni.Negroni
 
 	setupKeys()
 	r = unprotectedRouter()
 	pr = protectedRouter()
-	n = setupMiddleware(r, pr)
+	ar = adminRouter()
+	n = setupMiddleware(r, pr, ar)
 	db = setupDB(config.Database)
 
 	Debug.Println("Router and Middleware set up")
@@ -156,9 +157,15 @@ func setupKeys() {
 	}
 }
 
-func setupMiddleware(r, pr *vestigo.Router) (n *negroni.Negroni) {
+func setupMiddleware(r, pr, ar *vestigo.Router) (n *negroni.Negroni) {
 	n = negroni.New()
 	n.UseHandler(r)
+
+	r.Handle("/api/admin/*", negroni.New(
+		negroni.HandlerFunc(ValidateTokenMiddleware),
+		negroni.HandlerFunc(ValidateAdminMiddleware),
+		negroni.Wrap(ar),
+	))
 
 	r.Handle("/api/*", negroni.New(
 		negroni.HandlerFunc(ValidateTokenMiddleware),
@@ -262,6 +269,17 @@ func protectedRouter() (r *vestigo.Router) {
 
 	// missing operations:
 	// how should file and directory moves/copies be represented?
+
+	return r
+}
+
+// Endpoints only available to users who are Admins
+func adminRouter() (r *vestigo.Router) {
+
+	r = vestigo.NewRouter()
+
+	r.Patch("/api/admin/users/:username", apiUpdateUserHandler)
+	r.Delete("/api/admin/users/:username", apiListUsersHandler)
 
 	return r
 }

@@ -1179,32 +1179,6 @@ func apiGetUserHandler(w http.ResponseWriter, r *http.Request) {
 	JSONResponse(user, http.StatusOK, w)
 }
 
-// apiCreateUser
-func apiCreateUserHandler(w http.ResponseWriter, r *http.Request) {
-	var user User
-	var sr SuccessResponse
-
-	json.NewDecoder(r.Body).Decode(&user)
-
-	user.Active = true
-
-	err := createUser(user)
-	if err != nil {
-		errors := validationErrorsToJSON(err)
-		JSONResponse(errors, http.StatusBadRequest, w)
-		return
-	}
-
-	Debug.Println("User was created successfully", user)
-
-	sr = SuccessResponse{
-		Message: "User created",
-	}
-
-	JSONResponse(sr, http.StatusCreated, w)
-
-}
-
 // apiUpdateUser
 func apiUpdateUserNameHandler(w http.ResponseWriter, r *http.Request) {
 
@@ -1437,10 +1411,6 @@ func apiUserDeletePublicKeyHandler(w http.ResponseWriter, r *http.Request) {
 	JSONResponse(sr, http.StatusOK, w)
 
 }
-
-// apiDeleteUser
-func apiDeleteUserHandler(w http.ResponseWriter, r *http.Request) {}
-
 func apiPublishHandler(w http.ResponseWriter, r *http.Request) {
 	var fr FailureResponse
 

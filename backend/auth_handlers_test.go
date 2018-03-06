@@ -37,13 +37,6 @@ func TestAuthLoginHandler(t *testing.T) {
 	server = httptest.NewServer(unprotectedRouter())
 	var target = fmt.Sprintf("%s/%s", server.URL, "auth/login")
 
-	mh := User{
-		Username: "misshoover",
-		Email:    "e.hoover@springfield.k12.us",
-		Name:     "Elizabeth Hoover",
-		Password: "SuperSecret123",
-	}
-
 	_ = createUser(mh)
 
 	uc := &UserCredentials{
@@ -102,21 +95,14 @@ func TestAuthInvalidLoginHandler(t *testing.T) {
 	server = httptest.NewServer(unprotectedRouter())
 	var target = fmt.Sprintf("%s/%s", server.URL, "auth/login")
 
-	mh := User{
-		Username: "misshoover",
-		Email:    "e.hoover@springfield.k12.us",
-		Name:     "Elizabeth Hoover",
-		Password: "SuperSecret123",
-	}
-
 	_ = createUser(mh)
 
-	uc := &UserCredentials{
+	incorrectCredentials := &UserCredentials{
 		Username: "misshoover",
 		Password: "atotallyIncoRRecTPassw0rd",
 	}
 
-	payload, _ := json.Marshal(uc)
+	payload, _ := json.Marshal(incorrectCredentials)
 
 	b := bytes.NewBuffer(payload)
 
@@ -146,13 +132,6 @@ func TestAuthNonExistantLoginHandler(t *testing.T) {
 	setupTestKeys()
 	server = httptest.NewServer(unprotectedRouter())
 	var target = fmt.Sprintf("%s/%s", server.URL, "auth/login")
-
-	mh := User{
-		Username: "misshoover",
-		Email:    "e.hoover@springfield.k12.us",
-		Name:     "Elizabeth Hoover",
-		Password: "SuperSecret123",
-	}
 
 	_ = createUser(mh)
 
