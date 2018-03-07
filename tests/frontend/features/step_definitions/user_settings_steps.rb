@@ -1,5 +1,5 @@
 Given %r{^I am on my settings page$} do
-  path = "/cms/settings"
+  path = "/cms/settings/my_profile"
   visit(path)
   expect(page.current_path).to eql(path)
 end

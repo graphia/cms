@@ -32,7 +32,7 @@
 							{{ user.persistedName }}
 						</a>
 						<div class="dropdown-menu" aria-labelledby="user-menu">
-							<router-link :to="{name: 'user_settings'}" class="dropdown-item">
+							<router-link :to="{name: 'my_profile'}" class="dropdown-item">
 								Settings
 							</router-link>
 							<a class="dropdown-item logout" href="logout" @click="logout">Logout</a>

@@ -52,7 +52,7 @@ end
 Then %r{^I should see my keys listed by name and fingerprint$} do
   within(".existing-keys") do
     expect(page).to have_css("li#ssh-public-key-1")
-    expect(page).to have_css("h3", "home-desktop")
+    expect(page).to have_css("h3", text: "home-desktop")
     expect(page).to have_content("SHA256:YwVZ0Zs7a3n6MiAK9jH6vrX8jbFDT0UwqWP76JQvlK4")
   end
 end
