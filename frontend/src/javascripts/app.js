@@ -13,7 +13,11 @@ import Commit from '../components/Commit.vue';
 import Home from '../components/Home.vue';
 import MyProfile from '../components/Settings/MyProfile.vue';
 import SSHKeySettings from '../components/Settings/SSHKeySettings.vue';
+
+// User Paths
 import UserSettings from '../components/Settings/UserSettings.vue';
+import UserEdit from '../components/Settings/UserSettings/Edit.vue';
+import UserNew from '../components/Settings/UserSettings/New.vue';
 
 // Document Paths
 import DocumentIndex from '../components/Document/Index.vue';
@@ -59,7 +63,12 @@ const routes = [
 
 	{path: '/cms/settings/my_profile', component: MyProfile, name: 'my_profile', alias: '/cms/settings'},
 	{path: '/cms/settings/keys', component: SSHKeySettings, name: 'ssh_key_settings'},
+
+	// User management
 	{path: '/cms/settings/users', component: UserSettings, name: 'user_settings'},
+	{path: '/cms/settings/users/new', component: UserNew, name: 'user_new'},
+	{path: '/cms/settings/users/:id/edit', component: UserEdit, name: 'user_edit'},
+
 
 	// Directory pages
 	{path: '/cms/new', component: DirectoryNew, name: 'directory_new'},

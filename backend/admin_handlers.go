@@ -15,7 +15,6 @@ func apiCreateUserHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewDecoder(r.Body).Decode(&user)
 
 	user.Active = true
-	user.Admin = false
 
 	err := createUser(user)
 	if err != nil {

@@ -4,6 +4,7 @@ import VueConfig from 'vue-config';
 
 const config = {
 	api: "/api",
+	admin: "/api/admin",
 	auth: "/auth",
 	setup: "/setup",
 	cms: "/cms",

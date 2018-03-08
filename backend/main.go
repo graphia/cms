@@ -273,11 +273,12 @@ func protectedRouter() (r *vestigo.Router) {
 	return r
 }
 
-// Endpoints only available to users who are Admins
+// Endpoints only available to users who are Administrators
 func adminRouter() (r *vestigo.Router) {
 
 	r = vestigo.NewRouter()
 
+	r.Post("/api/admin/users", apiCreateUserHandler)
 	r.Patch("/api/admin/users/:username", apiUpdateUserHandler)
 	r.Delete("/api/admin/users/:username", apiListUsersHandler)
 

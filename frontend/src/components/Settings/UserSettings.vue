@@ -6,11 +6,53 @@
 		<div class="row">
 			<SettingsNavigation/>
 
-			<div class="col-md-9 user-list">
-				<div v-for="(user, i) in users" :key="i">
+			<div class="col-md-9">
 
-					<h1>{{ user.name }}</h1>
+				<div class="row">
+					<div class="col text-right p-2 m-2">
+						<router-link class="btn btn-secondary" :to="{name: 'user_new'}">
+							Create new user
+						</router-link>
+					</div>
 				</div>
+
+				<div class="row user-list">
+
+					<div class="col" v-for="(user, i) in users" :key="i">
+						<div class="card user" :id="`user-${user.id}`">
+
+							<div class="card-header">
+								{{ user.name }}
+
+								<span class="badge badge-info" v-if="user.admin">
+									Admin
+								</span>
+
+								<span class="badge badge-warning" v-if="!user.active">
+									Deactivated
+								</span>
+							</div>
+
+							<div class="card-body">
+								<dl>
+									<dt>Username:</dt>
+									<dd>{{ user.username }}</dd>
+
+									<dt>Email Address:</dt>
+									<dd>{{ user.email }}</dd>
+								</dl>
+							</div>
+
+							<div class="card-footer">
+								<router-link class="btn btn-secondary" :to="{name: 'user_edit', params: {id: user.id}}">
+									Edit
+								</router-link>
+							</div>
+						</div>
+					</div>
+
+				</div>
+
 			</div>
 		</div>
 	</div>

@@ -21,6 +21,8 @@ type LimitedUser struct {
 	Name     string `json:"name"`
 	Username string `json:"username"`
 	Email    string `json:"email"`
+	Admin    bool   `json:"admin"`
+	Active   bool   `json:"active"`
 }
 
 // User holds all information specific to a user
@@ -87,6 +89,8 @@ func (u User) limitedUser() LimitedUser {
 		Username: u.Username,
 		Email:    u.Email,
 		Name:     u.Name,
+		Admin:    u.Admin,
+		Active:   u.Active,
 	}
 }
 
