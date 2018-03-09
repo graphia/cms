@@ -239,11 +239,9 @@ func protectedRouter() (r *vestigo.Router) {
 	r.Get("/api/directories/:directory/documents/:document/attachments", apiGetFileAttachmentsHandler)
 	r.Get("/api/directories/:directory/documents/:document/attachments/:file", apiGetFileAttachmentHandler)
 
-	// user endpoints
+	// user retrieval endpoints
 	r.Get("/api/users", apiListUsersHandler)
-	r.Post("/api/users", apiCreateUserHandler)
 	r.Get("/api/users/:username", apiGetUserHandler)
-	r.Delete("/api/users/:username", apiDeleteUserHandler)
 
 	r.Post("/api/logout", apiLogoutHandler)
 	r.Get("/api/user_info", apiGetUserInfoHandler)

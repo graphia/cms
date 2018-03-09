@@ -12,7 +12,7 @@ Feature: User settings
 	Scenario: Page contents
 		Given I am on the users list page
 		Then there should be a user list
-		And there should be a "Create New User" button
+		And I should see a "Create new user" button
 
 	Scenario: User list
 		Given that '2' extra users have been created
@@ -24,7 +24,7 @@ Feature: User settings
 		Then I should see a section with my user's name as the title
 		And the details listed should be:
 			| Username | rod.flanders                               |
-			| Email    | rod.flanders@springfield.elementary.k12.us |
+			| Email    | rod.flanders@springfield-elementary.k12.us |
 
 	Scenario: Navigating to the edit page
 		Given I am on the users list page
@@ -33,5 +33,11 @@ Feature: User settings
 
 	Scenario: Navigating to the new user page
 		Given I am on the users list page
-		When I click the "Create New User" link
+		When I click the "Create new user" link
 		Then I should be on the new user page
+
+	Scenario: Admin users should be labelled
+		Given there is a regular user and an administrator
+		When I am on the users list page
+		Then the 'administrator' should have an 'Admin' label
+		And the 'regular user' should have no labels

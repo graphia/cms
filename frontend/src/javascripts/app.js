@@ -67,7 +67,7 @@ const routes = [
 	// User management
 	{path: '/cms/settings/users', component: UserSettings, name: 'user_settings'},
 	{path: '/cms/settings/users/new', component: UserNew, name: 'user_new'},
-	{path: '/cms/settings/users/:id/edit', component: UserEdit, name: 'user_edit'},
+	{path: '/cms/settings/users/:username/edit', component: UserEdit, name: 'user_edit'},
 
 
 	// Directory pages

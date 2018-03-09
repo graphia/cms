@@ -38,7 +38,7 @@ export default {
 			return this.$store.state.commit;
 		},
 
-		user() {
+		currentUser() {
 			return this.$store.state.user;
 		}
 

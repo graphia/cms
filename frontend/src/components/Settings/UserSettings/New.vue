@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<div class="col col-md-6">
 		<h1>New user</h1>
 
 		<form @submit="create">
@@ -30,7 +30,7 @@
 			</div>
 
 			<div class="form-group">
-				<label for="email">Email</label>
+				<label for="email">Email address</label>
 
 				<input name="email"
 					type="email"
@@ -42,17 +42,17 @@
 			</div>
 
 			<div class="form-group">
-				<label for="email">
-					<input name="email" type="checkbox" v-model="user.admin"/>
+				<label for="admin">
+					<input name="admin" type="checkbox" v-model="user.admin"/>
 					Administrator
 				</label>
 
 			</div>
 
-			<div class="btn-toolbar">
+			<div class="btn-toolbar" role="group">
 				<input type="submit" value="Create user" class="btn btn-success"/>
 
-				<router-link class="btn btn-secondary" :to="{name: 'user_settings', params: {id: user.id}}">
+				<router-link class="btn btn-secondary ml-2" :to="{name: 'user_settings', params: {id: user.id}}">
 					Cancel
 				</router-link>
 			</div>
@@ -71,7 +71,7 @@
 
 	class User {
 
-		constructor(name, username, email, password, admin = false) {
+		constructor(name, username, email, admin = false) {
 			this.name = name;
 			this.username = username;
 			this.email = email;
@@ -81,7 +81,7 @@
 		async save() {
 			const path = `${config.admin}/users`;
 
-			let response = await fetch(path, {
+			return fetch(path, {
 				method: "POST",
 				headers: store.state.auth.authHeader(),
 				body: JSON.stringify({
@@ -91,6 +91,7 @@
 					admin: this.admin
 				})
 			});
+
 		}
 	}
 
@@ -105,9 +106,21 @@
 			async create(event) {
 				event.preventDefault();
 
-				let response = await this.user.save()
+				let response = await this.user.save();
 
+				if (!checkResponse(response.status)) {
+					console.error("Failed to create user", response);
+					return;
+				};
 
+				this.$store.state.broadcast.addMessage(
+					"success",
+					"User Created",
+					`${this.user.name} will receive an email with instructions on how to log in`,
+					3
+				);
+
+				this.$router.push({name: 'user_settings'});
 
 			}
 		}
