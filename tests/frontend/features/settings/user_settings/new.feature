@@ -11,7 +11,8 @@ Feature: User creation
 
 	Scenario: Page contents
 		Given I am on the new user page
-		Then I should see a form with the following fields:
+		Then the page's title should be "New user"
+		And I should see a form with the following fields:
 			| Name          | Type        | Required |
 			| Username      | Text        | yes      |
 			| Name          | Text        | yes      |

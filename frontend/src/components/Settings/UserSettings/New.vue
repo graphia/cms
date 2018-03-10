@@ -1,6 +1,6 @@
 <template>
-	<div class="col col-md-6">
-		<h1>New user</h1>
+	<div class="col col-md-6" v-title="title">
+		<h1>{{ title }}</h1>
 
 		<form @submit="create">
 			<div class="form-group">
@@ -99,7 +99,8 @@
 		name: "NewUser",
 		data() {
 			return {
-				user: new User
+				user: new User,
+				title: "New user"
 			}
 		},
 		methods: {

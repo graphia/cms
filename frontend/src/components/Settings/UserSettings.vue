@@ -101,7 +101,7 @@
 		},
 		computed: {
 			breadcrumbs() {
-				return [new CMSBreadcrumb("User List", "user_settings")];
+				return [new CMSBreadcrumb("Users", "user_settings")];
 			},
 		},
 		components: {

@@ -11,7 +11,8 @@ Feature: User creation
 
 	Scenario: Page contents
 		Given I am on the edit user page
-		Then I should see a form with the following fields:
+		Then the page's title should be "Edit user"
+		And I should see a form with the following fields:
 			| Name          | Type        | Required |
 			| Name          | Text        | yes      |
 			| Email address | Email       | yes      |
