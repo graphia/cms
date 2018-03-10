@@ -96,7 +96,7 @@ Feature: Creating documents
 		When I add my document's details and submit the form
 		Then I should see the conflict modal box
 
-	Scenario: Breadcrumbs without metadata
+	Scenario: Breadcrumbs when the document has no metadata
 		Given I am on the new appendix page
 		Then I should see the following breadcrumbs:
 			| Text                | Reference       |
@@ -104,7 +104,7 @@ Feature: Creating documents
 			| appendices          | /cms/appendices |
 			| New Document        | None            |
 
-	Scenario: Breadcrumbs with metadata
+	Scenario: Breadcrumbs when the document has metadata
 		Given I am on the new document page
 		Then I should see the following breadcrumbs:
 			| Text                | Reference       |

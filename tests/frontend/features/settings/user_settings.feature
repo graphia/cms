@@ -41,3 +41,10 @@ Feature: User settings
 		When I am on the users list page
 		Then the 'administrator' should have an 'Admin' label
 		And the 'regular user' should have no labels
+
+	Scenario: Breadcrumbs
+		Given I am on the users list page
+		Then I should see the following breadcrumbs:
+			| Text      | Reference |
+			| Dashboard | /cms      |
+			| Users     | None      |

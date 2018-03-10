@@ -28,6 +28,10 @@
 		},
 		methods: {
 			currentPage(breadcrumb) {
+				if (!breadcrumb) {
+					console.error("breadcrumb has no target, ensure :levels are supplied");
+					return;
+				};
 				return this.$router.history.current.name === breadcrumb.target;
 			}
 		}

@@ -11,7 +11,7 @@ Feature: User creation
 
 	Scenario: Page contents
 		Given I am on the new user page
-		Then the page's title should be "New user"
+		Then the page's title should be "New Document"
 		And I should see a form with the following fields:
 			| Name          | Type        | Required |
 			| Username      | Text        | yes      |
@@ -44,3 +44,11 @@ Feature: User creation
 		And I re-enter the details of an existing user
 		When I submit the form
 		Then I should see an error message
+
+	Scenario: Breadcrumbs
+		Given I am on the new user page
+		Then I should see the following breadcrumbs:
+			| Text      | Reference           |
+			| Dashboard | /cms                |
+			| Users     | /cms/settings/users |
+			| New       | None                |

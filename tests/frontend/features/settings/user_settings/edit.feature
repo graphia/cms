@@ -41,3 +41,11 @@ Feature: User creation
 		And I re-enter the details of an existing user
 		When I submit the form
 		Then I should see an error message
+
+	Scenario: Breadcrumbs
+		Given I am on the edit user page
+		Then I should see the following breadcrumbs:
+			| Text      | Reference           |
+			| Dashboard | /cms                |
+			| Users     | /cms/settings/users |
+			| Edit      | None                |

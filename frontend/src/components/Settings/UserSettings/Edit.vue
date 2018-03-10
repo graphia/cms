@@ -1,5 +1,8 @@
 <template>
 	<div class="col col-md-6" v-title="title">
+
+		<Breadcrumbs :levels="breadcrumbs"/>
+
 		<h1>{{ title }}</h1>
 
 		<form @submit="update">
@@ -64,6 +67,8 @@
 	import checkResponse from '../../../javascripts/response.js';
 	import store from '../../../javascripts/store.js';
 	import config from '../../../javascripts/config.js';
+	import Breadcrumbs from '../../Utilities/Breadcrumbs';
+	import CMSBreadcrumb from '../../../javascripts/models/breadcrumb.js';
 
 	class User {
 
@@ -143,6 +148,17 @@
 				this.$router.push({name: 'user_settings'});
 
 			}
+		},
+		computed: {
+			breadcrumbs() {
+				return [
+					new CMSBreadcrumb("Users", "user_settings"),
+					new CMSBreadcrumb("Edit", "user_edit", {username: this.user.name})
+				];
+			},
+		},
+		components: {
+			Breadcrumbs
 		}
 	};
 </script>
