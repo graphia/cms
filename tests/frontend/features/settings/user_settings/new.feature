@@ -24,6 +24,7 @@ Feature: User creation
 		Then the 'Username' field should allow values from '3' to '32' characters
 		And the 'Name' field should allow values from '3' to '64' characters
 
+
 	Scenario: Creating a new user
 		Given I am on the new user page
 		When I fill in the form with the following data:
@@ -43,7 +44,7 @@ Feature: User creation
 		Given I am on the new user page
 		And I re-enter the details of an existing user
 		When I submit the form
-		Then I should see an error message
+		Then I should see an error message stating that the record is not unique
 
 	Scenario: Breadcrumbs
 		Given I am on the new user page

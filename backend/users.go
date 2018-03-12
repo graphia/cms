@@ -29,7 +29,7 @@ type LimitedUser struct {
 type User struct {
 	ID          int    `json:"id" storm:"id,increment"`
 	Name        string `json:"name" validate:"required,min=3,max=64"`
-	Username    string `json:"username" storm:"unique" validate:"required,min=3,max=32"`
+	Username    string `json:"username" storm:"index,unique" validate:"required,min=3,max=32"`
 	Password    string `json:"password" validate:"required,min=6"`
 	Email       string `json:"email" storm:"unique" validate:"required,email"`
 	Active      bool   `json:"active"`
@@ -215,7 +215,7 @@ func createUser(user User) (err error) {
 
 	err = db.Save(&user)
 	if err != nil {
-		return fmt.Errorf("User cannot be created, %v", err)
+		return err
 	}
 	return nil
 }

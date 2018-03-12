@@ -95,20 +95,20 @@ Then %r{^I see my newly\-created user when redirected to the user list$} do
 end
 
 
-Given %r{^there is a regular user and an administrator$} do
+  Given %r{^there is a regular user and an administrator$} do
   # admin is already created, create a regular user
 
   steps %{
-		Given I am on the new user page
-		When I fill in the form with the following data:
-			| Username         | hhermann       |
-			| Name             | Herman Hermann |
-			| Email address    | hello@hma.com  |
-		And I submit the form
-		Then I should see a message containing 'Herman Hermann will receive an email with instructions on how to log in'
-		And I should be on the users list page
+    Given I am on the new user page
+    When I fill in the form with the following data:
+      | Username         | hhermann       |
+      | Name             | Herman Hermann |
+      | Email address    | hello@hma.com  |
+    And I submit the form
+    Then I should see a message containing 'Herman Hermann will receive an email with instructions on how to log in'
+    And I should be on the users list page
   }
-end
+  end
 
 Then %r{^the '(.*?)' should have an '(.*?)' label$} do |role, text|
   within("#user-1") do
@@ -126,4 +126,33 @@ Given %r{^I am on the edit user page$} do
   path = "/cms/settings/users/rod.flanders/edit"
   visit(path)
   expect(page.current_path).to eql(path)
+end
+
+Given %r{^I re\-enter the details of an existing user$} do
+  steps %{
+    When I fill in the form with the following data:
+      | Username         | rod.flanders                                |
+      | Name             | Rod Flanders                                |
+      | Email address    | rod.flanders@springfield-elementary.k12.us  |
+  }
+end
+
+When %r{^I change the name and email address to match the regular user$} do
+  steps %{
+    When I fill in the form with the following data:
+      | Name             | Herman Hermann |
+      | Email address    | hello@hma.com  |
+  }
+end
+
+Then %r{^I should see an error message stating that the record is not unique$} do
+  msg = "This record cannot be saved because either the username or email address are already in use"
+  expect(page).to have_css(".alert.alert-danger", text: msg)
+end
+
+Then %r{^I see my newly\-updated user when redirected to the user list$} do
+  within("#user-1") do
+    expect(page).to have_content("Todd Flanders")
+    expect(page).to have_content("tf@floody.com")
+  end
 end

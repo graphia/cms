@@ -7,6 +7,13 @@
 
 		<form @submit="update">
 
+			<div class="form-group" v-if="hasErrors('Base')">
+				<div class="alert alert-danger">
+					This record cannot be saved because either the username or email address
+					are already in use
+				</div>
+			</div>
+
 			<div class="form-group">
 				<label for="name">Name</label>
 
@@ -17,7 +24,12 @@
 					required
 					minlength="3"
 					maxlength="64"
+					:class="{'is-invalid': hasErrors('Name')}"
 				/>
+
+				<div class="form-control-feedback invalid-feedback" v-if="hasErrors('Name')">
+					{{ errorMessage('Name') }}
+				</div>
 			</div>
 
 			<div class="form-group">
@@ -28,8 +40,13 @@
 					class="form-control"
 					v-model="user.email"
 					placeholder="milhouse.van.houten@k12.springfield.us"
+					:class="{'is-invalid': hasErrors('Email')}"
 					required
 				/>
+
+				<div class="form-control-feedback invalid-feedback" v-if="hasErrors('Email')">
+					{{ errorMessage('Email') }}
+				</div>
 			</div>
 
 			<div class="form-group">
@@ -56,7 +73,6 @@
 				</router-link>
 			</div>
 		</form>
-
 
 	</div>
 </template>
@@ -120,7 +136,8 @@
 		data() {
 			return {
 				user: new User,
-				title: "Edit user"
+				title: "Edit user",
+				errors: {}
 			};
 		},
 		methods: {
@@ -132,8 +149,10 @@
 				event.preventDefault();
 
 				let response = await this.user.save();
+				let json = await response.json();
 
 				if (!checkResponse(response.status)) {
+					this.errors = json;
 					console.error("Failed to modify user", response);
 					return;
 				};
@@ -144,9 +163,14 @@
 					"",
 					3
 				);
-
 				this.$router.push({name: 'user_settings'});
+			},
 
+			hasErrors(field) {
+				return !!this.errors[field];
+			},
+			errorMessage(field) {
+				return this.errors[field];
 			}
 		},
 		computed: {

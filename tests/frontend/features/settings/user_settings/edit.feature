@@ -37,10 +37,11 @@ Feature: User creation
 		Then I should be on the users list page
 
 	Scenario: Server-side validation errors
-		Given I am on the edit user page
-		And I re-enter the details of an existing user
-		When I submit the form
-		Then I should see an error message
+		Given there is a regular user and an administrator
+		And I am on the edit user page
+		When I change the name and email address to match the regular user
+		And I submit the form
+		Then I should see an error message stating that the record is not unique
 
 	Scenario: Breadcrumbs
 		Given I am on the edit user page
