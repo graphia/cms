@@ -31,7 +31,7 @@ type User struct {
 	Name        string `json:"name" validate:"required,min=3,max=64"`
 	Username    string `json:"username" storm:"unique" validate:"required,min=3,max=32"`
 	Password    string `json:"password" validate:"required,min=6"`
-	Email       string `json:"email" storm:"unique" validate:"email,required"`
+	Email       string `json:"email" storm:"unique" validate:"required,email"`
 	Active      bool   `json:"active"`
 	Admin       bool   `json:"admin"`
 	TokenString string `json:"token_string" storm:"unique"`
@@ -218,6 +218,32 @@ func createUser(user User) (err error) {
 		return fmt.Errorf("User cannot be created, %v", err)
 	}
 	return nil
+}
+
+func updateUser(user User, updates LimitedUser) (err error) {
+
+	// note username isn't updateable yet
+	user.Name = updates.Name
+	user.Email = updates.Email
+	user.Active = updates.Active
+	user.Admin = updates.Admin
+
+	if user.Username != updates.Username {
+		Warning.Printf("attempt to change username from %s to %s denied", user.Username, updates.Username)
+	}
+
+	// make sure everything's above board
+	err = validate.Struct(user)
+	if err != nil {
+		return err
+	}
+
+	err = db.Save(&user)
+	if err != nil {
+		Debug.Println("validation failed for user", user, updates)
+	}
+
+	return err
 }
 
 func allUsers() (limitedUsers []LimitedUser, err error) {

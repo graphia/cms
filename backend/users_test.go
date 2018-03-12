@@ -583,3 +583,29 @@ func TestUser_checkPassword(t *testing.T) {
 		})
 	}
 }
+
+func Test_updateUser(t *testing.T) {
+	db.Drop("User")
+
+	_ = createUser(ck)
+	original, _ := getUserByUsername("cookie.kwan")
+
+	updates := LimitedUser{
+		Username: "KWANCOOKIE12315", // should not be updated
+		Name:     "Cookie Swan",
+		Email:    "cookie.new@hotmail.com",
+		Active:   false,
+	}
+
+	err := updateUser(original, updates)
+	updated, _ := getUserByUsername("cookie.kwan")
+
+	assert.Nil(t, err)
+	assert.Equal(t, updates.Name, updated.Name)
+	assert.Equal(t, updates.Email, updated.Email)
+	assert.Equal(t, updates.Active, updated.Active)
+
+	// ensure username hasn't been changed
+	assert.Equal(t, original.Username, "cookie.kwan")
+
+}

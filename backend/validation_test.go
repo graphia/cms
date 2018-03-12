@@ -9,8 +9,9 @@ import (
 )
 
 type testStruct struct {
-	Name string `validate:"required,min=5,max=20"`
-	Age  int    `validate:"omitempty,min=18,max=99"`
+	Name  string `validate:"required,min=5,max=20"`
+	Age   int    `validate:"omitempty,min=18,max=99"`
+	Email string `validate:"omitempty,email"`
 }
 
 // should return a map[string][]string with attribute
@@ -103,6 +104,25 @@ func TestValidationErrorMessageMinIntTag(t *testing.T) {
 
 	expectedOut := make(map[string]string)
 	expectedOut["Age"] = "must be at least 18"
+
+	assert.Equal(t, expectedOut, errors)
+}
+
+func TestValidationErrorMessageEmail(t *testing.T) {
+	validate := validator.New()
+
+	fail := testStruct{Email: "something@"}
+
+	err := validate.Struct(fail)
+
+	// there should be errors
+	assert.NotNil(t, err)
+
+	errors := validationErrorsToJSON(err)
+
+	expectedOut := make(map[string]string)
+	expectedOut["Name"] = "is a required field"
+	expectedOut["Email"] = "is not a valid email address"
 
 	assert.Equal(t, expectedOut, errors)
 }

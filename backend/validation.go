@@ -20,9 +20,13 @@ func validationErrorsToJSON(errs error) map[string]string {
 func validationErrorMessage(e validator.FieldError) string {
 	// depending on the type of validation display an appropriate message
 
-	switch e.Tag() {
+	tag := e.Tag()
+
+	switch tag {
 	case "required":
 		return "is a required field"
+	case "email":
+		return "is not a valid email address"
 	case "min":
 
 		// min is available to both string and int attributes, and we probably
@@ -49,6 +53,7 @@ func validationErrorMessage(e validator.FieldError) string {
 		return "only alphanumeric unicode characters are permitted"
 	}
 
+	Warning.Println("No error message format specified", tag)
 	return "there was an unspecified error"
 
 }
