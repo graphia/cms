@@ -18,8 +18,8 @@
 
 				<div class="row user-list">
 
-					<div class="col" v-for="(user, i) in users" :key="i">
-						<div class="card user m-3" :id="`user-${user.id}`">
+					<div class="col px-2" v-for="(user, i) in users" :key="i">
+						<div class="card user my-2" :id="`user-${user.id}`">
 
 							<div class="card-header">
 								{{ user.name }}
