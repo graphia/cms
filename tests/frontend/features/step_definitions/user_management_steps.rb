@@ -166,11 +166,22 @@ end
 Given %r{^I am on my own edit user page$} do
   path = "/cms/settings/users/rod.flanders/edit"
   visit(path)
-  expect(page.current_path).to eql(path)end
+  expect(page.current_path).to eql(path)
+end
 
 Then %r{^the regular user should not be present$} do
   # check the admin is present too so we know
   # we're using the right selector
   expect(page).to have_css(".card", text: "Rod Flanders")
   expect(page).not_to have_css(".card", text: "Herman Hermann")
+end
+
+Given %r{^I am on the edit page for non\-existing user '(.*?)'$} do |username|
+  path = "/cms/settings/users/#{username}/edit"
+  visit(path)
+  expect(page.current_path).to eql(path)
+end
+
+Then %r{^I should see "(.*?)"$} do |text|
+  expect(page).to have_content(text)
 end

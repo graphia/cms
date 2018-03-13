@@ -1,82 +1,95 @@
 <template>
 	<div class="col col-md-6" v-title="title">
 
-		<Breadcrumbs :levels="breadcrumbs"/>
+		<div v-if="initializing">
+			Loading...
+		</div>
 
-		<h1>{{ title }}</h1>
+		<div v-else-if="user.found">
 
-		<form @submit="update">
+			<Breadcrumbs :levels="breadcrumbs"/>
 
-			<div class="form-group" v-if="hasErrors('Base')">
-				<div class="alert alert-danger">
-					This record cannot be saved because either the username or email address
-					are already in use
+			<h1>{{ title }}</h1>
+
+			<form @submit="update">
+
+				<div class="form-group" v-if="hasErrors('Base')">
+					<div class="alert alert-danger">
+						This record cannot be saved because either the username or email address
+						are already in use
+					</div>
 				</div>
-			</div>
 
-			<div class="form-group">
-				<label for="name">Name</label>
+				<div class="form-group">
+					<label for="name">Name</label>
 
-				<input name="name"
-					class="form-control"
-					v-model="user.name"
-					placeholder="Milhouse van Houten"
-					required
-					minlength="3"
-					maxlength="64"
-					:class="{'is-invalid': hasErrors('Name')}"
-				/>
+					<input name="name"
+						class="form-control"
+						v-model="user.name"
+						placeholder="Milhouse van Houten"
+						required
+						minlength="3"
+						maxlength="64"
+						:class="{'is-invalid': hasErrors('Name')}"
+					/>
 
-				<div class="form-control-feedback invalid-feedback" v-if="hasErrors('Name')">
-					{{ errorMessage('Name') }}
+					<div class="form-control-feedback invalid-feedback" v-if="hasErrors('Name')">
+						{{ errorMessage('Name') }}
+					</div>
 				</div>
-			</div>
 
-			<div class="form-group">
-				<label for="email">Email address</label>
+				<div class="form-group">
+					<label for="email">Email address</label>
 
-				<input name="email"
-					type="email"
-					class="form-control"
-					v-model="user.email"
-					placeholder="milhouse.van.houten@k12.springfield.us"
-					:class="{'is-invalid': hasErrors('Email')}"
-					required
-				/>
+					<input name="email"
+						type="email"
+						class="form-control"
+						v-model="user.email"
+						placeholder="milhouse.van.houten@k12.springfield.us"
+						:class="{'is-invalid': hasErrors('Email')}"
+						required
+					/>
 
-				<div class="form-control-feedback invalid-feedback" v-if="hasErrors('Email')">
-					{{ errorMessage('Email') }}
+					<div class="form-control-feedback invalid-feedback" v-if="hasErrors('Email')">
+						{{ errorMessage('Email') }}
+					</div>
 				</div>
-			</div>
 
-			<div class="form-group">
-				<label for="admin">
-					<input name="admin" type="checkbox" v-model="user.admin"/>
-					Administrator
-				</label>
+				<div class="form-group">
+					<label for="admin">
+						<input name="admin" type="checkbox" v-model="user.admin"/>
+						Administrator
+					</label>
 
-			</div>
+				</div>
 
-			<div class="form-group">
-				<label for="active">
-					<input name="active" type="checkbox" v-model="user.active"/>
-					Active
-				</label>
+				<div class="form-group">
+					<label for="active">
+						<input name="active" type="checkbox" v-model="user.active"/>
+						Active
+					</label>
 
-			</div>
+				</div>
 
-			<div class="btn-toolbar" role="group">
-				<input type="submit" value="Update user" class="btn btn-success"/>
+				<div class="btn-toolbar" role="group">
+					<input type="submit" value="Update user" class="btn btn-success"/>
 
-				<router-link class="btn btn-secondary mx-2" :to="{name: 'user_settings', params: {id: user.id}}">
-					Cancel
-				</router-link>
+					<router-link class="btn btn-secondary mx-2" :to="{name: 'user_settings', params: {id: user.id}}">
+						Cancel
+					</router-link>
 
-				<button class="btn btn-danger" @click="deleteUser">
-					Delete
-				</button>
-			</div>
-		</form>
+					<button class="btn btn-danger" @click="deleteUser">
+						Delete
+					</button>
+				</div>
+			</form>
+
+		</div>
+
+		<div v-else>
+			<h1>404</h1>
+			User {{ this.$route.params.username }} cannot be found.
+		</div>
 
 	</div>
 </template>
@@ -98,6 +111,7 @@
 			this.email = email;
 			this.admin = admin;
 			this.active = active;
+			this.found = false;
 		};
 
 		static async find(username) {
@@ -107,11 +121,17 @@
 
 			if (!checkResponse(response.status)) {
 				console.error(`User '${username}' cannot be retrieved`);
+
+				if (response.status == 404) {
+					console.error("user not found");
+					return response.status;
+				};
+
 				return;
 			}
 			let json = await response.json();
 
-			return new User(json.name, json.username, json.email, json.admin, json.active);
+			return new User(json.name, json.username, json.email, json.admin, json.active, true);
 		};
 
 		async save() {
@@ -149,13 +169,17 @@
 			return {
 				user: new User,
 				title: "Edit user",
-				errors: {}
+				errors: {},
+				initializing: true,
+				userFound: false
 			};
 		},
 		methods: {
 			async findUser() {
 				const username = this.$route.params.username;
 				this.user = await User.find(username);
+
+				this.initializing = false;
 			},
 			async update(event) {
 				event.preventDefault();

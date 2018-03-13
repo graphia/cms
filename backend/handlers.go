@@ -1172,7 +1172,7 @@ func apiGetUserHandler(w http.ResponseWriter, r *http.Request) {
 		fr = FailureResponse{
 			Message: fmt.Sprintln("Failed to find restricted user", username, err.Error()),
 		}
-		JSONResponse(fr, http.StatusBadRequest, w)
+		JSONResponse(fr, http.StatusNotFound, w)
 		return
 	}
 

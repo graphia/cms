@@ -50,3 +50,8 @@ Feature: User creation
 			| Dashboard | /cms                |
 			| Users     | /cms/settings/users |
 			| Edit      | None                |
+
+	Scenario: Non-existing user
+		Given I am on the edit page for non-existing user 'julius.hibbert'
+		Then I should see "404"
+		And I should see "User julius.hibbert cannot be found"
