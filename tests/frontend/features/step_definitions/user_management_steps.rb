@@ -156,3 +156,21 @@ Then %r{^I see my newly\-updated user when redirected to the user list$} do
     expect(page).to have_content("tf@floody.com")
   end
 end
+
+Given %r{^I am on the edit user page for the regular user$} do
+  path = "/cms/settings/users/hhermann/edit"
+  visit(path)
+  expect(page.current_path).to eql(path)
+end
+
+Given %r{^I am on my own edit user page$} do
+  path = "/cms/settings/users/rod.flanders/edit"
+  visit(path)
+  expect(page.current_path).to eql(path)end
+
+Then %r{^the regular user should not be present$} do
+  # check the admin is present too so we know
+  # we're using the right selector
+  expect(page).to have_css(".card", text: "Rod Flanders")
+  expect(page).not_to have_css(".card", text: "Herman Hermann")
+end

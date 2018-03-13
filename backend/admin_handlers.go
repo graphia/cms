@@ -78,7 +78,6 @@ func apiUpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 	Debug.Println("verrs", verrs)
 
 	if len(verrs) > 0 {
-
 		Debug.Println("returning validation errors")
 		JSONResponse(verrs, http.StatusBadRequest, w)
 		return
@@ -127,4 +126,42 @@ func checkUserModificationErrors(errIn error) (verrs map[string]string, errOut e
 	return verrs, nil
 }
 
-func apiDeleteUserHandler(w http.ResponseWriter, r *http.Request) {}
+func apiDeleteUserHandler(w http.ResponseWriter, r *http.Request) {
+	var fr FailureResponse
+	var sr SuccessResponse
+	var user, currentUser User
+	var err error
+
+	username := vestigo.Param(r, "username")
+
+	user, err = getUserByUsername(username)
+	if err != nil {
+		Error.Println("Failed to find user", username)
+		fr = FailureResponse{Message: fmt.Sprintf("No user %s", username)}
+		JSONResponse(fr, http.StatusNotFound, w)
+		return
+	}
+
+	currentUser = getCurrentUser(r.Context())
+	if user == currentUser {
+		Warning.Printf("%s tried to delete themself", currentUser.Username)
+		fr = FailureResponse{Message: "You cannot delete yourself"}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	err = user.delete()
+	if err != nil {
+		Error.Println("Couldn't delete user", username, err.Error())
+		fr = FailureResponse{Message: fmt.Sprintf("Cannot delete user %s", username)}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	sr = SuccessResponse{Message: fmt.Sprintf("Successfully deleted user %s", username)}
+	JSONResponse(sr, http.StatusOK, w)
+
+}
+
+func apiActivateUserHandler(w http.ResponseWriter, r *http.Request)   {}
+func apiDeactivateUserHandler(w http.ResponseWriter, r *http.Request) {}

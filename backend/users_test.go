@@ -134,7 +134,7 @@ func TestGetUserByUsername(t *testing.T) {
 	assert.NotZero(t, cookieKwan.ID)
 
 	_, err := getUserByUsername("not.miss.hoover.ok")
-	assert.Contains(t, err.Error(), "not found")
+	assert.Equal(t, ErrUserNotExists, err)
 
 }
 
@@ -607,5 +607,19 @@ func Test_updateUser(t *testing.T) {
 
 	// ensure username hasn't been changed
 	assert.Equal(t, original.Username, "cookie.kwan")
+
+}
+
+func Test_deleteUser(t *testing.T) {
+	db.Drop("User")
+
+	_ = createUser(mh)
+	deletee, _ := getUserByUsername(mh.Username)
+
+	_ = deletee.delete()
+
+	_, err := getUserByUsername(mh.Username)
+
+	assert.Equal(t, ErrUserNotExists, err)
 
 }

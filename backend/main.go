@@ -278,7 +278,7 @@ func adminRouter() (r *vestigo.Router) {
 
 	r.Post("/api/admin/users", apiCreateUserHandler)
 	r.Patch("/api/admin/users/:username", apiUpdateUserHandler)
-	r.Delete("/api/admin/users/:username", apiListUsersHandler)
+	r.Delete("/api/admin/users/:username", apiDeleteUserHandler)
 
 	return r
 }

@@ -1,11 +1,17 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/gliderlabs/ssh"
 	"golang.org/x/crypto/bcrypt"
 	gossh "golang.org/x/crypto/ssh"
+)
+
+var (
+	// ErrUserNotExists returned when the user can't be found
+	ErrUserNotExists = errors.New("user does not exist")
 )
 
 // UserCredentials is the subset of User required for auth
@@ -110,6 +116,10 @@ func (u User) unsetToken() error {
 	return db.UpdateField(&u, "TokenString", "")
 }
 
+func (u User) delete() error {
+	return db.DeleteStruct(&u)
+}
+
 func (u User) setPassword(pw string) error {
 	bcryptedPassword, err := bcrypt.GenerateFromPassword([]byte(pw), bcrypt.DefaultCost)
 	if err != nil {
@@ -144,7 +154,7 @@ func getUserByUsername(username string) (user User, err error) {
 
 	if user.ID == 0 {
 		Warning.Println("Cannot find user with Username", username)
-		return user, fmt.Errorf("not found username: %s", username)
+		return user, ErrUserNotExists
 	}
 
 	Debug.Println("Found user", username)

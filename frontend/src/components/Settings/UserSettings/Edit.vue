@@ -68,9 +68,13 @@
 			<div class="btn-toolbar" role="group">
 				<input type="submit" value="Update user" class="btn btn-success"/>
 
-				<router-link class="btn btn-secondary ml-2" :to="{name: 'user_settings', params: {id: user.id}}">
+				<router-link class="btn btn-secondary mx-2" :to="{name: 'user_settings', params: {id: user.id}}">
 					Cancel
 				</router-link>
+
+				<button class="btn btn-danger" @click="deleteUser">
+					Delete
+				</button>
 			</div>
 		</form>
 
@@ -125,8 +129,16 @@
 				})
 			});
 
-		}
-	}
+		};
+
+		async delete() {
+			const path = `${config.admin}/users/${this.username}`;
+			return fetch(path, {
+				method: "DELETE",
+				headers: store.state.auth.authHeader()
+			});
+		};
+	};
 
 	export default {
 		name: "EditUser",
@@ -164,6 +176,35 @@
 					3
 				);
 				this.$router.push({name: 'user_settings'});
+			},
+			async deleteUser(event) {
+				event.preventDefault();
+
+				let response = await this.user.delete();
+				let json = await response.json();
+
+				if (!checkResponse(response.status)) {
+					console.error("Failed to delete user", response);
+
+					this.$store.state.broadcast.addMessage(
+						"danger",
+						`User ${this.user.name} not deleted`,
+						json.message,
+						3
+					);
+
+					return;
+				};
+
+				this.$store.state.broadcast.addMessage(
+					"success",
+					`User ${this.user.name} deleted`,
+					"",
+					3
+				);
+
+				this.$router.push({name: 'user_settings'});
+
 			},
 
 			hasErrors(field) {
