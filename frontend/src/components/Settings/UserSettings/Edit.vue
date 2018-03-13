@@ -105,13 +105,13 @@
 
 	class User {
 
-		constructor(name, username, email, admin=false, active=true) {
+		constructor(name, username, email, admin=false, active=true, found=false) {
 			this.name = name;
 			this.username = username;
 			this.email = email;
 			this.admin = admin;
 			this.active = active;
-			this.found = false;
+			this.found = found;
 		};
 
 		static async find(username) {
