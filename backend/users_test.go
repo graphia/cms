@@ -16,12 +16,13 @@ import (
 var (
 	mh = User{
 		//ID:       1,
-		Username: "misshoover",
-		Email:    "e.hoover@springfield.k12.us",
-		Name:     "Elizabeth Hoover",
-		Password: "SuperSecret123",
-		Active:   true,
-		Admin:    false,
+		Username:        "misshoover",
+		Email:           "e.hoover@springfield.k12.us",
+		Name:            "Elizabeth Hoover",
+		Password:        "SuperSecret123",
+		Active:          true,
+		Admin:           false,
+		ConfirmationKey: "AAAAAAAABBBBBCCCCDD112233",
 	}
 
 	ck = User{

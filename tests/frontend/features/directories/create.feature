@@ -37,7 +37,6 @@ Feature: Creating directories
 		Given I am on the new directory page
 		And I fill in the form with the following data:
 			| Title       | Ice Creams                                  |
-			| Path        | ice-creams                                  |
 			| Description | A description of ice cream related products |
 		And I set the editor text to "# Fabulous ices of all colours"
 		When I submit the form

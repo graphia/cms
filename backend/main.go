@@ -16,18 +16,14 @@ import (
 )
 
 var (
-	config Config
-
-	// This was set to default to /etc/ but VSCode's Go debugger config isn't working properly
-	// see, https://github.com/Microsoft/vscode-go/issues/1134 so for ease now set it to the
-	// location of the test config
-	//
+	config        Config
 	argConfigPath = flag.String("config", "/etc/graphia/cms.yml", "the config file")
 	logEnabled    = flag.Bool("log-to-file", false, "enable logging")
 	verifyKey     *rsa.PublicKey
 	signKey       *rsa.PrivateKey
 	db            storm.DB
 	validate      *validator.Validate
+	mailer        Mailer
 )
 
 // init loads config and sets up logging without requiring
@@ -56,6 +52,8 @@ func init() {
 	}
 
 	validate = validator.New()
+
+	mailer = setupMailer()
 
 	setupLogging(*logEnabled)
 }
@@ -133,6 +131,7 @@ func main() {
 		Info.Println("HTTPS is not enabled, listening on", config.HTTPListenPort)
 		http.ListenAndServe(config.HTTPListenPortWithColon(), n)
 	}
+
 }
 
 func setupKeys() {
@@ -155,6 +154,10 @@ func setupKeys() {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func setupMailer() Mailer {
+	return Mailer{send: DefaultSender}
 }
 
 func setupMiddleware(r, pr, ar *vestigo.Router) (n *negroni.Negroni) {

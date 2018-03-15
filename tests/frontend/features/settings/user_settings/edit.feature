@@ -53,5 +53,5 @@ Feature: User creation
 
 	Scenario: Non-existing user
 		Given I am on the edit page for non-existing user 'julius.hibbert'
-		Then I should see "404"
-		And I should see "User julius.hibbert cannot be found"
+		Then I should see text '404'
+		And I should see text 'User julius.hibbert cannot be found'

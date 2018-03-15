@@ -1,10 +1,14 @@
 host: localhost
+url: https://localhost:8085
 http_listen_port: 8085
 https_enabled: false
 repository: repo
 logfile: ../logs/test.log
 database: ../tests/tmp/databases/test.db
 hugo_config_file: config/hugo.yml
+smtp_host: localhost
+smtp_port: 1025
+mail_template_path: ../templates/mail
 file_categories:
   documents:
     - .md

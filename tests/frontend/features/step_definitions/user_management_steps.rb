@@ -181,7 +181,3 @@ Given %r{^I am on the edit page for non\-existing user '(.*?)'$} do |username|
   visit(path)
   expect(page.current_path).to eql(path)
 end
-
-Then %r{^I should see "(.*?)"$} do |text|
-  expect(page).to have_content(text)
-end

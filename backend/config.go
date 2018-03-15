@@ -13,6 +13,7 @@ import (
 // Config holds configuration options stored in a yaml file
 type Config struct {
 	Host               string
+	URL                string `yaml:"url"`
 	HTTPSEnabled       bool   `yaml:"https_enabled"`
 	HTTPSListenPort    string `yaml:"https_listen_port"`
 	HTTPSCert          string `yaml:"https_cert"`
@@ -33,6 +34,11 @@ type Config struct {
 	GitBinPath         string              `yaml:"git_bin_path"`
 	GitRepoPath        string              `yaml:"git_repo_path"`
 	GitUser            string              `yaml:"git_user"`
+	SMTPHost           string              `yaml:"smtp_host"`
+	SMTPPort           string              `yaml:"smtp_port"`
+	SMTPUser           string              `yaml:"smtp_user"`
+	SMTPPassword       string              `yaml:"smtp_password"`
+	MailTemplatePath   string              `yaml:"mail_template_path"`
 	TranslationEnabled bool                `yaml:"translation_enabled"`
 	DefaultLanguage    string              `yaml:"default_language"`
 	EnabledLanguages   []string            `yaml:"enabled_languages"`

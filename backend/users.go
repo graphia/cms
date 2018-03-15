@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/rand"
 	"errors"
 	"fmt"
 
@@ -33,14 +34,15 @@ type LimitedUser struct {
 
 // User holds all information specific to a user
 type User struct {
-	ID          int    `json:"id" storm:"id,increment"`
-	Name        string `json:"name" validate:"required,min=3,max=64"`
-	Username    string `json:"username" storm:"index,unique" validate:"required,min=3,max=32"`
-	Password    string `json:"password" validate:"required,min=6"`
-	Email       string `json:"email" storm:"unique" validate:"required,email"`
-	Active      bool   `json:"active"`
-	Admin       bool   `json:"admin"`
-	TokenString string `json:"token_string" storm:"unique"`
+	ID              int    `json:"id" storm:"id,increment"`
+	Name            string `json:"name" validate:"required,min=3,max=64"`
+	Username        string `json:"username" storm:"index,unique" validate:"required,min=3,max=32"`
+	Password        string `json:"password" validate:"required,min=6"`
+	Email           string `json:"email" storm:"unique" validate:"required,email"`
+	Active          bool   `json:"active"`
+	Admin           bool   `json:"admin"`
+	TokenString     string `json:"token_string" storm:"unique"`
+	ConfirmationKey string `json:"activation_string" storm:"unique"`
 }
 
 // PasswordUpdate used by users to modify their password
@@ -114,6 +116,12 @@ func (u User) setToken(tokenString string) error {
 
 func (u User) unsetToken() error {
 	return db.UpdateField(&u, "TokenString", "")
+}
+
+func (u *User) setRandomConfirmationKey() error {
+	nk := generateRandomConfirmationKey()
+	u.ConfirmationKey = nk
+	return db.UpdateField(&u, "ConfirmationKey", nk)
 }
 
 func (u User) delete() error {
@@ -223,11 +231,13 @@ func createUser(user User) (err error) {
 
 	Info.Println("Validation passed, saving", user)
 
+	Info.Println("Creating confirmation key for user", user.Username)
+	user.setRandomConfirmationKey()
+
+	go sendEmailConfirmation(user)
+
 	err = db.Save(&user)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 func updateUser(user User, updates LimitedUser) (err error) {
@@ -301,5 +311,36 @@ func deactivateUser(user User) error {
 
 func reactivateUser(user User) error {
 	return db.UpdateField(&user, "Active", true)
+
+}
+
+func generateRandomConfirmationKey() string {
+
+	const length = 32
+	var chars = []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")
+
+	clen := len(chars)
+
+	maxrb := 255 - (256 % clen)
+	b := make([]byte, length)
+	r := make([]byte, length+(length/4)) // storage for random bytes.
+	i := 0
+	for {
+		if _, err := rand.Read(r); err != nil {
+			panic("uniuri: error reading random bytes: " + err.Error())
+		}
+		for _, rb := range r {
+			c := int(rb)
+			if c > maxrb {
+				// Skip this number to avoid modulo bias.
+				continue
+			}
+			b[i] = chars[c%clen]
+			i++
+			if i == length {
+				return string(b)
+			}
+		}
+	}
 
 }
