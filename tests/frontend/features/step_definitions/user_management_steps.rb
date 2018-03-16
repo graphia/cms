@@ -110,15 +110,15 @@ end
   }
   end
 
-Then %r{^the '(.*?)' should have an '(.*?)' label$} do |role, text|
+Then %r{^the 'administrator' should have an 'Admin' label$} do
   within("#user-1") do
-    expect(page).to have_css("span", text: 'Admin')
+    expect(page).to have_css("span.admin", text: 'Admin')
   end
 end
 
-Then %r{^the 'regular user' should have no labels$} do
+Then %r{^the 'regular user' should have no 'Admin' label$} do
   within("#user-2") do
-    expect(page).not_to have_css("span")
+    expect(page).not_to have_css("span.admin")
   end
 end
 

@@ -98,8 +98,13 @@
 			}
 			catch(err) {
 				// Token rejected for renewal
-				console.warn("Token not valid", err);
-				this.$store.state.auth.redirectToLogin();
+
+				let allow = CMSAuth.unblockedPageCheck(this.$route.path);
+
+				if (!allow) {
+					console.warn("Token not valid", err);
+					this.$store.state.auth.redirectToLogin();
+				};
 			};
 
 		},

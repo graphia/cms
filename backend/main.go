@@ -191,6 +191,9 @@ func unprotectedRouter() (r *vestigo.Router) {
 	r.Get("/setup/create_initial_user", setupAllowCreateInitialUserHandler)
 	r.Post("/setup/create_initial_user", setupCreateInitialUserHandler)
 
+	r.Get("/setup/activate/:confirmation_key", setupGetUserByConfirmationKeyHandler)
+	r.Patch("/setup/activate/:confirmation_key", setupActivateUserHandler)
+
 	// rather than above rule, do a check to see if the file exists and serve it
 	// if it doesn't, serve index.html :>
 	r.HandleFunc("/cms", cmsGeneralHandler)
@@ -280,6 +283,7 @@ func adminRouter() (r *vestigo.Router) {
 	r = vestigo.NewRouter()
 
 	r.Post("/api/admin/users", apiCreateUserHandler)
+	r.Get("/api/admin/users/:username", apiGetFullUserHandler)
 	r.Patch("/api/admin/users/:username", apiUpdateUserHandler)
 	r.Delete("/api/admin/users/:username", apiDeleteUserHandler)
 

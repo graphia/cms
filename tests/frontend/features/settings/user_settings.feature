@@ -40,7 +40,7 @@ Feature: User settings
 		Given there is a regular user and an administrator
 		When I am on the users list page
 		Then the 'administrator' should have an 'Admin' label
-		And the 'regular user' should have no labels
+		And the 'regular user' should have no 'Admin' label
 
 	Scenario: Breadcrumbs
 		Given I am on the users list page

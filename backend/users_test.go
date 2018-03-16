@@ -624,3 +624,61 @@ func Test_deleteUser(t *testing.T) {
 	assert.Equal(t, ErrUserNotExists, err)
 
 }
+
+func Test_activateUser(t *testing.T) {
+	type args struct {
+		user     User
+		password string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+		errMsg  string
+	}{
+		{
+			name: "Successful activation",
+			args: args{
+				user:     ds,
+				password: "atotallyvalidpassword",
+			},
+		},
+		{
+			name: "Already activated",
+			args: args{
+				user:     ck,
+				password: "atotallyvalidpassword",
+			},
+			wantErr: true,
+			errMsg:  "cookie.kwan already active",
+		},
+		{
+			name: "Password validation fail",
+			args: args{
+				user:     ds,
+				password: "invpw",
+			},
+			wantErr: true,
+			errMsg:  "password must be at least 6 characters",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_ = createUser(tt.args.user)
+			before, _ := getUserByUsername(tt.args.user.Username)
+
+			err := activateUser(before, tt.args.password)
+
+			if tt.wantErr {
+				assert.Equal(t, err.Error(), tt.errMsg)
+				return
+			}
+
+			assert.Nil(t, err)
+			after, _ := getUserByUsername(tt.args.user.Username)
+
+			assert.True(t, after.Active)
+
+		})
+	}
+}

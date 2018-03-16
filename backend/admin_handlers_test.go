@@ -138,7 +138,7 @@ func TestAPICreateUser(t *testing.T) {
 	assert.Equal(t, mh.Username, user.Username)
 	assert.Equal(t, mh.Name, user.Name)
 	assert.Equal(t, mh.Email, user.Email)
-	assert.True(t, user.Active)
+	assert.False(t, user.Active)
 
 	// ensure passwords don't match (i.e. encrypted)
 	assert.NotEqual(t, mh.Password, user.Password)

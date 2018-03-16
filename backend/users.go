@@ -24,12 +24,13 @@ type UserCredentials struct {
 // LimitedUser is a 'safe' subset of user data that we can
 // send out via the API. Password is omitted
 type LimitedUser struct {
-	ID       int    `json:"id"`
-	Name     string `json:"name"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Admin    bool   `json:"admin"`
-	Active   bool   `json:"active"`
+	ID              int    `json:"id"`
+	Name            string `json:"name"`
+	Username        string `json:"username"`
+	Email           string `json:"email"`
+	Admin           bool   `json:"admin"`
+	Active          bool   `json:"active"`
+	ConfirmationKey string `json:"confirmation_key"`
 }
 
 // User holds all information specific to a user
@@ -42,7 +43,7 @@ type User struct {
 	Active          bool   `json:"active"`
 	Admin           bool   `json:"admin"`
 	TokenString     string `json:"token_string" storm:"unique"`
-	ConfirmationKey string `json:"activation_string" storm:"unique"`
+	ConfirmationKey string `json:"confirmation_key" storm:"unique"`
 }
 
 // PasswordUpdate used by users to modify their password
@@ -99,6 +100,7 @@ func (u User) limitedUser() LimitedUser {
 		Name:     u.Name,
 		Admin:    u.Admin,
 		Active:   u.Active,
+		// ConfirmationKey: u.ConfirmationKey, (risky to leak this, let's omit)
 	}
 }
 
@@ -118,9 +120,8 @@ func (u User) unsetToken() error {
 	return db.UpdateField(&u, "TokenString", "")
 }
 
-func (u *User) setRandomConfirmationKey() error {
+func (u User) setRandomConfirmationKey() error {
 	nk := generateRandomConfirmationKey()
-	u.ConfirmationKey = nk
 	return db.UpdateField(&u, "ConfirmationKey", nk)
 }
 
@@ -129,12 +130,27 @@ func (u User) delete() error {
 }
 
 func (u User) setPassword(pw string) error {
-	bcryptedPassword, err := bcrypt.GenerateFromPassword([]byte(pw), bcrypt.DefaultCost)
+
+	Debug.Println("password valid, saving")
+
+	bcryptedPassword, err := generateBcryptedPassword(pw)
 	if err != nil {
 		return err
 	}
-	u.Password = string(bcryptedPassword)
-	return db.UpdateField(&u, "Password", string(bcryptedPassword))
+
+	return db.UpdateField(&u, "Password", bcryptedPassword)
+}
+
+func generateBcryptedPassword(pw string) (cpw string, err error) {
+	var bcpw []byte
+	if !(len(pw) >= 6) {
+		return cpw, fmt.Errorf("password must be at least 6 characters")
+	}
+
+	bcpw, err = bcrypt.GenerateFromPassword([]byte(pw), bcrypt.DefaultCost)
+	cpw = string(bcpw)
+	return cpw, err
+
 }
 
 func (u User) checkPassword(pw string) error {
@@ -195,6 +211,30 @@ func getLimitedUserByUsername(username string) (limitedUser LimitedUser, err err
 	return user.limitedUser(), err
 }
 
+func getLimitedUserByConfirmationKey(ck string) (limitedUser LimitedUser, err error) {
+	var user User
+	err = db.One("ConfirmationKey", ck, &user)
+
+	if user.ID == 0 {
+		Warning.Println("Cannot find user with ConfirmationKey", ck)
+		return limitedUser, ErrUserNotExists
+	}
+
+	return user.limitedUser(), err
+}
+
+func getUserByConfirmationKey(ck string) (user User, err error) {
+
+	err = db.One("ConfirmationKey", ck, &user)
+
+	if user.ID == 0 {
+		Warning.Println("Cannot find user with ConfirmationKey", ck)
+		return user, ErrUserNotExists
+	}
+
+	return user, err
+}
+
 func getUserByFingerprint(pk gossh.PublicKey) (user User, err error) {
 
 	var pub PublicKey
@@ -223,6 +263,7 @@ func createUser(user User) (err error) {
 	}
 
 	user.Password = string(bcryptedPassword)
+	user.ConfirmationKey = generateRandomConfirmationKey()
 
 	err = validate.Struct(user)
 	if err != nil {
@@ -230,9 +271,6 @@ func createUser(user User) (err error) {
 	}
 
 	Info.Println("Validation passed, saving", user)
-
-	Info.Println("Creating confirmation key for user", user.Username)
-	user.setRandomConfirmationKey()
 
 	go sendEmailConfirmation(user)
 
@@ -255,15 +293,29 @@ func updateUser(user User, updates LimitedUser) (err error) {
 	// make sure everything's above board
 	err = validate.Struct(user)
 	if err != nil {
+		Warning.Println("validation failed for user", user, updates)
 		return err
 	}
 
 	err = db.Save(&user)
-	if err != nil {
-		Debug.Println("validation failed for user", user, updates)
+	return err
+}
+
+func activateUser(user User, password string) (err error) {
+
+	if user.Active {
+		return fmt.Errorf("%s already active", user.Username)
 	}
 
-	return err
+	user.Password, err = generateBcryptedPassword(password)
+	if err != nil {
+		return
+	}
+
+	user.Active = true
+
+	return db.Save(&user)
+
 }
 
 func allUsers() (limitedUsers []LimitedUser, err error) {

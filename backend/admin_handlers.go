@@ -22,7 +22,7 @@ func apiCreateUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	json.NewDecoder(r.Body).Decode(&user)
 
-	user.Active = true
+	user.Active = false
 
 	err := createUser(user)
 	verrs, err = checkUserModificationErrors(err)
@@ -165,3 +165,24 @@ func apiDeleteUserHandler(w http.ResponseWriter, r *http.Request) {
 
 func apiActivateUserHandler(w http.ResponseWriter, r *http.Request)   {}
 func apiDeactivateUserHandler(w http.ResponseWriter, r *http.Request) {}
+
+func apiGetFullUserHandler(w http.ResponseWriter, r *http.Request) {
+	var fr FailureResponse
+
+	username := vestigo.Param(r, "username")
+	Debug.Println("Retrieving user", username)
+
+	user, err := getUserByUsername(username)
+	if err != nil {
+
+		Error.Println("Could not retrieve user", username, err.Error())
+
+		fr = FailureResponse{
+			Message: fmt.Sprintln("Failed to find user", username, err.Error()),
+		}
+		JSONResponse(fr, http.StatusNotFound, w)
+		return
+	}
+
+	JSONResponse(user, http.StatusOK, w)
+}

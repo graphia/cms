@@ -66,7 +66,19 @@ export default class CMSAuth {
 
 		return (token && !expired);
 
-	}
+	};
+
+	static unblockedPageCheck(path) {
+		// these paths do not require a login to access
+		const unblocked = [
+			new RegExp("^/cms/login"),
+			new RegExp("^/cms/setup/initial_user"),
+			new RegExp("^/cms/activate/[A-z0-9]{32}")
+		];
+
+		return unblocked.some((r) => {return r.exec(path)});
+
+	};
 
 	async renew() {
 		// renew JWT if

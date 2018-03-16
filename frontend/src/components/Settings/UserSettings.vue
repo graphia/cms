@@ -24,12 +24,12 @@
 							<div class="card-header">
 								{{ user.name }}
 
-								<span class="badge badge-info" v-if="user.admin">
+								<span class="badge admin badge-info" v-if="user.admin">
 									Admin
 								</span>
 
-								<span class="badge badge-warning" v-if="!user.active">
-									Deactivated
+								<span class="badge inactive badge-warning" v-if="!user.active">
+									Inactive
 								</span>
 							</div>
 

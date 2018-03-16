@@ -319,6 +319,7 @@ func setupCreateInitialUserHandler(w http.ResponseWriter, r *http.Request) {
 	// get details from body and ensure active
 	user := User{}
 	json.NewDecoder(r.Body).Decode(&user)
+
 	user.Active = true
 	user.Admin = true
 
@@ -326,7 +327,6 @@ func setupCreateInitialUserHandler(w http.ResponseWriter, r *http.Request) {
 	err = createUser(user)
 
 	if err != nil {
-		Error.Println("Failed to create user", err.Error())
 		errors := validationErrorsToJSON(err)
 		JSONResponse(errors, http.StatusBadRequest, w)
 		return
@@ -337,6 +337,54 @@ func setupCreateInitialUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	JSONResponse(sr, http.StatusCreated, w)
+
+}
+
+func setupGetUserByConfirmationKeyHandler(w http.ResponseWriter, r *http.Request) {
+	confKey := vestigo.Param(r, "confirmation_key")
+	lu, err := getLimitedUserByConfirmationKey(confKey)
+
+	if err != nil {
+		Error.Println("Failed to find user with key", confKey)
+		errors := validationErrorsToJSON(err)
+		JSONResponse(errors, http.StatusBadRequest, w)
+		return
+	}
+
+	JSONResponse(lu, http.StatusOK, w)
+
+}
+
+func setupActivateUserHandler(w http.ResponseWriter, r *http.Request) {
+	var sr SuccessResponse
+	var fr FailureResponse
+
+	type newPassword struct {
+		Password string
+	}
+
+	confKey := vestigo.Param(r, "confirmation_key")
+	u, err := getUserByConfirmationKey(confKey)
+
+	if err != nil {
+		Error.Println("Failed to find user with key", confKey)
+		fr = FailureResponse{Message: fmt.Sprintf("Failed to find user with key %s", confKey)}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	var np newPassword
+	json.NewDecoder(r.Body).Decode(&np)
+
+	err = activateUser(u, np.Password)
+	if err != nil {
+		errors := validationErrorsToJSON(err)
+		JSONResponse(errors, http.StatusBadRequest, w)
+		return
+	}
+
+	sr = SuccessResponse{Message: "User activated"}
+	JSONResponse(sr, http.StatusOK, w)
 
 }
 

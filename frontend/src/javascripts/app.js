@@ -7,6 +7,7 @@ import App from '../components/App.vue';
 
 import SetupInitialUser from '../components/Setup/InitialUser.vue';
 import SetupInitializeRepo from '../components/Setup/InitializeRepository.vue';
+import ActivateUser from '../components/Setup/ActivateUser.vue';
 
 import Login from '../components/Login.vue';
 import Commit from '../components/Commit.vue';
@@ -57,6 +58,7 @@ const routes = [
 	// Unprotected pages
 	{path: '/cms/setup/initial_user', component: SetupInitialUser, name: 'initial_setup'},
 	{path: '/cms/login', component: Login, name: 'login'},
+	{path: '/cms/activate/:confirmation_key', component: ActivateUser, name: 'activate_user'},
 
 	// Protected pages
 	{path: '/cms/setup/initialize_repo', component: SetupInitializeRepo, name: 'initialize_repo'},
@@ -99,8 +101,10 @@ export {router};
 // ensure that only logged-in users can continue
 router.beforeEach((to, from, next) => {
 
+	let allow = CMSAuth.unblockedPageCheck(to.path);
+
 	// is the destination somewhere other than the login page?
-	if (to.path == '/cms/login' || to.path == '/cms/setup/initial_user') {
+	if (allow) {
 		// destination is login page, continue
 		next();
 	}
