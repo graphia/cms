@@ -279,7 +279,7 @@ export default class CMSFile {
 	 */
 	static async find(directory, document, filename, edit = false) {
 
-		let path = `${config.api}/directories/${directory}/documents/${document}/files/${filename}`
+		let path = `${config.api}/directories/${directory}/documents/${document}/files/${filename}`;
 
 		// if we need the uncompiled markdown (for loading the editor), amend '/edit' to the path
 		if (edit) {

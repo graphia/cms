@@ -6,114 +6,108 @@
 		<div class="row">
 			<SettingsNavigation/>
 
-			<div class="col-md-9 personal-details">
-				<h1>Personal Details</h1>
+			<div class="col-md-9">
 
-				<form id="personal-details" @submit="updateUser">
+				<div class="row">
+					<div class="col text-right p-2 m-2">
+						<router-link class="btn btn-secondary" :to="{name: 'user_new'}">
+							Create new user
+						</router-link>
+					</div>
+				</div>
 
-					<div class="form-group">
-						<label class="form-control-label" for="username">Username</label>
-						<input
-							name="username"
-							class="form-control"
-							type="username"
-							placeholder="monty.burns@springfieldpower.com"
-							v-model="user.username"
-							required="true"
-							disabled="true"
-						/>
+				<div class="row user-list">
+
+					<div class="col px-2" v-for="(user, i) in users" :key="i">
+						<div class="card user my-2" :id="`user-${user.id}`">
+
+							<div class="card-header">
+								{{ user.name }}
+
+								<span class="badge admin badge-info" v-if="user.admin">
+									Admin
+								</span>
+
+								<span class="badge inactive badge-warning" v-if="!user.active">
+									Inactive
+								</span>
+							</div>
+
+							<div class="card-body">
+								<dl>
+									<dt>Username:</dt>
+									<dd>{{ user.username }}</dd>
+
+									<dt>Email Address:</dt>
+									<dd>{{ user.email }}</dd>
+								</dl>
+							</div>
+
+							<div class="card-footer">
+								<router-link class="btn btn-secondary" :to="{name: 'user_edit', params: {username: user.username}}">
+									Edit
+								</router-link>
+							</div>
+						</div>
 					</div>
 
-					<div class="form-group">
-						<label class="form-control-label" for="email">Email</label>
-						<input
-							name="email"
-							class="form-control"
-							type="email"
-							placeholder="monty.burns@springfieldpower.com"
-							v-model="user.email"
-							required="true"
-							disabled="true"
-						/>
-					</div>
-
-					<div class="form-group">
-						<label class="form-control-label" for="name">Name</label>
-						<input
-							name="name"
-							class="form-control"
-							placeholder="Charles Montgomery Burns"
-							v-model="user.name"
-							required="true"
-							minlength="3"
-							maxlength="64"
-						/>
-					</div>
-
-					<div class="form-group">
-						<input
-							type="submit"
-							value="Update my details"
-							class="btn btn-primary"
-							:disabled="!user.updated()"
-
-						/>
-					</div>
-				</form>
-
-				<PasswordSettings/>
-
+				</div>
 
 			</div>
-
 		</div>
-
 	</div>
+
 </template>
 
-<script>
+
+<script lang="babel">
 
 	import SettingsNavigation from "./Navigation";
 	import Breadcrumbs from '../Utilities/Breadcrumbs';
-	import PasswordSettings from './UserSettings/PasswordSettings';
+	import PasswordSettings from './MyProfile/PasswordSettings';
 
+
+	import checkResponse from '../../javascripts/response.js';
+	import store from '../../javascripts/store.js';
+	import config from '../../javascripts/config.js';
 	import CMSUser from '../../javascripts/models/user.js';
 	import CMSBreadcrumb from '../../javascripts/models/breadcrumb.js';
 
+	class UserList {
+		static async all() {
+			const path = `${config.api}/users`;
+			let response = await fetch(path, {headers: store.state.auth.authHeader()})
+
+			if (!checkResponse(response.status)) {
+				console.error("User list cannot be retrieved", response);
+				return;
+			};
+
+			return await response.json();
+
+		};
+	};
+
 	export default {
-		name: "Settings",
+		name: "UserSettings",
+		async created() {
+			this.users = await UserList.all();
+		},
 		data() {
 			return {
-				 // so we can render the form bound to something
-				emptyUser: new CMSUser
+				title: "Users",
+				users: []
 			};
 		},
 		computed: {
-			user() {
-				return (this.$store.state.user || this.emptyUser);
-			},
-
 			breadcrumbs() {
-				return [new CMSBreadcrumb("User settings", "user_settings")];
+				return [new CMSBreadcrumb("Users", "user_settings")];
 			},
-
-			title() {
-				return "Settings: Personal Details";
-			}
-
-		},
-		methods: {
-			async updateUser(event) {
-				event.preventDefault();
-				await this.user.save();
-				this.user.refresh();
-			}
 		},
 		components: {
 			SettingsNavigation,
 			Breadcrumbs,
 			PasswordSettings
 		}
-
 	};
 </script>

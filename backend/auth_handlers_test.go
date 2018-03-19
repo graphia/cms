@@ -37,13 +37,6 @@ func TestAuthLoginHandler(t *testing.T) {
 	server = httptest.NewServer(unprotectedRouter())
 	var target = fmt.Sprintf("%s/%s", server.URL, "auth/login")
 
-	mh := User{
-		Username: "misshoover",
-		Email:    "e.hoover@springfield.k12.us",
-		Name:     "Elizabeth Hoover",
-		Password: "SuperSecret123",
-	}
-
 	_ = createUser(mh)
 
 	uc := &UserCredentials{
@@ -102,21 +95,14 @@ func TestAuthInvalidLoginHandler(t *testing.T) {
 	server = httptest.NewServer(unprotectedRouter())
 	var target = fmt.Sprintf("%s/%s", server.URL, "auth/login")
 
-	mh := User{
-		Username: "misshoover",
-		Email:    "e.hoover@springfield.k12.us",
-		Name:     "Elizabeth Hoover",
-		Password: "SuperSecret123",
-	}
-
 	_ = createUser(mh)
 
-	uc := &UserCredentials{
+	incorrectCredentials := &UserCredentials{
 		Username: "misshoover",
 		Password: "atotallyIncoRRecTPassw0rd",
 	}
 
-	payload, _ := json.Marshal(uc)
+	payload, _ := json.Marshal(incorrectCredentials)
 
 	b := bytes.NewBuffer(payload)
 
@@ -147,13 +133,6 @@ func TestAuthNonExistantLoginHandler(t *testing.T) {
 	server = httptest.NewServer(unprotectedRouter())
 	var target = fmt.Sprintf("%s/%s", server.URL, "auth/login")
 
-	mh := User{
-		Username: "misshoover",
-		Email:    "e.hoover@springfield.k12.us",
-		Name:     "Elizabeth Hoover",
-		Password: "SuperSecret123",
-	}
-
 	_ = createUser(mh)
 
 	uc := &UserCredentials{
@@ -177,6 +156,38 @@ func TestAuthNonExistantLoginHandler(t *testing.T) {
 
 	assert.NotEmpty(t, receiver)
 	assert.Contains(t, "User not found: mskrabappel", receiver.Message)
+
+}
+
+func Test_authLoginHandler_Deactivated(t *testing.T) {
+	db.Drop("User")
+	setupTestKeys()
+	server = httptest.NewServer(unprotectedRouter())
+	var target = fmt.Sprintf("%s/%s", server.URL, "auth/login")
+
+	_ = createUser(ds)
+
+	uc := &UserCredentials{
+		Username: "dolph.starbeam",
+		Password: "mightypig",
+	}
+
+	payload, _ := json.Marshal(uc)
+
+	b := bytes.NewBuffer(payload)
+
+	client := &http.Client{}
+
+	req, _ := http.NewRequest("POST", target, b)
+
+	resp, _ := client.Do(req)
+
+	var receiver FailureResponse
+
+	json.NewDecoder(resp.Body).Decode(&receiver)
+
+	assert.NotEmpty(t, receiver)
+	assert.Contains(t, "User is inactive", receiver.Message)
 
 }
 

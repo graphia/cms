@@ -39,4 +39,4 @@ Feature: Settings page
 		Then I should see the following breadcrumbs:
 			| Text                | Reference   |
 			| Dashboard           | /cms        |
-			| User settings       | None        |
+			| My Profile          | None        |

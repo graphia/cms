@@ -7,12 +7,18 @@ import App from '../components/App.vue';
 
 import SetupInitialUser from '../components/Setup/InitialUser.vue';
 import SetupInitializeRepo from '../components/Setup/InitializeRepository.vue';
+import ActivateUser from '../components/Setup/ActivateUser.vue';
 
 import Login from '../components/Login.vue';
 import Commit from '../components/Commit.vue';
 import Home from '../components/Home.vue';
-import UserSettings from '../components/Settings/UserSettings.vue';
+import MyProfile from '../components/Settings/MyProfile.vue';
 import SSHKeySettings from '../components/Settings/SSHKeySettings.vue';
+
+// User Paths
+import UserSettings from '../components/Settings/UserSettings.vue';
+import UserEdit from '../components/Settings/UserSettings/Edit.vue';
+import UserNew from '../components/Settings/UserSettings/New.vue';
 
 // Document Paths
 import DocumentIndex from '../components/Document/Index.vue';
@@ -52,12 +58,19 @@ const routes = [
 	// Unprotected pages
 	{path: '/cms/setup/initial_user', component: SetupInitialUser, name: 'initial_setup'},
 	{path: '/cms/login', component: Login, name: 'login'},
+	{path: '/cms/activate/:confirmation_key', component: ActivateUser, name: 'activate_user'},
 
 	// Protected pages
 	{path: '/cms/setup/initialize_repo', component: SetupInitializeRepo, name: 'initialize_repo'},
 
-	{path: '/cms/settings/user', component: UserSettings, name: 'user_settings', alias: '/cms/settings'},
+	{path: '/cms/settings/my_profile', component: MyProfile, name: 'my_profile', alias: '/cms/settings'},
 	{path: '/cms/settings/keys', component: SSHKeySettings, name: 'ssh_key_settings'},
+
+	// User management
+	{path: '/cms/settings/users', component: UserSettings, name: 'user_settings'},
+	{path: '/cms/settings/users/new', component: UserNew, name: 'user_new'},
+	{path: '/cms/settings/users/:username/edit', component: UserEdit, name: 'user_edit'},
+
 
 	// Directory pages
 	{path: '/cms/new', component: DirectoryNew, name: 'directory_new'},
@@ -88,8 +101,10 @@ export {router};
 // ensure that only logged-in users can continue
 router.beforeEach((to, from, next) => {
 
+	let allow = CMSAuth.unblockedPageCheck(to.path);
+
 	// is the destination somewhere other than the login page?
-	if (to.path == '/cms/login' || to.path == '/cms/setup/initial_user') {
+	if (allow) {
 		// destination is login page, continue
 		next();
 	}

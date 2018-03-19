@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 	"time"
 
@@ -22,6 +21,7 @@ const (
 // ValidateTokenMiddleware validates the JWT token
 func ValidateTokenMiddleware(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	var usernameFromToken string
+	var fr FailureResponse
 
 	token, err := request.ParseFromRequest(r, request.AuthorizationHeaderExtractor,
 		func(token *jwt.Token) (interface{}, error) {
@@ -29,13 +29,8 @@ func ValidateTokenMiddleware(w http.ResponseWriter, r *http.Request, next http.H
 		})
 
 	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		response := FailureResponse{Message: "Unauthorized access, invalid JWT"}
-		json, err := json.Marshal(response)
-		if err != nil {
-			panic(err)
-		}
-		w.Write(json)
+		fr = FailureResponse{Message: "Unauthorized access, invalid JWT"}
+		JSONResponse(fr, http.StatusUnauthorized, w)
 		return
 	}
 
@@ -45,56 +40,57 @@ func ValidateTokenMiddleware(w http.ResponseWriter, r *http.Request, next http.H
 
 	// check that the user still exists, if this fails it's probably been deleted
 	user, err := getUserByUsername(usernameFromToken)
+
 	if err != nil {
-		response := FailureResponse{Message: "Cannot match user with token"}
-		json, err := json.Marshal(response)
-		if err != nil {
-			panic(err)
-		}
-		w.WriteHeader(http.StatusUnauthorized)
-		w.Write(json)
+		fr = FailureResponse{Message: "Cannot match user with token"}
+		JSONResponse(fr, http.StatusUnauthorized, w)
 		return
 	}
 
 	// check that the user is active in the system, if they're not disallow
 	if !user.Active {
-		response := FailureResponse{Message: "User has been deactivated"}
-		json, err := json.Marshal(response)
-		if err != nil {
-			panic(err)
-		}
-		w.WriteHeader(http.StatusUnauthorized)
-		w.Write(json)
+		fr = FailureResponse{Message: "User has been deactivated"}
+		JSONResponse(fr, http.StatusUnauthorized, w)
 		return
 	}
 
 	// check that the token matches the found user's stored token, if it doesn't
 	// it's likely that the user has logged in again and is using the *old* token
 	if user.TokenString != token.Raw {
-		response := FailureResponse{Message: "Token is out of date"}
-		json, err := json.Marshal(response)
-		if err != nil {
-			panic(err)
-		}
-		w.WriteHeader(http.StatusUnauthorized)
-		w.Write(json)
+		fr = FailureResponse{Message: "Token is out of date"}
+		JSONResponse(fr, http.StatusUnauthorized, w)
 		return
 	}
 
-	if err == nil {
-		if token.Valid {
-			ctx := newContextWithCurrentUser(r.Context(), r, user)
-			next(w, r.WithContext(ctx))
-		} else {
-			w.WriteHeader(http.StatusUnauthorized)
-			response := FailureResponse{Message: "Invalid credentials"}
-			json, err := json.Marshal(response)
-			if err != nil {
-				panic(err)
-			}
-			w.Write(json)
-		}
+	if !token.Valid {
+		fr = FailureResponse{Message: "Invalid credentials"}
+		JSONResponse(fr, http.StatusUnauthorized, w)
+		return
 	}
+
+	ctx := newContextWithCurrentUser(r.Context(), r, user)
+	next(w, r.WithContext(ctx))
+
+}
+
+// ValidateAdminMiddleware ensures the user is an administrator
+func ValidateAdminMiddleware(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+
+	var user User
+	var fr FailureResponse
+
+	user = getCurrentUser(r.Context())
+
+	if !user.Admin {
+		Warning.Printf("Regular user %s trying to access admin area", user.Username)
+		fr = FailureResponse{Message: "User does not have sufficient privileges"}
+		JSONResponse(fr, http.StatusUnauthorized, w)
+		return
+	}
+
+	Debug.Println("User is admin, continuing")
+
+	next(w, r)
 
 }
 

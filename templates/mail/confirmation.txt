@@ -1,0 +1,10 @@
+Dear {{ .User.Name }},
+
+An account has been created for you on your Graphia CMS instance. Please follow this
+link to activate your account.
+
+{{ .EmailConfig.URL }}/cms/activate/{{ .User.ConfirmationKey }}
+
+Your username is {{ .User.Username }} and you will be prompted to create a password.
+
+See you soon! 🤖

@@ -16,11 +16,13 @@ import (
 var (
 	mh = User{
 		//ID:       1,
-		Username: "misshoover",
-		Email:    "e.hoover@springfield.k12.us",
-		Name:     "Elizabeth Hoover",
-		Password: "SuperSecret123",
-		Active:   true,
+		Username:        "misshoover",
+		Email:           "e.hoover@springfield.k12.us",
+		Name:            "Elizabeth Hoover",
+		Password:        "SuperSecret123",
+		Active:          true,
+		Admin:           false,
+		ConfirmationKey: "AAAAAAAABBBBBCCCCDD112233",
 	}
 
 	ck = User{
@@ -30,6 +32,7 @@ var (
 		Name:     "Cookie Kwan",
 		Password: "P@ssword!",
 		Active:   true,
+		Admin:    true,
 	}
 
 	ds = User{
@@ -39,6 +42,7 @@ var (
 		Name:     "Dolph Starbeam",
 		Password: "mightypig",
 		Active:   false,
+		Admin:    false,
 	}
 
 	sb = User{
@@ -48,6 +52,7 @@ var (
 		Name:     "Selma Bouvier",
 		Password: "ilubjubjub",
 		Active:   false,
+		Admin:    false,
 	}
 )
 
@@ -130,7 +135,7 @@ func TestGetUserByUsername(t *testing.T) {
 	assert.NotZero(t, cookieKwan.ID)
 
 	_, err := getUserByUsername("not.miss.hoover.ok")
-	assert.Contains(t, err.Error(), "not found")
+	assert.Equal(t, ErrUserNotExists, err)
 
 }
 
@@ -576,6 +581,104 @@ func TestUser_checkPassword(t *testing.T) {
 				return
 			}
 			assert.Nil(t, dolph.checkPassword(tt.args.password))
+		})
+	}
+}
+
+func Test_updateUser(t *testing.T) {
+	db.Drop("User")
+
+	_ = createUser(ck)
+	original, _ := getUserByUsername("cookie.kwan")
+
+	updates := LimitedUser{
+		Username: "KWANCOOKIE12315", // should not be updated
+		Name:     "Cookie Swan",
+		Email:    "cookie.new@hotmail.com",
+		Active:   false,
+	}
+
+	err := updateUser(original, updates)
+	updated, _ := getUserByUsername("cookie.kwan")
+
+	assert.Nil(t, err)
+	assert.Equal(t, updates.Name, updated.Name)
+	assert.Equal(t, updates.Email, updated.Email)
+	assert.Equal(t, updates.Active, updated.Active)
+
+	// ensure username hasn't been changed
+	assert.Equal(t, original.Username, "cookie.kwan")
+
+}
+
+func Test_deleteUser(t *testing.T) {
+	db.Drop("User")
+
+	_ = createUser(mh)
+	deletee, _ := getUserByUsername(mh.Username)
+
+	_ = deletee.delete()
+
+	_, err := getUserByUsername(mh.Username)
+
+	assert.Equal(t, ErrUserNotExists, err)
+
+}
+
+func Test_activateUser(t *testing.T) {
+	type args struct {
+		user     User
+		password string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+		errMsg  string
+	}{
+		{
+			name: "Successful activation",
+			args: args{
+				user:     ds,
+				password: "atotallyvalidpassword",
+			},
+		},
+		{
+			name: "Already activated",
+			args: args{
+				user:     ck,
+				password: "atotallyvalidpassword",
+			},
+			wantErr: true,
+			errMsg:  "cookie.kwan already active",
+		},
+		{
+			name: "Password validation fail",
+			args: args{
+				user:     ds,
+				password: "invpw",
+			},
+			wantErr: true,
+			errMsg:  "password must be at least 6 characters",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_ = createUser(tt.args.user)
+			before, _ := getUserByUsername(tt.args.user.Username)
+
+			err := activateUser(before, tt.args.password)
+
+			if tt.wantErr {
+				assert.Equal(t, err.Error(), tt.errMsg)
+				return
+			}
+
+			assert.Nil(t, err)
+			after, _ := getUserByUsername(tt.args.user.Username)
+
+			assert.True(t, after.Active)
+
 		})
 	}
 }

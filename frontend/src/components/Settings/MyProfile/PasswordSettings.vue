@@ -99,7 +99,7 @@
 				this.error = "";
 
 				event.preventDefault();
-				let response = await this.user.updatePassword(
+				let response = await this.currentUser.updatePassword(
 					this.currentPassword,
 					this.newPassword
 				);

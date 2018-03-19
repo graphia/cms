@@ -4,7 +4,8 @@ Given %r{^the CMS is running with the "(.*?)" config$} do |opt|
     "default" => "../../config/cucumber/default.yml",
     "multilingual" => "../../config/cucumber/multilingual.yml",
     "ssh_enabled" => "../../config/cucumber/ssh_enabled.yml",
-    "https_enabled" => "../../config/cucumber/https.yml"
+    "https_enabled" => "../../config/cucumber/https.yml",
+    "confirmation_required" => "../../config/cucumber/confirmation_required.yml"
   }
 
   fail "config option not found: '#{opt}'" unless config_mapping[opt]

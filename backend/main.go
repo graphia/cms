@@ -16,18 +16,14 @@ import (
 )
 
 var (
-	config Config
-
-	// This was set to default to /etc/ but VSCode's Go debugger config isn't working properly
-	// see, https://github.com/Microsoft/vscode-go/issues/1134 so for ease now set it to the
-	// location of the test config
-	//
+	config        Config
 	argConfigPath = flag.String("config", "/etc/graphia/cms.yml", "the config file")
 	logEnabled    = flag.Bool("log-to-file", false, "enable logging")
 	verifyKey     *rsa.PublicKey
 	signKey       *rsa.PrivateKey
 	db            storm.DB
 	validate      *validator.Validate
+	mailer        Mailer
 )
 
 // init loads config and sets up logging without requiring
@@ -57,6 +53,8 @@ func init() {
 
 	validate = validator.New()
 
+	mailer = setupMailer()
+
 	setupLogging(*logEnabled)
 }
 
@@ -64,13 +62,14 @@ func main() {
 
 	Debug.Println("Initialised with config:", config)
 
-	var r, pr *vestigo.Router
+	var r, pr, ar *vestigo.Router
 	var n *negroni.Negroni
 
 	setupKeys()
 	r = unprotectedRouter()
 	pr = protectedRouter()
-	n = setupMiddleware(r, pr)
+	ar = adminRouter()
+	n = setupMiddleware(r, pr, ar)
 	db = setupDB(config.Database)
 
 	Debug.Println("Router and Middleware set up")
@@ -132,6 +131,7 @@ func main() {
 		Info.Println("HTTPS is not enabled, listening on", config.HTTPListenPort)
 		http.ListenAndServe(config.HTTPListenPortWithColon(), n)
 	}
+
 }
 
 func setupKeys() {
@@ -156,9 +156,19 @@ func setupKeys() {
 	}
 }
 
-func setupMiddleware(r, pr *vestigo.Router) (n *negroni.Negroni) {
+func setupMailer() Mailer {
+	return Mailer{send: DefaultSender}
+}
+
+func setupMiddleware(r, pr, ar *vestigo.Router) (n *negroni.Negroni) {
 	n = negroni.New()
 	n.UseHandler(r)
+
+	r.Handle("/api/admin/*", negroni.New(
+		negroni.HandlerFunc(ValidateTokenMiddleware),
+		negroni.HandlerFunc(ValidateAdminMiddleware),
+		negroni.Wrap(ar),
+	))
 
 	r.Handle("/api/*", negroni.New(
 		negroni.HandlerFunc(ValidateTokenMiddleware),
@@ -180,6 +190,9 @@ func unprotectedRouter() (r *vestigo.Router) {
 	// setup endpoints
 	r.Get("/setup/create_initial_user", setupAllowCreateInitialUserHandler)
 	r.Post("/setup/create_initial_user", setupCreateInitialUserHandler)
+
+	r.Get("/setup/activate/:confirmation_key", setupGetUserByConfirmationKeyHandler)
+	r.Patch("/setup/activate/:confirmation_key", setupActivateUserHandler)
 
 	// rather than above rule, do a check to see if the file exists and serve it
 	// if it doesn't, serve index.html :>
@@ -232,11 +245,9 @@ func protectedRouter() (r *vestigo.Router) {
 	r.Get("/api/directories/:directory/documents/:document/attachments", apiGetFileAttachmentsHandler)
 	r.Get("/api/directories/:directory/documents/:document/attachments/:file", apiGetFileAttachmentHandler)
 
-	// user endpoints
+	// user retrieval endpoints
 	r.Get("/api/users", apiListUsersHandler)
-	r.Post("/api/users", apiCreateUserHandler)
 	r.Get("/api/users/:username", apiGetUserHandler)
-	r.Delete("/api/users/:username", apiDeleteUserHandler)
 
 	r.Post("/api/logout", apiLogoutHandler)
 	r.Get("/api/user_info", apiGetUserInfoHandler)
@@ -262,6 +273,19 @@ func protectedRouter() (r *vestigo.Router) {
 
 	// missing operations:
 	// how should file and directory moves/copies be represented?
+
+	return r
+}
+
+// Endpoints only available to users who are Administrators
+func adminRouter() (r *vestigo.Router) {
+
+	r = vestigo.NewRouter()
+
+	r.Post("/api/admin/users", apiCreateUserHandler)
+	r.Get("/api/admin/users/:username", apiGetFullUserHandler)
+	r.Patch("/api/admin/users/:username", apiUpdateUserHandler)
+	r.Delete("/api/admin/users/:username", apiDeleteUserHandler)
 
 	return r
 }

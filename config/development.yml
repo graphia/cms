@@ -1,4 +1,5 @@
 host: localhost
+url: https://localhost:8080
 
 # HTTP settings
 http_listen_port: 8080
@@ -22,6 +23,11 @@ ssh_listen_port: 2222
 git_bin_path: /usr/local/bin/
 git_repo_path: ./hugo
 git_user: git
+mail_template_path: templates/mail
+smtp_host: localhost
+smtp_port: 1025
+smtp_user:
+smtp_pass:
 file_categories:
   documents:
     - .md

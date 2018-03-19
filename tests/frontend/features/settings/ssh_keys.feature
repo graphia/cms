@@ -13,7 +13,7 @@ Feature: Setting up my SSH Keys
 		Given I am on my ssh key settings page
 		Then I should see the heading "SSH Keys"
 		And I should see subheadings:
-			 | Existing keys        |
+			 | You have no keys     |
 			 | Upload a new SSH key |
 
 	Scenario: Page title
