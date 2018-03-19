@@ -208,6 +208,8 @@ func authRenewTokenHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	user.setToken(tokenString)
+
 	response := Token{tokenString}
 	JSONResponse(response, http.StatusOK, w)
 
