@@ -88,6 +88,14 @@ func authLoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if !user.Active {
+		fr = FailureResponse{
+			Message: "User is inactive",
+		}
+		JSONResponse(fr, http.StatusForbidden, w)
+		return
+	}
+
 	token, err := newToken(user)
 	if err != nil {
 		fr = FailureResponse{

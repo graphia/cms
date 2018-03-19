@@ -159,6 +159,38 @@ func TestAuthNonExistantLoginHandler(t *testing.T) {
 
 }
 
+func Test_authLoginHandler_Deactivated(t *testing.T) {
+	db.Drop("User")
+	setupTestKeys()
+	server = httptest.NewServer(unprotectedRouter())
+	var target = fmt.Sprintf("%s/%s", server.URL, "auth/login")
+
+	_ = createUser(ds)
+
+	uc := &UserCredentials{
+		Username: "dolph.starbeam",
+		Password: "mightypig",
+	}
+
+	payload, _ := json.Marshal(uc)
+
+	b := bytes.NewBuffer(payload)
+
+	client := &http.Client{}
+
+	req, _ := http.NewRequest("POST", target, b)
+
+	resp, _ := client.Do(req)
+
+	var receiver FailureResponse
+
+	json.NewDecoder(resp.Body).Decode(&receiver)
+
+	assert.NotEmpty(t, receiver)
+	assert.Contains(t, "User is inactive", receiver.Message)
+
+}
+
 // Auth middleware tests
 
 func setupMiddlewareProtectedTestServer() *httptest.Server {
