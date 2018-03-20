@@ -86,6 +86,7 @@ export default class CMSDirectory {
 			});
 
 			if (!checkResponse(response.status)) {
+				console.error("could not create directory", response);
 				return;
 			}
 
@@ -95,6 +96,20 @@ export default class CMSDirectory {
 		catch(err) {
 			console.error("There was a problem creating the new directory", err);
 		};
+
+	};
+
+	async destroy(commit) {
+
+		let path = `${config.api}/directories/${this.path}`;
+
+		let response = await fetch(path, {
+			method: "DELETE",
+			headers: store.state.auth.authHeader(),
+			body: JSON.stringify(commit.prepareJSON())
+		});
+
+		return response;
 
 	};
 

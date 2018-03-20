@@ -25,3 +25,9 @@ Then %r{^the "(.*?)" field's error text should contain "(.*?)"$} do |field, erro
     expect(page).to have_content(error)
   end
 end
+
+Then %r{^the "(.*?)" directory should have been deleted$} do |dir_name|
+  within(".directories") do
+    expect(page).not_to have_css("div[data-directory='#{dir_name}']")
+  end
+end

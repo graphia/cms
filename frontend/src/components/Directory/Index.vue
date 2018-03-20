@@ -6,7 +6,7 @@
 			<Breadcrumbs :levels="breadcrumbs"/>
 
 			<div class="row document-info">
-				<div class="col-md-8">
+				<div class="col-md-6">
 
 					<!-- document index header -->
 					<h2 v-if="activeDirectory.title">
@@ -21,8 +21,9 @@
 
 				</div>
 
-				<div class="col col-md-4 text-right">
+				<div id="directory-toolbar" class="col col-md-6 text-right">
 					<DocumentNewButton :directoryPath="directory"/>
+					<DirectoryDeleteButton/>
 				</div>
 			</div>
 
@@ -61,13 +62,14 @@
 
 <script lang="babel">
 
+	import CMSBreadcrumb from '../../javascripts/models/breadcrumb.js';
+
 	import IndexList from './Index/List';
 	import Breadcrumbs from '../Utilities/Breadcrumbs';
 	import Error from '../Errors/Error';
-	import CMSBreadcrumb from '../../javascripts/models/breadcrumb.js';
 	import Accessors from '../Mixins/accessors';
 	import DocumentNewButton from '../Document/Buttons/New';
-
+	import DirectoryDeleteButton from './Buttons/Delete';
 
 	export default {
 		name: "DirectoryIndex",
@@ -118,7 +120,8 @@
 			Breadcrumbs,
 			Error,
 			IndexList,
-			DocumentNewButton
+			DocumentNewButton,
+			DirectoryDeleteButton
 		}
 	}
 </script>
