@@ -249,7 +249,8 @@ export default class CMSFile {
 					directory,
 					json.info.title,
 					json.info.description,
-					json.info.body
+					json.info.body,
+					json.info.html
 				);
 				store.commit("setActiveDirectory", dir);
 			};

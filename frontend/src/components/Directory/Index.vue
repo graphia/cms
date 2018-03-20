@@ -5,7 +5,7 @@
 
 			<Breadcrumbs :levels="breadcrumbs"/>
 
-			<div class="row document-info">
+			<div class="row directory-info">
 				<div class="col-md-6">
 
 					<!-- document index header -->
@@ -19,10 +19,18 @@
 
 					<p>{{ activeDirectory.description }}</p>
 
+					<div class="directory-info-text">
+						<h3>Extra Information</h3>
+						<div v-html="activeDirectory.html"/>
+					</div>
+
 				</div>
 
 				<div id="directory-toolbar" class="col col-md-6 text-right">
 					<DocumentNewButton :directoryPath="directory"/>
+					<router-link :to="{name: 'directory_edit', params: {directory: this.$route.params.directory}}" class="btn btn-sm btn-primary">
+						Edit directory
+					</router-link>
 					<DirectoryDeleteButton/>
 				</div>
 			</div>

@@ -63,6 +63,8 @@
 		computed: {
 			groupedTranslations() {
 
+				console.log("grouping", this.documents);
+
 				// FIXME finding translations using the number of dots is potentially
 				// a bit fragile, should use a regexp to check for filenames ending
 				// in ".xx.md"

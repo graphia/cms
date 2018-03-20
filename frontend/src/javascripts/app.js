@@ -28,6 +28,7 @@ import DocumentHistory from '../components/Document/History.vue';
 
 // Directory Paths
 import DirectoryIndex from '../components/Directory/Index.vue';
+import DirectoryEdit from '../components/Directory/Edit.vue';
 import DirectoryNew from '../components/Directory/New.vue';
 
 // Utility Components
@@ -79,6 +80,7 @@ const routes = [
 
 	{path: '/cms/', component: Home, name: 'home'},
 	{path: '/cms/:directory', component: DirectoryIndex, name: 'directory_index'},
+	{path: '/cms/:directory/edit', component: DirectoryEdit, name: 'directory_edit'},
 	{path: '/cms/:directory/new', component: DocumentNew, name: 'document_new'},
 
 	{path: '/cms/:directory/:document/:language_code?/edit', component: DocumentEdit, name: 'document_edit'},

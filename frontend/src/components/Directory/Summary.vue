@@ -96,6 +96,7 @@
 						dir.info.title,
 						dir.info.description,
 						dir.info.body,
+						dir.info.html,
 						dir.contents.map((file) => {
 							return new CMSFile(file);
 						})
