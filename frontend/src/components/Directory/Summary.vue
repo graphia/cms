@@ -21,7 +21,7 @@
 
 					<div class="row">
 						<h4 class="col col-md-6">
-							<router-link :to="{name: 'document_index', params: {directory: directory.path}}">
+							<router-link :to="{name: 'directory_index', params: {directory: directory.path}}">
 								{{ (directory.title || directory.path) | capitalize }}
 							</router-link>
 						</h4>
@@ -51,7 +51,7 @@
 	import config from '../../javascripts/config.js';
 	import CMSFile from '../../javascripts/models/file.js';
 	import CMSDirectory from '../../javascripts/models/directory.js';
-	import IndexList from '../Document/Index/List';
+	import IndexList from '../Directory/Index/List';
 	import DocumentNewButton from '../Document/Buttons/New';
 
 	export default {

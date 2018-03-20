@@ -144,7 +144,7 @@
 				return [
 					new CMSBreadcrumb(
 						directory_title || this.params.directory,
-						"document_index",
+						"directory_index",
 						{directory: this.directory}
 					),
 					new CMSBreadcrumb(

@@ -61,7 +61,7 @@
 
 			formCancellationRedirectParams() {
 				return {
-					name: 'document_index'
+					name: 'directory_index'
 				};
 			},
 
@@ -69,7 +69,7 @@
 				return [
 					new CMSBreadcrumb(
 						this.$store.state.activeDirectory.title || this.directory,
-						"document_index",
+						"directory_index",
 						{directory: this.directory}
 					),
 					new CMSBreadcrumb(

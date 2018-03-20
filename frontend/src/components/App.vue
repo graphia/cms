@@ -19,7 +19,7 @@
 					</li>
 
 					<li v-for="(directory, i) in directories" :key="i">
-						<router-link :to="{name: 'document_index', params: {directory: directory.path}}" class="nav-link directory-link">
+						<router-link :to="{name: 'directory_index', params: {directory: directory.path}}" class="nav-link directory-link">
 							{{ directory.title || directory.path | capitalize }}
 						</router-link>
 					</li>

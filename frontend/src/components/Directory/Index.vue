@@ -70,7 +70,7 @@
 
 
 	export default {
-		name: "DocumentIndex",
+		name: "DirectoryIndex",
 		created() {
 			// populate $store.state.documents with docs from api
 			this.setup(this.directory);
@@ -105,7 +105,7 @@
 				return [
 					new CMSBreadcrumb(
 						this.activeDirectory.title || this.directory,
-						"document_index",
+						"directory_index",
 						{directory: this.directory}
 					)
 				];

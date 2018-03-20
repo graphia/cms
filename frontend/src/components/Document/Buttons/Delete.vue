@@ -129,7 +129,7 @@
 
 			redirectToDirectoryIndex(directory) {
 				this.$router.push({
-					name: 'document_index',
+					name: 'directory_index',
 					params:{directory}
 				});
 			},

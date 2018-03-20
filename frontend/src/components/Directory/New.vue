@@ -115,7 +115,7 @@
 				return;
 			},
 			redirectToIndex(directory) {
-				this.$router.push({name: 'document_index', params: {directory}});
+				this.$router.push({name: 'directory_index', params: {directory}});
 			},
 			validate() {
 				if (!this.form) {

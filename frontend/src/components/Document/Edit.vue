@@ -96,7 +96,7 @@
 
 					new CMSBreadcrumb(
 						dir_title || this.directory,
-						"document_index",
+						"directory_index",
 						{directory: this.directory}
 					),
 					new CMSBreadcrumb(
