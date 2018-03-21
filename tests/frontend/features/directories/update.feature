@@ -42,3 +42,11 @@ Feature: Creating directories
 		When I submit the form
 		Then I am on the "documents" index page
 		And the directory index page should contain the newly-updated information
+
+	Scenario: Breadcrumbs
+		Given I am on the update directory page
+		Then I should see the following breadcrumbs:
+			| Text                | Reference       |
+			| Dashboard           | /cms            |
+			| Important Documents | /cms/documents  |
+			| Edit                | None            |

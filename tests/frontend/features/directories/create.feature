@@ -63,3 +63,10 @@ Feature: Creating directories
 		When I enter "f" in the "Title" field
 		Then the submit button should be disabled
 		And the "Title" field's error text should contain "Please lengthen this text to 2 characters or more"
+
+	Scenario: Breadcrumbs
+		Given I am on the new directory page
+		Then I should see the following breadcrumbs:
+			| Text                | Reference       |
+			| Dashboard           | /cms            |
+			| New Directory       | None            |

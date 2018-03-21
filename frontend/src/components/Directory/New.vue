@@ -2,6 +2,8 @@
 
 	<div class="new-directory" v-title="title">
 
+		<Breadcrumbs :levels="breadcrumbs"/>
+
 		<h4>
 			Create a new directory
 		</h4>
@@ -62,7 +64,9 @@
 	import config from '../../javascripts/config.js';
 	import CMSDirectory from '../../javascripts/models/directory.js';
 	import slugify from '../../javascripts/utilities/slugify.js';
+	import CMSBreadcrumb from '../../javascripts/models/breadcrumb.js';
 
+	import Breadcrumbs from '../Utilities/Breadcrumbs';
 	import MinimalMarkdownEditor from './Editor';
 	import TitleField from './Metadata/TitleField';
 	import Accessors from '../Mixins/accessors';
@@ -124,6 +128,17 @@
 				this.valid = this.form.checkValidity();
 			}
 		},
+		computed: {
+			breadcrumbs() {
+				return [
+					new CMSBreadcrumb(
+						"New Directory",
+						"directory_new",
+						{}
+					)
+				];
+			}
+		},
 		watch: {
 			"activeDirectory.title": function title() {
 				this.activeDirectory.path = slugify(this.activeDirectory.title);
@@ -131,7 +146,8 @@
 		},
 		components: {
 			MinimalMarkdownEditor,
-			TitleField
+			TitleField,
+			Breadcrumbs
 		},
 		mixins: [Accessors]
 	};
