@@ -43,13 +43,16 @@
 				<MinimalMarkdownEditor/>
 			</div>
 
-			<div class="form-group">
+			<div class="btn-toolbar">
 				<input
 					type="submit"
-					class="form-control btn btn-success"
+					class="btn btn-success mx-2"
 					value="Create directory"
 					:disabled="!valid"
 				/>
+				<router-link class="btn btn-secondary" :to="{name: 'home'}">
+					Cancel
+				</router-link>
 			</div>
 
 		</form>

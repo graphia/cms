@@ -58,6 +58,11 @@ Feature: Creating directories
 		When I have filled in the required fields
 		Then the submit button should be enabled
 
+	Scenario: Cancelling a directory creation
+		Given I am on the new directory page
+		When I click the "Cancel" button
+		Then I should be on the homepage
+
 	Scenario: Displaying error messages
 		Given I am on the new directory page
 		When I enter "f" in the "Title" field

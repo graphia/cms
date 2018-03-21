@@ -33,6 +33,11 @@ Feature: Creating directories
 		Given I am on the update directory page
 		And the page's title should be "Edit directory"
 
+	Scenario: Cancelling a directory update
+		Given I am on the update directory page
+		When I click the "Cancel" button
+		Then I should be on the "documents" index page
+
 	Scenario: File updates
 		Given I am on the update directory page
 		And I fill in the form with the following data:

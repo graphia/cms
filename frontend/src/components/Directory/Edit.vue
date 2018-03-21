@@ -1,7 +1,6 @@
 <template>
 
-	<div class="edit-directory" v-title="title">
-
+	<div class="edit-directory col-md-9" v-title="title">
 
 		<Breadcrumbs :levels="breadcrumbs"/>
 
@@ -32,12 +31,16 @@
 				<MinimalMarkdownEditor/>
 			</div>
 
-			<div class="form-group">
+			<div class="btn-toolbar" role="toolbar">
 				<input
 					type="submit"
-					class="form-control btn btn-success"
+					class="btn btn-success mx-2"
 					value="Update directory"
 				/>
+
+				<router-link class="btn btn-secondary" :to="{name: 'directory_index', params: {directory}}">
+					Cancel
+				</router-link>
 			</div>
 
 		</form>
