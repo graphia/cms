@@ -31,3 +31,32 @@ Then %r{^the "(.*?)" directory should have been deleted$} do |dir_name|
     expect(page).not_to have_css("div[data-directory='#{dir_name}']")
   end
 end
+
+Then %r{^I should be able to see the directory's description$} do
+  expect(page).to have_css(".directory-description", text: "Documents go here")
+end
+
+Then %r{^I should be able to see the directory's introduction$} do
+  within(".directory-info-text") do
+    expect(page).to have_content("These documents are amazing")
+  end
+end
+
+Then %r{^there should be no "(.*?)" section$} do |css_class|
+  expect(page).not_to have_css(css_class)
+end
+
+Given %r{^I am on the update directory page$} do
+  path = "/cms/documents/edit"
+  visit(path)
+  expect(page.current_path).to eql(path)
+end
+
+Then %r{^the directory index page should contain the newly\-updated information$} do
+  expect(page).to have_css(".directory-description", text: "A description of ice cream related products")
+
+  within(".directory-info-text") do
+    expect(page).to have_css("h1", text: "Fabulous ices of all colours")
+  end
+
+end

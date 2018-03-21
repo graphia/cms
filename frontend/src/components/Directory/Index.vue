@@ -17,9 +17,9 @@
 					</h2>
 					<!-- /document index header -->
 
-					<p>{{ activeDirectory.description }}</p>
+					<p class="directory-description">{{ activeDirectory.description }}</p>
 
-					<div class="directory-info-text">
+					<div class="directory-info-text" v-if="activeDirectory.html.length > 0">
 						<h3>Extra Information</h3>
 						<div v-html="activeDirectory.html"/>
 					</div>
