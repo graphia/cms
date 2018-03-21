@@ -106,6 +106,8 @@ Given %r{^the 'documents' directory has title and description metadata$} do
     title: Important Documents
     description: Documents go here
     ---
+
+    These *documents* are **amazing**, aren't they?
     FM
   )
 end
