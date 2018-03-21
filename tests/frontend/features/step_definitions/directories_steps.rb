@@ -27,6 +27,7 @@ Then %r{^the "(.*?)" field's error text should contain "(.*?)"$} do |field, erro
 end
 
 Then %r{^the "(.*?)" directory should have been deleted$} do |dir_name|
+  expect(page).to have_css("h1", text: "Dashboard")
   within(".directories") do
     expect(page).not_to have_css("div[data-directory='#{dir_name}']")
   end
@@ -59,4 +60,9 @@ Then %r{^the directory index page should contain the newly\-updated information$
     expect(page).to have_css("h1", text: "Fabulous ices of all colours")
   end
 
+end
+
+Given %r{^I click 'Delete directory' then 'Confirm deletion'$} do
+  click_button "Delete directory"
+  click_button "Confirm deletion"
 end

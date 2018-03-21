@@ -80,7 +80,7 @@
 				this.$store.dispatch("initializeCommit");
 			},
 
-			showDeleteModal() {
+			showDeleteModal(event) {
 				event.preventDefault();
 				return $("#delete-warning.modal").modal();
 			},

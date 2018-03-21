@@ -13,8 +13,14 @@ Feature: Creating directories
 		Given I am on the "documents" index page
 		Then I should see a "Delete directory" button
 
-	Scenario: Actually deleting a directory
+	Scenario: The deletion modal
 		Given I am on the "documents" index page
 		When I click the "Delete directory" button
-		Then the "documents" directory should have been deleted
-		And I should see a message containing 'Documents and its contents have been deleted'
+		Then I should see the deletion modal box
+
+	Scenario: Actually deleting a directory
+		Given I am on the "documents" index page
+		When I click 'Delete directory' then 'Confirm deletion'
+		Then I should see a message containing 'Documents and its contents have been deleted'
+		And I should be on the homepage
+		And the "documents" directory should have been deleted
