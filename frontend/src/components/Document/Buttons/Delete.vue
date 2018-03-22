@@ -2,7 +2,7 @@
 
 	<div>
 
-		<button type="button" @click="showDeleteModal" class="btn btn-danger mr-2">
+		<button type="button" @click="showDeleteModal" class="btn btn-danger my-2 mx-1">
 			Delete
 		</button>
 

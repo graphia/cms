@@ -48,8 +48,6 @@
 				filename = `index.${this.params.language_code}.md`;
 			};
 
-			console.debug("filename", filename)
-
 			// retrieve the document and make it Active
 			await this.$store.dispatch("editDocument", {
 				directory: this.params.directory,

@@ -8,7 +8,7 @@
 				more information which will be displayed above the list of contents.
 			</p>
 
-			<router-link class="btn btn-lg btn-primary" :to="{name: 'directory_new'}">
+			<router-link class="btn btn-lg btn-primary btn-block" :to="{name: 'directory_new'}">
 				<octicon :icon-name="'file-directory'"></octicon>
 				Create a new directory
 			</router-link>
