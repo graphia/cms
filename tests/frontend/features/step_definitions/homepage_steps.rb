@@ -8,6 +8,10 @@ When %r{^I visit the homepage$} do
   step "I am on the homepage"
 end
 
+Then %r{^I should be on the homepage$} do
+  expect(page.current_path).to eql("/cms")
+end
+
 Then %r{^I should see a summary of recent changes$} do
   expect(page).to have_css("h4", text: "Recent Updates")
 end
@@ -102,6 +106,8 @@ Given %r{^the 'documents' directory has title and description metadata$} do
     title: Important Documents
     description: Documents go here
     ---
+
+    These *documents* are **amazing**, aren't they?
     FM
   )
 end

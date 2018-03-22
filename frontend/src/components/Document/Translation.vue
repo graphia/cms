@@ -2,7 +2,7 @@
 	<div class="dropdown" v-if="anyAvailableLanguages">
 
 		<button
-			class="btn btn-primary dropdown-toggle"
+			class="btn btn-primary dropdown-toggle my-2 mx-1"
 			type="button"
 			id="translationMenu"
 			data-toggle="dropdown"

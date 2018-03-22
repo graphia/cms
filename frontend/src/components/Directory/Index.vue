@@ -5,8 +5,8 @@
 
 			<Breadcrumbs :levels="breadcrumbs"/>
 
-			<div class="row document-info">
-				<div class="col-md-8">
+			<div class="row directory-info">
+				<div class="col-md-6">
 
 					<!-- document index header -->
 					<h2 v-if="activeDirectory.title">
@@ -17,12 +17,21 @@
 					</h2>
 					<!-- /document index header -->
 
-					<p>{{ activeDirectory.description }}</p>
+					<p class="directory-description">{{ activeDirectory.description }}</p>
+
+					<div class="directory-info-text" v-if="activeDirectory.html.length > 0">
+						<h3>Extra Information</h3>
+						<div v-html="activeDirectory.html"/>
+					</div>
 
 				</div>
 
-				<div class="col col-md-4 text-right">
+				<div id="directory-toolbar" class="col col-md-6 text-right">
 					<DocumentNewButton :directoryPath="directory"/>
+					<router-link :to="{name: 'directory_edit', params: {directory: this.$route.params.directory}}" class="btn btn-sm btn-primary">
+						Edit directory
+					</router-link>
+					<DirectoryDeleteButton/>
 				</div>
 			</div>
 
@@ -61,16 +70,17 @@
 
 <script lang="babel">
 
+	import CMSBreadcrumb from '../../javascripts/models/breadcrumb.js';
+
 	import IndexList from './Index/List';
 	import Breadcrumbs from '../Utilities/Breadcrumbs';
 	import Error from '../Errors/Error';
-	import CMSBreadcrumb from '../../javascripts/models/breadcrumb.js';
 	import Accessors from '../Mixins/accessors';
 	import DocumentNewButton from '../Document/Buttons/New';
-
+	import DirectoryDeleteButton from './Buttons/Delete';
 
 	export default {
-		name: "DocumentIndex",
+		name: "DirectoryIndex",
 		created() {
 			// populate $store.state.documents with docs from api
 			this.setup(this.directory);
@@ -105,7 +115,7 @@
 				return [
 					new CMSBreadcrumb(
 						this.activeDirectory.title || this.directory,
-						"document_index",
+						"directory_index",
 						{directory: this.directory}
 					)
 				];
@@ -118,7 +128,8 @@
 			Breadcrumbs,
 			Error,
 			IndexList,
-			DocumentNewButton
+			DocumentNewButton,
+			DirectoryDeleteButton
 		}
 	}
 </script>

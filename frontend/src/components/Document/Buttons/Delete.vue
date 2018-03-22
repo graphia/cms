@@ -2,7 +2,7 @@
 
 	<div>
 
-		<button type="button" @click="showDeleteModal" class="btn btn-danger mr-2">
+		<button type="button" @click="showDeleteModal" class="btn btn-danger my-2 mx-1">
 			Delete
 		</button>
 
@@ -80,7 +80,7 @@
 				this.$store.dispatch("initializeCommit");
 			},
 
-			showDeleteModal() {
+			showDeleteModal(event) {
 				event.preventDefault();
 				return $("#delete-warning.modal").modal();
 			},
@@ -129,7 +129,7 @@
 
 			redirectToDirectoryIndex(directory) {
 				this.$router.push({
-					name: 'document_index',
+					name: 'directory_index',
 					params:{directory}
 				});
 			},

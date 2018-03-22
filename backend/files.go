@@ -1223,7 +1223,10 @@ func getMetadata(repo *git.Repository, tree *git.Tree) (di DirectoryInfo, err er
 
 	reader = bytes.NewReader(blob.Contents())
 
-	_, err = particle.YAMLEncoding.DecodeReader(reader, &di)
+	md, err := particle.YAMLEncoding.DecodeReader(reader, &di)
+
+	di.Body = string(md)
+	di.HTML = renderMarkdown(md)
 
 	if err != nil {
 		Warning.Println("_index.md cannot be decoded, exiting", blob.Contents())

@@ -21,13 +21,14 @@ import UserEdit from '../components/Settings/UserSettings/Edit.vue';
 import UserNew from '../components/Settings/UserSettings/New.vue';
 
 // Document Paths
-import DocumentIndex from '../components/Document/Index.vue';
 import DocumentShow from '../components/Document/Show.vue';
 import DocumentEdit from '../components/Document/Edit.vue';
 import DocumentNew from '../components/Document/New.vue';
 import DocumentHistory from '../components/Document/History.vue';
 
 // Directory Paths
+import DirectoryIndex from '../components/Directory/Index.vue';
+import DirectoryEdit from '../components/Directory/Edit.vue';
 import DirectoryNew from '../components/Directory/New.vue';
 
 // Utility Components
@@ -78,7 +79,8 @@ const routes = [
 	{path: '/cms/commits/:hash', component: Commit, name: 'commit'},
 
 	{path: '/cms/', component: Home, name: 'home'},
-	{path: '/cms/:directory', component: DocumentIndex, name: 'document_index'},
+	{path: '/cms/:directory', component: DirectoryIndex, name: 'directory_index'},
+	{path: '/cms/:directory/edit', component: DirectoryEdit, name: 'directory_edit'},
 	{path: '/cms/:directory/new', component: DocumentNew, name: 'document_new'},
 
 	{path: '/cms/:directory/:document/:language_code?/edit', component: DocumentEdit, name: 'document_edit'},

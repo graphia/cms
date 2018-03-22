@@ -12,7 +12,7 @@
 				to your audience by publishing it.
 			</div>
 
-			<button class="btn btn-lg btn-success" :class="{'disabled': publishing}" @click="publish">
+			<button class="btn btn-lg btn-success btn-block" :class="{'disabled': publishing}" @click="publish">
 				<octicon :icon-name="'cloud-upload'"></octicon>
 				{{ publishing ? "Publishing" : "Publish" }}
 			</button>

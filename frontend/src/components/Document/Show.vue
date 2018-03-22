@@ -42,13 +42,13 @@
 
 						<div class="btn-toolbar" role="toolbar">
 
-							<router-link class="btn btn-primary mr-2" :to="{name: 'document_edit', params: this.navigationParams}">
+							<router-link class="btn btn-primary my-2 mx-1" :to="{name: 'document_edit', params: this.navigationParams}">
 								Edit
 							</router-link>
 
 							<Translation v-if="$store.state.server.translationInfo.translationEnabled"/>
 
-							<router-link class="btn btn-info mr-2" :to="{name: 'document_history', params: this.navigationParams}">
+							<router-link class="btn btn-info my-2 mx-1" :to="{name: 'document_history', params: this.navigationParams}">
 								History
 							</router-link>
 
@@ -144,7 +144,7 @@
 				return [
 					new CMSBreadcrumb(
 						directory_title || this.params.directory,
-						"document_index",
+						"directory_index",
 						{directory: this.directory}
 					),
 					new CMSBreadcrumb(

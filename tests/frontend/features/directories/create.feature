@@ -58,8 +58,20 @@ Feature: Creating directories
 		When I have filled in the required fields
 		Then the submit button should be enabled
 
+	Scenario: Cancelling a directory creation
+		Given I am on the new directory page
+		When I click the "Cancel" button
+		Then I should be on the homepage
+
 	Scenario: Displaying error messages
 		Given I am on the new directory page
 		When I enter "f" in the "Title" field
 		Then the submit button should be disabled
 		And the "Title" field's error text should contain "Please lengthen this text to 2 characters or more"
+
+	Scenario: Breadcrumbs
+		Given I am on the new directory page
+		Then I should see the following breadcrumbs:
+			| Text                | Reference       |
+			| Dashboard           | /cms            |
+			| New Directory       | None            |

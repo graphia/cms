@@ -16,7 +16,7 @@
 				</div>
 				<div class="modal-footer">
 					<button @click="downloadFile" type="button" class="btn btn-success">Download your copy</button>
-					<router-link class="btn btn-danger" data-dismiss="modal" :to="{name: 'document_index', params: {directory: this.directory}}">
+					<router-link class="btn btn-danger" data-dismiss="modal" :to="{name: 'directory_index', params: {directory: this.directory}}">
 						Close
 					</router-link>
 				</div>

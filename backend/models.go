@@ -94,6 +94,7 @@ type DirectoryInfo struct {
 	Title       string `json:"title" yaml:"title"`
 	Description string `json:"description" yaml:"description"`
 	Body        string `json:"body" yaml:"-"`
+	HTML        string `json:"html" yaml:"-"`
 }
 
 // RepositoryInfo provides some data about the repo, such as

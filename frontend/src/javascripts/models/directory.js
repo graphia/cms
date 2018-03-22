@@ -10,11 +10,12 @@ export default class CMSDirectory {
 		return dir;
 	};
 
-	constructor(path, title, description, body, contents = []) {
+	constructor(path, title, description, body, html, contents = []) {
 		this.path        = path        || "";
 		this.title       = title       || "";
 		this.description = description || "";
 		this.body        = body        || "";
+		this.html        = html        || "";
 		this.contents    = contents;
 	};
 
@@ -31,7 +32,7 @@ export default class CMSDirectory {
 
 
 	static async all() {
-		let path = `${config.api}/directories`
+		const path = `${config.api}/directories`
 
 		try {
 			let response = await fetch(path, {method: "GET", headers: store.state.auth.authHeader()});
@@ -58,7 +59,8 @@ export default class CMSDirectory {
 					dir.path,
 					dir.info.title,
 					dir.info.description,
-					dir.info.body
+					dir.info.body,
+					dir.info.html
 				);
 			});
 
@@ -75,31 +77,47 @@ export default class CMSDirectory {
 
 	async create(commit) {
 
-		let path = `${config.api}/directories`;
+		const path = `${config.api}/directories`;
 
-		try {
+		let response = await fetch(path, {
+			method: "POST",
+			headers: store.state.auth.authHeader(),
+			body: JSON.stringify(commit.prepareJSON())
+		});
 
-			let response = await fetch(path, {
-				method: "POST",
-				headers: store.state.auth.authHeader(),
-				body: JSON.stringify(commit.prepareJSON())
-			});
+		return response;
 
-			if (!checkResponse(response.status)) {
-				return;
-			}
+	};
 
-			return response;
+	async update(commit) {
+		const path = `${config.api}/directories/${this.path}`;
 
-		}
-		catch(err) {
-			console.error("There was a problem creating the new directory", err);
-		};
+		let response = await fetch(path, {
+			method: "PATCH",
+			headers: store.state.auth.authHeader(),
+			body: JSON.stringify(commit.prepareJSON())
+		});
+
+		return response;
+
+	}
+
+	async destroy(commit) {
+
+		const path = `${config.api}/directories/${this.path}`;
+
+		let response = await fetch(path, {
+			method: "DELETE",
+			headers: store.state.auth.authHeader(),
+			body: JSON.stringify(commit.prepareJSON())
+		});
+
+		return response;
 
 	};
 
 	static async get(name) {
-		let path = `${config.api}/directories/${name}`;
+		const path = `${config.api}/directories/${name}`;
 
 		let response = await fetch(path, {
 			method: "GET",
@@ -113,7 +131,7 @@ export default class CMSDirectory {
 
 		let json = await response.json();
 
-		let dir = new CMSDirectory(dir, json.title, json.description, json.body);
+		let dir = new CMSDirectory(name, json.title, json.description, json.body);
 
 		store.state.activeDirectory = dir;
 

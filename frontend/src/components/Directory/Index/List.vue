@@ -54,7 +54,7 @@
 
 <script lang="babel">
 
-	import NewButton from '../Buttons/New';
+	import NewButton from '../../Document/Buttons/New';
 
 	export default {
 		name: "IndexList",

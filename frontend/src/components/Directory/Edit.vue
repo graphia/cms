@@ -1,29 +1,17 @@
 <template>
 
-	<div class="new-directory" v-title="title">
+	<div class="edit-directory col-md-12" v-title="title">
 
 		<Breadcrumbs :levels="breadcrumbs"/>
 
 		<h4>
-			Create a new directory
+			Edit {{ this.activeDirectory.title }}
 		</h4>
 
-		<!-- new directory form -->
-		<form :id="formID" @submit="createDirectory">
+		<!-- edit directory form -->
+		<form :id="formID" @submit="updateDirectory">
 
 			<TitleField/>
-
-			<div class="form-group">
-				<label class="form-control-label" for="path">Path</label>
-				<input
-					name="path"
-					class="form-control"
-					placeholder="operating-procedures"
-					v-model="activeDirectory.path"
-					required="true"
-					readonly="true"
-				/>
-			</div>
 
 			<div class="form-group">
 				<label class="form-control-label" for="description">Description</label>
@@ -43,20 +31,20 @@
 				<MinimalMarkdownEditor/>
 			</div>
 
-			<div class="btn-toolbar">
+			<div class="btn-toolbar" role="toolbar">
 				<input
 					type="submit"
 					class="btn btn-success mx-2"
-					value="Create directory"
-					:disabled="!valid"
+					value="Update directory"
 				/>
-				<router-link class="btn btn-secondary" :to="{name: 'home'}">
+
+				<router-link class="btn btn-secondary" :to="{name: 'directory_index', params: {directory}}">
 					Cancel
 				</router-link>
 			</div>
 
 		</form>
-		<!-- /new directory form -->
+		<!-- /edit directory form -->
 
 	</div>
 
@@ -66,7 +54,6 @@
 	import checkResponse from '../../javascripts/response.js';
 	import config from '../../javascripts/config.js';
 	import CMSDirectory from '../../javascripts/models/directory.js';
-	import slugify from '../../javascripts/utilities/slugify.js';
 	import CMSBreadcrumb from '../../javascripts/models/breadcrumb.js';
 
 	import Breadcrumbs from '../Utilities/Breadcrumbs';
@@ -75,30 +62,29 @@
 	import Accessors from '../Mixins/accessors';
 
 	export default {
-		name: "DirectoryNew",
+		name: "DirectoryEdit",
 		data() {
 			return {
-				markdownLoaded: true,
-				formID: "create-directory",
+				markdownLoaded: false,
+				formID: "update-directory",
 				valid: false,
-				title: "Create directory"
+				title: "Edit directory"
 			};
 		},
-		created() {
-			this.$store.commit("initializeDirectory");
-			this.$store.dispatch("initializeCommit");
-
-			this.$bus.$on("checkMetadata", () => {
-				this.validate()
-			});
+		async created() {
+			await this.$store.dispatch("getDirectory", this.directory);
+			this.markdownLoaded = true;
 		},
 		methods: {
-			async createDirectory(event) {
+			async updateDirectory(event) {
 				event.preventDefault();
 
+				await this.$store.dispatch("initializeCommit");
+
+				this.commit.message = `Updated ${this.activeDirectory.title} metadata`;
 				this.commit.addDirectory(this.activeDirectory);
 
-				let response = await this.activeDirectory.create(this.commit);
+				let response = await this.activeDirectory.update(this.commit);
 
 				if (!checkResponse(response.status)) {
 					console.error(response.status);
@@ -107,45 +93,42 @@
 
 				let json = await response.json();
 
-				await this.$store.commit("setLatestRevision", json.oid);
+				this.$store.commit("setLatestRevision", json.oid);
 
-				// new directory created successfully, show a message
+				// directory updated successfully, show a message
 				this.$store.state.broadcast.addMessage(
 					"success",
-					"Directory Created",
-					`You have created the directory ${this.activeDirectory.title}, it has the path ${this.activeDirectory.path}`,
+					"Directory Updated",
+					`Your changes to ${this.activeDirectory.title} have been saved`,
 					3
 				);
 
 				// redirect to the new directory's index page
-				this.redirectToIndex(this.activeDirectory.path);
+				this.redirectToIndex(this.directory);
 				return;
 			},
 			redirectToIndex(directory) {
 				this.$router.push({name: 'directory_index', params: {directory}});
 			},
-			validate() {
-				if (!this.form) {
-					this.form = document.getElementById(this.formID);
-				};
-				this.valid = this.form.checkValidity();
-			}
+
 		},
 		computed: {
+
 			breadcrumbs() {
 				return [
 					new CMSBreadcrumb(
-						"New Directory",
-						"directory_new",
-						{}
+						this.activeDirectory.title || this.directory,
+						"directory_index",
+						{directory: this.directory}
+					),
+					new CMSBreadcrumb(
+						"Edit",
+						"directory_edit",
+						{directory: this.directory}
 					)
 				];
 			}
-		},
-		watch: {
-			"activeDirectory.title": function title() {
-				this.activeDirectory.path = slugify(this.activeDirectory.title);
-			}
+
 		},
 		components: {
 			MinimalMarkdownEditor,
