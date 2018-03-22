@@ -26,11 +26,12 @@ Then %r{^the "(.*?)" field's error text should contain "(.*?)"$} do |field, erro
   end
 end
 
+Then %r{^the "(.*?)" directory exists$} do |dir_name|
+  expect(Dir.exist?(File.join(REPO_PATH, dir_name))).to be true
+end
+
 Then %r{^the "(.*?)" directory should have been deleted$} do |dir_name|
-  expect(page).to have_css("h1", text: "Dashboard")
-  within(".directories") do
-    expect(page).not_to have_css("div[data-directory='#{dir_name}']")
-  end
+  expect(Dir.exist?(File.join(REPO_PATH, dir_name))).to be false
 end
 
 Then %r{^I should be able to see the directory's description$} do
@@ -63,6 +64,7 @@ Then %r{^the directory index page should contain the newly\-updated information$
 end
 
 Given %r{^I click 'Delete directory' then 'Confirm deletion'$} do
+  step 'the "documents" directory exists'
   click_button "Delete directory"
   click_button "Confirm deletion"
 end

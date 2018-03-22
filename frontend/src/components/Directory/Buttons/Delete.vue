@@ -6,7 +6,7 @@
 			Delete directory
 		</button>
 
-		<div id="delete-warning" class="modal">
+		<div id="delete-warning" class="modal fade">
 			<div class="modal-dialog" role="document">
 				<div class="modal-content">
 					<div class="modal-header">
@@ -58,18 +58,18 @@
 
 			showDeleteModal(event) {
 				event.preventDefault();
-				return $("#delete-warning.modal").modal();
+				$("#delete-warning.modal").modal();
 			},
 
 			hideDeleteModal() {
-				return $("#delete-warning.modal").modal("hide");
+				$("#delete-warning.modal").modal("hide");
 			},
 
 			async deleteDirectory(event) {
-				event.preventDefault();
 				this.hideDeleteModal();
+				event.preventDefault();
 
-				let title = this.activeDirectory.title
+				const title = this.activeDirectory.title;
 
 				let commit = new CMSCommit(
 					`Deleting directory ${title}`,
