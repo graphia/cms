@@ -1,6 +1,6 @@
 <template>
 
-	<div class="edit-directory col-md-9" v-title="title">
+	<div class="edit-directory col-md-12" v-title="title">
 
 		<Breadcrumbs :levels="breadcrumbs"/>
 
