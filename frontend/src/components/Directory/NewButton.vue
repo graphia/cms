@@ -1,5 +1,5 @@
 <template>
-	<div class="card bg-light">
+	<div class="card">
 
 		<div class="card-body">
 

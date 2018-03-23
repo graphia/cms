@@ -10,6 +10,77 @@ $enable-hover-media-query:	false !default;
 $enable-grid-classes:		true !default;
 $enable-print-styles:		true !default;
 
-@import "sass/diff"
 
+$white: white !default;
+$gray-100: #f8f9fa !default;
+$gray-200: #e9ecef !default;
+$gray-300: #dee2e6 !default;
+$gray-400: #ced4da !default;
+$gray-500: #adb5bd !default;
+$gray-600: #868e96 !default;
+$gray-700: #495057 !default;
+$gray-800: rgb(70, 70, 70) !default;
+$gray-900: #212529 !default;
+
+$cream-100: rgb(246, 246, 239) !default;
+$cream-200: darken($cream-100, 3%) !default;
+$cream-300: darken($cream-100, 5%) !default;
+$cream-400: darken($cream-100, 8%) !default;
+
+$black:  #000 !default;
+
+$grays: (100: $gray-100, 200: $gray-200, 300: $gray-300, 400: $gray-400, 500: $gray-500, 600: $gray-600, 700: $gray-700, 800: $gray-800, 900: $gray-900 ) !default;
+
+$blue:    rgb(65, 115, 213) !default;
+$indigo:  #6610f2 !default;
+$purple:  #6f42c1 !default;
+$pink:    #e83e8c !default;
+$red:     #dc3545 !default;
+$orange:  rgb(228, 132, 43) !default;
+$yellow:  #ffc107 !default;
+$green:   #28a745 !default;
+$teal:    #20c997 !default;
+$cyan:    #17a2b8 !default;
+
+$colors: (blue: $blue, indigo: $indigo, purple: $purple, pink: $pink, red: $red, orange: $orange, yellow: $yellow, green: $green, teal: $teal, cyan: $cyan, white: $white, gray: $gray-600, gray-dark: $gray-800) !default;
+
+$theme-colors: (primary: $orange, secondary: $gray-600, success: $green, info: $cyan, warning: $yellow, danger: $red, light: $cream-100, dark: $gray-800) !default;
+
+$border-radius:          .25rem !default;
+$border-radius-lg:       .3rem !default;
+$border-radius-sm:       .2rem !default;
+
+body
+	background-color: $cream-100 !important
+
+.btn.btn-primary
+	color: white !important
+
+.card
+	.card-header
+		background-color: $gray-800
+		color: $white
+
+		a
+			color: $white
+
+
+nav > ol.breadcrumb
+	background-color: $cream-400
+
+	li.active
+		color: $black
+
+span.badge-primary
+	color: $white !important
+
+article#document-content
+
+	.content
+		background-color: $white
+		padding: 1rem 2rem
+		border: 1px solid rgba($black,.125)
+		border-radius: $border-radius
+
+@import "sass/diff"
 @import bootstrap

@@ -1,6 +1,6 @@
 <template>
 
-	<div class="publisher card bg-light">
+	<div class="publisher card">
 		<div class="card-body">
 
 			<div class="alert alert-success" v-if="published">
