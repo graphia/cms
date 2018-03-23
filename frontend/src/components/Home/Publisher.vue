@@ -7,10 +7,11 @@
 				Publishing was successful, click <a href="/" target="_blank">here</a>
 				to view the finished site.
 			</div>
-			<div class="alert alert-info" v-else>
+
+			<p>
 				When you are happy with the content, you can release it
 				to your audience by publishing it.
-			</div>
+			</p>
 
 			<button class="btn btn-lg btn-success btn-block" :class="{'disabled': publishing}" @click="publish">
 				<octicon :icon-name="'cloud-upload'"></octicon>

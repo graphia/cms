@@ -14,10 +14,10 @@
 			</div>
 		</div>
 
-		<div class="col col-md-12" v-else>
+		<div class="col col-md-12 directories" v-else>
 
 			<!-- listing directories -->
-				<div class="border rounded p-4 mb-4 bg-white" :data-directory="directory.path" :class="directory.path" v-for="(directory, i) in directories" :key="i">
+				<div class="border rounded p-4 mb-4 bg-white directory" :data-directory="directory.path" :class="directory.path" v-for="(directory, i) in directories" :key="i">
 
 					<div class="row">
 						<h4 class="col col-md-6">

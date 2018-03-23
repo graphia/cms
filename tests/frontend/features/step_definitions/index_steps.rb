@@ -36,7 +36,7 @@ Given %r{^I am on the "([^"]*)" index page$} do |name|
 end
 
 When %r{^I click the "([^"]*)" navigation link$} do |link_text|
-  within("#application > .navbar") do
+  within("header > .navbar") do
 
     # If the window is too small and the nav is collapsed,
     # we need to toggle the nav first. Normally, this is
@@ -55,7 +55,7 @@ end
 Then %r{^each directory index page should have the correct title:$} do |table|
 	table.hashes.each do |row|
 		visit("/cms/#{row['Directory']}")
-		expect(page).to have_css("h2", text: row['Title'])
+		expect(page).to have_css("h1", text: row['Title'])
 	end
 end
 

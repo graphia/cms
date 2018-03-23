@@ -1,57 +1,65 @@
 <template>
 	<div id="application">
 
-		<!-- Primary Navigation Start -->
-		<nav class="navbar navbar-expand-md navbar-dark bg-dark">
+		<header>
+			<!-- Primary Navigation Start -->
+			<nav class="navbar navbar-expand-md navbar-dark bg-dark">
 
-			<router-link class="navbar-brand" :to="{name: 'home'}">Graphia CMS</router-link>
+				<router-link class="navbar-brand" :to="{name: 'home'}">Graphia CMS</router-link>
 
 
-			<button v-if="user" class="navbar-toggler navbar-toggler-right hidden-md-up" type="button" data-toggle="collapse" data-target="#primary" aria-label="Toggle navigation">
-				<span class="navbar-toggler-icon"></span>
-			</button>
+				<button v-if="user" class="navbar-toggler navbar-toggler-right hidden-md-up" type="button" data-toggle="collapse" data-target="#primary" aria-label="Toggle navigation">
+					<span class="navbar-toggler-icon"></span>
+				</button>
 
-			<div v-if="user" id="primary" class="collapse navbar-collapse">
-				<ul class="navbar-nav mr-auto">
+				<div v-if="user" id="primary" class="collapse navbar-collapse">
+					<ul class="navbar-nav mr-auto">
 
-					<li>
-						<router-link :to="{name: 'home'}" exact class="nav-link home-link">Home</router-link>
-					</li>
+						<li>
+							<router-link :to="{name: 'home'}" exact class="nav-link home-link">Home</router-link>
+						</li>
 
-					<li v-for="(directory, i) in directories" :key="i">
-						<router-link :to="{name: 'directory_index', params: {directory: directory.path}}" class="nav-link directory-link">
-							{{ directory.title || directory.path | capitalize }}
-						</router-link>
-					</li>
-
-				</ul>
-
-				<ul class="navbar-nav">
-					<li id="user-dropdown" class="nav-item dropdown">
-						<a class="nav-link dropdown-toggle" href="#" id="user-menu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-							{{ user.persistedName }}
-						</a>
-						<div class="dropdown-menu" aria-labelledby="user-menu">
-							<router-link :to="{name: 'my_profile'}" class="dropdown-item">
-								Settings
+						<li v-for="(directory, i) in directories" :key="i">
+							<router-link :to="{name: 'directory_index', params: {directory: directory.path}}" class="nav-link directory-link">
+								{{ directory.title || directory.path | capitalize }}
 							</router-link>
-							<a class="dropdown-item logout" href="logout" @click="logout">Logout</a>
-						</div>
-					</li>
-				</ul>
-			</div>
+						</li>
 
-		</nav>
-		<!-- Primary Navigation End -->
+					</ul>
+
+					<ul class="navbar-nav">
+						<li id="user-dropdown" class="nav-item dropdown">
+							<a class="nav-link dropdown-toggle" href="#" id="user-menu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+								{{ user.persistedName }}
+							</a>
+							<div class="dropdown-menu" aria-labelledby="user-menu">
+								<router-link :to="{name: 'my_profile'}" class="dropdown-item">
+									Settings
+								</router-link>
+								<a class="dropdown-item logout" href="logout" @click="logout">Logout</a>
+							</div>
+						</li>
+					</ul>
+				</div>
+
+			</nav>
+			<!-- Primary Navigation End -->
+		</header>
 
 		<!-- Router View Container Start -->
-		<div class="container-fluid">
+		<div class="main container-fluid">
 			<Broadcast/>
 			<transition name="fade">
 				<router-view/>
 			</transition>
 		</div>
 		<!-- Router View Container End -->
+
+		<footer>
+			<div class="copyright m-2">
+				<a href="https://www.graphia.co.uk">Graphia CMS&trade;</a>
+			</div>
+		</footer>
 
 	</div>
 </template>

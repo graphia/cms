@@ -1,5 +1,5 @@
 Then %r{^I should be redirected to the parent directory's index$} do
-  expect(page).to have_css("h2", text: "Appendices")
+  expect(page).to have_css("h1", text: "Appendices")
   expect(page.current_path).to eql("/cms/appendices")
 end
 

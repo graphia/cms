@@ -169,4 +169,8 @@
 			color: black !important;
 		}
 	}
+
+	.CodeMirror, .CodeMirror-scroll {
+		min-height: 70vh;
+	}
 </style>

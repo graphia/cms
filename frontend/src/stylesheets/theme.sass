@@ -53,6 +53,18 @@ $border-radius-sm:       .2rem !default;
 body
 	background-color: $cream-100 !important
 
+	#application
+		padding: 0px
+		margin: 0px
+
+		height: 100vh
+		display: flex
+		flex-direction: column
+
+		.main
+			flex: 1
+
+
 .btn.btn-primary
 	color: white !important
 
@@ -64,18 +76,25 @@ body
 		a
 			color: $white
 
+.directories > .directory
+	.document-entry
+		// box-shadow: 3px 3px 11px -1px rgba(0,0,0,0.28)
 
 nav > ol.breadcrumb
 	background-color: $cream-400
 
 	li > a
-		color: darken($orange, 10%)
+		color: $orange
 
 	li.active
 		color: $black
 
 span.badge-primary
 	color: $white !important
+
+h1
+	&:first-of-type
+		color: $orange
 
 article#document-content
 
@@ -84,6 +103,41 @@ article#document-content
 		padding: 1rem 2rem
 		border: 1px solid rgba($black,.125)
 		border-radius: $border-radius
+
+		// Markdown Styles
+		h1
+			font-size: 400%
+			margin: 2rem 0rem
+
+
+		h2
+			font-size: 300%
+			margin: 1.6rem 0rem
+
+		h3
+			font-size: 250%
+			margin: 1.4rem 0rem
+
+		h4
+			font-size: 200%
+			margin: 1.2rem 0rem
+		h5
+			font-size: 180%
+			margin: 1rem 0rem
+
+		h6
+			font-size: 150%
+			margin: 1rem 0rem
+
+footer
+	display: flex
+	align-items: center
+	background-color: $gray-800
+	color: $white
+
+	.copyright
+		text-align: center
+
 
 @import "sass/diff"
 @import bootstrap
