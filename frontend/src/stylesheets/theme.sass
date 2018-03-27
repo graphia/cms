@@ -68,17 +68,28 @@ body
 .btn.btn-primary
 	color: white !important
 
-.card
-	.card-header
-		background-color: $gray-800
-		color: $white
+.card.document-entry
+	margin: 2rem 0rem
 
-		a
-			color: $white
+	.card-header
+		background-color: $white
+		color: $orange
+		border: 0
+
+		font-size: larger
+
+	.card-body
+		padding-top: 0rem
+
 
 .directories > .directory
 	.document-entry
 		// box-shadow: 3px 3px 11px -1px rgba(0,0,0,0.28)
+
+.directory-info
+	blockquote
+		border-left: 2px solid $orange
+		padding: 1rem 0rem 1rem 1rem
 
 nav > ol.breadcrumb
 	background-color: $cream-400
@@ -97,6 +108,7 @@ h1
 		color: $orange
 
 article#document-content
+	margin: 1rem 0rem
 
 	.content
 		background-color: $white

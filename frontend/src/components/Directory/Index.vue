@@ -1,9 +1,9 @@
 <template>
 	<div id="document-index" v-title="title">
 
-		<div v-if="this.documents && this.documents.length > 0">
+		<Breadcrumbs :levels="breadcrumbs"/>
 
-			<Breadcrumbs :levels="breadcrumbs"/>
+		<div class="rounded p-4 mb-4 bg-white" v-if="this.documents && this.documents.length > 0">
 
 			<div class="row directory-info">
 				<div class="col-md-12">
@@ -17,10 +17,9 @@
 					</h1>
 					<!-- /document index header -->
 
-					<p class="directory-description">{{ activeDirectory.description }}</p>
+					<blockquote class="blockquote directory-description">{{ activeDirectory.description }}</blockquote>
 
 					<div class="directory-info-text" v-if="activeDirectory.html.length > 0">
-						<h3>Extra Information</h3>
 						<div v-html="activeDirectory.html"/>
 					</div>
 
