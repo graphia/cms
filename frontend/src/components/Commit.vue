@@ -5,7 +5,7 @@
 		<Breadcrumbs class="col-lg-12 commit" :levels="breadcrumbs"/>
 
 		<div class="col-lg-12 commit">
-			<h1>Commit</h1>
+			<h1>{{ title }}</h1>
 
 			<dl class="row">
 
@@ -13,13 +13,15 @@
 				<dd class="col-sm-9">{{ this.commit.hash }}</dd>
 
 				<dt class="col-sm-3">Author</dt>
-				<dd class="col-sm-9"><a :href="`mailto:${this.committerEmailAddress}`">{{ this.committerName }}</a></dd>
+				<dd class="col-sm-9">
+					<a :href="`mailto:${this.committerEmailAddress}`">{{ this.committerName }}</a>
+				</dd>
 
 				<dt class="col-sm-3">Message</dt>
-				<dd class="col-sm-9">{{ this.commit.message }}</a></dd>
+				<dd class="col-sm-9">{{ this.commit.message }}</dd>
 
 				<dt class="col-sm-3">Time</dt>
-				<dd class="col-sm-9">{{ this.commit.timestamp | format_date }}</a></dd>
+				<dd class="col-sm-9">{{ this.commit.timestamp | format_date }}</dd>
 
 			</dl>
 
