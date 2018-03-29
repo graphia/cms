@@ -196,3 +196,16 @@ Then %r{^I should see the modified file in a green box next to the old version i
 
   end
 end
+
+Then %r{^the "(.*?)" file should have tooltip "(.*?)"$} do |operation, text|
+  operations = {
+    "added" => "file-created",
+    "updated" => "file-updated",
+    "deleted" => "file-deleted"
+  }
+
+  within("div.card.#{operations[operation]}") do
+    # the bootstrap tooltip plugin moves the attr from title to data-original-title
+    expect(page).to have_css("h2[data-toggle='tooltip'][data-original-title='#{text}']")
+  end
+end

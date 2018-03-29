@@ -46,7 +46,23 @@ export default class CMSPatch {
 				break;
 		};
 
-		console.error("File has not been not updated, created or deleted");
+		console.error("No icon: File has not been not updated, created or deleted");
 	};
+
+	get description() {
+		switch (true) {
+			case this.fileUpdated():
+				return "File modified";
+				break;
+			case this.fileCreated():
+				return "File added";
+				break;
+			case this.fileDeleted():
+				return "File deleted";
+				break;
+		};
+
+		console.error("No description: File has not been not updated, created or deleted");
+	}
 
 };

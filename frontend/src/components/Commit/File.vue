@@ -6,7 +6,7 @@
 		}"
 	>
 
-		<h2 class="card-header">
+		<h2 :data-filename="this.patch.filename" class="card-header" data-toggle="tooltip" data-placment="bottom" :title="this.patch.description">
 			<octicon :icon-name="this.patch.icon"/>
 			<code>{{ this.path }}</code>
 		</h2>
@@ -45,7 +45,10 @@
 			Diff
 		},
 		created() {
-			this.patch = new CMSPatch(this.commitHash, this.path, this.files.old, this.files.new)
+			this.patch = new CMSPatch(this.commitHash, this.path, this.files.old, this.files.new);
 		},
+		mounted() {
+			$(`h2[data-filename="${this.patch.filename}"]`).tooltip();
+		}
 	};
 </script>
