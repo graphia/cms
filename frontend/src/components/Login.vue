@@ -1,38 +1,36 @@
 <template>
-	<div class="row" v-title="title">
 
-		<div class="col-sm-6 offset-sm-3">
+	<div class="row justify-content-center align-items-center" v-title="title">
 
-			<div class="card mt-4">
+		<div class="card mt-4">
 
-				<h3 class="card-header">Log in</h3>
+			<h3 class="card-header">Log in</h3>
 
-				<!-- Login form start -->
-				<div class="card-body">
+			<!-- Login form start -->
+			<div class="card-body">
 
-					<form @submit="login" class="login-form">
+				<form @submit="login" class="login-form">
 
-						<div class="form-group">
-							<label for="username">Username</label>
-							<input class="form-control" type="text" name="username" v-model="username" required/>
-						</div>
-						<div class="form-group">
-							<label for="password">Password</label>
-							<input class="form-control" type="password" name="password" v-model="password" required/>
-						</div>
+					<div class="form-group">
+						<label for="username">Username</label>
+						<input class="form-control" type="text" name="username" v-model="username" required/>
+					</div>
+					<div class="form-group">
+						<label for="password">Password</label>
+						<input class="form-control" type="password" name="password" v-model="password" required/>
+					</div>
 
-						<div class="form-group">
-							<input type="submit" value="Log in" class="btn btn-primary"/>
-						</div>
-					</form>
-
-				</div>
-				<!-- Login form end -->
+					<div class="form-group">
+						<input type="submit" value="Log in" class="btn btn-primary"/>
+					</div>
+				</form>
 
 			</div>
-
+			<!-- Login form end -->
 		</div>
+
 	</div>
+
 </template>
 
 <style lang="scss">

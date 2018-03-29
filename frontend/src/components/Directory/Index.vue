@@ -1,38 +1,41 @@
 <template>
 	<div id="document-index" v-title="title">
 
-		<div v-if="this.documents && this.documents.length > 0">
+		<Breadcrumbs :levels="breadcrumbs"/>
 
-			<Breadcrumbs :levels="breadcrumbs"/>
+		<div class="rounded p-4 mb-4 bg-white" v-if="this.documents && this.documents.length > 0">
 
 			<div class="row directory-info">
-				<div class="col-md-6">
+				<div class="col-md-12">
 
 					<!-- document index header -->
-					<h2 v-if="activeDirectory.title">
+					<h1 v-if="activeDirectory.title">
 						{{ activeDirectory.title }}
-					</h2>
-					<h2 v-else>
+					</h1>
+					<h1 v-else>
 						{{ directory | capitalize }}
-					</h2>
+					</h1>
 					<!-- /document index header -->
 
-					<p class="directory-description">{{ activeDirectory.description }}</p>
+					<blockquote class="blockquote directory-description">{{ activeDirectory.description }}</blockquote>
 
 					<div class="directory-info-text" v-if="activeDirectory.html.length > 0">
-						<h3>Extra Information</h3>
 						<div v-html="activeDirectory.html"/>
 					</div>
 
 				</div>
 
-				<div id="directory-toolbar" class="col col-md-6 text-right">
-					<DocumentNewButton :directoryPath="directory"/>
-					<router-link :to="{name: 'directory_edit', params: {directory: this.$route.params.directory}}" class="btn btn-sm btn-primary">
-						Edit directory
-					</router-link>
-					<DirectoryDeleteButton/>
+
+				<div id="directory-toolbar" class="col-md-12">
+					<div class="mx-1 my-2">
+						<DocumentNewButton :directoryPath="directory"/>
+						<router-link :to="{name: 'directory_edit', params: {directory: this.$route.params.directory}}" class="btn btn-sm btn-secondary">
+							Edit directory
+						</router-link>
+						<DirectoryDeleteButton/>
+					</div>
 				</div>
+
 			</div>
 
 			<IndexList :documents="documents" :directoryPath="directory"/>

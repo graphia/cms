@@ -33,21 +33,36 @@ export default class CMSPatch {
 	};
 
 	get icon() {
-		let text = null;
 
 		switch (true) {
 			case this.fileUpdated():
-				text = "diff-modified";
+				return "diff-modified";
 				break;
 			case this.fileCreated():
-				text = "diff-added";
+				return "diff-added";
 				break;
 			case this.fileDeleted():
-				text = "diff-removed";
+				return "diff-removed";
 				break;
 		};
 
-		return text;
+		console.error("No icon: File has not been not updated, created or deleted");
 	};
+
+	get description() {
+		switch (true) {
+			case this.fileUpdated():
+				return "File modified";
+				break;
+			case this.fileCreated():
+				return "File added";
+				break;
+			case this.fileDeleted():
+				return "File deleted";
+				break;
+		};
+
+		console.error("No description: File has not been not updated, created or deleted");
+	}
 
 };

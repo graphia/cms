@@ -40,6 +40,21 @@ Feature: Commits
 		And the diff 'removed' icon should be visible
 		And it should contain the entire file's contents
 
+	Scenario: Added tooltip
+		Given I have added a new file
+		When I navigate to the commit's details page
+		Then the "added" file should have tooltip "File added"
+
+	Scenario: Updated tooltip
+		Given I have made changes to an existing file
+		When I navigate to the commit's details page
+		Then the "updated" file should have tooltip "File modified"
+
+	Scenario: Deleted tooltip
+		Given I have deleted a file
+		When I navigate to the commit's details page
+		Then the "deleted" file should have tooltip "File deleted"
+
 	Scenario: Multiple changes
 		Given I have modified one file and removed another in a single commit
 		When I navigate to the commit's details page

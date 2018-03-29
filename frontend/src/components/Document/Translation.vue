@@ -121,6 +121,6 @@
 	};
 
 	.dropdown {
-		margin-right: 0.5rem;
+		margin: 0rem;
 	};
 </style>

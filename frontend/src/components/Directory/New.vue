@@ -4,9 +4,7 @@
 
 		<Breadcrumbs :levels="breadcrumbs"/>
 
-		<h4>
-			Create a new directory
-		</h4>
+		<h1>Create a new directory</h1>
 
 		<!-- new directory form -->
 		<form :id="formID" @submit="createDirectory">

@@ -4,9 +4,7 @@
 
 		<Breadcrumbs :levels="breadcrumbs"/>
 
-		<h4>
-			Edit {{ this.activeDirectory.title }}
-		</h4>
+		<h1>Edit {{ this.activeDirectory.title }}</h1>
 
 		<!-- edit directory form -->
 		<form :id="formID" @submit="updateDirectory">

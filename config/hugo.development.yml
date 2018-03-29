@@ -15,21 +15,21 @@ defaultContentLanguageInSubdir: false
 
 Languages:
   en:
-    title: "English"
+    name: "English"
     weight: 0
     flag: 🇬🇧
 
   fr:
-    title: "French"
+    name: "French"
     weight: 1
     flag: 🇫🇷
 
   de:
-    title: "German"
+    name: "German"
     weight: 1
     flag: 🇩🇪
 
   es:
-    title: "Spanish"
+    name: "Spanish"
     weight: 1
     flag: 🇪🇸

@@ -12,7 +12,7 @@
 
 			<div class="col-md-4" v-for="(d, base, i) in groupedTranslations" :key="i">
 
-				<div class="card document-entry m-1" :data-filename="base" :class="{'border-warning': primary(d).draft}" :data-draft="primary(d).draft">
+				<div class="card document-entry" :data-filename="base" :class="{'border-warning': primary(d).draft}" :data-draft="primary(d).draft">
 
 					<div class="card-header">
 
