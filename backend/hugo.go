@@ -12,8 +12,16 @@ func buildStaticSite() ([]byte, error) {
 	// FIXME change to hugo dir https://stackoverflow.com/questions/43135919/how-to-run-a-shell-command-in-a-specific-folder-with-golang
 
 	// set the title
+	var title string
+	title = "Graphia CMS"
+
 	env := os.Environ()
-	env = append(env, fmt.Sprintf("HUGO_TITLE=%s", config.SiteTitle))
+
+	if config.SiteTitle != "" {
+		title = config.SiteTitle
+	}
+
+	env = append(env, fmt.Sprintf("HUGO_TITLE=%s", title))
 	command.Env = env
 
 	out, err := command.CombinedOutput()

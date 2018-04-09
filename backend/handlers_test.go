@@ -2376,6 +2376,9 @@ func Test_apiUpdatePasswordHandler(t *testing.T) {
 }
 
 func Test_apiGetServerInformationHandler(t *testing.T) {
+
+	db.Drop("User")
+
 	server = httptest.NewServer(protectedRouter())
 	repoPath := "../tests/tmp/repositories/server_info"
 	_, _ = setupSmallTestRepo(repoPath)
