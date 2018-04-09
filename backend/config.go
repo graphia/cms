@@ -12,6 +12,7 @@ import (
 
 // Config holds configuration options stored in a yaml file
 type Config struct {
+	SiteTitle          string `yaml:"site_title"`
 	Host               string
 	URL                string `yaml:"url"`
 	HTTPSEnabled       bool   `yaml:"https_enabled"`

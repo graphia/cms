@@ -5,7 +5,7 @@
 			<!-- Primary Navigation Start -->
 			<nav class="navbar navbar-expand-md navbar-dark bg-dark">
 
-				<router-link class="navbar-brand" :to="{name: 'home'}">Graphia CMS</router-link>
+				<router-link class="navbar-brand" :to="{name: 'home'}">{{ this.siteTitle }}</router-link>
 
 
 				<button v-if="user" class="navbar-toggler navbar-toggler-right hidden-md-up" type="button" data-toggle="collapse" data-target="#primary" aria-label="Toggle navigation">
@@ -120,6 +120,9 @@
 		computed: {
 			user() {
 				return this.$store.state.user;
+			},
+			siteTitle() {
+				return (this.$store.state.server.serverInfo.title || "Graphia CMS");
 			}
 		},
 		methods: {

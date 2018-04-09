@@ -142,3 +142,33 @@ Then %r{^I should see "(.*?)" files of type "(.*?)"$} do |count, label|
     expect(page).to have_css("tr[data-count-type='#{label.downcase}'] > td", text: count)
   end
 end
+
+Given %r{^my company name is "(.*?)"$} do |company_name|
+
+  visit "/cms"
+  token = evaluate_script("localStorage.token")
+
+  uri = URI('http://127.0.0.1:9095/api/server_info')
+  req = Net::HTTP::Get.new(uri)
+  req['Authorization'] = "Bearer #{token}"
+
+  res = Net::HTTP.start(uri.hostname, uri.port) do |http|
+    http.request(req)
+  end
+
+  json = JSON.parse(res.body)
+
+  @config_site_title = json["title"]
+  expect(@config_site_title).to eql(company_name)
+
+end
+
+Then %r{^the header in the main navigation should contain "(.*?)"$} do |company_name|
+  expect(page).to have_css("nav .navbar-brand", text: company_name)
+end
+
+Then %r{^the title should be a link to the homepage$} do
+  within("nav.navbar") do
+    expect(page).to have_link(@config_site_title, href: "/cms")
+  end
+end
