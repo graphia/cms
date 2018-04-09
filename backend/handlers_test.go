@@ -2374,3 +2374,42 @@ func Test_apiUpdatePasswordHandler(t *testing.T) {
 		})
 	}
 }
+
+func Test_apiGetServerInformationHandler(t *testing.T) {
+
+	db.Drop("User")
+
+	server = httptest.NewServer(protectedRouter())
+	repoPath := "../tests/tmp/repositories/server_info"
+	_, _ = setupSmallTestRepo(repoPath)
+
+	// create two users
+	_ = createUser(ds)
+	_ = createUser(ck)
+
+	target := fmt.Sprintf(
+		"%s/%s",
+		server.URL,
+		"api/server_info",
+	)
+
+	resp, _ := http.Get(target)
+
+	var si ServerInfo
+	json.NewDecoder(resp.Body).Decode(&si)
+
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+	// title from config file
+	assert.Equal(t, config.SiteTitle, si.Title)
+
+	// 2 users, as created above
+	assert.Equal(t, 2, si.Users)
+
+	// one commit (setting up the repo)
+	assert.Equal(t, 1, si.Commits)
+
+	// small test repo contains 6 markdown documents
+	assert.Equal(t, 6, si.Counts["documents"])
+
+}

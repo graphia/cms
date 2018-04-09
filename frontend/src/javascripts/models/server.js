@@ -4,6 +4,7 @@ import store from '../store.js';
 
 class CMSServerInfo {
 	constructor() {
+		this.title = "Site Title";
 		this.users = null;
 		this.commits = null;
 		this.files = {};
@@ -28,6 +29,7 @@ class CMSServerInfo {
 		this.commits = si.commits;
 		this.users = si.users;
 		this.files = si.files;
+		this.title = si.title;
 
 		return response;
 

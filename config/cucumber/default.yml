@@ -1,3 +1,4 @@
+site_title: Krusty Burger
 http_listen_port: 9095
 https_enabled: false
 repository: ../../tests/tmp/repositories/cucumber
