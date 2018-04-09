@@ -44,8 +44,6 @@
 
 		<div v-else-if="this.documents && this.documents.length === 0">
 
-			<Breadcrumbs :levels="breadcrumbs"/>
-
 			<div class="col-12">
 
 				<div class="alert alert-warning">
