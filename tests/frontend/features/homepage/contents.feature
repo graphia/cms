@@ -10,10 +10,6 @@ Feature: Home page contents
 		And my user account exists
 		And I have logged in
 
-	Scenario: Page heading
-		Given I am on the homepage
-		Then the main heading should be "Dashboard"
-
 	Scenario: Page title is dynamic
 		Given I am on the homepage
 		And the page's title should be "Graphia CMS"

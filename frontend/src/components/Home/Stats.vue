@@ -27,21 +27,15 @@
 
 			<table class="table table-sm file-statistics">
 				<caption class="pl-2">Files and quantities by type</caption>
-				<thead class="table-head">
-					<tr>
-						<th class="pl-2">Type</th>
-						<th class="pr-2 text-right">Quantity</th>
-					</tr>
-				</thead>
 				<tbody>
 					<tr v-for="(value, key, i) in serverInfo.files" v-if="key != 'other'" :key="i" :data-count-type="key">
 						<td class="pl-2 text-capitalize">{{ key }}</td>
-						<td class="pr-2 text-right">{{ value }}</td>
+						<td class="pr-2 text-center">{{ value }}</td>
 					</tr>
 
 					<tr data-count-type="other">
 						<td class="pl-2 text-capitalize">Other</td>
-						<td class="pr-2 text-right">{{ serverInfo.files.other }}</td>
+						<td class="pr-2 text-center">{{ serverInfo.files.other }}</td>
 					</tr>
 
 				</tbody>
@@ -62,3 +56,11 @@
 		}
 	}
 </script>
+
+<style lang="scss">
+.file-statistics {
+	td {
+		padding: 0rem 1rem;
+	};
+};
+</style>

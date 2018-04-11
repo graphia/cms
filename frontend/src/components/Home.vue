@@ -3,8 +3,6 @@
 
 		<Breadcrumbs :levels="breadcrumbs" />
 
-		<h1>Dashboard</h1>
-
 		<div class="row mt-4">
 
 			<div class="col col-md-4">
