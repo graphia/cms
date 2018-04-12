@@ -136,3 +136,9 @@
 		mixins: [Accessors]
 	};
 </script>
+
+<style lang="scss" scoped>
+	form {
+		margin: 1rem;
+	};
+</style>

@@ -62,7 +62,6 @@
 		</div>
 
 		<div v-else>
-			<Breadcrumbs :levels="breadcrumbs"/>
 
 			<Error :code="404"/>
 		</div>
