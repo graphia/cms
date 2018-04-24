@@ -7,6 +7,7 @@ repository: repo
 logfile: ../logs/test.log
 database: ../tests/tmp/databases/test.db
 hugo_config_file: config/hugo.yml
+hugo_theme_path: /the/theme/path
 smtp_host: localhost
 smtp_port: 1025
 mail_template_path: ../templates/mail

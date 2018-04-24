@@ -16,13 +16,13 @@ logfile: logs/development.log
 database: db/development.db
 static: ./frontend/public
 hugo_config_file: config/hugo.development.yml
+hugo_theme_path: ../graphia-minimal-theme
 hugo_bin: /usr/local/bin/hugo
 private_key_path: keys/passwords/app.rsa
 public_key_path: keys/passwords/app.rsa.pub
 ssh_enabled: true
 ssh_listen_port: 2222
 git_bin_path: /usr/local/bin/
-git_repo_path: ./hugo
 git_user: git
 mail_template_path: templates/mail
 smtp_host: localhost

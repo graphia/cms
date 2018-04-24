@@ -25,6 +25,7 @@ type Config struct {
 	Database           string // file path for BoltDB file
 	Static             string
 	HugoConfigFile     string              `yaml:"hugo_config_file"`
+	HugoThemePath      string              `yaml:"hugo_theme_path"`
 	HugoBin            string              `yaml:"hugo_bin"`
 	PrivateKeyPath     string              `yaml:"private_key_path"`
 	PublicKeyPath      string              `yaml:"public_key_path"`
@@ -33,7 +34,6 @@ type Config struct {
 	SSHEnabled         bool                `yaml:"ssh_enabled"`
 	SSHListenPort      string              `yaml:"ssh_listen_port"`
 	GitBinPath         string              `yaml:"git_bin_path"`
-	GitRepoPath        string              `yaml:"git_repo_path"`
 	GitUser            string              `yaml:"git_user"`
 	SMTPHost           string              `yaml:"smtp_host"`
 	SMTPPort           string              `yaml:"smtp_port"`

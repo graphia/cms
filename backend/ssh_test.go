@@ -84,3 +84,52 @@ func TestPublicKey_User(t *testing.T) {
 		})
 	}
 }
+
+func Test_resolvePath(t *testing.T) {
+
+	repoPath := "../tests/tmp/repositories/repo_path"
+	_, _ = setupSmallTestRepo(repoPath)
+
+	type args struct {
+		name string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantAp  string
+		wantErr bool
+		errMsg  string
+	}{
+		{
+			name:    "Incorrect path",
+			args:    args{name: "something_else"},
+			wantErr: true,
+			errMsg:  "invalid repo",
+		},
+		{
+			name:    "Content path",
+			args:    args{name: "content"},
+			wantErr: false,
+			wantAp:  config.Repository,
+		},
+		{
+			name:    "Theme path",
+			args:    args{name: "theme"},
+			wantErr: false,
+			wantAp:  config.HugoThemePath,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			gotAp, err := resolvePath(tt.args.name)
+
+			if tt.wantErr {
+				assert.Equal(t, err.Error(), tt.errMsg)
+				return
+			}
+
+			assert.Equal(t, tt.wantAp, gotAp)
+		})
+	}
+}
