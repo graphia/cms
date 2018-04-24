@@ -5,13 +5,18 @@ logfile: ../../logs/cucumber-server-ssh.log
 database: ../../db/cucumber.db
 static: ../../dist
 hugo_config_file: ../../config/hugo.development.yml
+
+# note that this is the same as the repo, we're just testing that
+# it clones and not inspecting the content
+hugo_theme_path: ../../tests/tmp/repositories/cucumber
+
+
 hugo_bin: /usr/local/bin/hugo
 private_key_path: ../../tests/data/keys/passwords/app.test.rsa
 public_key_path: ../../tests/data/keys/passwords/app.test.rsa.pub
 ssh_enabled: true
 ssh_listen_port: 2223
 git_bin_path: /usr/local/bin/
-git_repo_path: ../../tests/tmp/repositories/
 git_user: git
 file_categories:
   documents:
