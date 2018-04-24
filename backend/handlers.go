@@ -1595,10 +1595,12 @@ func apiGetServerInformationHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	si = ServerInfo{
-		Title:   config.SiteTitle,
-		Users:   uc,
-		Counts:  fc,
-		Commits: cc,
+		Title:         config.SiteTitle,
+		Users:         uc,
+		Counts:        fc,
+		Commits:       cc,
+		Host:          config.Host,
+		SSHListenPort: config.SSHListenPort,
 	}
 
 	if err != nil {

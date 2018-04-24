@@ -107,10 +107,12 @@ type RepositoryInfo struct {
 
 // ServerInfo holds basic details/counts displayed on the dashboard
 type ServerInfo struct {
-	Title   string         `json:"title"`
-	Users   int            `json:"users"`
-	Commits int            `json:"commits"`
-	Counts  map[string]int `json:"files"`
+	Title         string         `json:"title"`
+	Users         int            `json:"users"`
+	Commits       int            `json:"commits"`
+	Counts        map[string]int `json:"files"`
+	Host          string         `json:"host"`
+	SSHListenPort string         `json:"ssh_port"`
 }
 
 // Language contains a language's name and code for localisation

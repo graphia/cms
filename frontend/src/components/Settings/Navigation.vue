@@ -15,6 +15,11 @@
 				Users
 			</router-link>
 		</li>
+		<li class="nav-item">
+			<router-link class="nav-link" :to="{name: 'theme_settings'}" linkActiveClass="active">
+				Theme
+			</router-link>
+		</li>
 	</ul>
 </template>
 

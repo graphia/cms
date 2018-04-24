@@ -14,6 +14,7 @@ import Commit from '../components/Commit.vue';
 import Home from '../components/Home.vue';
 import MyProfile from '../components/Settings/MyProfile.vue';
 import SSHKeySettings from '../components/Settings/SSHKeySettings.vue';
+import ThemeSettings from '../components/Settings/Theme.vue';
 
 // User Paths
 import UserSettings from '../components/Settings/UserSettings.vue';
@@ -66,6 +67,7 @@ const routes = [
 
 	{path: '/cms/settings/my_profile', component: MyProfile, name: 'my_profile', alias: '/cms/settings'},
 	{path: '/cms/settings/keys', component: SSHKeySettings, name: 'ssh_key_settings'},
+	{path: '/cms/settings/theme', component: ThemeSettings, name: 'theme_settings'},
 
 	// User management
 	{path: '/cms/settings/users', component: UserSettings, name: 'user_settings'},

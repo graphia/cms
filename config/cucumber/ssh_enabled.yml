@@ -1,9 +1,11 @@
+host: docs.somecompany.com
 http_listen_port: 9095
 https_enabled: false
 repository: ../../tests/tmp/repositories/cucumber
 logfile: ../../logs/cucumber-server-ssh.log
 database: ../../db/cucumber.db
 static: ../../dist
+ssh_listen_port: 2323
 hugo_config_file: ../../config/hugo.development.yml
 
 # note that this is the same as the repo, we're just testing that
