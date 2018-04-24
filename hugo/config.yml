@@ -1,7 +1,7 @@
 languageCode: "en-gb"
 
 # baseURL: "http://localhost:1313"
-title: "Burns Slant Drilling Co."
+title: "Your Company"
 buildDrafts: true
 theme: ../../../graphia-minimal-theme
 relativeURLs: true
