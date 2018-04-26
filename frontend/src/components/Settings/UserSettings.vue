@@ -95,7 +95,7 @@
 		},
 		data() {
 			return {
-				title: "Users",
+				title: "Settings: Users",
 				users: []
 			};
 		},

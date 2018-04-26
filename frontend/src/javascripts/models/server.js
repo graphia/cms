@@ -8,6 +8,8 @@ class CMSServerInfo {
 		this.users = null;
 		this.commits = null;
 		this.files = {};
+		this.ssh_port = "22";
+		this.host = null;
 	};
 
 	async refresh() {
@@ -30,6 +32,8 @@ class CMSServerInfo {
 		this.users = si.users;
 		this.files = si.files;
 		this.title = si.title;
+		this.ssh_port = si.ssh_port;
+		this.host = si.host;
 
 		return response;
 

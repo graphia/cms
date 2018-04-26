@@ -15,6 +15,7 @@ logfile: /var/log/graphia/prod.log
 database: /var/graphia/db/users.db
 static: /var/graphia/public
 hugo_config_file: /etc/graphia/hugo.yml
+hugo_theme_path: /var/graphia/hugo/themes/graphia-minimal-theme
 hugo_bin: /usr/local/bin/hugo
 private_key_path: /etc/graphia/keys/passwords/app.rsa
 public_key_path: /etc/graphia/keys/passwords/app.rsa.pub

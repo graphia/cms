@@ -25,6 +25,7 @@ type Config struct {
 	Database           string // file path for BoltDB file
 	Static             string
 	HugoConfigFile     string              `yaml:"hugo_config_file"`
+	HugoThemePath      string              `yaml:"hugo_theme_path"`
 	HugoBin            string              `yaml:"hugo_bin"`
 	PrivateKeyPath     string              `yaml:"private_key_path"`
 	PublicKeyPath      string              `yaml:"public_key_path"`
@@ -33,7 +34,6 @@ type Config struct {
 	SSHEnabled         bool                `yaml:"ssh_enabled"`
 	SSHListenPort      string              `yaml:"ssh_listen_port"`
 	GitBinPath         string              `yaml:"git_bin_path"`
-	GitRepoPath        string              `yaml:"git_repo_path"`
 	GitUser            string              `yaml:"git_user"`
 	SMTPHost           string              `yaml:"smtp_host"`
 	SMTPPort           string              `yaml:"smtp_port"`
@@ -112,11 +112,6 @@ func loadConfig(path *string) (Config, error) {
 			return *c, fmt.Errorf("Translation enabled but no languages enabled")
 		}
 
-		// only a warning if there's just one - things will (kind of) work 🙄
-		if len(c.EnabledLanguages) == 1 {
-			Warning.Println("Translation is turned on but only one language is enabled")
-		}
-
 		// make sure the default language code exists
 		defaultFound := contains(codes, c.DefaultLanguage)
 		if !defaultFound {
@@ -129,6 +124,15 @@ func loadConfig(path *string) (Config, error) {
 				return *c, fmt.Errorf("Language code '%s' not found", el)
 			}
 		}
+	}
+
+	// check some other things are present
+	if c.HugoThemePath == "" {
+		return *c, fmt.Errorf("Hugo theme path not specified")
+	}
+
+	if c.Repository == "" {
+		return *c, fmt.Errorf("Repository path not specified")
 	}
 
 	return *c, err

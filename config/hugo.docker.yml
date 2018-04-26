@@ -6,6 +6,7 @@ themesDir: /var/graphia/hugo/themes
 contentDir: /var/graphia/hugo/content
 relativeURLs: true
 publishDir: /var/graphia/public
+preserveTaxonomyNames: true
 
 pygmentsCodeFences: true
 pygmentsUseClasses: true

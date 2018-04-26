@@ -1,6 +1,5 @@
 Given %r{^my user account with public key exists$} do
 
-
   # create the user
   user_uri = URI('http://127.0.0.1:9095/setup/create_initial_user')
   req = Net::HTTP::Post.new(user_uri, "Content-Type" => "application/json")
@@ -51,12 +50,12 @@ Then %r{^I should receive an error$} do
   end
 end
 
-When %r{^I try to clone the repository "(.*?)"$} do |name|
+When %r{^I try to clone the "(.*?)" repository$} do |name|
 
   Dir.mkdir("../tmp/ssh") unless Dir.exists?("../tmp/ssh")
 
   # First make sure the target dir doesn't exist
-  @clone_dir = "content"
+  @clone_dir = name
   @clone_location = "../tmp/ssh/#{@clone_dir}"
   FileUtils.rm_rf(@clone_location)
   expect(Dir.exists?(@clone_location)).to be false
@@ -88,6 +87,12 @@ end
 
 Then %r{^I should see output with an error$} do
   expect(@output).to include("fatal: protocol error")
+end
+
+# rather than test with an *actual* theme, just ensure that a content repo is in place
+# we're not checking the actual contents, just ensuring that the specified theme is clonable
+Given %r{^a theme is present$} do
+  expect(Dir.exists?(REPO_PATH)).to be true
 end
 
 def connect_via_ssh(host: "127.0.0.1", port: 2223, key: valid_key, cmd: "", user: "git")

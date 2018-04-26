@@ -49,15 +49,17 @@ func checkGitExecutable(name string) (ap string, err error) {
 	return ap, err
 }
 
-func gitRepoPath(name string) (ap string, err error) {
-	ap = filepath.Join(config.GitRepoPath, name)
-	_, err = os.Stat(ap)
+func resolvePath(name string) (ap string, err error) {
 
-	if err != nil && os.IsNotExist(err) {
-		return ap, fmt.Errorf("Error: Directory '%s' does not exist", name)
+	switch name {
+	case "theme":
+		return config.HugoThemePath, err
+	case "content":
+		return config.Repository, err
+	default:
+		return ap, fmt.Errorf("invalid repo")
 	}
 
-	return ap, err
 }
 
 func setupSSH() {
@@ -65,20 +67,19 @@ func setupSSH() {
 	ssh.Handle(func(s ssh.Session) {
 
 		Debug.Println("Incoming SSH connection")
+		var msg string
 
 		if s.User() != config.GitUser {
 			io.WriteString(s, "Access denied\n")
 			return
 		}
 
-		// only git-upload-pack and git-receive-pack are valid
 		if len(s.Command()) == 0 {
 			io.WriteString(s, "Graphia: Connection successful\n")
 			return
 		}
 
-		// Make sure target repo exists
-
+		// Only git-upload-pack and git-receive-pack are valid
 		// get the operation (either git-upload-pack or git-receive-pack)
 		// and the repo. the actual command is in the format:
 		// git-upload-pack repo-name
@@ -88,15 +89,27 @@ func setupSSH() {
 			io.WriteString(s, err.Error())
 			return
 		}
-		repo, err := gitRepoPath(s.Command()[1])
+
+		rp, err := resolvePath(s.Command()[1])
 		if err != nil {
-			Error.Println("Invalid operation", err)
-			io.WriteString(s, err.Error())
+			msg = "Invalid command"
+			Error.Println(msg, s.Command()[1])
+			io.WriteString(s, msg)
 			return
 		}
 
-		Debug.Println("executing", operation, repo)
-		cmd := exec.Command(operation, repo)
+		// Make sure target repo exists at the given path
+		Debug.Println("checking repo exists", rp)
+		_, err = os.Stat(rp)
+		if os.IsNotExist(err) {
+			Error.Println("repo does not exist, abort", rp)
+			msg = "repo does not exist at specified path"
+			io.WriteString(s, msg)
+			return
+		}
+
+		Debug.Println("executing", operation, rp)
+		cmd := exec.Command(operation, rp)
 		cmd.Env = append(os.Environ(), "SSH_ORIGINAL_COMMAND="+operation)
 
 		stdout, err := cmd.StdoutPipe()
