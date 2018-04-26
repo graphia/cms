@@ -1,3 +1,4 @@
 http_listen_port: 8081
 https_enabled: false
 repository: ../tests/data/repositories/small
+hugo_theme_path: /some/theme/path

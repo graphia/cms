@@ -5,6 +5,7 @@ logfile: ../../logs/cucumber-server.log
 database: ../../db/cucumber.db
 static: ../../dist
 hugo_config_file: ../../config/hugo.development.yml
+hugo_theme_path: /the/theme/path
 hugo_bin: /usr/local/bin/hugo
 private_key_path: ../../tests/data/keys/passwords/app.test.rsa
 public_key_path: ../../tests/data/keys/passwords/app.test.rsa.pub

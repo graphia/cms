@@ -7,6 +7,7 @@ database: ../../db/cucumber.db
 static: ../../dist
 hugo_config_file: ../../config/hugo.development.yml
 hugo_bin: /usr/local/bin/hugo
+hugo_theme_path: /the/theme/path
 private_key_path: ../../tests/data/keys/passwords/app.test.rsa
 public_key_path: ../../tests/data/keys/passwords/app.test.rsa.pub
 file_categories:
