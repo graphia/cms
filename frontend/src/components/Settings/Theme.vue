@@ -135,7 +135,7 @@ git clone {{ serverInfo.host }}:theme
 	};
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 	pre {
 		background-color: black;
 		color: white;
