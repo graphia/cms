@@ -3,7 +3,7 @@
 
 		<label for="document-version" class="form-control-label">Version</label>
 		<input
-			id="tag-editor"
+			id="version"
 			type="text"
 			name="version"
 			class="form-control"
