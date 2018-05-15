@@ -1,0 +1,10 @@
+- id: tags
+  translation: Kategorien
+- id: translations
+  translation: Übersetzungen
+- id: date
+  translation: Datum
+- id: contents
+  translation: Inhalt
+- id: author
+  translation: Autor

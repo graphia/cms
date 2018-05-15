@@ -1,0 +1,12 @@
+- id: tags
+  translation: Tags
+- id: translations
+  translation: Translations
+- id: date
+  translation: Date
+- id: contents
+  translation: Contents
+- id: author
+  translation: Author
+- id: home
+  translation: Home

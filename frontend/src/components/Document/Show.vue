@@ -38,6 +38,15 @@
 
 							<dt>Draft</dt>
 							<dd>{{ this.draftDescription() }}</dd>
+
+							<dt>Translations</dt>
+							<dd>
+								<span v-for="(translation, i) in translations" :key="i">
+									<router-link :to="{name: 'document_show', params: translation.params}">
+										{{ translation.flag || translation.code }}
+									</router-link>
+								</span>
+							</dd>
 						</dl>
 
 						<div class="btn-toolbar" role="toolbar">
@@ -97,9 +106,6 @@
 		name: "DocumentShow",
 		created() {
 			// populate $store.state.documents with docs from api
-			this.getDocument();
-		},
-		mounted() {
 			this.getDocument();
 		},
 		computed: {
@@ -166,6 +172,36 @@
 				};
 
 				return p;
+			},
+
+			translations() {
+
+				const ld = this.$store.state.server.translationInfo.languages;
+				const dl = this.$store.state.server.translationInfo.defaultLanguage;
+
+				let tr = this.document.translations.map((code) => {
+					let match = ld.find(x => x.code === code);
+
+					if (!match) {
+						console.warn("no language configured for code", code);
+						return {code: code, flag: "", name: code};
+					};
+
+					return match;
+
+				});
+
+				// add in route params so we don't clutter the view
+				return tr.map((t) => {
+					// {directory: document.path, filename: document.filename, document: document.document, language_code: translation.code}
+					t.params = {
+						directory: this.document.path,
+						filename: this.document.filename,
+						document: this.document.document,
+						language_code: (dl === t.code ? null : t.code)
+					}
+					return t;
+				})
 			}
 		},
 		methods: {

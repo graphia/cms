@@ -71,6 +71,7 @@ enabled_languages:
   - es
   - de
   - fr
+  - uk
 
 all_languages:
   en:
@@ -88,3 +89,6 @@ all_languages:
   it:
     name: Italian
     flag: 🇮🇹
+  uk:
+    name: Ukranian
+    flag: 🇺🇦
