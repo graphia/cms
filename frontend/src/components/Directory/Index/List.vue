@@ -35,7 +35,7 @@
 							<li class="list-inline-item" v-for="(t, k) in translations(d)" :key="k" :data-lang="t.languageInfo.name">
 
 								<router-link :to="{name: 'document_show', params: {directory: t.path, filename: t.filename, document: t.document, language_code: t.language}}">
-									{{ (t.languageInfo && t.languageInfo.flag) || "missing" }}
+									{{ (t.languageInfo && t.languageInfo.flag) || t.language }}
 								</router-link>
 							</li>
 						</ul>

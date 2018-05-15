@@ -91,6 +91,7 @@
 
 	import config from '../../javascripts/config.js';
 	import checkResponse from "../../javascripts/response.js";
+	import filenameFromLanguageCode from '../../javascripts/utilities/filename-from-language-code.js';
 
 	export default {
 		name: "DocumentShow",
@@ -169,12 +170,7 @@
 		},
 		methods: {
 			async getDocument() {
-
-				let filename = "index.md";
-
-				if (this.params.language_code) {
-					filename = `index.${this.params.language_code}.md`;
-				};
+				const filename = filenameFromLanguageCode(this.params.language_code)
 
 				let document = this.params.document;
 				let directory = this.params.directory;
