@@ -74,3 +74,7 @@ Feature: Displaying documents
 		Then the main heading should be "404"
 		And the page's title should be "Not found"
 		And there should be an alert with the message "The item you were looking for cannot be found"
+
+	Scenario: Translations section hidden by default
+		Given that multilingual mode is disabled
+		Then the translations section should not be displayed

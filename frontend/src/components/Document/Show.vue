@@ -39,16 +39,21 @@
 							<dt>Draft</dt>
 							<dd>{{ this.draftDescription() }}</dd>
 
-							<dt>Translations</dt>
-							<dd class="translations">
-								<ul class="list-inline">
-									<li class="list-inline-item" v-for="(translation, i) in translations" :key="i" :data-lang="translation.code">
-										<router-link :to="{name: 'document_show', params: translation.params}">
-											{{ translation.flag || translation.code }}
-										</router-link>
-									</li>
-								</ul>
-							</dd>
+
+							<div class="translations" v-if="$store.state.server.translationInfo.translationEnabled">
+
+								<dt>Translations</dt>
+								<dd>
+									<ul class="list-inline translations-list">
+										<li class="list-inline-item" v-for="(translation, i) in translations" :key="i" :data-lang="translation.code">
+											<router-link :to="{name: 'document_show', params: translation.params}">
+												{{ translation.flag || translation.code }}
+											</router-link>
+										</li>
+									</ul>
+								</dd>
+
+							</div>
 						</dl>
 
 						<div class="btn-toolbar" role="toolbar">

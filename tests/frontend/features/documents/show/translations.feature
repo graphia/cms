@@ -11,7 +11,8 @@ Feature: Translations
 		And I have logged in
 
 	Scenario: Translation links visible on the documents show page
-		Given my document has been translated into 'Finnish' and 'Swedish'
-		When I visit my document's 'English' page
+		Given that multilingual mode is enabled
+		When my document has been translated into 'Finnish' and 'Swedish'
+		And I visit my document's 'English' page
 		Then my document should have links to 'English', 'Finnish' and 'Swedish' in the Translations section
 

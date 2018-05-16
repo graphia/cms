@@ -107,10 +107,22 @@ Then %r{^my document should have links to 'English', 'Finnish' and 'Swedish' in 
     "sv" => "🇸🇪",
     "fi" => "🇫🇮"
   }
-  within(".translations") do
+  within(".translations-list") do
     langs.each do |lang, flag|
       expect(page).to have_css("li[data-lang='#{lang}']", text: flag)
     end
   end
 
+end
+
+Given %r{^that multilingual mode is disabled$} do
+  # do nothing
+end
+
+Given %r{^that multilingual mode is enabled$} do
+  # do nothing
+end
+
+Then %r{^the translations section should not be displayed$} do
+  expect(page).not_to have_css(".translations")
 end
