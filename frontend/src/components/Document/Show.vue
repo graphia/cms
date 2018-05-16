@@ -40,12 +40,14 @@
 							<dd>{{ this.draftDescription() }}</dd>
 
 							<dt>Translations</dt>
-							<dd>
-								<span v-for="(translation, i) in translations" :key="i">
-									<router-link :to="{name: 'document_show', params: translation.params}">
-										{{ translation.flag || translation.code }}
-									</router-link>
-								</span>
+							<dd class="translations">
+								<ul class="list-inline">
+									<li class="list-inline-item" v-for="(translation, i) in translations" :key="i" :data-lang="translation.code">
+										<router-link :to="{name: 'document_show', params: translation.params}">
+											{{ translation.flag || translation.code }}
+										</router-link>
+									</li>
+								</ul>
 							</dd>
 						</dl>
 
