@@ -157,7 +157,14 @@ export default class CMSFile {
 	};
 
 	get languageInfo() {
-		return store.state.server.translationInfo.languages.find(x => x.code === this.language);
+		let match = store.state.server.translationInfo.languages.find(x => x.code === this.language);
+
+		if (!match) {
+			console.warning("no language configured for code", this.language);
+			return {code: this.language, flag: "", name: this.language};
+		}
+
+		return match;
 	};
 
 	get attachmentsDir() {

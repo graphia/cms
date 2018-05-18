@@ -38,6 +38,22 @@
 
 							<dt>Draft</dt>
 							<dd>{{ this.draftDescription() }}</dd>
+
+
+							<div class="translations" v-if="$store.state.server.translationInfo.translationEnabled">
+
+								<dt>Translations</dt>
+								<dd>
+									<ul class="list-inline translations-list">
+										<li class="list-inline-item" v-for="(translation, i) in translations" :key="i" :data-lang="translation.code">
+											<router-link :to="{name: 'document_show', params: translation.params}">
+												{{ translation.flag || translation.code }}
+											</router-link>
+										</li>
+									</ul>
+								</dd>
+
+							</div>
 						</dl>
 
 						<div class="btn-toolbar" role="toolbar">
@@ -91,14 +107,12 @@
 
 	import config from '../../javascripts/config.js';
 	import checkResponse from "../../javascripts/response.js";
+	import filenameFromLanguageCode from '../../javascripts/utilities/filename-from-language-code.js';
 
 	export default {
 		name: "DocumentShow",
 		created() {
 			// populate $store.state.documents with docs from api
-			this.getDocument();
-		},
-		mounted() {
 			this.getDocument();
 		},
 		computed: {
@@ -165,16 +179,41 @@
 				};
 
 				return p;
+			},
+
+			translations() {
+
+				const ld = this.$store.state.server.translationInfo.languages;
+				const dl = this.$store.state.server.translationInfo.defaultLanguage;
+
+				let tr = this.document.translations.map((code) => {
+					let match = ld.find(x => x.code === code);
+
+					if (!match) {
+						console.warn("no language configured for code", code);
+						return {code: code, flag: "", name: code};
+					};
+
+					return match;
+
+				});
+
+				// add in route params so we don't clutter the view
+				return tr.map((t) => {
+					// {directory: document.path, filename: document.filename, document: document.document, language_code: translation.code}
+					t.params = {
+						directory: this.document.path,
+						filename: this.document.filename,
+						document: this.document.document,
+						language_code: (dl === t.code ? null : t.code)
+					}
+					return t;
+				})
 			}
 		},
 		methods: {
 			async getDocument() {
-
-				let filename = "index.md";
-
-				if (this.params.language_code) {
-					filename = `index.${this.params.language_code}.md`;
-				};
+				const filename = filenameFromLanguageCode(this.params.language_code)
 
 				let document = this.params.document;
 				let directory = this.params.directory;

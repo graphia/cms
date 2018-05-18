@@ -1,12 +1,13 @@
 languageCode: "en-gb"
 
-# baseURL: "http://localhost:1313"
+baseURL: "http://docs.yourcompany.com:1313"
 title: "Your Company"
 buildDrafts: true
 theme: ../../../graphia-minimal-theme
-relativeURLs: true
+#relativeURLs: true
 publishDir: ../dist
 fencedCode: true
+preserveTaxonomyNames: true
 
 pygmentsCodeFences: true
 pygmentsUseClasses: true
@@ -16,20 +17,28 @@ defaultContentLanguageInSubdir: false
 
 Languages:
   en:
-    name: "English"
+    name: English
     weight: 0
     flag: 🇬🇧
+    title: Your Company
 
   fr:
-    name: "French"
+    name: Français
     weight: 1
     flag: 🇫🇷
 
   de:
-    name: "German"
+    name: Deutsch
     weight: 1
     flag: 🇩🇪
+
   es:
-    name: "Spanish"
+    name: Español
     weight: 1
     flag: 🇪🇸
+
+  uk:
+    name: українська мова
+    weight: 1
+    flag: 🇺🇦
+    title: Ваша компанія

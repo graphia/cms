@@ -28,6 +28,7 @@
 
 	import checkResponse from "../../javascripts/response.js";
 	import CMSBreadcrumb from '../../javascripts/models/breadcrumb.js';
+	import filenameFromLanguageCode from '../../javascripts/utilities/filename-from-language-code.js';
 
 	export default {
 		name: "DocumentEdit",
@@ -42,11 +43,7 @@
 			// set up a fresh new commit
 			this.$store.dispatch("initializeCommit");
 
-			let filename = "index.md";
-
-			if (this.params.language_code) {
-				filename = `index.${this.params.language_code}.md`;
-			};
+			const filename = filenameFromLanguageCode(this.params.language_code)
 
 			// retrieve the document and make it Active
 			await this.$store.dispatch("editDocument", {

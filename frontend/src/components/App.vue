@@ -50,7 +50,7 @@
 		<div class="main container-fluid">
 			<Broadcast/>
 			<transition name="fade">
-				<router-view/>
+				<router-view :key="$route.fullPath"/>
 			</transition>
 		</div>
 		<!-- Router View Container End -->

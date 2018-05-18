@@ -29,6 +29,7 @@
 
 	import CMSTranslation from '../../javascripts/models/translation.js';
 	import checkResponse from "../../javascripts/response.js";
+	import filenameFromLanguageCode from '../../javascripts/utilities/filename-from-language-code.js';
 
 	export default {
 		name: "Translation",
@@ -63,11 +64,7 @@
 				try {
 					let code = sender.currentTarget.value;
 
-					let filename = "index.md";
-
-					if (this.params.language_code) {
-						filename = `index.${this.params.language_code}.md`;
-					};
+					let filename = filenameFromLanguageCode(this.params.language_code)
 
 					let translation = new CMSTranslation(
 						this.params.directory,

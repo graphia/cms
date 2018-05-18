@@ -93,3 +93,36 @@ end
 Then %r{^I should be on the document's history page$} do
   expect(page.current_path).to eql("/cms/appendices/appendix_1/history")
 end
+
+When %r{^I visit my document's 'English' page$} do
+  path = "/cms/documents/translated_doc"
+  visit(path)
+  expect(page.current_path).to eql(path)
+end
+
+Then %r{^my document should have links to 'English', 'Finnish' and 'Swedish' in the Translations section$} do
+
+  langs = {
+    "en" => "🇬🇧",
+    "sv" => "🇸🇪",
+    "fi" => "🇫🇮"
+  }
+  within(".translations-list") do
+    langs.each do |lang, flag|
+      expect(page).to have_css("li[data-lang='#{lang}']", text: flag)
+    end
+  end
+
+end
+
+Given %r{^that multilingual mode is disabled$} do
+  # do nothing
+end
+
+Given %r{^that multilingual mode is enabled$} do
+  # do nothing
+end
+
+Then %r{^the translations section should not be displayed$} do
+  expect(page).not_to have_css(".translations")
+end

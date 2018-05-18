@@ -63,6 +63,7 @@
 
 	import CMSDirectory from '../../../javascripts/models/directory.js';
 	import checkResponse from "../../../javascripts/response.js";
+	import filenameFromLanguageCode from '../../../javascripts/utilities/filename-from-language-code.js';
 
 	export default {
 		name: "DocumentDelete",
@@ -134,11 +135,8 @@
 				});
 			},
 			async getDocument() {
-				let filename = "index.md";
 
-				if (this.params.language_code) {
-					filename = `index.${this.params.language_code}.md`;
-				};
+				const filename = filenameFromLanguageCode(this.params.language_code)
 
 				let directory = this.params.directory;
 				let document = this.params.document;
