@@ -48,10 +48,10 @@ const mutations = {
 	},
 	async logout(context) {
 		state.user = null;
-		state.directories = []
-		state.documents = []
-		state.activeDocument = new CMSFile
-		state.activeDirectory = new CMSDirectory
+		state.directories = [];
+		state.documents = [];
+		state.activeDocument = new CMSFile;
+		state.activeDirectory = new CMSDirectory;
 	},
 	async saveUser(context, user) {
 		return user.save();

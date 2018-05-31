@@ -248,9 +248,9 @@ func protectedRouter() (r *vestigo.Router) {
 	// user retrieval endpoints
 	r.Get("/api/users", apiListUsersHandler)
 	r.Get("/api/users/:username", apiGetUserHandler)
+	r.Get("/api/user_info", apiGetUserInfoHandler)
 
 	r.Post("/api/logout", apiLogoutHandler)
-	r.Get("/api/user_info", apiGetUserInfoHandler)
 
 	// user settings and ssh key management
 	r.Patch("/api/settings/name", apiUpdateUserNameHandler)
@@ -266,6 +266,7 @@ func protectedRouter() (r *vestigo.Router) {
 	r.Get("/api/repository_info", apiGetRepositoryInformationHandler)
 	r.Get("/api/recent_commits", apiGetCommitsHandler)
 	r.Get("/api/commits/:hash", apiGetCommitHandler)
+	r.Get("/api/history", apiGetHistoryHandler)
 
 	// cms endpoints
 	r.Post("/api/publish", apiPublishHandler)

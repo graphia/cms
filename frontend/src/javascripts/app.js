@@ -15,6 +15,7 @@ import Home from '../components/Home.vue';
 import MyProfile from '../components/Settings/MyProfile.vue';
 import SSHKeySettings from '../components/Settings/SSHKeySettings.vue';
 import ThemeSettings from '../components/Settings/Theme.vue';
+import History from '../components/History.vue';
 
 // User Paths
 import UserSettings from '../components/Settings/UserSettings.vue';
@@ -76,6 +77,7 @@ const routes = [
 
 
 	// Directory pages
+	{path: '/cms/history', component: History, name: 'history'},
 	{path: '/cms/new', component: DirectoryNew, name: 'directory_new'},
 
 	{path: '/cms/commits/:hash', component: Commit, name: 'commit'},

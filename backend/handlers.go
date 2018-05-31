@@ -1503,7 +1503,7 @@ func apiPublishHandler(w http.ResponseWriter, r *http.Request) {
 // GET /api/recent_commits
 //
 // returns the most recent commits made to the repository. Currently hard-coded
-// to 20, but would make sense to accept a param
+// to 5, but would make sense to accept a param
 //
 // [
 //	  {
@@ -1515,13 +1515,14 @@ func apiPublishHandler(w http.ResponseWriter, r *http.Request) {
 //	  },
 // ]
 func apiGetCommitsHandler(w http.ResponseWriter, r *http.Request) {
+	const qty = 5
 	var fr FailureResponse
 	var commits []Commit
 	var err error
 
 	// TODO manage quantity param
 
-	commits, err = getCommits(5)
+	commits, err = getCommits(qty)
 	if err != nil {
 		fr = FailureResponse{
 			Message: fmt.Sprintf("Failed to retrieve recent commits: %s", err.Error()),
@@ -1691,6 +1692,38 @@ func apiGetFileHistoryHandler(w http.ResponseWriter, r *http.Request) {
 
 	JSONResponse(history, http.StatusOK, w)
 
+}
+
+// GET /api/history
+//
+// returns the most recent commits made to the repository. Currently hard-coded
+// to 50, but would make sense to accept a param
+//
+// [
+//	  {
+//	    "message": "Changed some stuff",
+//	    "id": "e2da99aa078c",
+//	    "object_type": "blob",
+//	    "author": "Peter Yates"
+//	    "time": "Fri Jul 14 12:34:45 2017 +0100"
+//	  },
+// ]
+func apiGetHistoryHandler(w http.ResponseWriter, r *http.Request) {
+	const qty = 50
+	var fr FailureResponse
+	var commits []Commit
+	var err error
+
+	commits, err = getCommits(qty)
+	if err != nil {
+		fr = FailureResponse{
+			Message: fmt.Sprintf("Failed to retrieve recent commits: %s", err.Error()),
+		}
+		JSONResponse(fr, http.StatusBadRequest, w)
+		return
+	}
+
+	JSONResponse(commits, http.StatusOK, w)
 }
 
 // User data 👩🏽‍💻
