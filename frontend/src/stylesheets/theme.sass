@@ -31,7 +31,9 @@ $black:  #000 !default;
 
 $grays: (100: $gray-100, 200: $gray-200, 300: $gray-300, 400: $gray-400, 500: $gray-500, 600: $gray-600, 700: $gray-700, 800: $gray-800, 900: $gray-900 ) !default;
 
-$blue:    rgb(65, 115, 213) !default;
+
+$blue:    #0074d9 !default;
+$primary: #2d4e66 !default;
 $indigo:  #6610f2 !default;
 $purple:  #6f42c1 !default;
 $pink:    #e83e8c !default;
@@ -44,14 +46,17 @@ $cyan:    #17a2b8 !default;
 
 $colors: (blue: $blue, indigo: $indigo, purple: $purple, pink: $pink, red: $red, orange: $orange, yellow: $yellow, green: $green, teal: $teal, cyan: $cyan, white: $white, gray: $gray-600, gray-dark: $gray-800) !default;
 
-$theme-colors: (primary: $orange, secondary: $gray-600, success: $green, info: $cyan, warning: $yellow, danger: $red, light: $cream-100, dark: $gray-800) !default;
+$theme-colors: (primary: $primary, secondary: $gray-600, success: $green, info: $cyan, warning: $yellow, danger: $red, light: $cream-100, dark: $gray-800) !default;
+
+@function theme-color($key: "primary")
+  @return map-get($theme-colors, $key)
 
 $border-radius:          .25rem !default;
 $border-radius-lg:       .3rem !default;
 $border-radius-sm:       .2rem !default;
 
 body
-	background-color: $cream-100 !important
+	background-color: $gray-100 !important
 
 	#application
 		padding: 0px
@@ -73,7 +78,7 @@ body
 
 	.card-header
 		background-color: $white
-		color: $orange
+		color: theme-color("primary")
 		border: 0
 
 		font-size: larger
@@ -88,14 +93,14 @@ body
 
 .directory-info
 	blockquote
-		border-left: 2px solid $orange
+		border-left: 2px solid theme-color("primary")
 		padding: 1rem 0rem 1rem 1rem
 
 nav > ol.breadcrumb
-	background-color: $cream-400
+	background-color: $gray-200
 
 	li > a
-		color: $orange
+		color: $blue
 
 	li.active
 		color: $black
@@ -106,7 +111,7 @@ span.badge-primary
 h1
 	margin: 2.2rem 0rem
 	&:first-of-type
-		color: $orange
+		color: theme-color("primary")
 
 article#document-content
 	margin: 1rem 0rem
@@ -152,6 +157,9 @@ footer
 
 	.copyright
 		text-align: center
+
+		a
+			color: lighten(theme-color("primary"), 55%)
 
 
 @import "sass/diff"
