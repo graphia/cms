@@ -14,7 +14,9 @@
 			<div class="col-md-5">
 				<div class="card recent-updates">
 					<div class="card-body">
-						<h4 class="card-title">Recent Updates</h4>
+						<h4 class="card-title">
+							<router-link :to="{name: 'history'}">History</router-link>
+						</h4>
 					</div>
 
 					<ol class="list-group list-group-flush">
