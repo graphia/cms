@@ -24,3 +24,10 @@ Feature: Commits
 		Given I have added a new file
 		When I navigate to the history page
 		Then the commit should include the committer name
+
+	Scenario: Breadcrumbs
+		When I am on the history page
+		Then I should see the following breadcrumbs:
+			| Text      | Reference   |
+			| Dashboard | /cms        |
+			| History   | None        |

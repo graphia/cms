@@ -10,6 +10,12 @@ When %r{^I navigate to the history page$} do
   expect(page.current_path).to eql(path)
 end
 
+When %r{^I am on the history page$} do
+  path = "/cms/history"
+  visit(path)
+  expect(page.current_path).to eql(path)
+end
+
 
 Given %r{^I am on the document history page for "([^"]*)"$} do |arg1|
   path = "/cms/documents/document_1/history"
