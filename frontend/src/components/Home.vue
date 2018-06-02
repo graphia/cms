@@ -14,13 +14,15 @@
 			<div class="col-md-5">
 				<div class="card recent-updates">
 					<div class="card-body">
-						<h4 class="card-title">Recent Updates</h4>
+						<h4 class="card-title">
+							<router-link :to="{name: 'history'}">Recent Updates</router-link>
+						</h4>
 					</div>
 
 					<ol class="list-group list-group-flush">
 						<li class="recent-commit-info list-group-item" v-for="(commit, i) in commits" :key="i">
 							<router-link :to="{name: 'commit', params: {hash: commit.id}}">
-								{{ commit.message || "Empty commit message" }}
+								{{ commit.summary || "Empty commit message" }}
 							</router-link>
 							<p class="card-text">
 								<small>{{ commit.author.Name }} committed {{ commit.timestamp | time_ago }}</small>

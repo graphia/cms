@@ -13,7 +13,8 @@ Then %r{^I should be on the homepage$} do
 end
 
 Then %r{^I should see a summary of recent changes$} do
-  expect(page).to have_css("h4", text: "Recent Updates")
+  expect(page).to have_css("h4 > a", text: "Recent Updates")
+  expect(page).to have_link("Recent Updates", href: "/cms/history")
 end
 
 Then %r{^I should see a statistics section$} do

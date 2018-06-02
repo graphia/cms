@@ -182,6 +182,7 @@ type SetupOption struct {
 
 // Commit holds metadata for a Git Commit
 type Commit struct {
+	Summary    string         `json:"summary"`
 	Message    string         `json:"message"`
 	ID         string         `json:"id"`
 	ObjectType string         `json:"object_type"`

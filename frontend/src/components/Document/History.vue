@@ -17,9 +17,18 @@
 
 						<div class="card-body">
 
-							<p class="card-text">
-								{{ item.message }}
-							</p>
+							<div class="card-text commit-message">
+
+								<div class="mb-4" v-for="(line, j) in formatMessage(item.message)" :key="j">
+									<h4 v-if="j == 0">
+										{{ line }}
+									</h4>
+									<p v-else>
+										{{ line }}
+									</p>
+								</div>
+
+							</div>
 
 							<div class="btn-toolbar">
 
@@ -70,6 +79,12 @@
 			return {
 				history: []
 			};
+		},
+
+		methods: {
+			formatMessage(m) {
+				return m.split(/(\r\n|\n|\r)/gm);
+			}
 		},
 
 		computed: {

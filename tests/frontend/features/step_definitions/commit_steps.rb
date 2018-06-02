@@ -17,8 +17,10 @@ end
 Given %r{^I have added a new file$} do
   g = Git.open(REPO_PATH)
 
+  @commit_author = "Roy Snyder"
+
   # Set some committer info
-  g.config('user.name', 'Roy Snyder')
+  g.config('user.name', @commit_author)
   g.config('user.email', 'roy.snyder@springfield.court.us')
 
   @new_document = <<~CONTENTS
@@ -37,7 +39,8 @@ Given %r{^I have added a new file$} do
 
   g.add(all: true)
 
-  g.commit("Added Bart's Friend Falls in Love")
+  @commit_message ||= "Added Bart's Friend Falls in Love"
+  g.commit(@commit_message)
 
   # get the hash of the latest commit (the one right above!)
   @hash = g.log.first.to_s
