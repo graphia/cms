@@ -3,11 +3,11 @@
 
 		<Breadcrumbs :levels="breadcrumbs"/>
 
-		<div class="col col-md-12">
+		<div class="bg-white p-4 m-2">
 			<h1>History</h1>
 
 			<div class="commit-list">
-				<div class="card m-4" v-for="(commit, i) in commits" :key="i">
+				<div class="card m-4" v-for="(commit, i) in commits" :key="i" :data-commit-hash="commit.id">
 					<div class="card-header">
 						<div class="hash">
 							{{ prettyDate(commit.timestamp) }} <span class="text-muted">({{ timeAgo(commit.timestamp) }})</span>
@@ -18,10 +18,21 @@
 					</div>
 					<div class="card-body">
 
-						<router-link class="btn btn-text" :to="{name: 'commit', params: {hash: commit.id}}">
-							{{ commit.message }}
-						</router-link>
+						<div v-for="(line, j) in formatMessage(commit.message)" :key="j">
+							<h4 v-if="j == 0">
+								{{ line }}
+							</h4>
+							<p v-else>
+								{{ line }}
+							</p>
+						</div>
 
+					</div>
+
+					<div class="card-footer">
+						<router-link class="btn btn-sm btn-primary" :to="{name: 'commit', params: {hash: commit.id}}">
+							View
+						</router-link>
 					</div>
 				</div>
 			</div>
@@ -84,16 +95,14 @@
 					units: 'ms'
 				});
 
+			},
+			formatMessage(m) {
+				return m.split(/(\r\n|\n|\r)/gm);
 			}
 		},
 		computed: {
 			breadcrumbs() {
-				return [
-					new CMSBreadcrumb(
-						"History",
-						"history"
-					)
-				];
+				return [new CMSBreadcrumb("History", "history")];
 			},
 		},
 		components: {
@@ -105,8 +114,6 @@
 <style lang="scss" scoped>
 
 	.commit-list {
-
-		border-left: 3px solid grey;
 
 		.card > .card-header {
 			display: flex;

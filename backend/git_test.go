@@ -132,7 +132,7 @@ func TestAllCommits(t *testing.T) {
 	var messages []string
 
 	for _, commit := range commits {
-		messages = append(messages, commit.Message)
+		messages = append(messages, commit.Summary)
 	}
 
 	// should return both commit messages

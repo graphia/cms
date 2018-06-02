@@ -140,7 +140,8 @@ func allCommits(repo *git.Repository, qty int) (commits []Commit, err error) {
 
 		Debug.Println("Commited at:", c.Author().When)
 		commit = Commit{
-			Message:    c.Summary(),
+			Summary:    c.Summary(),
+			Message:    c.Message(),
 			ID:         c.Id().String(),
 			ObjectType: c.Type().String(),
 			Author:     c.Author(),

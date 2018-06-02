@@ -4,6 +4,13 @@ Given %r{^I am on the appendix history page for "([^"]*)"$} do |arg1|
   expect(page.current_path).to eql(path)
 end
 
+When %r{^I navigate to the history page$} do
+  path = "/cms/history"
+  visit(path)
+  expect(page.current_path).to eql(path)
+end
+
+
 Given %r{^I am on the document history page for "([^"]*)"$} do |arg1|
   path = "/cms/documents/document_1/history"
   visit(path)
@@ -91,5 +98,46 @@ Then %r{^the diff should have correctly marked insertions and deletions$} do
   within(".card.history.commit-#{@commit[:hash]}") do
     expect(page).to have_css("pre.diff del", text: 1)
     expect(page).to have_css("pre.diff ins", text: 2)
+  end
+end
+
+
+Then %r{^I should see my commit$} do
+  expect(page).to have_css("div[data-commit-hash='#{@hash}']")
+end
+
+Given %r{^I have added a new file with a multiline commit message$} do
+
+  @summary = "Do the Bartman"
+  @message_1 = "Yo! Hey, what's happening, dude?"
+  @message_2 = "I'm the guy with the rep for being rude."
+
+  @commit_message = <<~MSG
+    #{@summary}
+
+    #{@message_1}
+    #{@message_2}
+  MSG
+
+  step "I have added a new file"
+end
+
+Then %r{^the first line of my commit message should be a header$} do
+  within("div[data-commit-hash='#{@hash}']") do
+    expect(page).to have_css("h4", text: @summary)
+  end
+end
+
+Then %r{^all subsequent lines should be paragraphs$} do
+  within("div[data-commit-hash='#{@hash}']") do
+    [@message_1, @message_2].each do |m|
+      expect(page).to have_css("p", text: m)
+    end
+  end
+end
+
+Then %r{^the commit should include the committer name$} do
+  within("div[data-commit-hash='#{@hash}']") do
+    expect(page).to have_css(".author", text: @commit_author)
   end
 end
